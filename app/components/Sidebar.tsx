@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen } from "lucide-react";
+import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -41,6 +41,10 @@ export default function Sidebar() {
         <Link href="/safety" className={`nav-item ${pathname === "/safety" ? "active" : ""}`}>
           <ShieldCheck size={20} />
           <span>งานความปลอดภัย</span>
+        </Link>
+        <Link href="/important" className={`nav-item ${pathname === "/important" ? "active" : ""}`}>
+          <AlertCircle size={20} />
+          <span>ติดตามงานสำคัญ</span>
         </Link>
         <Link href="/guide" className={`nav-item ${pathname === "/guide" ? "active" : ""}`}>
           <BookOpen size={20} />
