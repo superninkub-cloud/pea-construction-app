@@ -12,7 +12,7 @@ export default function OutagePlan() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
   // Form states
-  const [formData, setFormData] = useState({ id: "", details: "", wbs: "", status: "รออนุมัติ" });
+  const [formData, setFormData] = useState({ id: "", details: "", wbs: "", status: "หน่วยงานตนเอง" });
   const [loading, setLoading] = useState(false);
 
   // Month navigation
@@ -56,7 +56,7 @@ export default function OutagePlan() {
     if (existingPlan) {
       setFormData({ id: existingPlan.id, details: existingPlan.details, wbs: existingPlan.wbs || "", status: existingPlan.status });
     } else {
-      setFormData({ id: "", details: "", wbs: "", status: "รออนุมัติ" });
+      setFormData({ id: "", details: "", wbs: "", status: "หน่วยงานตนเอง" });
     }
     
     setIsModalOpen(true);
@@ -152,8 +152,8 @@ export default function OutagePlan() {
                     {dayPlans.map((p, idx) => (
                       <div key={idx} style={{ 
                         fontSize: '0.75rem', 
-                        background: p.status === 'เสร็จสิ้น' ? '#d1fae5' : 'var(--pea-purple)', 
-                        color: p.status === 'เสร็จสิ้น' ? '#065f46' : 'white',
+                        background: p.status === 'หน่วยงานอื่น' ? '#fee2e2' : '#d1fae5', 
+                        color: p.status === 'หน่วยงานอื่น' ? '#b91c1c' : '#065f46',
                         padding: '4px 6px',
                         borderRadius: '4px',
                         whiteSpace: 'nowrap',
@@ -199,12 +199,10 @@ export default function OutagePlan() {
             </div>
             
             <div style={{ marginBottom: '24px' }}>
-              <label className="form-label">สถานะ</label>
+              <label className="form-label">ปฏิบัติงานให้หน่วยงาน</label>
               <select className="form-select" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-                <option value="รออนุมัติ">รออนุมัติ</option>
-                <option value="อนุมัติแล้ว">อนุมัติแล้ว</option>
-                <option value="เสร็จสิ้น">เสร็จสิ้น</option>
-                <option value="ยกเลิก">ยกเลิก</option>
+                <option value="หน่วยงานตนเอง">หน่วยงานตนเอง</option>
+                <option value="หน่วยงานอื่น">หน่วยงานอื่น</option>
               </select>
             </div>
             
