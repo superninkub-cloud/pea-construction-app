@@ -18,6 +18,7 @@ export default function UpdateStatus() {
   // Form State
   const [status, setStatus] = useState("");
   const [projectValue, setProjectValue] = useState("");
+  const [pTracking, setPTracking] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("ม.ค.");
   const [newRemarks, setNewRemarks] = useState("");
   const [oldRemarks, setOldRemarks] = useState("");
@@ -33,7 +34,7 @@ export default function UpdateStatus() {
   
   // Add New Project State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newProject, setNewProject] = useState({ wbs: "", name: "", supervisor: "", project_type: "", value: "", open_year: "" });
+  const [newProject, setNewProject] = useState({ wbs: "", name: "", supervisor: "", project_type: "", value: "", open_year: "", p_tracking: "" });
   const [addLoading, setAddLoading] = useState(false);
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function UpdateStatus() {
         setProject(p);
         setStatus(p.status || "");
         setProjectValue(p.value ? p.value.toString() : "");
+        setPTracking(p.p_tracking || "");
         setOldRemarks(p.remarks || "");
         setNewRemarks("");
         setChecks({
@@ -132,6 +134,7 @@ export default function UpdateStatus() {
         .update({
           status,
           value: Number(projectValue) || 0,
+          p_tracking: pTracking,
           remarks: combinedRemarks,
           image_url: imageUrl,
           ...checks,
@@ -189,6 +192,7 @@ export default function UpdateStatus() {
         project_type: newProject.project_type,
         value: Number(newProject.value) || 0,
         open_year: newProject.open_year,
+        p_tracking: newProject.p_tracking,
         status: "",
         remarks: ""
       });
@@ -196,7 +200,7 @@ export default function UpdateStatus() {
       if (error) throw error;
       
       setIsAddModalOpen(false);
-      setNewProject({ wbs: "", name: "", supervisor: "", project_type: "", value: "", open_year: "" });
+      setNewProject({ wbs: "", name: "", supervisor: "", project_type: "", value: "", open_year: "", p_tracking: "" });
       fetchProjects();
       alert("เพิ่มงานใหม่เรียบร้อยแล้ว!");
     } catch (error: any) {
@@ -273,6 +277,13 @@ export default function UpdateStatus() {
               <div>
                 <label className="form-label">สถานะล่าสุด (เช่น C1, F4)</label>
                 <input type="text" className="form-control" value={status} onChange={(e) => setStatus(e.target.value)} />
+              </div>
+              <div>
+                <label className="form-label">🚨 สถานะ สาย ป. ติดตาม</label>
+                <select className="form-select" value={pTracking} onChange={(e) => setPTracking(e.target.value)}>
+                  <option value="">-- ไม่ได้ติดตาม --</option>
+                  <option value="ติดตาม">ติดตาม</option>
+                </select>
               </div>
               <div>
                 <label className="form-label">📅 ประจำเดือน</label>
@@ -435,8 +446,15 @@ export default function UpdateStatus() {
                 <input type="number" className="form-control" value={newProject.value} onChange={e => setNewProject({...newProject, value: e.target.value})} placeholder="0" />
               </div>
               <div>
-                <label className="form-label">ปีเปิดงาน</label>
+                <label className="form-label">📅 ปีที่เปิดงาน</label>
                 <input type="text" className="form-control" value={newProject.open_year} onChange={e => setNewProject({...newProject, open_year: e.target.value})} placeholder="เช่น 2567" />
+              </div>
+              <div>
+                <label className="form-label">🚨 สาย ป. ติดตาม</label>
+                <select className="form-select" value={newProject.p_tracking} onChange={e => setNewProject({...newProject, p_tracking: e.target.value})}>
+                  <option value="">-- ไม่ระบุ --</option>
+                  <option value="ติดตาม">ติดตาม</option>
+                </select>
               </div>
             </div>
             

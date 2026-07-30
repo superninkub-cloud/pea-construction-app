@@ -13,6 +13,7 @@ export default function Overview() {
   const [monthFilter, setMonthFilter] = useState("ALL");
   const [supervisorFilter, setSupervisorFilter] = useState("ALL");
   const [yearFilter, setYearFilter] = useState("ALL");
+  const [pTrackingFilter, setPTrackingFilter] = useState("ALL");
   const [statuses, setStatuses] = useState<string[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
 
@@ -51,21 +52,23 @@ export default function Overview() {
     const s = p.status || "ไม่มีข้อมูล";
     const sup = p.supervisor || "ไม่ระบุ";
     
-    let matchYear = true;
+    const matchYear = true; // year is handled in loop below
+    let yearMatched = true;
     if (yearFilter !== "ALL") {
       const year = Number(p.open_year) || 0;
-      if (yearFilter === "BEFORE_2568") matchYear = year > 0 && year < 2568;
-      else if (yearFilter === "2568") matchYear = year === 2568;
-      else if (yearFilter === "2569") matchYear = year === 2569;
+      if (yearFilter === "BEFORE_2568") yearMatched = year > 0 && year < 2568;
+      else if (yearFilter === "2568") yearMatched = year === 2568;
+      else if (yearFilter === "2569") yearMatched = year === 2569;
     }
 
     const matchStatus = statusFilter === "ALL" || s === statusFilter;
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
     const matchSupervisor = supervisorFilter === "ALL" || sup === supervisorFilter;
+    const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking === "ติดตาม");
     const matchSearch = Object.values(p).some((val) => 
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
-    return matchStatus && matchMonth && matchSupervisor && matchSearch && matchYear;
+    return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking;
   });
 
   if (loading) {
@@ -173,6 +176,13 @@ export default function Overview() {
                   {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map(m => (
                     <option key={m} value={m}>{m}</option>
                   ))}
+                </select>
+              </div>
+              <div>
+                <label className="form-label">🚨 กรองสาย ป.</label>
+                <select className="form-select" value={pTrackingFilter} onChange={(e) => setPTrackingFilter(e.target.value)}>
+                  <option value="ALL">แสดงทั้งหมด</option>
+                  <option value="TRACKED">เฉพาะที่ สาย ป. ติดตาม</option>
                 </select>
               </div>
               <button className="btn btn-primary" onClick={handlePrint}>
