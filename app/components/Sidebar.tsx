@@ -42,10 +42,10 @@ export default function Sidebar() {
           <ShieldCheck size={20} />
           <span>งานความปลอดภัย</span>
         </Link>
-        <a href="https://pea-foundation-guide-c4e3.vercel.app/" target="_blank" rel="noopener noreferrer" className="nav-item">
+        <Link href="/guide" className={`nav-item ${pathname === "/guide" ? "active" : ""}`}>
           <BookOpen size={20} />
           <span>คู่มืองานก่อสร้าง 115kV</span>
-        </a>
+        </Link>
       </nav>
     </div>
   );
