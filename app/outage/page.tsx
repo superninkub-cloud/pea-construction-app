@@ -100,7 +100,7 @@ export default function OutagePlan() {
 
   return (
     <>
-      <TopBar title="ตารางแผนดับไฟ" />
+      <TopBar title="ตารางแผนงานดับไฟ/แผนการใช้รถ/กิจกรรมอื่น ๆ" />
       <div className="content-area animation-fade-in">
         <div className="card">
           {/* Header */}
@@ -185,7 +185,7 @@ export default function OutagePlan() {
             </button>
             
             <h3 style={{ color: 'var(--pea-purple)', marginBottom: '20px', fontWeight: 'bold' }}>
-              แผนดับไฟวันที่ {selectedDate?.getDate()} {monthNames[selectedDate?.getMonth() || 0]} {selectedDate ? selectedDate.getFullYear() + 543 : ''}
+              แผนงานวันที่ {selectedDate?.getDate()} {monthNames[selectedDate?.getMonth() || 0]} {selectedDate ? selectedDate.getFullYear() + 543 : ''}
             </h3>
             
             <div style={{ marginBottom: '16px' }}>
@@ -194,8 +194,8 @@ export default function OutagePlan() {
             </div>
             
             <div style={{ marginBottom: '16px' }}>
-              <label className="form-label">📝 รายละเอียด / พื้นที่ได้รับผลกระทบ *</label>
-              <textarea className="form-control" rows={3} value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})} placeholder="เช่น ปักเสา พาดสาย บริเวณ..."></textarea>
+              <label className="form-label">📝 ประเภทงาน และรายละเอียด *</label>
+              <textarea className="form-control" rows={3} value={formData.details} onChange={e => setFormData({...formData, details: e.target.value})} placeholder="ระบุว่าเป็น แผนดับไฟ, แผนใช้รถ หรือ กิจกรรมอื่นๆ พร้อมรายละเอียด..."></textarea>
             </div>
             
             <div style={{ marginBottom: '24px' }}>
