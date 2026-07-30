@@ -6,6 +6,8 @@ export const metadata = {
   description: "ระบบอัพเดทสถานะงานก่อสร้าง",
 };
 
+import AuthWrapper from "./components/AuthWrapper";
+
 export default function RootLayout({
   children,
 }: {
@@ -14,12 +16,14 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body>
-        <div className="app-layout">
-          <Sidebar />
-          <div className="main-wrapper">
-            {children}
+        <AuthWrapper>
+          <div className="app-layout">
+            <Sidebar />
+            <div className="main-wrapper">
+              {children}
+            </div>
           </div>
-        </div>
+        </AuthWrapper>
       </body>
     </html>
   );
