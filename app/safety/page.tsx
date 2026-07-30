@@ -146,19 +146,20 @@ export default function SafetyPlan() {
                               <div 
                                 onClick={() => toggleProgress(plan.id, i + 1)}
                                 style={{ 
-                                  background: isCompleted ? 'var(--pea-green)' : 'white',
+                                  background: isCompleted ? '#15803d' : 'white', // Dark safety green
                                   color: isCompleted ? 'white' : 'transparent', 
-                                  border: isCompleted ? '2px solid var(--pea-green)' : '2px solid #94a3b8',
+                                  border: isCompleted ? '2px solid #15803d' : '2px solid #94a3b8',
                                   borderRadius: '4px', 
-                                  width: '20px', 
-                                  height: '20px', 
+                                  width: '22px', 
+                                  height: '22px', 
                                   display: 'flex', 
                                   alignItems: 'center', 
                                   justifyContent: 'center',
-                                  fontWeight: 'bold',
-                                  fontSize: '0.8rem',
+                                  fontWeight: '900',
+                                  fontSize: '1rem',
                                   cursor: 'pointer',
-                                  transition: 'all 0.2s'
+                                  transition: 'all 0.2s',
+                                  boxShadow: isCompleted ? '0 2px 4px rgba(21, 128, 61, 0.3)' : 'none'
                                 }}>
                                 ✓
                               </div>
