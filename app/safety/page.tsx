@@ -1,10 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TopBar from "../components/TopBar";
+import { supabase } from "../../lib/supabaseClient";
 
 export default function SafetyPlan() {
   const [search, setSearch] = useState("");
+  const [progress, setProgress] = useState<Record<string, boolean>>({});
+  const [projectId, setProjectId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProgress();
+  }, []);
+
+  const fetchProgress = async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('wbs', 'SAFETY_PLAN_2026')
+      .single();
+
+    if (data && data.remarks) {
+      try {
+        setProgress(JSON.parse(data.remarks));
+        setProjectId(data.id);
+      } catch (e) { }
+    }
+  };
+
+  const toggleProgress = async (topicId: number, month: number) => {
+    const key = `${topicId}_${month}`;
+    const newProgress = { ...progress, [key]: !progress[key] };
+    setProgress(newProgress);
+
+    const payload = {
+      wbs: 'SAFETY_PLAN_2026',
+      name: 'Safety Training Progress',
+      remarks: JSON.stringify(newProgress)
+    };
+
+    if (projectId) {
+      await supabase.from('projects').update(payload).eq('id', projectId);
+    } else {
+      const { data } = await supabase.from('projects').insert(payload).select().single();
+      if (data) setProjectId(data.id);
+    }
+  };
 
   const trainingPlans = [
     { id: 1, topic: "การฝึกซ้อมการติดตั้งเครื่องมือต่อลงดิน", instructor: "นายวีรพัฒน์ นาคลมัย", months: [3, 5, 7, 9, 11] },
@@ -86,23 +127,41 @@ export default function SafetyPlan() {
                     <td style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{plan.topic}</td>
                     {monthNames.map((m, i) => {
                       const isScheduled = plan.months.includes(i + 1);
+                      const key = `${plan.id}_${i + 1}`;
+                      const isCompleted = progress[key];
+
                       return (
-                        <td key={i} style={{ textAlign: 'center', padding: '8px 2px' }}>
+                        <td key={i} style={{ textAlign: 'center', padding: '4px 2px', verticalAlign: 'middle' }}>
                           {isScheduled && (
-                            <div style={{ 
-                              background: 'var(--pea-green)', 
-                              color: 'white', 
-                              borderRadius: '4px', 
-                              width: '24px', 
-                              height: '24px', 
-                              display: 'flex', 
-                              alignItems: 'center', 
+                            <div style={{
+                              background: '#dcfce7', // light green indicating plan
+                              border: '1px solid #86efac',
+                              borderRadius: '6px',
+                              padding: '4px',
+                              display: 'flex',
                               justifyContent: 'center',
                               margin: '0 auto',
-                              fontWeight: 'bold',
-                              fontSize: '0.8rem'
-                            }}>
-                              ✓
+                              width: '32px'
+                            }} title="แผนที่กำหนดไว้">
+                              <div 
+                                onClick={() => toggleProgress(plan.id, i + 1)}
+                                style={{ 
+                                  background: isCompleted ? 'var(--pea-green)' : 'white',
+                                  color: isCompleted ? 'white' : 'transparent', 
+                                  border: isCompleted ? '2px solid var(--pea-green)' : '2px solid #94a3b8',
+                                  borderRadius: '4px', 
+                                  width: '20px', 
+                                  height: '20px', 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'center',
+                                  fontWeight: 'bold',
+                                  fontSize: '0.8rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s'
+                                }}>
+                                ✓
+                              </div>
                             </div>
                           )}
                         </td>
