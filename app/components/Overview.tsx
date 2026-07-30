@@ -89,6 +89,9 @@ export default function Overview() {
               </div>
               <div className="stat-title">โครงการทั้งหมด</div>
               <div className="stat-subtitle">ที่ตรงตามเงื่อนไข</div>
+              <div style={{ marginTop: '12px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--pea-purple)' }}>
+                ฿ {formatNumber(filteredProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}
+              </div>
             </div>
 
             <div className="stat-card" style={{ borderTop: '4px solid #10b981' }}>
@@ -97,6 +100,9 @@ export default function Overview() {
               </div>
               <div className="stat-title" style={{ color: '#047857' }}>สถานะ F4 (ปิดงาน)</div>
               <div className="stat-subtitle">โครงการที่เสร็จสิ้น</div>
+              <div style={{ marginTop: '12px', fontSize: '1.1rem', fontWeight: 'bold', color: '#047857' }}>
+                ฿ {formatNumber(filteredProjects.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}
+              </div>
             </div>
 
             <div className="stat-card" style={{ borderTop: '4px solid #f59e0b' }}>
@@ -105,6 +111,9 @@ export default function Overview() {
               </div>
               <div className="stat-title" style={{ color: '#b45309' }}>สถานะอื่นๆ</div>
               <div className="stat-subtitle">อยู่ระหว่างดำเนินการ</div>
+              <div style={{ marginTop: '12px', fontSize: '1.1rem', fontWeight: 'bold', color: '#b45309' }}>
+                ฿ {formatNumber(filteredProjects.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}
+              </div>
             </div>
           </div>
 
