@@ -270,7 +270,6 @@ export default function UpdateStatus() {
                 {loading ? "กำลังบันทึก..." : "💾 บันทึกข้อมูล"}
               </button>
             </div>
-            </div>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
