@@ -71,7 +71,7 @@ export default function Overview() {
   if (loading) {
     return (
       <>
-        <TopBar title="ภาพรวม (Dashboard)" />
+        <TopBar title="ภาพรวมงานก่อสร้างของ ผกร.กรย.(ก3)" />
         <div className="content-area" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
            <div style={{ color: 'var(--text-light)', fontSize: '1.2rem' }}>กำลังโหลดข้อมูล...</div>
         </div>
@@ -81,7 +81,7 @@ export default function Overview() {
 
   return (
     <>
-      <TopBar title="ภาพรวม (Dashboard)" />
+      <TopBar title="ภาพรวมงานก่อสร้างของ ผกร.กรย.(ก3)" />
       
       <div className="content-area animation-fade-in">
         {/* Print Header */}

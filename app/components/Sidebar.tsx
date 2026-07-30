@@ -16,7 +16,7 @@ export default function Sidebar() {
           className="sidebar-logo"
         />
         <div>
-          <div className="sidebar-title">PEA Update</div>
+          <div className="sidebar-title" style={{ fontSize: '0.95rem', whiteSpace: 'nowrap' }}>ระบบติดตามงาน ผกร.กรย.(ก3)</div>
           <div className="sidebar-subtitle">ระบบก่อสร้าง ผกร.(ก3)</div>
         </div>
       </div>
