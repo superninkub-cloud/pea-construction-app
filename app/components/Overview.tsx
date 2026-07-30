@@ -64,7 +64,7 @@ export default function Overview() {
     const matchStatus = statusFilter === "ALL" || s === statusFilter;
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
     const matchSupervisor = supervisorFilter === "ALL" || sup === supervisorFilter;
-    const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking && p.p_tracking !== "");
+    const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม");
     const matchSearch = Object.values(p).some((val) => 
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
@@ -235,7 +235,7 @@ export default function Overview() {
                         <div style={{ fontSize: "0.85rem", color: "var(--text-light)", marginTop: "4px" }}>
                           เปิดงานปี: {p.open_year || "-"}
                         </div>
-                        {p.p_tracking && p.p_tracking !== "" && <div style={{ marginTop: "6px" }}><span className="badge badge-danger">🚨 {p.p_tracking}</span></div>}
+                        {p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม" && <div style={{ marginTop: "6px" }}><span className="badge badge-danger">🚨 {p.p_tracking}</span></div>}
                       </td>
                       <td style={{ textAlign: "center", fontWeight: "600", color: "#047857" }}>
                         {formatNumber(p.value)}
