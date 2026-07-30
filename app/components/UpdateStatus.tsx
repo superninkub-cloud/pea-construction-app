@@ -160,16 +160,19 @@ export default function UpdateStatus() {
           <div>
             <label className="form-label">📌 เลือกรหัส WBS / ชื่องานโครงการ</label>
             <select className="form-select" style={{ fontWeight: '600', color: 'var(--pea-purple)' }} value={selectedWbs} onChange={(e) => setSelectedWbs(e.target.value)}>
-              <option value="">-- เลือกรหัส WBS หรือ ชื่องาน --</option>
+              <option value="">-- หรือคลิกเลือกจากรายการด้านล่าง --</option>
               {filteredProjects.map(p => (
-                <option key={p.id} value={p.wbs}>[{p.wbs}] {p.name}</option>
+                <option key={p.id} value={p.wbs}>[{p.wbs}] {p.name} - สถานะ: {p.status || "-"}</option>
               ))}
             </select>
           </div>
         </div>
 
-        {project && (
+        {project ? (
           <div className="card">
+            <button onClick={() => setSelectedWbs("")} className="btn" style={{ marginBottom: '20px', background: '#f8fafc', color: 'var(--text-dark)', border: '1px solid var(--border-color)', fontSize: '0.9rem', padding: '8px 16px' }}>
+              ⬅️ ย้อนกลับไปหน้ารายการ
+            </button>
             <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '20px', marginBottom: '24px' }}>
                <h4 style={{ color: "var(--pea-purple)", fontSize: "1.5rem", fontWeight: "700", marginBottom: "4px" }}>{project.wbs}</h4>
                <h5 style={{ color: "var(--text-dark)", fontSize: "1.1rem", fontWeight: "500" }}>{project.name}</h5>
@@ -267,6 +270,42 @@ export default function UpdateStatus() {
                 {loading ? "กำลังบันทึก..." : "💾 บันทึกข้อมูล"}
               </button>
             </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+            {filteredProjects.map(p => {
+               const steps = [p.check1, p.check2, p.check3, p.check4, p.check5, p.check6, p.check7, p.check8];
+               const doneCount = steps.filter(Boolean).length;
+               const progressPercent = (doneCount / 8) * 100;
+               return (
+                 <div 
+                   key={p.id} 
+                   className="card" 
+                   style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', cursor: 'pointer', border: '1px solid #e2e8f0' }} 
+                   onClick={() => setSelectedWbs(p.wbs)}
+                   onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--pea-purple)'}
+                   onMouseOut={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                 >
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                      <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
+                      <span className={`badge ${p.status === "F4" ? "badge-success" : "badge-warning"}`}>{p.status || "-"}</span>
+                   </div>
+                   <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', flex: 1, color: 'var(--text-dark)' }}>{p.name}</div>
+                   <div style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginBottom: '16px' }}>ผู้ควบคุมงาน: {p.supervisor}</div>
+                   
+                   <div style={{ width: '100%', backgroundColor: '#f1f5f9', height: '6px', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+                      <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: progressPercent === 100 ? '#10b981' : 'var(--pea-purple)' }}></div>
+                   </div>
+                   <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', textAlign: 'right' }}>ความคืบหน้า {doneCount}/8 ขั้นตอน</div>
+                 </div>
+               )
+            })}
+            {filteredProjects.length === 0 && (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
+                ยังไม่มีข้อมูลโครงการ กรุณานำเข้าข้อมูลจาก Supabase ก่อนครับ
+              </div>
+            )}
           </div>
         )}
       </div>
