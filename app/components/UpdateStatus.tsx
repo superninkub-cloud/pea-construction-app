@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
+import { Plus, X } from "lucide-react";
 
 export default function UpdateStatus() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -28,6 +29,11 @@ export default function UpdateStatus() {
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
+  
+  // Add New Project State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newProject, setNewProject] = useState({ wbs: "", name: "", supervisor: "", project_type: "", value: "", open_year: "" });
+  const [addLoading, setAddLoading] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -145,6 +151,37 @@ export default function UpdateStatus() {
     setLoading(false);
   };
 
+  const handleAddNewProject = async () => {
+    if (!newProject.wbs || !newProject.name) {
+      alert("กรุณากรอกรหัส WBS และชื่องานให้ครบถ้วน");
+      return;
+    }
+    setAddLoading(true);
+    try {
+      const { error } = await supabase.from("projects").insert({
+        wbs: newProject.wbs,
+        name: newProject.name,
+        supervisor: newProject.supervisor,
+        project_type: newProject.project_type,
+        value: Number(newProject.value) || 0,
+        open_year: newProject.open_year,
+        status: "",
+        remarks: ""
+      });
+      
+      if (error) throw error;
+      
+      setIsAddModalOpen(false);
+      setNewProject({ wbs: "", name: "", supervisor: "", project_type: "", value: "", open_year: "" });
+      fetchProjects();
+      alert("เพิ่มงานใหม่เรียบร้อยแล้ว!");
+    } catch (error: any) {
+      console.error(error);
+      alert(`ล้มเหลว: ${error.message}`);
+    }
+    setAddLoading(false);
+  };
+
   return (
     <>
       <TopBar title="อัพเดทสถานะงาน" />
@@ -159,12 +196,21 @@ export default function UpdateStatus() {
           </div>
           <div>
             <label className="form-label">📌 เลือกรหัส WBS / ชื่องานโครงการ</label>
-            <select className="form-select" style={{ fontWeight: '600', color: 'var(--pea-purple)' }} value={selectedWbs} onChange={(e) => setSelectedWbs(e.target.value)}>
-              <option value="">-- หรือคลิกเลือกจากรายการด้านล่าง --</option>
-              {filteredProjects.map(p => (
-                <option key={p.id} value={p.wbs}>[{p.wbs}] {p.name} - สถานะ: {p.status || "-"}</option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <select className="form-select" style={{ fontWeight: '600', color: 'var(--pea-purple)', flex: 1 }} value={selectedWbs} onChange={(e) => setSelectedWbs(e.target.value)}>
+                <option value="">-- หรือคลิกเลือกจากรายการด้านล่าง --</option>
+                {filteredProjects.map(p => (
+                  <option key={p.id} value={p.wbs}>[{p.wbs}] {p.name} - สถานะ: {p.status || "-"}</option>
+                ))}
+              </select>
+              <button 
+                className="btn btn-primary" 
+                style={{ padding: '0 20px', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                <Plus size={18} /> เพิ่มงานใหม่
+              </button>
+            </div>
           </div>
         </div>
 
@@ -308,6 +354,60 @@ export default function UpdateStatus() {
           </div>
         )}
       </div>
+
+      {/* Add New Project Modal */}
+      {isAddModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="card animation-fade-in" style={{ width: '100%', maxWidth: '600px', margin: 0, position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+            <button 
+              onClick={() => setIsAddModalOpen(false)} 
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)' }}
+            >
+              <X />
+            </button>
+            
+            <h3 style={{ color: 'var(--pea-purple)', marginBottom: '24px', fontWeight: 'bold' }}>➕ เพิ่มข้อมูลงานก่อสร้างใหม่</h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div>
+                <label className="form-label">📌 รหัส WBS *</label>
+                <input type="text" className="form-control" value={newProject.wbs} onChange={e => setNewProject({...newProject, wbs: e.target.value})} placeholder="เช่น I-63-I-..." />
+              </div>
+              <div>
+                <label className="form-label">👷 ผู้ควบคุมงาน</label>
+                <input type="text" className="form-control" value={newProject.supervisor} onChange={e => setNewProject({...newProject, supervisor: e.target.value})} placeholder="ชื่อผู้คุมงาน" />
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label className="form-label">📝 ชื่องานโครงการ *</label>
+              <textarea className="form-control" rows={2} value={newProject.name} onChange={e => setNewProject({...newProject, name: e.target.value})} placeholder="เช่น ยน.ขยายเขต..."></textarea>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <label className="form-label">ประเภทโครงการ</label>
+                <input type="text" className="form-control" value={newProject.project_type} onChange={e => setNewProject({...newProject, project_type: e.target.value})} placeholder="เช่น ขยายเขต" />
+              </div>
+              <div>
+                <label className="form-label">มูลค่างาน (บาท)</label>
+                <input type="number" className="form-control" value={newProject.value} onChange={e => setNewProject({...newProject, value: e.target.value})} placeholder="0" />
+              </div>
+              <div>
+                <label className="form-label">ปีเปิดงาน</label>
+                <input type="text" className="form-control" value={newProject.open_year} onChange={e => setNewProject({...newProject, open_year: e.target.value})} placeholder="เช่น 2567" />
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
+              <button className="btn" onClick={() => setIsAddModalOpen(false)} style={{ background: '#f1f5f9', color: 'var(--text-dark)' }}>ยกเลิก</button>
+              <button className="btn btn-primary" onClick={handleAddNewProject} disabled={addLoading || !newProject.wbs || !newProject.name}>
+                {addLoading ? "กำลังบันทึก..." : "💾 บันทึกงานใหม่"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
