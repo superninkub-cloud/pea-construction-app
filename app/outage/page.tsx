@@ -45,16 +45,16 @@ export default function OutagePlan() {
   for (let i = 0; i < firstDay; i++) days.push(null);
   for (let i = 1; i <= daysInMonth; i++) days.push(i);
 
-  const handleDayClick = (day: number) => {
+  const handleDayClick = (day: number, planId?: string) => {
     if (!day) return;
     const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day, 12);
     setSelectedDate(clickedDate);
     
-    const dateStr = clickedDate.toISOString().split('T')[0];
-    const existingPlan = plans.find(p => p.outage_date === dateStr);
-    
-    if (existingPlan) {
-      setFormData({ id: existingPlan.id, details: existingPlan.details, wbs: existingPlan.wbs || "", status: existingPlan.status });
+    if (planId) {
+      const existingPlan = plans.find(p => p.id === planId);
+      if (existingPlan) {
+        setFormData({ id: existingPlan.id, details: existingPlan.details, wbs: existingPlan.wbs || "", status: existingPlan.status });
+      }
     } else {
       setFormData({ id: "", details: "", wbs: "", status: "หน่วยงานตนเอง" });
     }
@@ -150,7 +150,9 @@ export default function OutagePlan() {
                   {/* Indicators */}
                   <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {dayPlans.map((p, idx) => (
-                      <div key={idx} style={{ 
+                      <div key={idx} 
+                        onClick={(e) => { e.stopPropagation(); handleDayClick(day, p.id); }}
+                        style={{ 
                         fontSize: '0.75rem', 
                         background: p.status === 'หน่วยงานอื่น' ? '#fee2e2' : '#d1fae5', 
                         color: p.status === 'หน่วยงานอื่น' ? '#b91c1c' : '#065f46',
@@ -185,7 +187,7 @@ export default function OutagePlan() {
             </button>
             
             <h3 style={{ color: 'var(--pea-purple)', marginBottom: '20px', fontWeight: 'bold' }}>
-              แผนงานวันที่ {selectedDate?.getDate()} {monthNames[selectedDate?.getMonth() || 0]} {selectedDate ? selectedDate.getFullYear() + 543 : ''}
+              {formData.id ? "แก้ไข" : "เพิ่ม"}แผนงานวันที่ {selectedDate?.getDate()} {monthNames[selectedDate?.getMonth() || 0]} {selectedDate ? selectedDate.getFullYear() + 543 : ''}
             </h3>
             
             <div style={{ marginBottom: '16px' }}>
