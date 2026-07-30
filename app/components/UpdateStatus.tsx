@@ -282,7 +282,8 @@ export default function UpdateStatus() {
                 <label className="form-label">🚨 สถานะ สาย ป. ติดตาม</label>
                 <select className="form-select" value={pTracking} onChange={(e) => setPTracking(e.target.value)}>
                   <option value="">-- ไม่ได้ติดตาม --</option>
-                  <option value="ติดตาม">ติดตาม</option>
+                  <option value="ติดตาม">ติดตาม (ทั่วไป)</option>
+                  <option value="งานกลุ่ม 1 งานก่อนปี 68 ที่ตกแผน สาย ป ติดตาม">งานกลุ่ม 1 งานก่อนปี 68 ที่ตกแผน สาย ป ติดตาม</option>
                 </select>
               </div>
               <div>
@@ -453,7 +454,8 @@ export default function UpdateStatus() {
                 <label className="form-label">🚨 สาย ป. ติดตาม</label>
                 <select className="form-select" value={newProject.p_tracking} onChange={e => setNewProject({...newProject, p_tracking: e.target.value})}>
                   <option value="">-- ไม่ระบุ --</option>
-                  <option value="ติดตาม">ติดตาม</option>
+                  <option value="ติดตาม">ติดตาม (ทั่วไป)</option>
+                  <option value="งานกลุ่ม 1 งานก่อนปี 68 ที่ตกแผน สาย ป ติดตาม">งานกลุ่ม 1 งานก่อนปี 68 ที่ตกแผน สาย ป ติดตาม</option>
                 </select>
               </div>
             </div>
