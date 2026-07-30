@@ -100,7 +100,7 @@ export default function OutagePlan() {
 
   return (
     <>
-      <TopBar title="ตารางแผนงานดับไฟ/แผนการใช้รถ/กิจกรรมอื่น ๆ" />
+      <TopBar title="แผนงานระดม/แผนใช้รถ" />
       <div className="content-area animation-fade-in">
         <div className="card">
           {/* Header */}

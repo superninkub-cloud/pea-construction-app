@@ -32,7 +32,7 @@ export default function Sidebar() {
         </Link>
         <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`}>
           <CalendarDays size={20} />
-          <span>ตารางแผนงาน/ใช้รถ</span>
+          <span>แผนงานระดม/แผนใช้รถ</span>
         </Link>
         <Link href="/vehicle" className={`nav-item ${pathname === "/vehicle" ? "active" : ""}`}>
           <Car size={20} />
