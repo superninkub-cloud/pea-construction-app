@@ -17,6 +17,7 @@ export default function UpdateStatus() {
   
   // Form State
   const [status, setStatus] = useState("");
+  const [projectValue, setProjectValue] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("ม.ค.");
   const [newRemarks, setNewRemarks] = useState("");
   const [oldRemarks, setOldRemarks] = useState("");
@@ -71,6 +72,7 @@ export default function UpdateStatus() {
       if (p) {
         setProject(p);
         setStatus(p.status || "");
+        setProjectValue(p.value ? p.value.toString() : "");
         setOldRemarks(p.remarks || "");
         setNewRemarks("");
         setChecks({
@@ -129,6 +131,7 @@ export default function UpdateStatus() {
         .from("projects")
         .update({
           status,
+          value: Number(projectValue) || 0,
           remarks: combinedRemarks,
           image_url: imageUrl,
           ...checks,
@@ -227,7 +230,19 @@ export default function UpdateStatus() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
               <div><strong style={{ color: 'var(--text-light)' }}>ผู้ควบคุมงาน:</strong> <br/><span style={{ fontWeight: '600' }}>{project.supervisor}</span></div>
               <div><strong style={{ color: 'var(--text-light)' }}>ประเภทโครงการ:</strong> <br/><span style={{ fontWeight: '500' }}>{project.project_type || "-"}</span></div>
-              <div><strong style={{ color: 'var(--text-light)' }}>มูลค่า:</strong> <br/><span style={{ fontWeight: '600', color: '#047857' }}>{(project.value || 0).toLocaleString()}</span> บาท</div>
+              <div>
+                <strong style={{ color: 'var(--text-light)' }}>มูลค่า:</strong> <br/>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                  <input 
+                    type="number" 
+                    className="form-control" 
+                    style={{ maxWidth: '130px', padding: '4px 8px' }} 
+                    value={projectValue} 
+                    onChange={(e) => setProjectValue(e.target.value)} 
+                  />
+                  <span style={{ fontWeight: '600', color: '#047857' }}>บาท</span>
+                </div>
+              </div>
               <div><strong style={{ color: 'var(--text-light)' }}>ปีเปิดงาน:</strong> <br/><span style={{ fontWeight: '500' }}>{project.open_year || "-"} ({project.year_criteria || "-"})</span></div>
             </div>
             
