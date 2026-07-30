@@ -154,6 +154,27 @@ export default function UpdateStatus() {
     setLoading(false);
   };
 
+  const handleDeleteProject = async () => {
+    if (!project) return;
+    if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบโครงการ ${project.wbs}? ข้อมูลทั้งหมดของโครงการนี้จะหายไป`)) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("projects").delete().eq("id", project.id);
+      if (error) throw error;
+      
+      alert("ลบโครงการเรียบร้อยแล้ว");
+      setProject(null);
+      setSelectedWbs("");
+      fetchProjects();
+    } catch (error: any) {
+      console.error(error);
+      alert(`ลบล้มเหลว: ${error.message}`);
+    }
+    setLoading(false);
+  };
+
   const handleAddNewProject = async () => {
     if (!newProject.wbs || !newProject.name) {
       alert("กรุณากรอกรหัส WBS และชื่องานให้ครบถ้วน");
@@ -327,9 +348,14 @@ export default function UpdateStatus() {
                 </div>
               ) : <div></div>}
               
-              <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ minWidth: '160px' }}>
-                {loading ? "กำลังบันทึก..." : "💾 บันทึกข้อมูล"}
-              </button>
+              <div style={{ display: "flex", gap: "12px" }}>
+                <button className="btn" onClick={handleDeleteProject} disabled={loading} style={{ minWidth: '140px', background: '#fee2e2', color: '#b91c1c' }}>
+                  🗑️ ลบโครงการ
+                </button>
+                <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ minWidth: '160px' }}>
+                  {loading ? "กำลังบันทึก..." : "💾 บันทึกข้อมูล"}
+                </button>
+              </div>
             </div>
           </div>
         ) : (
