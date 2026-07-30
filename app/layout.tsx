@@ -1,9 +1,9 @@
 import "./globals.css";
-import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
 
 export const metadata = {
   title: "PEA Construction Update",
-  description: "ระบบอัพเดทสถานะงานก่อสร้าง ของ ผกร.กรย.(ก3) ประจำปี 2569",
+  description: "ระบบอัพเดทสถานะงานก่อสร้าง",
 };
 
 export default function RootLayout({
@@ -14,9 +14,11 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body>
-        <div className="container-main">
-          <Header />
-          <div className="content-body">{children}</div>
+        <div className="app-layout">
+          <Sidebar />
+          <div className="main-wrapper">
+            {children}
+          </div>
         </div>
       </body>
     </html>
