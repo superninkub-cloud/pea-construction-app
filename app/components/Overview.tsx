@@ -11,7 +11,9 @@ export default function Overview() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [monthFilter, setMonthFilter] = useState("ALL");
+  const [supervisorFilter, setSupervisorFilter] = useState("ALL");
   const [statuses, setStatuses] = useState<string[]>([]);
+  const [supervisors, setSupervisors] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProjects();
@@ -30,6 +32,8 @@ export default function Overview() {
       setProjects(data || []);
       const uniqueStatuses = Array.from(new Set(data?.map(p => p.status || "ไม่มีข้อมูล").filter(Boolean)));
       setStatuses(uniqueStatuses as string[]);
+      const uniqueSupervisors = Array.from(new Set(data?.map(p => p.supervisor || "ไม่ระบุ").filter(Boolean)));
+      setSupervisors(uniqueSupervisors as string[]);
     }
     setLoading(false);
   };
@@ -44,12 +48,14 @@ export default function Overview() {
 
   const filteredProjects = projects.filter((p) => {
     const s = p.status || "ไม่มีข้อมูล";
+    const sup = p.supervisor || "ไม่ระบุ";
     const matchStatus = statusFilter === "ALL" || s === statusFilter;
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
+    const matchSupervisor = supervisorFilter === "ALL" || sup === supervisorFilter;
     const matchSearch = Object.values(p).some((val) => 
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
-    return matchStatus && matchMonth && matchSearch;
+    return matchStatus && matchMonth && matchSupervisor && matchSearch;
   });
 
   if (loading) {
@@ -96,12 +102,21 @@ export default function Overview() {
               />
             </div>
 
-            <div>
-              <label className="form-label">📌 กรองตามสถานะ</label>
-              <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                <option value="ALL">แสดงทั้งหมด</option>
-                {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label className="form-label">📌 กรองตามสถานะ</label>
+                <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                  <option value="ALL">แสดงทั้งหมด</option>
+                  {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="form-label">👷 กรองตามชื่อช่าง</label>
+                <select className="form-select" value={supervisorFilter} onChange={(e) => setSupervisorFilter(e.target.value)}>
+                  <option value="ALL">แสดงทั้งหมด</option>
+                  {supervisors.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'end' }}>

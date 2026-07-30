@@ -24,7 +24,7 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`}>
           <LayoutDashboard size={20} />
-          <span>แดชบอร์ด (Overview)</span>
+          <span>Dashboard งานก่อสร้าง</span>
         </Link>
         <Link href="/update" className={`nav-item ${pathname === "/update" ? "active" : ""}`}>
           <FileEdit size={20} />
