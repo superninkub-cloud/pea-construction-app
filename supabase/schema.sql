@@ -38,3 +38,21 @@ INSERT INTO storage.buckets (id, name, public) VALUES ('project_images', 'projec
 -- Allow anonymous access to the storage bucket
 CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'project_images');
 CREATE POLICY "Public Insert" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'project_images');
+
+-- Create the outage_plans table
+CREATE TABLE public.outage_plans (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  wbs text,
+  outage_date date NOT NULL,
+  details text NOT NULL,
+  status text DEFAULT 'รออนุมัติ',
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.outage_plans ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow anonymous select outage" ON public.outage_plans FOR SELECT USING (true);
+CREATE POLICY "Allow anonymous insert outage" ON public.outage_plans FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous update outage" ON public.outage_plans FOR UPDATE USING (true);
+CREATE POLICY "Allow anonymous delete outage" ON public.outage_plans FOR DELETE USING (true);

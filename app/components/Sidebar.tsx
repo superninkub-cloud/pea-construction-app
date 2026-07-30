@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit } from "lucide-react";
+import { LayoutDashboard, FileEdit, CalendarDays } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -29,6 +29,10 @@ export default function Sidebar() {
         <Link href="/update" className={`nav-item ${pathname === "/update" ? "active" : ""}`}>
           <FileEdit size={20} />
           <span>อัพเดทสถานะงาน</span>
+        </Link>
+        <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`}>
+          <CalendarDays size={20} />
+          <span>ตารางแผนดับไฟ</span>
         </Link>
       </nav>
     </div>
