@@ -96,6 +96,31 @@ export default function OutagePlan() {
     }
   };
 
+  const handleImportJuly = async () => {
+    if (!confirm("คุณต้องการนำเข้าข้อมูลแผนงานเดือนกรกฎาคม 2026 ใช่หรือไม่?")) return;
+    const plansToInsert = [
+      { outage_date: '2026-07-02', details: 'ตัดเสาคลองบ้านห้วย บางปะ...', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-02', details: 'ระดม นครชัยศรี 4 ชุด', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-05', details: 'บ่อพลอย', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-06', details: 'ปักเสา 115 กาญ5 5 ชุด', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-07', details: 'อู่ทองขอเทรลเลอร์ ย้ายเสา', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-08', details: 'อู่ทองขอเทรลเลอร์ ย้ายเสา', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-09', details: 'กร่างทอง ท่าม่วง 5 ชุด', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-19', details: 'บ่อพลอย', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-21', details: 'อู่ทองขอเทรลเลอร์ ย้ายเสา', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-22', details: 'อู่ทองขอเทรลเลอร์ ย้ายเสา', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-25', details: 'ตลาดกำแพงแสน 5 ชุด', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-27', details: '115 บางเลน 5 ชุด โรงหมี่', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-28', details: 'วันเฉลิมพระชนมพรรษา', wbs: '', status: 'หน่วยงานตนเอง' },
+      { outage_date: '2026-07-29', details: 'วันอาสาฬหบูชา', wbs: '', status: 'หน่วยงานตนเอง' }
+    ];
+    setLoading(true);
+    await supabase.from("outage_plans").insert(plansToInsert);
+    setLoading(false);
+    fetchPlans();
+    alert("นำเข้าข้อมูลเสร็จสิ้น!");
+  };
+
   const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
   return (
@@ -108,9 +133,18 @@ export default function OutagePlan() {
             <h2 style={{ color: 'var(--pea-purple)', fontSize: '1.5rem', fontWeight: 'bold' }}>
               เดือน{monthNames[currentDate.getMonth()]} {currentDate.getFullYear() + 543}
             </h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="btn" onClick={prevMonth} style={{ padding: '8px', background: '#f1f5f9', color: '#334155' }}><ChevronLeft /></button>
-              <button className="btn" onClick={nextMonth} style={{ padding: '8px', background: '#f1f5f9', color: '#334155' }}><ChevronRight /></button>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <button className="btn btn-secondary" onClick={handleImportJuly} style={{ fontSize: '0.8rem', padding: '6px 12px', background: '#f59e0b', color: 'white', border: 'none' }}>
+                📥 ดึงข้อมูล ก.ค. 2026 อัตโนมัติ
+              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="btn btn-secondary" onClick={prevMonth} style={{ padding: '8px' }}>
+                  <ChevronLeft size={20} />
+                </button>
+                <button className="btn btn-secondary" onClick={nextMonth} style={{ padding: '8px' }}>
+                  <ChevronRight size={20} />
+                </button>
+              </div>
             </div>
           </div>
 
