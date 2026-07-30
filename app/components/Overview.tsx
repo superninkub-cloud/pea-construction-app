@@ -12,6 +12,7 @@ export default function Overview() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [monthFilter, setMonthFilter] = useState("ALL");
   const [supervisorFilter, setSupervisorFilter] = useState("ALL");
+  const [yearFilter, setYearFilter] = useState("ALL");
   const [statuses, setStatuses] = useState<string[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
 
@@ -49,13 +50,22 @@ export default function Overview() {
   const filteredProjects = projects.filter((p) => {
     const s = p.status || "ไม่มีข้อมูล";
     const sup = p.supervisor || "ไม่ระบุ";
+    
+    let matchYear = true;
+    if (yearFilter !== "ALL") {
+      const year = Number(p.open_year) || 0;
+      if (yearFilter === "BEFORE_2568") matchYear = year > 0 && year < 2568;
+      else if (yearFilter === "2568") matchYear = year === 2568;
+      else if (yearFilter === "2569") matchYear = year === 2569;
+    }
+
     const matchStatus = statusFilter === "ALL" || s === statusFilter;
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
     const matchSupervisor = supervisorFilter === "ALL" || sup === supervisorFilter;
     const matchSearch = Object.values(p).some((val) => 
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
-    return matchStatus && matchMonth && matchSupervisor && matchSearch;
+    return matchStatus && matchMonth && matchSupervisor && matchSearch && matchYear;
   });
 
   if (loading) {
@@ -129,7 +139,7 @@ export default function Overview() {
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
               <div>
                 <label className="form-label">📌 กรองตามสถานะ</label>
                 <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -142,6 +152,15 @@ export default function Overview() {
                 <select className="form-select" value={supervisorFilter} onChange={(e) => setSupervisorFilter(e.target.value)}>
                   <option value="ALL">แสดงทั้งหมด</option>
                   {supervisors.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="form-label">🗓️ กรองปีที่เปิดงาน</label>
+                <select className="form-select" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
+                  <option value="ALL">แสดงทุกปี</option>
+                  <option value="BEFORE_2568">ก่อนปี 2568</option>
+                  <option value="2568">ปี 2568</option>
+                  <option value="2569">ปี 2569</option>
                 </select>
               </div>
             </div>
