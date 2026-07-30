@@ -107,13 +107,13 @@ export default function Overview() {
         <table className="table-custom">
           <thead>
             <tr>
-              <th width="14%">WBS / ข้อมูลปี</th>
-              <th width="20%">ชื่องาน / ผู้คุมงาน</th>
-              <th width="11%" style={{ textAlign: "center" }}>มูลค่า (บาท)</th>
-              <th width="7%" style={{ textAlign: "center" }}>สถานะ</th>
-              <th width="28%" style={{ textAlign: "center" }}>ความคืบหน้า (8 ขั้นตอน)</th>
-              <th width="12%">ประวัติหมายเหตุรายเดือน</th>
-              <th width="8%" style={{ textAlign: "center" }}>รูปภาพ</th>
+              <th style={{ width: "14%" }}>WBS / ข้อมูลปี</th>
+              <th style={{ width: "20%" }}>ชื่องาน / ผู้คุมงาน</th>
+              <th style={{ width: "11%", textAlign: "center" }}>มูลค่า (บาท)</th>
+              <th style={{ width: "7%", textAlign: "center" }}>สถานะ</th>
+              <th style={{ width: "28%", textAlign: "center" }}>ความคืบหน้า (8 ขั้นตอน)</th>
+              <th style={{ width: "12%" }}>ประวัติหมายเหตุรายเดือน</th>
+              <th style={{ width: "8%", textAlign: "center" }}>รูปภาพ</th>
             </tr>
           </thead>
           <tbody>
