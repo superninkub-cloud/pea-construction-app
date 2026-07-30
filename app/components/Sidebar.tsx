@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -42,6 +42,10 @@ export default function Sidebar() {
           <ShieldCheck size={20} />
           <span>งานความปลอดภัย</span>
         </Link>
+        <a href="https://pea-foundation-guide-c4e3.vercel.app/" target="_blank" rel="noopener noreferrer" className="nav-item">
+          <BookOpen size={20} />
+          <span>คู่มืองานก่อสร้าง 115kV</span>
+        </a>
       </nav>
     </div>
   );
