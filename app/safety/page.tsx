@@ -109,29 +109,29 @@ export default function SafetyPlan() {
           </div>
 
           <div className="table-responsive" style={{ padding: 0 }}>
-            <table className="table-custom" style={{ minWidth: '1000px' }}>
+            <table className="table-custom" style={{ minWidth: '1000px', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  <th style={{ width: '5%', textAlign: 'center' }}>ลำดับ</th>
-                  <th style={{ width: '35%' }}>แผนงาน / หัวข้อการฝึก</th>
+                  <th style={{ width: '5%', textAlign: 'center', border: '1px solid #cbd5e1', backgroundColor: '#f1f5f9' }}>ลำดับ</th>
+                  <th style={{ width: '35%', border: '1px solid #cbd5e1', backgroundColor: '#f1f5f9' }}>แผนงาน / หัวข้อการฝึก</th>
                   {monthNames.map((m, i) => (
-                    <th key={i} style={{ width: '4%', textAlign: 'center', fontSize: '0.85rem' }}>{m}</th>
+                    <th key={i} style={{ width: '4%', textAlign: 'center', fontSize: '0.85rem', border: '1px solid #cbd5e1', backgroundColor: '#f1f5f9' }}>{m}</th>
                   ))}
-                  <th style={{ width: '12%', textAlign: 'center' }}>ผู้ฝึกสอน</th>
+                  <th style={{ width: '12%', textAlign: 'center', border: '1px solid #cbd5e1', backgroundColor: '#f1f5f9' }}>ผู้ฝึกสอน</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredPlans.length > 0 ? filteredPlans.map((plan) => (
-                  <tr key={plan.id}>
-                    <td style={{ textAlign: 'center', fontWeight: 'bold', color: 'var(--text-light)' }}>{plan.id}</td>
-                    <td style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{plan.topic}</td>
+                {filteredPlans.length > 0 ? filteredPlans.map((plan, index) => (
+                  <tr key={plan.id} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                    <td style={{ textAlign: 'center', fontWeight: 'bold', color: 'var(--text-light)', border: '1px solid #e2e8f0' }}>{plan.id}</td>
+                    <td style={{ fontWeight: '500', color: 'var(--text-dark)', border: '1px solid #e2e8f0' }}>{plan.topic}</td>
                     {monthNames.map((m, i) => {
                       const isScheduled = plan.months.includes(i + 1);
                       const key = `${plan.id}_${i + 1}`;
                       const isCompleted = progress[key];
 
                       return (
-                        <td key={i} style={{ textAlign: 'center', padding: '4px 2px', verticalAlign: 'middle' }}>
+                        <td key={i} style={{ textAlign: 'center', padding: '4px 2px', verticalAlign: 'middle', border: '1px solid #e2e8f0' }}>
                           {isScheduled && (
                             <div style={{
                               background: '#dcfce7', // light green indicating plan
@@ -167,11 +167,11 @@ export default function SafetyPlan() {
                         </td>
                       );
                     })}
-                    <td style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--pea-purple)' }}>{plan.instructor}</td>
+                    <td style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--pea-purple)', border: '1px solid #e2e8f0' }}>{plan.instructor}</td>
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan={15} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)' }}>ไม่พบข้อมูลที่ค้นหา</td>
+                    <td colSpan={15} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-light)', border: '1px solid #e2e8f0' }}>ไม่พบข้อมูลที่ค้นหา</td>
                   </tr>
                 )}
               </tbody>
