@@ -1,0 +1,8 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: ["*.supabase.co"], // Allow images from supabase storage
+  },
+};
+
+export default nextConfig;
