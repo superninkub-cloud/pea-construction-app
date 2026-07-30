@@ -82,12 +82,30 @@ export default function Overview() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '24px' }}>
           
-          <div className="stat-card">
-            <div className="stat-circle">
-               {filteredProjects.length}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+            <div className="stat-card">
+              <div className="stat-circle">
+                 {filteredProjects.length}
+              </div>
+              <div className="stat-title">โครงการทั้งหมด</div>
+              <div className="stat-subtitle">ที่ตรงตามเงื่อนไข</div>
             </div>
-            <div className="stat-title">โครงการทั้งหมด</div>
-            <div className="stat-subtitle">ที่ตรงตามเงื่อนไข</div>
+
+            <div className="stat-card" style={{ borderTop: '4px solid #10b981' }}>
+              <div className="stat-circle" style={{ color: '#10b981', background: '#d1fae5' }}>
+                 {filteredProjects.filter(p => p.status === 'F4').length}
+              </div>
+              <div className="stat-title" style={{ color: '#047857' }}>สถานะ F4 (ปิดงาน)</div>
+              <div className="stat-subtitle">โครงการที่เสร็จสิ้น</div>
+            </div>
+
+            <div className="stat-card" style={{ borderTop: '4px solid #f59e0b' }}>
+              <div className="stat-circle" style={{ color: '#d97706', background: '#fef3c7' }}>
+                 {filteredProjects.filter(p => p.status !== 'F4').length}
+              </div>
+              <div className="stat-title" style={{ color: '#b45309' }}>สถานะอื่นๆ</div>
+              <div className="stat-subtitle">อยู่ระหว่างดำเนินการ</div>
+            </div>
           </div>
 
           <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center' }}>
