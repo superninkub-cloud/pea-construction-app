@@ -77,7 +77,16 @@ const defaultProjects = [
 export default function ImportantTasksPage() {
   const [projectData, setProjectData] = useState(defaultProjects);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<{ status?: string; progress?: number; note?: string }>({});
+  const [editForm, setEditForm] = useState<{
+    name?: string;
+    wbs?: string;
+    distance?: string;
+    target?: string;
+    status?: string;
+    progress?: number;
+    note?: string;
+    type?: string;
+  }>({});
   const [dbId, setDbId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -110,9 +119,14 @@ export default function ImportantTasksPage() {
   const startEdit = (proj: any) => {
     setEditingId(proj.id);
     setEditForm({
+      name: proj.name,
+      wbs: proj.wbs,
+      distance: proj.distance,
+      target: proj.target,
       status: proj.status,
       progress: proj.progress || 0,
       note: proj.note,
+      type: proj.type,
     });
   };
 
@@ -128,7 +142,16 @@ export default function ImportantTasksPage() {
     
     try {
       const changesToSave = updatedData.reduce((acc: any, curr) => {
-        acc[curr.id] = { status: curr.status, note: curr.note, progress: curr.progress };
+        acc[curr.id] = { 
+          name: curr.name,
+          wbs: curr.wbs,
+          distance: curr.distance,
+          target: curr.target,
+          status: curr.status, 
+          note: curr.note, 
+          progress: curr.progress,
+          type: curr.type
+        };
         return acc;
       }, {});
       
@@ -209,19 +232,32 @@ export default function ImportantTasksPage() {
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     {getStatusIcon(proj.type)}
-                    <span style={{ 
-                      fontWeight: "600", 
-                      fontSize: "0.9rem",
-                      color: proj.type === "urgent" ? "#b91c1c" : 
-                             proj.type === "warning" ? "#a16207" : 
-                             proj.type === "normal" ? "#15803d" : "#4b5563",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px"
-                    }}>
-                      {proj.type === "urgent" ? "ต้องเร่งรัดด่วน" : 
-                       proj.type === "warning" ? "ติดอุปสรรค" : 
-                       proj.type === "normal" ? "ปกติ" : "ยกเลิก"}
-                    </span>
+                    {isEditing ? (
+                      <select 
+                        value={editForm.type}
+                        onChange={(e) => setEditForm({...editForm, type: e.target.value})}
+                        style={{ padding: "2px 4px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
+                      >
+                        <option value="urgent">ต้องเร่งรัดด่วน</option>
+                        <option value="warning">ติดอุปสรรค</option>
+                        <option value="normal">ปกติ</option>
+                        <option value="cancelled">ยกเลิก</option>
+                      </select>
+                    ) : (
+                      <span style={{ 
+                        fontWeight: "600", 
+                        fontSize: "0.9rem",
+                        color: proj.type === "urgent" ? "#b91c1c" : 
+                               proj.type === "warning" ? "#a16207" : 
+                               proj.type === "normal" ? "#15803d" : "#4b5563",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px"
+                      }}>
+                        {proj.type === "urgent" ? "ต้องเร่งรัดด่วน" : 
+                         proj.type === "warning" ? "ติดอุปสรรค" : 
+                         proj.type === "normal" ? "ปกติ" : "ยกเลิก"}
+                      </span>
+                    )}
                   </div>
                   
                   {!isEditing ? (
@@ -262,22 +298,57 @@ export default function ImportantTasksPage() {
                   )}
                 </div>
 
-                <h3 style={{ fontSize: "1.1rem", fontWeight: "600", color: "#0f172a", marginBottom: "12px", lineHeight: "1.4" }}>
-                  {proj.name}
-                </h3>
+                {isEditing ? (
+                  <textarea
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                    style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "1rem", fontWeight: "600", marginBottom: "12px", minHeight: "60px", resize: "vertical" }}
+                  />
+                ) : (
+                  <h3 style={{ fontSize: "1.1rem", fontWeight: "600", color: "#0f172a", marginBottom: "12px", lineHeight: "1.4" }}>
+                    {proj.name}
+                  </h3>
+                )}
                 
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px", flex: 1 }}>
-                  <div style={{ display: "flex", fontSize: "0.9rem" }}>
+                  <div style={{ display: "flex", fontSize: "0.9rem", alignItems: isEditing ? "center" : "flex-start", marginBottom: isEditing ? "4px" : "0" }}>
                     <span style={{ color: "#64748b", width: "90px" }}>WBS:</span>
-                    <span style={{ fontWeight: "500", color: "#334155" }}>{proj.wbs}</span>
+                    {isEditing ? (
+                      <input 
+                        type="text" 
+                        value={editForm.wbs} 
+                        onChange={(e) => setEditForm({...editForm, wbs: e.target.value})}
+                        style={{ flex: 1, padding: "4px 8px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.9rem" }}
+                      />
+                    ) : (
+                      <span style={{ fontWeight: "500", color: "#334155" }}>{proj.wbs}</span>
+                    )}
                   </div>
-                  <div style={{ display: "flex", fontSize: "0.9rem" }}>
+                  <div style={{ display: "flex", fontSize: "0.9rem", alignItems: isEditing ? "center" : "flex-start", marginBottom: isEditing ? "4px" : "0" }}>
                     <span style={{ color: "#64748b", width: "90px" }}>ระยะทาง:</span>
-                    <span style={{ fontWeight: "500", color: "#334155" }}>{proj.distance}</span>
+                    {isEditing ? (
+                      <input 
+                        type="text" 
+                        value={editForm.distance} 
+                        onChange={(e) => setEditForm({...editForm, distance: e.target.value})}
+                        style={{ flex: 1, padding: "4px 8px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.9rem" }}
+                      />
+                    ) : (
+                      <span style={{ fontWeight: "500", color: "#334155" }}>{proj.distance}</span>
+                    )}
                   </div>
-                  <div style={{ display: "flex", fontSize: "0.9rem" }}>
+                  <div style={{ display: "flex", fontSize: "0.9rem", alignItems: isEditing ? "center" : "flex-start", marginBottom: isEditing ? "4px" : "0" }}>
                     <span style={{ color: "#64748b", width: "90px" }}>เป้าหมาย:</span>
-                    <span style={{ fontWeight: "500", color: "#334155" }}>{proj.target}</span>
+                    {isEditing ? (
+                      <input 
+                        type="text" 
+                        value={editForm.target} 
+                        onChange={(e) => setEditForm({...editForm, target: e.target.value})}
+                        style={{ flex: 1, padding: "4px 8px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.9rem" }}
+                      />
+                    ) : (
+                      <span style={{ fontWeight: "500", color: "#334155" }}>{proj.target}</span>
+                    )}
                   </div>
                   <div style={{ display: "flex", fontSize: "0.9rem", alignItems: isEditing ? "center" : "flex-start" }}>
                     <span style={{ color: "#64748b", width: "90px", marginTop: isEditing ? "0" : "0" }}>สถานะ:</span>
