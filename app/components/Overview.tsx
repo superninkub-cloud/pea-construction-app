@@ -49,6 +49,7 @@ export default function Overview() {
   };
 
   const filteredProjects = projects.filter((p) => {
+    if (p.wbs === "IMPORTANT_TASKS_2026" || p.wbs === "SAFETY_PLAN_2026") return false;
     const s = p.status || "ไม่มีข้อมูล";
     const sup = p.supervisor || "ไม่ระบุ";
     
