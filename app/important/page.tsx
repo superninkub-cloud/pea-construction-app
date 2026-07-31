@@ -75,7 +75,7 @@ const defaultProjects = [
 ];
 
 export default function ImportantTasksPage() {
-  const [projectData, setProjectData] = useState(defaultProjects);
+  const [projectData, setProjectData] = useState<any[]>(defaultProjects);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<{
     name?: string;
