@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import TopBar from "../components/TopBar";
-import { AlertTriangle, AlertCircle, CheckCircle2, XCircle, Edit2, Save, X } from "lucide-react";
+import { AlertTriangle, AlertCircle, CheckCircle2, XCircle, Edit2, Save, X, Plus, Trash2 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
 const defaultProjects = [
@@ -104,11 +104,21 @@ export default function ImportantTasksPage() {
         
       if (data && data.remarks) {
         const parsed = JSON.parse(data.remarks);
-        const merged = defaultProjects.map(p => ({
-          ...p,
-          ...(parsed[p.id] || {})
-        }));
-        setProjectData(merged);
+        const hasFullData = Object.values(parsed).some((p: any) => p && p.name);
+        
+        let loadedProjects = [];
+        if (hasFullData) {
+          loadedProjects = Object.keys(parsed).map(key => ({
+            id: Number(key),
+            ...parsed[key]
+          })).sort((a, b) => a.id - b.id);
+        } else {
+          loadedProjects = defaultProjects.map(p => ({
+            ...p,
+            ...(parsed[p.id] || {})
+          }));
+        }
+        setProjectData(loadedProjects);
         setDbId(data.id);
       }
     } catch (err) {
@@ -131,8 +141,71 @@ export default function ImportantTasksPage() {
   };
 
   const cancelEdit = () => {
+    const editingProj = projectData.find(p => p.id === editingId);
+    if (editingProj && !editingProj.name && !editingProj.wbs) {
+      setProjectData(projectData.filter(p => p.id !== editingId));
+    }
     setEditingId(null);
     setEditForm({});
+  };
+
+  const handleAddProject = () => {
+    const newId = Date.now();
+    const newProject = {
+      id: newId,
+      name: "",
+      wbs: "",
+      distance: "",
+      target: "",
+      status: "รอดำเนินการ",
+      progress: 0,
+      note: "",
+      type: "normal"
+    };
+    setProjectData([newProject, ...projectData]);
+    startEdit(newProject);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('คุณต้องการลบโครงการนี้ใช่หรือไม่?')) return;
+    
+    setIsSaving(true);
+    const updatedData = projectData.filter(p => p.id !== id);
+    setProjectData(updatedData);
+    
+    try {
+      const changesToSave = updatedData.reduce((acc: any, curr) => {
+        acc[curr.id] = { 
+          name: curr.name,
+          wbs: curr.wbs,
+          distance: curr.distance,
+          target: curr.target,
+          status: curr.status, 
+          note: curr.note, 
+          progress: curr.progress,
+          type: curr.type
+        };
+        return acc;
+      }, {});
+      
+      const payload = {
+        wbs: 'IMPORTANT_TASKS_2026',
+        name: 'Important Tasks 2026 Tracker',
+        remarks: JSON.stringify(changesToSave)
+      };
+      
+      if (dbId) {
+        await supabase.from('projects').update(payload).eq('id', dbId);
+      } else {
+        const { data } = await supabase.from('projects').insert(payload).select().single();
+        if (data) setDbId(data.id);
+      }
+    } catch (err) {
+      console.error("Error deleting data:", err);
+    }
+    
+    setIsSaving(false);
+    if (editingId === id) setEditingId(null);
   };
 
   const handleSave = async (id: number) => {
@@ -200,13 +273,29 @@ export default function ImportantTasksPage() {
       <TopBar title="ระบบติดตามงานสำคัญ (ปี 2569)" />
       
       <div style={{ padding: "24px 32px" }}>
-        <div style={{ marginBottom: "24px" }}>
-          <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", marginBottom: "8px" }}>
-            ภาพรวมงานที่ต้องเร่งรัด
-          </h2>
-          <p style={{ color: "#64748b" }}>
-            ข้อมูลอ้างอิงจากแฟ้มการประชุม แผนก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา (กฟก.3)
-          </p>
+        <div style={{ marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", marginBottom: "8px" }}>
+              ภาพรวมงานที่ต้องเร่งรัด
+            </h2>
+            <p style={{ color: "#64748b" }}>
+              ข้อมูลอ้างอิงจากแฟ้มการประชุม แผนก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา (กฟก.3)
+            </p>
+          </div>
+          <button
+            onClick={handleAddProject}
+            style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              backgroundColor: "#2563eb", color: "white",
+              padding: "8px 16px", borderRadius: "8px",
+              fontWeight: "600", fontSize: "0.95rem",
+              border: "none", cursor: "pointer",
+              boxShadow: "0 2px 4px rgba(37,99,235,0.2)",
+              marginTop: "4px"
+            }}
+          >
+            <Plus size={18} /> เพิ่มโครงการ
+          </button>
         </div>
 
         <div style={{ 
@@ -261,16 +350,29 @@ export default function ImportantTasksPage() {
                   </div>
                   
                   {!isEditing ? (
-                    <button 
-                      onClick={() => startEdit(proj)}
-                      style={{ 
-                        display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", 
-                        color: "#3b82f6", backgroundColor: "white", border: "1px solid #bfdbfe", 
-                        padding: "4px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
-                      }}
-                    >
-                      <Edit2 size={12} /> แก้ไข
-                    </button>
+                    <div style={{ display: "flex", gap: "4px" }}>
+                      <button 
+                        onClick={() => startEdit(proj)}
+                        style={{ 
+                          display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", 
+                          color: "#3b82f6", backgroundColor: "white", border: "1px solid #bfdbfe", 
+                          padding: "4px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
+                        }}
+                      >
+                        <Edit2 size={12} /> แก้ไข
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(proj.id)}
+                        style={{ 
+                          display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", 
+                          color: "#ef4444", backgroundColor: "white", border: "1px solid #fecaca", 
+                          padding: "4px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
+                        }}
+                        title="ลบโครงการ"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   ) : (
                     <div style={{ display: "flex", gap: "4px" }}>
                       <button 
