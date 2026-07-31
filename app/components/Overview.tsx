@@ -49,7 +49,12 @@ export default function Overview() {
   };
 
   const filteredProjects = projects.filter((p) => {
-    if (p.wbs && (p.wbs.includes("IMPORTANT_TASKS_") || p.wbs.includes("SAFETY_PLAN_"))) return false;
+    if (
+      (p.wbs && (p.wbs.includes("IMPORTANT_TASKS") || p.wbs.includes("SAFETY_PLAN"))) ||
+      (p.name && (p.name.includes("Important Tasks") || p.name.includes("Safety Training")))
+    ) {
+      return false;
+    }
     const s = p.status || "ไม่มีข้อมูล";
     const sup = p.supervisor || "ไม่ระบุ";
     
