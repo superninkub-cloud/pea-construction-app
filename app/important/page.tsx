@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import TopBar from "../components/TopBar";
-import { AlertTriangle, AlertCircle, CheckCircle2, XCircle, Edit2, Save, X, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, AlertCircle, CheckCircle2, XCircle, Edit2, Save, X, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
 const defaultProjects = [
@@ -86,9 +86,15 @@ export default function ImportantTasksPage() {
     progress?: number;
     note?: string;
     type?: string;
+    monthlyProgress?: { id: number; month: string; progress: number; note: string }[];
   }>({});
   const [dbId, setDbId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [expandedProjects, setExpandedProjects] = useState<number[]>([]);
+
+  const toggleExpand = (id: number) => {
+    setExpandedProjects(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+  };
 
   useEffect(() => {
     fetchData();
@@ -137,6 +143,7 @@ export default function ImportantTasksPage() {
       progress: proj.progress || 0,
       note: proj.note,
       type: proj.type,
+      monthlyProgress: proj.monthlyProgress || [],
     });
   };
 
@@ -160,7 +167,8 @@ export default function ImportantTasksPage() {
       status: "รอดำเนินการ",
       progress: 0,
       note: "",
-      type: "normal"
+      type: "normal",
+      monthlyProgress: []
     };
     setProjectData([newProject, ...projectData]);
     startEdit(newProject);
@@ -183,7 +191,8 @@ export default function ImportantTasksPage() {
           status: curr.status, 
           note: curr.note, 
           progress: curr.progress,
-          type: curr.type
+          type: curr.type,
+          monthlyProgress: curr.monthlyProgress || []
         };
         return acc;
       }, {});
@@ -223,7 +232,8 @@ export default function ImportantTasksPage() {
           status: curr.status, 
           note: curr.note, 
           progress: curr.progress,
-          type: curr.type
+          type: curr.type,
+          monthlyProgress: curr.monthlyProgress || []
         };
         return acc;
       }, {});
@@ -513,6 +523,102 @@ export default function ImportantTasksPage() {
                     <span>{proj.note}</span>
                   )}
                 </div>
+
+                {proj.monthlyProgress && proj.monthlyProgress.length > 0 && !isEditing && (
+                  <div style={{ marginTop: "16px" }}>
+                    <button 
+                      onClick={() => toggleExpand(proj.id)}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%",
+                        backgroundColor: "#f8fafc", padding: "8px 12px", borderRadius: "6px",
+                        border: "1px solid #e2e8f0", color: "#475569", fontSize: "0.85rem", fontWeight: "600",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <span>ความคืบหน้ารายเดือน ({proj.monthlyProgress.length} รายการ)</span>
+                      {expandedProjects.includes(proj.id) ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </button>
+                    
+                    {expandedProjects.includes(proj.id) && (
+                      <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                        {proj.monthlyProgress.map((mp: any) => (
+                          <div key={mp.id} style={{ backgroundColor: "white", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0", fontSize: "0.85rem" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                              <span style={{ fontWeight: "600", color: "#334155" }}>{mp.month}</span>
+                              <span style={{ fontWeight: "600", color: (mp.progress === 100 ? "#15803d" : "#0f172a") }}>{mp.progress}%</span>
+                            </div>
+                            {mp.note && <div style={{ color: "#64748b", marginTop: "4px" }}>{mp.note}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {isEditing && (
+                  <div style={{ marginTop: "16px", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span style={{ fontWeight: "600", color: "#334155", fontSize: "0.85rem" }}>ความคืบหน้ารายเดือน</span>
+                      <button 
+                        onClick={() => {
+                          const newMp = { id: Date.now(), month: "", progress: 0, note: "" };
+                          setEditForm({...editForm, monthlyProgress: [...(editForm.monthlyProgress || []), newMp]});
+                        }}
+                        style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.75rem", backgroundColor: "#3b82f6", color: "white", border: "none", padding: "4px 8px", borderRadius: "4px", cursor: "pointer" }}
+                      >
+                        <Plus size={12} /> เพิ่มเดือน
+                      </button>
+                    </div>
+                    
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {(editForm.monthlyProgress || []).map((mp, idx) => (
+                        <div key={mp.id} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "8px", backgroundColor: "white", borderRadius: "6px", border: "1px solid #cbd5e1" }}>
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <input 
+                              type="text" placeholder="เดือน (เช่น ม.ค. 69)" value={mp.month}
+                              onChange={(e) => {
+                                const newMp = [...(editForm.monthlyProgress || [])];
+                                newMp[idx].month = e.target.value;
+                                setEditForm({...editForm, monthlyProgress: newMp});
+                              }}
+                              style={{ flex: 1, padding: "4px 8px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.8rem" }}
+                            />
+                            <input 
+                              type="number" placeholder="%" value={mp.progress} min="0" max="100" step="0.01"
+                              onChange={(e) => {
+                                const newMp = [...(editForm.monthlyProgress || [])];
+                                newMp[idx].progress = Number(e.target.value);
+                                setEditForm({...editForm, monthlyProgress: newMp});
+                              }}
+                              style={{ width: "60px", padding: "4px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.8rem" }}
+                            />
+                            <button 
+                              onClick={() => {
+                                const newMp = (editForm.monthlyProgress || []).filter((_, i) => i !== idx);
+                                setEditForm({...editForm, monthlyProgress: newMp});
+                              }}
+                              style={{ backgroundColor: "#fef2f2", color: "#ef4444", border: "1px solid #fecaca", padding: "4px", borderRadius: "4px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                          <input 
+                            type="text" placeholder="สถานะ/หมายเหตุ" value={mp.note}
+                            onChange={(e) => {
+                              const newMp = [...(editForm.monthlyProgress || [])];
+                              newMp[idx].note = e.target.value;
+                              setEditForm({...editForm, monthlyProgress: newMp});
+                            }}
+                            style={{ width: "100%", padding: "4px 8px", borderRadius: "4px", border: "1px solid #cbd5e1", fontSize: "0.8rem" }}
+                          />
+                        </div>
+                      ))}
+                      {(editForm.monthlyProgress || []).length === 0 && (
+                        <div style={{ textAlign: "center", color: "#94a3b8", fontSize: "0.8rem", padding: "8px 0" }}>ยังไม่มีข้อมูลรายเดือน</div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
               </div>
             );
