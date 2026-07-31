@@ -49,7 +49,16 @@ export default function UpdateStatus() {
     if (error) {
       console.error(error);
     } else {
-      const projData = data as Project[];
+      let projData = data as Project[];
+      projData = projData.filter((p) => {
+        if (
+          (p.wbs && (p.wbs.includes("IMPORTANT_TASKS") || p.wbs.includes("SAFETY_PLAN"))) ||
+          (p.name && (p.name.includes("Important Tasks") || p.name.includes("Safety Training")))
+        ) {
+          return false;
+        }
+        return true;
+      });
       setProjects(projData);
       setFilteredProjects(projData);
       const uniqueSups = Array.from(new Set(projData.map(p => p.supervisor || "ไม่มีข้อมูล")));
