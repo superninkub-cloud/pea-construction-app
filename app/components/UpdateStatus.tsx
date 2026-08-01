@@ -405,6 +405,7 @@ export default function UpdateStatus() {
                   <option value="1">รูปแบบที่ 1: มีครบ 6 ขั้นตอน</option>
                   <option value="2">รูปแบบที่ 2: ไม่มีพาดสายแรงต่ำ และไม่มีรื้อถอน (4 ขั้นตอน)</option>
                   <option value="3">รูปแบบที่ 3: ไม่มีพาดสายแรงต่ำ แต่มีรื้อถอน (5 ขั้นตอน)</option>
+                  <option value="4">รูปแบบที่ 4: เฉพาะงานติดตั้งอุปกรณ์หัวเสาและงานพาดสายแรงสูง</option>
                 </select>
               </div>
 
@@ -415,9 +416,9 @@ export default function UpdateStatus() {
                   { label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา", idx: 2, unit: "ชุด" },
                   { label: "4. พาดสายแรงสูง", idx: 3, unit: "เมตร" },
                   { label: "5. พาดสายแรงต่ำ", idx: 4, unit: "เมตร" },
-                  { label: "6. รื้อถอนเสาเก่า", idx: 5, unit: "ต้น" }
+                  { label: "6. งานรื้อถอน", idx: 5, unit: "ต้น" }
                 ].map(step => {
-                  const weights = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : [15, 25, 20, 20, 10, 10]);
+                  const weights = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : (constructionType === "4" ? [0, 0, 50, 50, 0, 0] : [15, 25, 20, 20, 10, 10]));
                   const weight = weights[step.idx];
                   if (weight === 0) return null; // Hide if not applicable
 
@@ -463,7 +464,7 @@ export default function UpdateStatus() {
                 <span style={{ fontWeight: '600', marginRight: '12px' }}>Progress งานก่อสร้างรวม:</span>
                 <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--pea-purple)' }}>
                   {(() => {
-                    const w = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : [15, 25, 20, 20, 10, 10]);
+                    const w = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : (constructionType === "4" ? [0, 0, 50, 50, 0, 0] : [15, 25, 20, 20, 10, 10]));
                     const total = progDone.reduce((sum, doneVal, idx) => {
                       const targetVal = progTargets[idx];
                       if (targetVal === 0 || w[idx] === 0) return sum;
