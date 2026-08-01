@@ -20,6 +20,7 @@ export default function UpdateStatus() {
   const [projectValue, setProjectValue] = useState("");
   const [pTracking, setPTracking] = useState("");
   const [actionPlan, setActionPlan] = useState("");
+  const [closingPlan, setClosingPlan] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("ม.ค.");
   const [newRemarks, setNewRemarks] = useState("");
   const [oldRemarks, setOldRemarks] = useState("");
@@ -89,6 +90,7 @@ export default function UpdateStatus() {
         setProjectValue(p.value ? p.value.toString() : "");
         setPTracking(p.p_tracking || "");
         setActionPlan(p.action_plan || "");
+        setClosingPlan(p.closing_plan || "");
         setOldRemarks(p.remarks || "");
         setNewRemarks("");
         setChecks({
@@ -150,6 +152,7 @@ export default function UpdateStatus() {
           value: Number(projectValue) || 0,
           p_tracking: pTracking,
           action_plan: actionPlan,
+          closing_plan: closingPlan,
           remarks: combinedRemarks,
           image_url: imageUrl,
           ...checks,
@@ -302,18 +305,6 @@ export default function UpdateStatus() {
                 </select>
               </div>
               <div>
-                <label className="form-label">แผนปฏิบัติงาน</label>
-                <select className="form-select" value={actionPlan} onChange={(e) => setActionPlan(e.target.value)}>
-                  <option value="">-- ไม่ได้กำหนด --</option>
-                  <option value="ยังไม่ดำเนินการ">ยังไม่ดำเนินการ</option>
-                  <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 1">ก่อสร้างแล้วเสร็จภายในไตรมาส 1</option>
-                  <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 2">ก่อสร้างแล้วเสร็จภายในไตรมาส 2</option>
-                  <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 3">ก่อสร้างแล้วเสร็จภายในไตรมาส 3</option>
-                  <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 4">ก่อสร้างแล้วเสร็จภายในไตรมาส 4</option>
-                  <option value="ไม่เสร็จในปี 2569">ไม่เสร็จในปี 2569</option>
-                </select>
-              </div>
-              <div>
                 <label className="form-label">📅 ประจำเดือน</label>
                 <select className="form-select" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
                   {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map(m => (
@@ -321,6 +312,31 @@ export default function UpdateStatus() {
                   ))}
                 </select>
               </div>
+              {userRole === "admin" && (
+                <>
+                  <div>
+                    <label className="form-label">แผนปฏิบัติการ</label>
+                    <select className="form-select" value={actionPlan} onChange={(e) => setActionPlan(e.target.value)}>
+                      <option value="">-- ไม่ได้กำหนด --</option>
+                      <option value="ยังไม่ดำเนินการ">ยังไม่ดำเนินการ</option>
+                      <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 1">ก่อสร้างแล้วเสร็จภายในไตรมาส 1</option>
+                      <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 2">ก่อสร้างแล้วเสร็จภายในไตรมาส 2</option>
+                      <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 3">ก่อสร้างแล้วเสร็จภายในไตรมาส 3</option>
+                      <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 4">ก่อสร้างแล้วเสร็จภายในไตรมาส 4</option>
+                      <option value="ไม่เสร็จในปี 2569">ไม่เสร็จในปี 2569</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label">แผนปิดงาน</label>
+                    <select className="form-select" value={closingPlan} onChange={(e) => setClosingPlan(e.target.value)}>
+                      <option value="">-- ไม่ได้กำหนด --</option>
+                      {["ม.ค. 69", "ก.พ. 69", "มี.ค. 69", "เม.ย. 69", "พ.ค. 69", "มิ.ย. 69", "ก.ค. 69", "ส.ค. 69", "ก.ย. 69", "ต.ค. 69", "พ.ย. 69", "ธ.ค. 69"].map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
             </div>
 
             <div style={{ marginBottom: "20px" }}>

@@ -16,6 +16,7 @@ export default function Overview() {
   const [yearFilter, setYearFilter] = useState("ALL");
   const [pTrackingFilter, setPTrackingFilter] = useState("ALL");
   const [actionPlanFilter, setActionPlanFilter] = useState("ALL");
+  const [closingPlanFilter, setClosingPlanFilter] = useState("ALL");
   const [statuses, setStatuses] = useState<string[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
 
@@ -75,10 +76,12 @@ export default function Overview() {
     const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม");
     const currentActionPlan = p.action_plan || "";
     const matchActionPlan = actionPlanFilter === "ALL" || (currentActionPlan === "" && actionPlanFilter === "ไม่ได้กำหนด") || currentActionPlan === actionPlanFilter;
+    const currentClosingPlan = p.closing_plan || "";
+    const matchClosingPlan = closingPlanFilter === "ALL" || (currentClosingPlan === "" && closingPlanFilter === "ไม่ได้กำหนด") || currentClosingPlan === closingPlanFilter;
     const matchSearch = Object.values(p).some((val) => 
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
-    return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking && matchActionPlan;
+    return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
   });
 
   if (loading) {
@@ -240,7 +243,7 @@ export default function Overview() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px' }}>
                 <div>
                   <label className="form-label">📌 กรองตามสถานะ</label>
                   <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -264,6 +267,16 @@ export default function Overview() {
                     <option value="2569">ปี 2569</option>
                   </select>
                 </div>
+                <div>
+                  <label className="form-label">🏁 กรองแผนปิดงาน</label>
+                  <select className="form-select" value={closingPlanFilter} onChange={(e) => setClosingPlanFilter(e.target.value)}>
+                    <option value="ALL">แสดงทั้งหมด</option>
+                    <option value="ไม่ได้กำหนด">ไม่ได้กำหนด</option>
+                    {["ม.ค. 69", "ก.พ. 69", "มี.ค. 69", "เม.ย. 69", "พ.ค. 69", "มิ.ย. 69", "ก.ค. 69", "ส.ค. 69", "ก.ย. 69", "ต.ค. 69", "พ.ย. 69", "ธ.ค. 69"].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
@@ -284,7 +297,7 @@ export default function Overview() {
                   </select>
                 </div>
                 <div>
-                  <label className="form-label">📊 กรองแผนปฏิบัติงาน</label>
+                  <label className="form-label">📊 กรองแผนปฏิบัติการ</label>
                   <select className="form-select" value={actionPlanFilter} onChange={(e) => setActionPlanFilter(e.target.value)}>
                     <option value="ALL">แสดงทั้งหมด</option>
                     <option value="ไม่ได้กำหนด">ไม่ได้กำหนด</option>

@@ -11,6 +11,7 @@ export interface Project {
   open_year: string;
   p_tracking: string;
   action_plan?: string;
+  closing_plan?: string;
   check1: boolean;
   check2: boolean;
   check3: boolean;
