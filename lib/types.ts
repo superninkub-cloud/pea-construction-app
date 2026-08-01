@@ -10,6 +10,7 @@ export interface Project {
   year_criteria: string;
   open_year: string;
   p_tracking: string;
+  action_plan?: string;
   check1: boolean;
   check2: boolean;
   check3: boolean;

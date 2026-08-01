@@ -15,6 +15,7 @@ export default function Overview() {
   const [supervisorFilter, setSupervisorFilter] = useState("ALL");
   const [yearFilter, setYearFilter] = useState("ALL");
   const [pTrackingFilter, setPTrackingFilter] = useState("ALL");
+  const [actionPlanFilter, setActionPlanFilter] = useState("ALL");
   const [statuses, setStatuses] = useState<string[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
 
@@ -72,10 +73,12 @@ export default function Overview() {
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
     const matchSupervisor = supervisorFilter === "ALL" || sup === supervisorFilter;
     const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม");
+    const currentActionPlan = p.action_plan || "";
+    const matchActionPlan = actionPlanFilter === "ALL" || (currentActionPlan === "" && actionPlanFilter === "ไม่ได้กำหนด") || currentActionPlan === actionPlanFilter;
     const matchSearch = Object.values(p).some((val) => 
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
-    return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking;
+    return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking && matchActionPlan;
   });
 
   if (loading) {
@@ -263,7 +266,7 @@ export default function Overview() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
                 <div>
                   <label className="form-label">📅 กรองประจำเดือน</label>
                   <select className="form-select" value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
@@ -278,6 +281,19 @@ export default function Overview() {
                   <select className="form-select" value={pTrackingFilter} onChange={(e) => setPTrackingFilter(e.target.value)}>
                     <option value="ALL">แสดงทั้งหมด</option>
                     <option value="TRACKED">เฉพาะที่ สาย ป. ติดตาม</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">📊 กรองแผนปฏิบัติงาน</label>
+                  <select className="form-select" value={actionPlanFilter} onChange={(e) => setActionPlanFilter(e.target.value)}>
+                    <option value="ALL">แสดงทั้งหมด</option>
+                    <option value="ไม่ได้กำหนด">ไม่ได้กำหนด</option>
+                    <option value="ยังไม่ดำเนินการ">ยังไม่ดำเนินการ</option>
+                    <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 1">ก่อสร้างแล้วเสร็จภายในไตรมาส 1</option>
+                    <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 2">ก่อสร้างแล้วเสร็จภายในไตรมาส 2</option>
+                    <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 3">ก่อสร้างแล้วเสร็จภายในไตรมาส 3</option>
+                    <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 4">ก่อสร้างแล้วเสร็จภายในไตรมาส 4</option>
+                    <option value="ไม่เสร็จในปี 2569">ไม่เสร็จในปี 2569</option>
                   </select>
                 </div>
                 <button className="btn btn-primary" onClick={handlePrint} style={{ width: '100%' }}>

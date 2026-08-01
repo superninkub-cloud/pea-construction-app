@@ -19,6 +19,7 @@ export default function UpdateStatus() {
   const [status, setStatus] = useState("");
   const [projectValue, setProjectValue] = useState("");
   const [pTracking, setPTracking] = useState("");
+  const [actionPlan, setActionPlan] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("ม.ค.");
   const [newRemarks, setNewRemarks] = useState("");
   const [oldRemarks, setOldRemarks] = useState("");
@@ -87,6 +88,7 @@ export default function UpdateStatus() {
         setStatus(p.status || "");
         setProjectValue(p.value ? p.value.toString() : "");
         setPTracking(p.p_tracking || "");
+        setActionPlan(p.action_plan || "");
         setOldRemarks(p.remarks || "");
         setNewRemarks("");
         setChecks({
@@ -147,6 +149,7 @@ export default function UpdateStatus() {
           status,
           value: Number(projectValue) || 0,
           p_tracking: pTracking,
+          action_plan: actionPlan,
           remarks: combinedRemarks,
           image_url: imageUrl,
           ...checks,
@@ -296,6 +299,18 @@ export default function UpdateStatus() {
                   <option value="">-- ไม่ได้ติดตาม --</option>
                   <option value="ติดตาม">ติดตาม (ทั่วไป)</option>
                   <option value="งานกลุ่ม 1 งานก่อนปี 68 ที่ตกแผน สาย ป ติดตาม">งานกลุ่ม 1 งานก่อนปี 68 ที่ตกแผน สาย ป ติดตาม</option>
+                </select>
+              </div>
+              <div>
+                <label className="form-label">แผนปฏิบัติงาน</label>
+                <select className="form-select" value={actionPlan} onChange={(e) => setActionPlan(e.target.value)}>
+                  <option value="">-- ไม่ได้กำหนด --</option>
+                  <option value="ยังไม่ดำเนินการ">ยังไม่ดำเนินการ</option>
+                  <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 1">ก่อสร้างแล้วเสร็จภายในไตรมาส 1</option>
+                  <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 2">ก่อสร้างแล้วเสร็จภายในไตรมาส 2</option>
+                  <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 3">ก่อสร้างแล้วเสร็จภายในไตรมาส 3</option>
+                  <option value="ก่อสร้างแล้วเสร็จภายในไตรมาส 4">ก่อสร้างแล้วเสร็จภายในไตรมาส 4</option>
+                  <option value="ไม่เสร็จในปี 2569">ไม่เสร็จในปี 2569</option>
                 </select>
               </div>
               <div>
