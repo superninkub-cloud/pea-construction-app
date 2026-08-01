@@ -60,7 +60,7 @@ export default function Overview() {
     }
     const s = p.status || "ไม่มีข้อมูล";
     const sup = p.supervisor || "ไม่ระบุ";
-    
+
     const matchYear = true; // year is handled in loop below
     let yearMatched = true;
     if (yearFilter !== "ALL") {
@@ -78,7 +78,7 @@ export default function Overview() {
     const matchActionPlan = actionPlanFilter === "ALL" || (currentActionPlan === "" && actionPlanFilter === "ไม่ได้กำหนด") || currentActionPlan === actionPlanFilter;
     const currentClosingPlan = p.closing_plan || "";
     const matchClosingPlan = closingPlanFilter === "ALL" || (currentClosingPlan === "" && closingPlanFilter === "ไม่ได้กำหนด") || currentClosingPlan === closingPlanFilter;
-    const matchSearch = Object.values(p).some((val) => 
+    const matchSearch = Object.values(p).some((val) =>
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
     return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
@@ -89,7 +89,7 @@ export default function Overview() {
       <>
         <TopBar title="ภาพรวมงานก่อสร้างของ ผกร.กรย.(ก3)" />
         <div className="content-area" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-           <div style={{ color: 'var(--text-light)', fontSize: '1.2rem' }}>กำลังโหลดข้อมูล...</div>
+          <div style={{ color: 'var(--text-light)', fontSize: '1.2rem' }}>กำลังโหลดข้อมูล...</div>
         </div>
       </>
     );
@@ -98,7 +98,7 @@ export default function Overview() {
   return (
     <>
       <TopBar title="ภาพรวมงานก่อสร้างของ ผกร.กรย.(ก3)" />
-      
+
       <div className="content-area animation-fade-in">
         {/* Print Header */}
         <div id="reportPrintHeader" style={{ display: 'none', marginBottom: '20px' }}>
@@ -107,7 +107,7 @@ export default function Overview() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-          
+
           <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
             <div className="stat-card" style={{ borderTop: '4px solid var(--pea-purple)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -162,11 +162,11 @@ export default function Overview() {
           </div>
 
           <div className="filter-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px', marginBottom: '24px' }}>
-            
+
             {/* Donut Chart Card */}
             <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <h3 style={{ fontSize: '1rem', marginBottom: '20px', alignSelf: 'flex-start', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
-              
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
                 <div className="donut-chart-container">
                   <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
@@ -177,7 +177,7 @@ export default function Overview() {
                       stroke="#f1f5f9"
                       strokeWidth="6"
                     />
-                    
+
                     {/* Note: In a real app we'd calculate stroke-dasharray dynamically. 
                         For now, we'll use a static placeholder that looks like the mockup */}
                     <path
@@ -325,7 +325,7 @@ export default function Overview() {
                 <th style={{ width: "20%" }}>ชื่องาน / ผู้คุมงาน</th>
                 <th style={{ width: "11%", textAlign: "center" }}>มูลค่า (บาท)</th>
                 <th style={{ width: "7%", textAlign: "center" }}>สถานะ</th>
-                <th style={{ width: "28%", textAlign: "center" }}>ความคืบหน้า (8 ขั้นตอน)</th>
+                <th style={{ width: "28%", textAlign: "center" }}>ความคืบหน้า (หน้างาน / 8 ขั้นตอน)</th>
                 <th style={{ width: "12%" }}>ประวัติหมายเหตุ</th>
                 <th style={{ width: "8%", textAlign: "center", paddingRight: "24px" }}>รูปภาพ</th>
               </tr>
@@ -347,12 +347,12 @@ export default function Overview() {
                   ];
                   const doneCount = steps.filter(s => s.checked).length;
                   const progressPercent = (doneCount / 8) * 100;
-                  
+
                   return (
                     <tr key={p.id}>
                       <td data-label="WBS / ข้อมูลปี" style={{ paddingLeft: "24px" }}>
                         <div style={{ color: "var(--pea-purple)", fontWeight: "600" }}>{p.wbs}</div>
-                        <div style={{ color: "var(--text-light)", fontSize: "0.8rem", marginTop: "4px" }}>เปิดปี: {p.open_year || '-'} <br/>เกณฑ์: {p.year_criteria || '-'}</div>
+                        <div style={{ color: "var(--text-light)", fontSize: "0.8rem", marginTop: "4px" }}>เปิดปี: {p.open_year || '-'} <br />เกณฑ์: {p.year_criteria || '-'}</div>
                       </td>
                       <td data-label="ชื่องาน / ผู้คุมงาน">
                         <div style={{ fontWeight: "600", color: "var(--text-dark)" }}>{p.name}</div>
@@ -368,26 +368,49 @@ export default function Overview() {
                       <td data-label="สถานะ" style={{ textAlign: "center" }}>
                         <span className={`badge ${p.status === "F4" ? "badge-success" : "badge-warning"}`}>{p.status || "-"}</span>
                       </td>
-                      <td data-label="ความคืบหน้า (8 ขั้นตอน)">
+                      <td data-label="ความคืบหน้า (หน้างาน / 8 ขั้นตอน)">
+                        {/* Physical Progress */}
+                        {(() => {
+                          const type = p.construction_type || "1";
+                          const w = type === "2" ? [20, 30, 25, 25, 0, 0] : (type === "3" ? [20, 25, 25, 20, 0, 10] : [15, 25, 20, 20, 10, 10]);
+                          const physicalProgress = [p.prog_step1, p.prog_step2, p.prog_step3, p.prog_step4, p.prog_step5, p.prog_step6]
+                            .map(val => Number(val) || 0)
+                            .reduce((sum, val, idx) => sum + (val * w[idx] / 100), 0);
+                          
+                          return (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px', textAlign: 'left' }}>หน้างาน:</span>
+                              <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1, maxWidth: '100px' }}>
+                                <div style={{ height: "100%", width: `${physicalProgress}%`, backgroundColor: physicalProgress === 100 ? "#10b981" : (physicalProgress > 50 ? "#3b82f6" : "#8b5cf6") }}></div>
+                              </div>
+                              <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--pea-purple)', minWidth: '35px', textAlign: 'right' }}>
+                                {physicalProgress.toFixed(1)}%
+                              </span>
+                            </div>
+                          );
+                        })()}
+                        
+                        {/* Admin 8 Steps Progress */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
-                          <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1, maxWidth: '120px' }}>
-                             <div style={{ height: "100%", width: `${progressPercent}%`, backgroundColor: progressPercent === 100 ? "#10b981" : (progressPercent > 50 ? "#f59e0b" : "#ef4444") }}></div>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px', textAlign: 'left' }}>เอกสาร:</span>
+                          <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1, maxWidth: '100px' }}>
+                            <div style={{ height: "100%", width: `${progressPercent}%`, backgroundColor: progressPercent === 100 ? "#10b981" : (progressPercent > 50 ? "#f59e0b" : "#ef4444") }}></div>
                           </div>
                           <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-dark)', minWidth: '35px', textAlign: 'right' }}>
                             {Math.round(progressPercent)}%
                           </span>
                         </div>
                         <div style={{ fontSize: "0.65rem", display: "flex", flexWrap: "wrap", gap: "4px", justifyContent: "center" }}>
-                           {steps.map((s, idx) => (
-                             s.checked 
-                              ? <span key={idx} style={{ color: "#047857", background: "#d1fae5", padding: "2px 6px", borderRadius: "4px", fontWeight: "500" }}>✓ {s.label}</span> 
+                          {steps.map((s, idx) => (
+                            s.checked
+                              ? <span key={idx} style={{ color: "#047857", background: "#d1fae5", padding: "2px 6px", borderRadius: "4px", fontWeight: "500" }}>✓ {s.label}</span>
                               : null // Hide unchecked steps to save space and look cleaner like the design
-                           ))}
+                          ))}
                         </div>
                       </td>
                       <td data-label="ประวัติหมายเหตุ">
                         <div style={{ maxHeight: "100px", overflowY: "auto", fontSize: "0.8rem", whiteSpace: "pre-wrap", color: "var(--text-light)" }}>
-                           {p.remarks || "-"}
+                          {p.remarks || "-"}
                         </div>
                       </td>
                       <td data-label="รูปภาพ" style={{ textAlign: "center", paddingRight: "24px" }}>

@@ -12,15 +12,17 @@ export default function UpdateStatus() {
   const [supervisors, setSupervisors] = useState<string[]>([]);
   const [selectedSupervisor, setSelectedSupervisor] = useState("ALL");
   const [selectedWbs, setSelectedWbs] = useState("");
-  
+
   const [project, setProject] = useState<Project | null>(null);
-  
+
   // Form State
   const [status, setStatus] = useState("");
   const [projectValue, setProjectValue] = useState("");
   const [pTracking, setPTracking] = useState("");
   const [actionPlan, setActionPlan] = useState("");
   const [closingPlan, setClosingPlan] = useState("");
+  const [constructionType, setConstructionType] = useState("1");
+  const [progSteps, setProgSteps] = useState<number[]>([0, 0, 0, 0, 0, 0]);
   const [selectedMonth, setSelectedMonth] = useState("ม.ค.");
   const [newRemarks, setNewRemarks] = useState("");
   const [oldRemarks, setOldRemarks] = useState("");
@@ -30,11 +32,11 @@ export default function UpdateStatus() {
   });
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
-  
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [userRole, setUserRole] = useState("user");
-  
+
   // Add New Project State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newProject, setNewProject] = useState({ wbs: "", name: "", supervisor: "", project_type: "", value: "", open_year: "", p_tracking: "" });
@@ -91,6 +93,15 @@ export default function UpdateStatus() {
         setPTracking(p.p_tracking || "");
         setActionPlan(p.action_plan || "");
         setClosingPlan(p.closing_plan || "");
+        setConstructionType(p.construction_type || "1");
+        setProgSteps([
+          p.prog_step1 || 0,
+          p.prog_step2 || 0,
+          p.prog_step3 || 0,
+          p.prog_step4 || 0,
+          p.prog_step5 || 0,
+          p.prog_step6 || 0
+        ]);
         setOldRemarks(p.remarks || "");
         setNewRemarks("");
         setChecks({
@@ -118,33 +129,33 @@ export default function UpdateStatus() {
     if (!project) return;
     setLoading(true);
     setMessage({ text: "", type: "" });
-    
+
     try {
       let imageUrl = project.image_url;
-      
+
       if (file) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${project.wbs}_${Date.now()}.${fileExt}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("project_images")
           .upload(fileName, file, { cacheControl: '3600', upsert: false });
-          
+
         if (uploadError) throw uploadError;
-        
+
         const { data: publicUrlData } = supabase.storage.from("project_images").getPublicUrl(fileName);
         imageUrl = publicUrlData.publicUrl;
       }
-      
+
       let combinedRemarks = oldRemarks;
       if (newRemarks.trim() !== "" || status.trim() !== "") {
         const yearStr = (new Date().getFullYear() + 543).toString().slice(-2);
         let newEntry = `📍 [${selectedMonth} ${yearStr}]`;
-        if(status.trim() !== "") newEntry += ` สถานะ: ${status}`;
-        if(newRemarks.trim() !== "") newEntry += ` | ${newRemarks.trim()}`;
-        
+        if (status.trim() !== "") newEntry += ` สถานะ: ${status}`;
+        if (newRemarks.trim() !== "") newEntry += ` | ${newRemarks.trim()}`;
+
         combinedRemarks = oldRemarks.trim() === "" ? newEntry : newEntry + "\n" + oldRemarks.trim();
       }
-      
+
       const { error: updateError } = await supabase
         .from("projects")
         .update({
@@ -153,21 +164,28 @@ export default function UpdateStatus() {
           p_tracking: pTracking,
           action_plan: actionPlan,
           closing_plan: closingPlan,
+          construction_type: constructionType,
+          prog_step1: progSteps[0],
+          prog_step2: progSteps[1],
+          prog_step3: progSteps[2],
+          prog_step4: progSteps[3],
+          prog_step5: progSteps[4],
+          prog_step6: progSteps[5],
           remarks: combinedRemarks,
           image_url: imageUrl,
           ...checks,
           updated_at: new Date().toISOString()
         })
         .eq("id", project.id);
-        
+
       if (updateError) throw updateError;
-      
+
       setMessage({ text: "บันทึกสถานะงานและเช็คลิสท์เรียบร้อยแล้ว", type: "success" });
       setOldRemarks(combinedRemarks);
       setNewRemarks("");
       setFile(null);
       fetchProjects();
-      
+
     } catch (error: any) {
       console.error(error);
       setMessage({ text: `ล้มเหลว: ${error.message}`, type: "error" });
@@ -184,7 +202,7 @@ export default function UpdateStatus() {
     try {
       const { error } = await supabase.from("projects").delete().eq("id", project.id);
       if (error) throw error;
-      
+
       alert("ลบโครงการเรียบร้อยแล้ว");
       setProject(null);
       setSelectedWbs("");
@@ -214,9 +232,9 @@ export default function UpdateStatus() {
         status: "",
         remarks: ""
       });
-      
+
       if (error) throw error;
-      
+
       setIsAddModalOpen(false);
       setNewProject({ wbs: "", name: "", supervisor: "", project_type: "", value: "", open_year: "", p_tracking: "" });
       fetchProjects();
@@ -249,8 +267,8 @@ export default function UpdateStatus() {
                   <option key={p.id} value={p.wbs}>[{p.wbs}] {p.name} - สถานะ: {p.status || "-"}</option>
                 ))}
               </select>
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 style={{ padding: '0 20px', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
                 onClick={() => setIsAddModalOpen(true)}
               >
@@ -266,31 +284,31 @@ export default function UpdateStatus() {
               ⬅️ ย้อนกลับไปหน้ารายการ
             </button>
             <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '20px', marginBottom: '24px' }}>
-               <h4 style={{ color: "var(--pea-purple)", fontSize: "1.5rem", fontWeight: "700", marginBottom: "4px" }}>{project.wbs}</h4>
-               <h5 style={{ color: "var(--text-dark)", fontSize: "1.1rem", fontWeight: "500" }}>{project.name}</h5>
+              <h4 style={{ color: "var(--pea-purple)", fontSize: "1.5rem", fontWeight: "700", marginBottom: "4px" }}>{project.wbs}</h4>
+              <h5 style={{ color: "var(--text-dark)", fontSize: "1.1rem", fontWeight: "500" }}>{project.name}</h5>
             </div>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-              <div><strong style={{ color: 'var(--text-light)' }}>ผู้ควบคุมงาน:</strong> <br/><span style={{ fontWeight: '600' }}>{project.supervisor}</span></div>
-              <div><strong style={{ color: 'var(--text-light)' }}>ประเภทโครงการ:</strong> <br/><span style={{ fontWeight: '500' }}>{project.project_type || "-"}</span></div>
+              <div><strong style={{ color: 'var(--text-light)' }}>ผู้ควบคุมงาน:</strong> <br /><span style={{ fontWeight: '600' }}>{project.supervisor}</span></div>
+              <div><strong style={{ color: 'var(--text-light)' }}>ประเภทโครงการ:</strong> <br /><span style={{ fontWeight: '500' }}>{project.project_type || "-"}</span></div>
               <div>
-                <strong style={{ color: 'var(--text-light)' }}>มูลค่า:</strong> <br/>
+                <strong style={{ color: 'var(--text-light)' }}>มูลค่า:</strong> <br />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                  <input 
-                    type="number" 
-                    className="form-control" 
-                    style={{ maxWidth: '130px', padding: '4px 8px' }} 
-                    value={projectValue} 
-                    onChange={(e) => setProjectValue(e.target.value)} 
+                  <input
+                    type="number"
+                    className="form-control"
+                    style={{ maxWidth: '130px', padding: '4px 8px' }}
+                    value={projectValue}
+                    onChange={(e) => setProjectValue(e.target.value)}
                   />
                   <span style={{ fontWeight: '600', color: '#047857' }}>บาท</span>
                 </div>
               </div>
-              <div><strong style={{ color: 'var(--text-light)' }}>ปีเปิดงาน:</strong> <br/><span style={{ fontWeight: '500' }}>{project.open_year || "-"} ({project.year_criteria || "-"})</span></div>
+              <div><strong style={{ color: 'var(--text-light)' }}>ปีเปิดงาน:</strong> <br /><span style={{ fontWeight: '500' }}>{project.open_year || "-"} ({project.year_criteria || "-"})</span></div>
             </div>
-            
+
             <h5 style={{ color: "var(--pea-purple)", marginBottom: "16px", fontWeight: "600", fontSize: '1.1rem' }}>อัพเดทสถานะและการดำเนินงาน</h5>
-            
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
               <div>
                 <label className="form-label">สถานะล่าสุด (เช่น C1, F4)</label>
@@ -341,9 +359,9 @@ export default function UpdateStatus() {
 
             <div style={{ marginBottom: "20px" }}>
               <label className="form-label">📝 อัพเดทความคืบหน้าใหม่</label>
-              <textarea 
-                className="form-control" 
-                rows={2} 
+              <textarea
+                className="form-control"
+                rows={2}
                 placeholder="พิมพ์รายละเอียดที่นี่... (จะไปต่อท้ายประวัติเดิมโดยอัตโนมัติ)"
                 value={newRemarks}
                 onChange={(e) => setNewRemarks(e.target.value)}
@@ -352,17 +370,79 @@ export default function UpdateStatus() {
 
             <div style={{ marginBottom: "32px" }}>
               <label className="form-label" style={{ color: 'var(--text-light)' }}>🕒 ประวัติหมายเหตุเดิมทั้งหมด</label>
-              <textarea 
-                className="form-control" 
-                rows={4} 
+              <textarea
+                className="form-control"
+                rows={4}
                 style={{ backgroundColor: "#f8fafc", color: "var(--text-light)", fontSize: "0.85rem" }}
                 value={oldRemarks}
                 disabled
               />
             </div>
 
+            <h5 style={{ color: "var(--pea-purple)", marginBottom: "16px", fontWeight: "600", fontSize: '1.1rem' }}>ความก้าวหน้างานก่อสร้าง (หน้างาน)</h5>
+            <div style={{ marginBottom: "32px", padding: "20px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+              <div style={{ marginBottom: "16px" }}>
+                <label className="form-label">รูปแบบลักษณะงานก่อสร้าง</label>
+                <select className="form-select" value={constructionType} onChange={(e) => {
+                  setConstructionType(e.target.value);
+                  // Reset steps that are not applicable to 0? Or just let them be, the weight will be 0 anyway.
+                }}>
+                  <option value="1">รูปแบบที่ 1: มีครบ 6 ขั้นตอน</option>
+                  <option value="2">รูปแบบที่ 2: ไม่มีพาดสายแรงต่ำ และไม่มีรื้อถอน (4 ขั้นตอน)</option>
+                  <option value="3">รูปแบบที่ 3: ไม่มีพาดสายแรงต่ำ แต่มีรื้อถอน (5 ขั้นตอน)</option>
+                </select>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px", marginBottom: "16px" }}>
+                {[
+                  { label: "1. ขุดหลุมปักเสา", idx: 0 },
+                  { label: "2. ปักเสา", idx: 1 },
+                  { label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา", idx: 2 },
+                  { label: "4. พาดสายแรงสูง", idx: 3 },
+                  { label: "5. พาดสายแรงต่ำ", idx: 4 },
+                  { label: "6. รื้อถอนเสาเก่า", idx: 5 }
+                ].map(step => {
+                  const weights = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : [15, 25, 20, 20, 10, 10]);
+                  const weight = weights[step.idx];
+                  if (weight === 0) return null; // Hide if not applicable
+
+                  return (
+                    <div key={step.idx} style={{ display: 'flex', flexDirection: 'column' }}>
+                      <label className="form-label" style={{ fontSize: "0.9rem", marginBottom: "4px" }}>{step.label} (Weight: {weight}%)</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                          type="number"
+                          min="0" max="100"
+                          className="form-control"
+                          value={progSteps[step.idx]}
+                          onChange={(e) => {
+                            const val = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+                            const newSteps = [...progSteps];
+                            newSteps[step.idx] = val;
+                            setProgSteps(newSteps);
+                          }}
+                        />
+                        <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '8px' }}>
+                <span style={{ fontWeight: '600', marginRight: '12px' }}>Progress งานก่อสร้างรวม:</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--pea-purple)' }}>
+                  {(() => {
+                    const w = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : [15, 25, 20, 20, 10, 10]);
+                    const total = progSteps.reduce((sum, val, idx) => sum + (val * w[idx] / 100), 0);
+                    return total.toFixed(2);
+                  })()}%
+                </span>
+              </div>
+            </div>
+
             <h5 style={{ color: "var(--pea-purple)", marginBottom: "16px", fontWeight: "600", fontSize: '1.1rem' }}>ตรวจสอบเช็คลิสท์</h5>
-            
+
             <div className="checklist-grid" style={{ marginBottom: '32px' }}>
               {[
                 { id: "check1", label: "ก่อสร้างเสร็จ" },
@@ -375,11 +455,11 @@ export default function UpdateStatus() {
                 { id: "check8", label: "ปรับแบบแผนผังแล้ว" }
               ].map((chk, i) => (
                 <div key={chk.id} className="check-item">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     id={chk.id}
                     checked={checks[chk.id as keyof typeof checks]}
-                    onChange={(e) => setChecks({...checks, [chk.id]: e.target.checked})}
+                    onChange={(e) => setChecks({ ...checks, [chk.id]: e.target.checked })}
                   />
                   <label htmlFor={chk.id} style={{ cursor: "pointer", userSelect: "none", fontSize: '0.95rem' }}>{chk.label}</label>
                 </div>
@@ -402,7 +482,7 @@ export default function UpdateStatus() {
                   {message.type === 'success' ? '✅ ' : '❌ '}{message.text}
                 </div>
               ) : <div></div>}
-              
+
               <div style={{ display: "flex", gap: "12px" }}>
                 {userRole === "admin" && (
                   <button className="btn" onClick={handleDeleteProject} disabled={loading} style={{ minWidth: '140px', background: '#fee2e2', color: '#b91c1c' }}>
@@ -418,31 +498,31 @@ export default function UpdateStatus() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
             {filteredProjects.map(p => {
-               const steps = [p.check1, p.check2, p.check3, p.check4, p.check5, p.check6, p.check7, p.check8];
-               const doneCount = steps.filter(Boolean).length;
-               const progressPercent = (doneCount / 8) * 100;
-               return (
-                 <div 
-                   key={p.id} 
-                   className="card" 
-                   style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', cursor: 'pointer', border: '1px solid #e2e8f0' }} 
-                   onClick={() => setSelectedWbs(p.wbs)}
-                   onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--pea-purple)'}
-                   onMouseOut={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
-                 >
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                      <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
-                      <span className={`badge ${p.status === "F4" ? "badge-success" : "badge-warning"}`}>{p.status || "-"}</span>
-                   </div>
-                   <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', flex: 1, color: 'var(--text-dark)' }}>{p.name}</div>
-                   <div style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginBottom: '16px' }}>ผู้ควบคุมงาน: {p.supervisor}</div>
-                   
-                   <div style={{ width: '100%', backgroundColor: '#f1f5f9', height: '6px', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
-                      <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: progressPercent === 100 ? '#10b981' : 'var(--pea-purple)' }}></div>
-                   </div>
-                   <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', textAlign: 'right' }}>ความคืบหน้า {doneCount}/8 ขั้นตอน</div>
-                 </div>
-               )
+              const steps = [p.check1, p.check2, p.check3, p.check4, p.check5, p.check6, p.check7, p.check8];
+              const doneCount = steps.filter(Boolean).length;
+              const progressPercent = (doneCount / 8) * 100;
+              return (
+                <div
+                  key={p.id}
+                  className="card"
+                  style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', cursor: 'pointer', border: '1px solid #e2e8f0' }}
+                  onClick={() => setSelectedWbs(p.wbs)}
+                  onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--pea-purple)'}
+                  onMouseOut={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                    <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
+                    <span className={`badge ${p.status === "F4" ? "badge-success" : "badge-warning"}`}>{p.status || "-"}</span>
+                  </div>
+                  <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', flex: 1, color: 'var(--text-dark)' }}>{p.name}</div>
+                  <div style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginBottom: '16px' }}>ผู้ควบคุมงาน: {p.supervisor}</div>
+
+                  <div style={{ width: '100%', backgroundColor: '#f1f5f9', height: '6px', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+                    <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: progressPercent === 100 ? '#10b981' : 'var(--pea-purple)' }}></div>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', textAlign: 'right' }}>ความคืบหน้า {doneCount}/8 ขั้นตอน</div>
+                </div>
+              )
             })}
             {filteredProjects.length === 0 && (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
@@ -457,54 +537,54 @@ export default function UpdateStatus() {
       {isAddModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div className="card animation-fade-in" style={{ width: '100%', maxWidth: '600px', margin: 0, position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
-            <button 
-              onClick={() => setIsAddModalOpen(false)} 
+            <button
+              onClick={() => setIsAddModalOpen(false)}
               style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)' }}
             >
               <X />
             </button>
-            
+
             <h3 style={{ color: 'var(--pea-purple)', marginBottom: '24px', fontWeight: 'bold' }}>➕ เพิ่มข้อมูลงานก่อสร้างใหม่</h3>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div>
                 <label className="form-label">📌 รหัส WBS *</label>
-                <input type="text" className="form-control" value={newProject.wbs} onChange={e => setNewProject({...newProject, wbs: e.target.value})} placeholder="เช่น I-63-I-..." />
+                <input type="text" className="form-control" value={newProject.wbs} onChange={e => setNewProject({ ...newProject, wbs: e.target.value })} placeholder="เช่น I-63-I-..." />
               </div>
               <div>
                 <label className="form-label">👷 ผู้ควบคุมงาน</label>
-                <input type="text" className="form-control" value={newProject.supervisor} onChange={e => setNewProject({...newProject, supervisor: e.target.value})} placeholder="ชื่อผู้คุมงาน" />
+                <input type="text" className="form-control" value={newProject.supervisor} onChange={e => setNewProject({ ...newProject, supervisor: e.target.value })} placeholder="ชื่อผู้คุมงาน" />
               </div>
             </div>
-            
+
             <div style={{ marginBottom: '16px' }}>
               <label className="form-label">📝 ชื่องานโครงการ *</label>
-              <textarea className="form-control" rows={2} value={newProject.name} onChange={e => setNewProject({...newProject, name: e.target.value})} placeholder="เช่น ยน.ขยายเขต..."></textarea>
+              <textarea className="form-control" rows={2} value={newProject.name} onChange={e => setNewProject({ ...newProject, name: e.target.value })} placeholder="เช่น ยน.ขยายเขต..."></textarea>
             </div>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '24px' }}>
               <div>
                 <label className="form-label">ประเภทโครงการ</label>
-                <input type="text" className="form-control" value={newProject.project_type} onChange={e => setNewProject({...newProject, project_type: e.target.value})} placeholder="เช่น ขยายเขต" />
+                <input type="text" className="form-control" value={newProject.project_type} onChange={e => setNewProject({ ...newProject, project_type: e.target.value })} placeholder="เช่น ขยายเขต" />
               </div>
               <div>
                 <label className="form-label">มูลค่างาน (บาท)</label>
-                <input type="number" className="form-control" value={newProject.value} onChange={e => setNewProject({...newProject, value: e.target.value})} placeholder="0" />
+                <input type="number" className="form-control" value={newProject.value} onChange={e => setNewProject({ ...newProject, value: e.target.value })} placeholder="0" />
               </div>
               <div>
                 <label className="form-label">📅 ปีที่เปิดงาน</label>
-                <input type="text" className="form-control" value={newProject.open_year} onChange={e => setNewProject({...newProject, open_year: e.target.value})} placeholder="เช่น 2567" />
+                <input type="text" className="form-control" value={newProject.open_year} onChange={e => setNewProject({ ...newProject, open_year: e.target.value })} placeholder="เช่น 2567" />
               </div>
               <div>
                 <label className="form-label">🚨 สาย ป. ติดตาม</label>
-                <select className="form-select" value={newProject.p_tracking} onChange={e => setNewProject({...newProject, p_tracking: e.target.value})}>
+                <select className="form-select" value={newProject.p_tracking} onChange={e => setNewProject({ ...newProject, p_tracking: e.target.value })}>
                   <option value="">-- ไม่ระบุ --</option>
                   <option value="ติดตาม">ติดตาม (ทั่วไป)</option>
                   <option value="งานกลุ่ม 1 งานก่อนปี 68 ที่ตกแผน สาย ป ติดตาม">งานกลุ่ม 1 งานก่อนปี 68 ที่ตกแผน สาย ป ติดตาม</option>
                 </select>
               </div>
             </div>
-            
+
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
               <button className="btn" onClick={() => setIsAddModalOpen(false)} style={{ background: '#f1f5f9', color: 'var(--text-dark)' }}>ยกเลิก</button>
               <button className="btn btn-primary" onClick={handleAddNewProject} disabled={addLoading || !newProject.wbs || !newProject.name}>

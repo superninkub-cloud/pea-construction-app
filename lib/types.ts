@@ -12,6 +12,13 @@ export interface Project {
   p_tracking: string;
   action_plan?: string;
   closing_plan?: string;
+  construction_type?: string;
+  prog_step1?: number;
+  prog_step2?: number;
+  prog_step3?: number;
+  prog_step4?: number;
+  prog_step5?: number;
+  prog_step6?: number;
   check1: boolean;
   check2: boolean;
   check3: boolean;
