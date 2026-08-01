@@ -8,6 +8,8 @@ export const metadata = {
 
 import AuthWrapper from "./components/AuthWrapper";
 
+import ClientLayout from "./components/ClientLayout";
+
 export default function RootLayout({
   children,
 }: {
@@ -17,12 +19,9 @@ export default function RootLayout({
     <html lang="th">
       <body>
         <AuthWrapper>
-          <div className="app-layout">
-            <Sidebar />
-            <div className="main-wrapper">
-              {children}
-            </div>
-          </div>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
         </AuthWrapper>
       </body>
     </html>

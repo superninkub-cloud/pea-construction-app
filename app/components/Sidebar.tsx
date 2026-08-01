@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle } from "lucide-react";
+import { useSidebar } from "./SidebarContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isSidebarOpen, closeSidebar } = useSidebar();
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
       <div className="sidebar-logo-container">
         <img
           src="https://lh3.googleusercontent.com/d/1pQWRFXNG6IL3cQUTWmuQVE7wMHVFrsjD"
@@ -21,7 +23,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" onClick={closeSidebar}>
         <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`}>
           <LayoutDashboard size={20} />
           <span>Dashboard งานก่อสร้าง</span>

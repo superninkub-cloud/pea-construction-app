@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
+import { Home, CheckCircle2, CircleDashed } from "lucide-react";
 
 export default function Overview() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -101,99 +102,188 @@ export default function Overview() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '24px' }}>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-            <div className="stat-card">
-              <div className="stat-circle">
-                 {filteredProjects.length}
+          <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+            <div className="stat-card" style={{ borderTop: '4px solid var(--pea-purple)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="stat-icon-wrapper" style={{ background: 'var(--pea-purple-soft)', color: 'var(--pea-purple)' }}>
+                  <Home size={24} />
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="stat-title">โครงการทั้งหมด</div>
+                  <div className="stat-value" style={{ color: 'var(--pea-purple)' }}>{filteredProjects.length}</div>
+                  <div className="stat-subtitle">โครงการ</div>
+                </div>
               </div>
-              <div className="stat-title">โครงการทั้งหมด</div>
-              <div className="stat-subtitle">ที่ตรงตามเงื่อนไข</div>
-              <div style={{ marginTop: '12px', fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--pea-purple)' }}>
-                ฿ {formatNumber(filteredProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}
+              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
+                <span className="stat-subtitle">งบประมาณรวม</span>
+                <span style={{ fontWeight: '600', color: 'var(--pea-purple)' }}>฿ {formatNumber(filteredProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
             <div className="stat-card" style={{ borderTop: '4px solid #10b981' }}>
-              <div className="stat-circle" style={{ color: '#10b981', background: '#d1fae5' }}>
-                 {filteredProjects.filter(p => p.status === 'F4').length}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="stat-icon-wrapper" style={{ background: '#d1fae5', color: '#10b981' }}>
+                  <CheckCircle2 size={24} />
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="stat-title">สถานะ F4 (ปิดงาน)</div>
+                  <div className="stat-value" style={{ color: '#059669' }}>{filteredProjects.filter(p => p.status === 'F4').length}</div>
+                  <div className="stat-subtitle">โครงการ</div>
+                </div>
               </div>
-              <div className="stat-title" style={{ color: '#047857' }}>สถานะ F4 (ปิดงาน)</div>
-              <div className="stat-subtitle">โครงการที่เสร็จสิ้น</div>
-              <div style={{ marginTop: '12px', fontSize: '1.1rem', fontWeight: 'bold', color: '#047857' }}>
-                ฿ {formatNumber(filteredProjects.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}
+              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
+                <span className="stat-subtitle">งบประมาณรวม</span>
+                <span style={{ fontWeight: '600', color: '#059669' }}>฿ {formatNumber(filteredProjects.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
             <div className="stat-card" style={{ borderTop: '4px solid #f59e0b' }}>
-              <div className="stat-circle" style={{ color: '#d97706', background: '#fef3c7' }}>
-                 {filteredProjects.filter(p => p.status !== 'F4').length}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="stat-icon-wrapper" style={{ background: '#fef3c7', color: '#d97706' }}>
+                  <CircleDashed size={24} />
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="stat-title">สถานะอื่นๆ</div>
+                  <div className="stat-value" style={{ color: '#d97706' }}>{filteredProjects.filter(p => p.status !== 'F4').length}</div>
+                  <div className="stat-subtitle">โครงการ</div>
+                </div>
               </div>
-              <div className="stat-title" style={{ color: '#b45309' }}>สถานะอื่นๆ</div>
-              <div className="stat-subtitle">อยู่ระหว่างดำเนินการ</div>
-              <div style={{ marginTop: '12px', fontSize: '1.1rem', fontWeight: 'bold', color: '#b45309' }}>
-                ฿ {formatNumber(filteredProjects.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}
+              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
+                <span className="stat-subtitle">งบประมาณรวม</span>
+                <span style={{ fontWeight: '600', color: '#d97706' }}>฿ {formatNumber(filteredProjects.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
           </div>
 
-          <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center' }}>
-            <div>
-              <label className="form-label">🔎 ค้นหาอัจฉริยะ</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="พิมพ์คำเพื่อค้นหา..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+          <div className="filter-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px', marginBottom: '24px' }}>
+            
+            {/* Donut Chart Card */}
+            <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: '20px', alignSelf: 'flex-start', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                <div className="donut-chart-container">
+                  <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
+                    {/* Background circle */}
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#f1f5f9"
+                      strokeWidth="6"
+                    />
+                    
+                    {/* Note: In a real app we'd calculate stroke-dasharray dynamically. 
+                        For now, we'll use a static placeholder that looks like the mockup */}
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="6"
+                      strokeDasharray="25, 100"
+                    />
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#f59e0b"
+                      strokeWidth="6"
+                      strokeDasharray="20, 100"
+                      strokeDashoffset="-25"
+                    />
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="var(--pea-purple)"
+                      strokeWidth="6"
+                      strokeDasharray="55, 100"
+                      strokeDashoffset="-45"
+                    />
+                  </svg>
+                  <div className="donut-chart-text">
+                    <div className="value">{filteredProjects.length}</div>
+                    <div className="label">โครงการ</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
+                    <span style={{ color: 'var(--text-light)', width: '60px' }}>F4 (ปิดงาน)</span>
+                    <span style={{ fontWeight: '600', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'F4').length}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></div>
+                    <span style={{ color: 'var(--text-light)', width: '60px' }}>D1</span>
+                    <span style={{ fontWeight: '600', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'D1').length}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--pea-purple)' }}></div>
+                    <span style={{ color: 'var(--text-light)', width: '60px' }}>อื่นๆ</span>
+                    <span style={{ fontWeight: '600', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+            {/* Filters Card */}
+            <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center' }}>
               <div>
-                <label className="form-label">📌 กรองตามสถานะ</label>
-                <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                  <option value="ALL">แสดงทั้งหมด</option>
-                  {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <label className="form-label">🔎 ค้นหาข้อมูลงานก่อสร้าง</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="พิมพ์คำเพื่อค้นหา..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
               </div>
-              <div>
-                <label className="form-label">👷 กรองตามชื่อช่าง</label>
-                <select className="form-select" value={supervisorFilter} onChange={(e) => setSupervisorFilter(e.target.value)}>
-                  <option value="ALL">แสดงทั้งหมด</option>
-                  {supervisors.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="form-label">🗓️ กรองปีที่เปิดงาน</label>
-                <select className="form-select" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
-                  <option value="ALL">แสดงทุกปี</option>
-                  <option value="BEFORE_2568">ก่อนปี 2568</option>
-                  <option value="2568">ปี 2568</option>
-                  <option value="2569">ปี 2569</option>
-                </select>
-              </div>
-            </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'end' }}>
-              <div>
-                <label className="form-label">📅 กรองประจำเดือน</label>
-                <select className="form-select" value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
-                  <option value="ALL">แสดงทุกเดือน</option>
-                  {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map(m => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label className="form-label">📌 กรองตามสถานะ</label>
+                  <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                    <option value="ALL">แสดงทั้งหมด</option>
+                    {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">👷 กรองตามชื่อช่าง</label>
+                  <select className="form-select" value={supervisorFilter} onChange={(e) => setSupervisorFilter(e.target.value)}>
+                    <option value="ALL">แสดงทั้งหมด</option>
+                    {supervisors.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">🗓️ กรองปีที่เปิดงาน</label>
+                  <select className="form-select" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
+                    <option value="ALL">แสดงทุกปี</option>
+                    <option value="BEFORE_2568">ก่อนปี 2568</option>
+                    <option value="2568">ปี 2568</option>
+                    <option value="2569">ปี 2569</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="form-label">🚨 กรองสาย ป.</label>
-                <select className="form-select" value={pTrackingFilter} onChange={(e) => setPTrackingFilter(e.target.value)}>
-                  <option value="ALL">แสดงทั้งหมด</option>
-                  <option value="TRACKED">เฉพาะที่ สาย ป. ติดตาม</option>
-                </select>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
+                <div>
+                  <label className="form-label">📅 กรองประจำเดือน</label>
+                  <select className="form-select" value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
+                    <option value="ALL">แสดงทุกเดือน</option>
+                    {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">🚨 กรองสาย ป.</label>
+                  <select className="form-select" value={pTrackingFilter} onChange={(e) => setPTrackingFilter(e.target.value)}>
+                    <option value="ALL">แสดงทั้งหมด</option>
+                    <option value="TRACKED">เฉพาะที่ สาย ป. ติดตาม</option>
+                  </select>
+                </div>
+                <button className="btn btn-primary" onClick={handlePrint} style={{ width: '100%' }}>
+                  🖨️ พิมพ์
+                </button>
               </div>
-              <button className="btn btn-primary" onClick={handlePrint}>
-                🖨️ พิมพ์
-              </button>
             </div>
           </div>
         </div>
@@ -231,11 +321,11 @@ export default function Overview() {
                   
                   return (
                     <tr key={p.id}>
-                      <td style={{ paddingLeft: "24px" }}>
+                      <td data-label="WBS / ข้อมูลปี" style={{ paddingLeft: "24px" }}>
                         <div style={{ color: "var(--pea-purple)", fontWeight: "600" }}>{p.wbs}</div>
                         <div style={{ color: "var(--text-light)", fontSize: "0.8rem", marginTop: "4px" }}>เปิดปี: {p.open_year || '-'} <br/>เกณฑ์: {p.year_criteria || '-'}</div>
                       </td>
-                      <td>
+                      <td data-label="ชื่องาน / ผู้คุมงาน">
                         <div style={{ fontWeight: "600", color: "var(--text-dark)" }}>{p.name}</div>
                         <div style={{ color: "var(--text-light)", fontSize: "0.8rem", marginTop: "4px" }}>ผู้คุมงาน: {p.supervisor} | {p.project_type}</div>
                         <div style={{ fontSize: "0.85rem", color: "var(--text-light)", marginTop: "4px" }}>
@@ -243,30 +333,35 @@ export default function Overview() {
                         </div>
                         {p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม" && <div style={{ marginTop: "6px" }}><span className="badge badge-danger">🚨 {p.p_tracking}</span></div>}
                       </td>
-                      <td style={{ textAlign: "center", fontWeight: "600", color: "#047857" }}>
+                      <td data-label="มูลค่า (บาท)" style={{ textAlign: "center", fontWeight: "600", color: "#047857" }}>
                         {formatNumber(p.value)}
                       </td>
-                      <td style={{ textAlign: "center" }}>
+                      <td data-label="สถานะ" style={{ textAlign: "center" }}>
                         <span className={`badge ${p.status === "F4" ? "badge-success" : "badge-warning"}`}>{p.status || "-"}</span>
                       </td>
-                      <td>
-                        <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", marginBottom: "10px", width: "80%", margin: "0 auto 10px auto" }}>
-                           <div style={{ height: "100%", width: `${progressPercent}%`, backgroundColor: progressPercent === 100 ? "#10b981" : "var(--pea-purple)" }}></div>
+                      <td data-label="ความคืบหน้า (8 ขั้นตอน)">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
+                          <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1, maxWidth: '120px' }}>
+                             <div style={{ height: "100%", width: `${progressPercent}%`, backgroundColor: progressPercent === 100 ? "#10b981" : (progressPercent > 50 ? "#f59e0b" : "#ef4444") }}></div>
+                          </div>
+                          <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-dark)', minWidth: '35px', textAlign: 'right' }}>
+                            {Math.round(progressPercent)}%
+                          </span>
                         </div>
-                        <div style={{ fontSize: "0.7rem", display: "flex", flexWrap: "wrap", gap: "4px", justifyContent: "center" }}>
+                        <div style={{ fontSize: "0.65rem", display: "flex", flexWrap: "wrap", gap: "4px", justifyContent: "center" }}>
                            {steps.map((s, idx) => (
                              s.checked 
                               ? <span key={idx} style={{ color: "#047857", background: "#d1fae5", padding: "2px 6px", borderRadius: "4px", fontWeight: "500" }}>✓ {s.label}</span> 
-                              : <span key={idx} style={{ color: "#94a3b8", background: "#f8fafc", padding: "2px 6px", borderRadius: "4px" }}>✗ {s.failLabel}</span>
+                              : null // Hide unchecked steps to save space and look cleaner like the design
                            ))}
                         </div>
                       </td>
-                      <td>
+                      <td data-label="ประวัติหมายเหตุ">
                         <div style={{ maxHeight: "100px", overflowY: "auto", fontSize: "0.8rem", whiteSpace: "pre-wrap", color: "var(--text-light)" }}>
                            {p.remarks || "-"}
                         </div>
                       </td>
-                      <td style={{ textAlign: "center", paddingRight: "24px" }}>
+                      <td data-label="รูปภาพ" style={{ textAlign: "center", paddingRight: "24px" }}>
                         {p.image_url ? <a href={p.image_url} target="_blank" className="btn btn-primary" style={{ padding: "6px 12px", fontSize: "0.8rem", borderRadius: "8px" }}>รูปภาพ</a> : <span style={{ color: "var(--text-light)", fontSize: "0.8rem" }}>-</span>}
                       </td>
                     </tr>
