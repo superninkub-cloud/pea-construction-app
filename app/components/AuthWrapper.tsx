@@ -19,8 +19,14 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "pscc3") {
+    if (password === "Cha16072534") {
       sessionStorage.setItem("pea_auth", "true");
+      sessionStorage.setItem("pea_role", "admin");
+      setIsAuthenticated(true);
+      setError(false);
+    } else if (password === "pscc3") {
+      sessionStorage.setItem("pea_auth", "true");
+      sessionStorage.setItem("pea_role", "user");
       setIsAuthenticated(true);
       setError(false);
     } else {

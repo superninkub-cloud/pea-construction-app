@@ -31,6 +31,7 @@ export default function UpdateStatus() {
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
+  const [userRole, setUserRole] = useState("user");
   
   // Add New Project State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -42,6 +43,8 @@ export default function UpdateStatus() {
     const currentMonthIndex = new Date().getMonth();
     const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
     setSelectedMonth(months[currentMonthIndex]);
+    const role = sessionStorage.getItem("pea_role");
+    if (role) setUserRole(role);
   }, []);
 
   const fetchProjects = async () => {
@@ -370,9 +373,11 @@ export default function UpdateStatus() {
               ) : <div></div>}
               
               <div style={{ display: "flex", gap: "12px" }}>
-                <button className="btn" onClick={handleDeleteProject} disabled={loading} style={{ minWidth: '140px', background: '#fee2e2', color: '#b91c1c' }}>
-                  🗑️ ลบโครงการ
-                </button>
+                {userRole === "admin" && (
+                  <button className="btn" onClick={handleDeleteProject} disabled={loading} style={{ minWidth: '140px', background: '#fee2e2', color: '#b91c1c' }}>
+                    🗑️ ลบโครงการ
+                  </button>
+                )}
                 <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ minWidth: '160px' }}>
                   {loading ? "กำลังบันทึก..." : "💾 บันทึกข้อมูล"}
                 </button>

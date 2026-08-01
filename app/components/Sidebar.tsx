@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle } from "lucide-react";
+import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 
 export default function Sidebar() {
@@ -52,6 +52,18 @@ export default function Sidebar() {
           <BookOpen size={20} />
           <span>คู่มืองานก่อสร้าง 115kV</span>
         </Link>
+        <div 
+          onClick={() => {
+            sessionStorage.removeItem("pea_auth");
+            sessionStorage.removeItem("pea_role");
+            window.location.reload();
+          }}
+          className="nav-item" 
+          style={{ marginTop: '30px', borderTop: '1px solid #e2e8f0', paddingTop: '15px', color: '#ef4444', cursor: 'pointer' }}
+        >
+          <LogOut size={20} />
+          <span style={{ fontWeight: '600' }}>ออกจากระบบ</span>
+        </div>
       </nav>
     </div>
   );

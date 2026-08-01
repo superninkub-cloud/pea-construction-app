@@ -1,9 +1,15 @@
 "use client";
-import { Menu } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 
 export default function TopBar({ title }: { title: string }) {
   const { toggleSidebar } = useSidebar();
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("pea_auth");
+    sessionStorage.removeItem("pea_role");
+    window.location.reload();
+  };
 
   return (
     <div className="topbar">
@@ -19,6 +25,29 @@ export default function TopBar({ title }: { title: string }) {
           <span className="user-name">ผกร.กรย.(ก3)</span>
           <span className="user-role">เจ้าหน้าที่อัพเดทสถานะ</span>
         </div>
+        <button 
+          onClick={handleLogout}
+          style={{
+            marginLeft: '12px',
+            padding: '6px 12px',
+            backgroundColor: '#fee2e2',
+            color: '#ef4444',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fecaca'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
+          title="ออกจากระบบ"
+        >
+          <LogOut size={16} /> ออกจากระบบ
+        </button>
       </div>
     </div>
   );

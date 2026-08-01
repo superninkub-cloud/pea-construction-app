@@ -91,6 +91,7 @@ export default function ImportantTasksPage() {
   const [dbId, setDbId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [expandedProjects, setExpandedProjects] = useState<number[]>([]);
+  const [userRole, setUserRole] = useState("user");
 
   const toggleExpand = (id: number) => {
     setExpandedProjects(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
@@ -98,6 +99,8 @@ export default function ImportantTasksPage() {
 
   useEffect(() => {
     fetchData();
+    const role = sessionStorage.getItem("pea_role");
+    if (role) setUserRole(role);
   }, []);
 
   const fetchData = async () => {
@@ -371,17 +374,19 @@ export default function ImportantTasksPage() {
                       >
                         <Edit2 size={12} /> แก้ไข
                       </button>
-                      <button 
-                        onClick={() => handleDelete(proj.id)}
-                        style={{ 
-                          display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", 
-                          color: "#ef4444", backgroundColor: "white", border: "1px solid #fecaca", 
-                          padding: "4px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
-                        }}
-                        title="ลบโครงการ"
-                      >
-                        <Trash2 size={12} />
-                      </button>
+                      {userRole === "admin" && (
+                        <button 
+                          onClick={() => handleDelete(proj.id)}
+                          style={{ 
+                            display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", 
+                            color: "#ef4444", backgroundColor: "white", border: "1px solid #fecaca", 
+                            padding: "4px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
+                          }}
+                          title="ลบโครงการ"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div style={{ display: "flex", gap: "4px" }}>
