@@ -22,7 +22,8 @@ export default function UpdateStatus() {
   const [actionPlan, setActionPlan] = useState("");
   const [closingPlan, setClosingPlan] = useState("");
   const [constructionType, setConstructionType] = useState("1");
-  const [progSteps, setProgSteps] = useState<number[]>([0, 0, 0, 0, 0, 0]);
+  const [progTargets, setProgTargets] = useState<number[]>([0, 0, 0, 0, 0, 0]);
+  const [progDone, setProgDone] = useState<number[]>([0, 0, 0, 0, 0, 0]);
   const [selectedMonth, setSelectedMonth] = useState("ม.ค.");
   const [newRemarks, setNewRemarks] = useState("");
   const [oldRemarks, setOldRemarks] = useState("");
@@ -94,13 +95,21 @@ export default function UpdateStatus() {
         setActionPlan(p.action_plan || "");
         setClosingPlan(p.closing_plan || "");
         setConstructionType(p.construction_type || "1");
-        setProgSteps([
-          p.prog_step1 || 0,
-          p.prog_step2 || 0,
-          p.prog_step3 || 0,
-          p.prog_step4 || 0,
-          p.prog_step5 || 0,
-          p.prog_step6 || 0
+        setProgTargets([
+          p.step1_target || 0,
+          p.step2_target || 0,
+          p.step3_target || 0,
+          p.step4_target || 0,
+          p.step5_target || 0,
+          p.step6_target || 0
+        ]);
+        setProgDone([
+          p.step1_done || 0,
+          p.step2_done || 0,
+          p.step3_done || 0,
+          p.step4_done || 0,
+          p.step5_done || 0,
+          p.step6_done || 0
         ]);
         setOldRemarks(p.remarks || "");
         setNewRemarks("");
@@ -165,12 +174,18 @@ export default function UpdateStatus() {
           action_plan: actionPlan,
           closing_plan: closingPlan,
           construction_type: constructionType,
-          prog_step1: progSteps[0],
-          prog_step2: progSteps[1],
-          prog_step3: progSteps[2],
-          prog_step4: progSteps[3],
-          prog_step5: progSteps[4],
-          prog_step6: progSteps[5],
+          step1_target: progTargets[0],
+          step1_done: progDone[0],
+          step2_target: progTargets[1],
+          step2_done: progDone[1],
+          step3_target: progTargets[2],
+          step3_done: progDone[2],
+          step4_target: progTargets[3],
+          step4_done: progDone[3],
+          step5_target: progTargets[4],
+          step5_done: progDone[4],
+          step6_target: progTargets[5],
+          step6_done: progDone[5],
           remarks: combinedRemarks,
           image_url: imageUrl,
           ...checks,
@@ -393,14 +408,14 @@ export default function UpdateStatus() {
                 </select>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px", marginBottom: "16px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", marginBottom: "16px" }}>
                 {[
-                  { label: "1. ขุดหลุมปักเสา", idx: 0 },
-                  { label: "2. ปักเสา", idx: 1 },
-                  { label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา", idx: 2 },
-                  { label: "4. พาดสายแรงสูง", idx: 3 },
-                  { label: "5. พาดสายแรงต่ำ", idx: 4 },
-                  { label: "6. รื้อถอนเสาเก่า", idx: 5 }
+                  { label: "1. ขุดหลุมปักเสา", idx: 0, unit: "ต้น" },
+                  { label: "2. ปักเสา", idx: 1, unit: "ต้น" },
+                  { label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา", idx: 2, unit: "ชุด" },
+                  { label: "4. พาดสายแรงสูง", idx: 3, unit: "เมตร" },
+                  { label: "5. พาดสายแรงต่ำ", idx: 4, unit: "เมตร" },
+                  { label: "6. รื้อถอนเสาเก่า", idx: 5, unit: "ต้น" }
                 ].map(step => {
                   const weights = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : [15, 25, 20, 20, 10, 10]);
                   const weight = weights[step.idx];
@@ -412,17 +427,32 @@ export default function UpdateStatus() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <input
                           type="number"
-                          min="0" max="100"
+                          min="0"
+                          placeholder="ผลงาน"
                           className="form-control"
-                          value={progSteps[step.idx]}
+                          value={progDone[step.idx] || ""}
                           onChange={(e) => {
-                            const val = Math.min(100, Math.max(0, Number(e.target.value) || 0));
-                            const newSteps = [...progSteps];
-                            newSteps[step.idx] = val;
-                            setProgSteps(newSteps);
+                            const val = Math.max(0, Number(e.target.value) || 0);
+                            const newDone = [...progDone];
+                            newDone[step.idx] = val;
+                            setProgDone(newDone);
                           }}
                         />
-                        <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>%</span>
+                        <span style={{ color: 'var(--text-light)' }}>/</span>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="เป้าหมาย"
+                          className="form-control"
+                          value={progTargets[step.idx] || ""}
+                          onChange={(e) => {
+                            const val = Math.max(0, Number(e.target.value) || 0);
+                            const newTargets = [...progTargets];
+                            newTargets[step.idx] = val;
+                            setProgTargets(newTargets);
+                          }}
+                        />
+                        <span style={{ fontWeight: '500', color: 'var(--text-light)', minWidth: '35px' }}>{step.unit}</span>
                       </div>
                     </div>
                   );
@@ -434,7 +464,13 @@ export default function UpdateStatus() {
                 <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--pea-purple)' }}>
                   {(() => {
                     const w = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : [15, 25, 20, 20, 10, 10]);
-                    const total = progSteps.reduce((sum, val, idx) => sum + (val * w[idx] / 100), 0);
+                    const total = progDone.reduce((sum, doneVal, idx) => {
+                      const targetVal = progTargets[idx];
+                      if (targetVal === 0 || w[idx] === 0) return sum;
+                      const percent = (doneVal / targetVal);
+                      const cappedPercent = Math.min(1, percent);
+                      return sum + (cappedPercent * w[idx]);
+                    }, 0);
                     return total.toFixed(2);
                   })()}%
                 </span>

@@ -373,9 +373,16 @@ export default function Overview() {
                         {(() => {
                           const type = p.construction_type || "1";
                           const w = type === "2" ? [20, 30, 25, 25, 0, 0] : (type === "3" ? [20, 25, 25, 20, 0, 10] : [15, 25, 20, 20, 10, 10]);
-                          const physicalProgress = [p.prog_step1, p.prog_step2, p.prog_step3, p.prog_step4, p.prog_step5, p.prog_step6]
-                            .map(val => Number(val) || 0)
-                            .reduce((sum, val, idx) => sum + (val * w[idx] / 100), 0);
+                          const targets = [p.step1_target, p.step2_target, p.step3_target, p.step4_target, p.step5_target, p.step6_target].map(val => Number(val) || 0);
+                          const dones = [p.step1_done, p.step2_done, p.step3_done, p.step4_done, p.step5_done, p.step6_done].map(val => Number(val) || 0);
+                          
+                          const physicalProgress = dones.reduce((sum, doneVal, idx) => {
+                            const targetVal = targets[idx];
+                            if (targetVal === 0 || w[idx] === 0) return sum;
+                            const percent = (doneVal / targetVal);
+                            const cappedPercent = Math.min(1, percent);
+                            return sum + (cappedPercent * w[idx]);
+                          }, 0);
                           
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
