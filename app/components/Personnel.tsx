@@ -185,9 +185,18 @@ export default function PersonnelComponent() {
               if (p.includes("ผู้ช่วยหัวหน้าแผนก") || p.includes("ผู้ช่วยหัวหน้า")) return 2;
               if (p.includes("หัวหน้าแผนก")) return 1;
               if (p.includes("หัวหน้า") || p.includes("ผจก") || p.includes("ผู้จัดการ")) return 3;
-              if (p.includes("ช่าง") || p.includes("พนักงานช่าง")) return 4;
-              if (p.includes("ขับรถ")) return 5;
-              return 6;
+              
+              if (p.includes("ระดับ 7") || p.includes("ระดับ7")) return 11;
+              if (p.includes("ระดับ 6") || p.includes("ระดับ6")) return 12;
+              if (p.includes("ระดับ 5") || p.includes("ระดับ5")) return 13;
+              if (p.includes("ระดับ 4") || p.includes("ระดับ4")) return 14;
+              if (p.includes("ระดับ 3") || p.includes("ระดับ3")) return 15;
+              if (p.includes("ระดับ 2") || p.includes("ระดับ2")) return 16;
+              if (p.includes("ระดับ 1") || p.includes("ระดับ1")) return 17;
+
+              if (p.includes("ช่าง") || p.includes("พนักงานช่าง")) return 20;
+              if (p.includes("ขับรถ")) return 30;
+              return 40;
             };
 
             teamPersonnel.sort((a, b) => getRank(a.position) - getRank(b.position));
