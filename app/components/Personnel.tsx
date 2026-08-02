@@ -10,6 +10,7 @@ export default function PersonnelComponent() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [collapsedTeams, setCollapsedTeams] = useState<Record<string, boolean>>({});
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -203,19 +204,39 @@ export default function PersonnelComponent() {
 
             if (teamPersonnel.length === 0) return null;
 
+            const isCollapsed = collapsedTeams[team] || false;
+            
+            const toggleTeam = (teamName: string) => {
+              setCollapsedTeams(prev => ({
+                ...prev,
+                [teamName]: !prev[teamName]
+              }));
+            };
+
             return (
               <div key={team} style={{ marginBottom: '40px' }}>
-                <h3 style={{ margin: "0 0 16px 0", color: "var(--pea-purple)", borderBottom: "2px solid #e2e8f0", paddingBottom: "12px", display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 
+                  onClick={() => toggleTeam(team)}
+                  style={{ cursor: 'pointer', margin: "0 0 16px 0", color: "var(--pea-purple)", borderBottom: "2px solid #e2e8f0", paddingBottom: "12px", display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                   {team === "สังกัดแผนก" ? "บุคลากร สังกัดแผนก" : `ทีมงานชุด: ${team}`}
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-light)', background: '#f1f5f9', padding: '2px 10px', borderRadius: '12px', marginLeft: 'auto' }}>
                     {teamPersonnel.length} คน
                   </span>
+                  <div style={{ padding: '4px', background: '#f1f5f9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '8px' }}>
+                    {isCollapsed ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    )}
+                  </div>
                 </h3>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                  {teamPersonnel.map(p => (
-                    <div key={p.id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
+                {!isCollapsed && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                    {teamPersonnel.map(p => (
+                      <div key={p.id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
                       <div style={{ height: '220px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                         {p.image_url ? (
                           <img src={p.image_url} alt={p.full_name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
@@ -251,7 +272,8 @@ export default function PersonnelComponent() {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
             );
           })}
