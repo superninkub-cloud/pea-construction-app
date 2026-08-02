@@ -140,43 +140,73 @@ export default function PersonnelComponent() {
       {loading ? (
         <div style={{ textAlign: "center", padding: "40px" }}>กำลังโหลดข้อมูล...</div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-          {filteredPersonnel.map(p => (
-            <div key={p.id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
-              <div style={{ height: '200px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                {p.image_url ? (
-                  <img src={p.image_url} alt={p.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                )}
-              </div>
-              <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <h4 style={{ margin: '0 0 4px 0', color: 'var(--text-dark)', fontWeight: '700' }}>{p.full_name}</h4>
-                <div style={{ color: 'var(--pea-purple)', fontWeight: '600', marginBottom: '12px', fontSize: '0.9rem' }}>{p.position}</div>
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                  {p.phone || "-"}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                  สังกัด: {p.team}
-                </div>
+        <div>
+          {["สังกัดแผนก", "อุดมศักดิ์", "วีรพัฒน์", "ศุภวิชญ์", "ขวัญนคร", "ศราวุฒิ"].map(team => {
+            let teamPersonnel = filteredPersonnel.filter(p => p.team === team);
+            
+            // Sort: Head of department or team leader first
+            teamPersonnel.sort((a, b) => {
+              const aIsHead = a.position.includes("หัวหน้า") || a.position.includes("ผจก") || a.position.includes("ผู้จัดการ");
+              const bIsHead = b.position.includes("หัวหน้า") || b.position.includes("ผจก") || b.position.includes("ผู้จัดการ");
+              if (aIsHead && !bIsHead) return -1;
+              if (!aIsHead && bIsHead) return 1;
+              return 0;
+            });
 
-                {userRole === "admin" && (
-                  <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button onClick={() => handleDelete(p.id, p.full_name)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                      ลบข้อมูล
-                    </button>
-                  </div>
-                )}
+            if (teamPersonnel.length === 0) return null;
+
+            return (
+              <div key={team} style={{ marginBottom: '40px' }}>
+                <h3 style={{ margin: "0 0 16px 0", color: "var(--pea-purple)", borderBottom: "2px solid #e2e8f0", paddingBottom: "12px", display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  {team === "สังกัดแผนก" ? "บุคลากร สังกัดแผนก" : `ทีมงานชุด: ${team}`}
+                  <span style={{ fontSize: '0.9rem', color: 'var(--text-light)', background: '#f1f5f9', padding: '2px 10px', borderRadius: '12px', marginLeft: 'auto' }}>
+                    {teamPersonnel.length} คน
+                  </span>
+                </h3>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                  {teamPersonnel.map(p => (
+                    <div key={p.id} className="card" style={{ display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
+                      <div style={{ height: '220px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                        {p.image_url ? (
+                          <img src={p.image_url} alt={p.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        )}
+                      </div>
+                      <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <h4 style={{ margin: '0 0 4px 0', color: 'var(--text-dark)', fontWeight: '700', fontSize: '1.1rem' }}>{p.full_name}</h4>
+                        <div style={{ color: 'var(--pea-purple)', fontWeight: '600', marginBottom: '16px', fontSize: '0.95rem' }}>{p.position}</div>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                          {p.phone || "-"}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                          สังกัด: {p.team}
+                        </div>
+
+                        {userRole === "admin" && (
+                          <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end' }}>
+                            <button onClick={() => handleDelete(p.id, p.full_name)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                              ลบข้อมูล
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
+          
           {filteredPersonnel.length === 0 && (
-            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-light)', background: '#fff', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-              ไม่พบข้อมูลบุคลากร
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-light)', background: '#fff', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+              ไม่พบข้อมูลบุคลากรในระบบ
             </div>
           )}
         </div>
