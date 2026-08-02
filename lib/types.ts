@@ -37,3 +37,13 @@ export interface Project {
   image_url: string;
   updated_at?: string;
 }
+
+export interface Personnel {
+  id: string;
+  full_name: string;
+  position: string;
+  phone: string;
+  team: string;
+  image_url: string;
+  created_at: string;
+}
