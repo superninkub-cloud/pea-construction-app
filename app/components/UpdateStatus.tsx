@@ -24,6 +24,7 @@ export default function UpdateStatus() {
   const [constructionType, setConstructionType] = useState("1");
   const [progTargets, setProgTargets] = useState<number[]>([0, 0, 0, 0, 0, 0]);
   const [progDone, setProgDone] = useState<number[]>([0, 0, 0, 0, 0, 0]);
+  const [manualProgress, setManualProgress] = useState<number>(0);
   const [selectedMonth, setSelectedMonth] = useState("ม.ค.");
   const [newRemarks, setNewRemarks] = useState("");
   const [oldRemarks, setOldRemarks] = useState("");
@@ -111,6 +112,7 @@ export default function UpdateStatus() {
           p.step5_done || 0,
           p.step6_done || 0
         ]);
+        setManualProgress(p.manual_progress || 0);
         setOldRemarks(p.remarks || "");
         setNewRemarks("");
         setChecks({
@@ -186,6 +188,7 @@ export default function UpdateStatus() {
           step5_done: progDone[4],
           step6_target: progTargets[5],
           step6_done: progDone[5],
+          manual_progress: manualProgress,
           remarks: combinedRemarks,
           image_url: imageUrl,
           ...checks,
@@ -406,64 +409,82 @@ export default function UpdateStatus() {
                   <option value="2">รูปแบบที่ 2: ไม่มีพาดสายแรงต่ำ และไม่มีรื้อถอน (4 ขั้นตอน)</option>
                   <option value="3">รูปแบบที่ 3: ไม่มีพาดสายแรงต่ำ แต่มีรื้อถอน (5 ขั้นตอน)</option>
                   <option value="4">รูปแบบที่ 4: เฉพาะงานติดตั้งอุปกรณ์หัวเสาและงานพาดสายแรงสูง</option>
+                  <option value="5">รูปแบบที่ 5: ประเมินความก้าวหน้ารวมเอง (%)</option>
                 </select>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", marginBottom: "16px" }}>
-                {[
-                  { label: "1. ขุดหลุมปักเสา", idx: 0, unit: "ต้น" },
-                  { label: "2. ปักเสา", idx: 1, unit: "ต้น" },
-                  { label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา", idx: 2, unit: "ชุด" },
-                  { label: "4. พาดสายแรงสูง", idx: 3, unit: "เมตร" },
-                  { label: "5. พาดสายแรงต่ำ", idx: 4, unit: "เมตร" },
-                  { label: "6. งานรื้อถอน", idx: 5, unit: "ต้น" }
-                ].map(step => {
-                  const weights = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : (constructionType === "4" ? [0, 0, 50, 50, 0, 0] : [15, 25, 20, 20, 10, 10]));
-                  const weight = weights[step.idx];
-                  if (weight === 0) return null; // Hide if not applicable
+              {constructionType === "5" ? (
+                <div style={{ marginBottom: "16px", padding: "16px", background: "#fff", borderRadius: "8px", border: "1px dashed #cbd5e1" }}>
+                  <label className="form-label" style={{ fontSize: "0.95rem", marginBottom: "8px" }}>ความก้าวหน้างานก่อสร้างโดยรวม (ประเมินเอง)</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '300px' }}>
+                    <input
+                      type="number"
+                      min="0" max="100"
+                      className="form-control"
+                      value={manualProgress || ""}
+                      onChange={(e) => setManualProgress(Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
+                    />
+                    <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>%</span>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", marginBottom: "16px" }}>
+                  {[
+                    { label: "1. ขุดหลุมปักเสา", idx: 0, unit: "ต้น" },
+                    { label: "2. ปักเสา", idx: 1, unit: "ต้น" },
+                    { label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา", idx: 2, unit: "ชุด" },
+                    { label: "4. พาดสายแรงสูง", idx: 3, unit: "เมตร" },
+                    { label: "5. พาดสายแรงต่ำ", idx: 4, unit: "เมตร" },
+                    { label: "6. งานรื้อถอน", idx: 5, unit: "ต้น" }
+                  ].map(step => {
+                    const weights = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : (constructionType === "4" ? [0, 0, 50, 50, 0, 0] : [15, 25, 20, 20, 10, 10]));
+                    const weight = weights[step.idx];
+                    if (weight === 0) return null; // Hide if not applicable
 
-                  return (
-                    <div key={step.idx} style={{ display: 'flex', flexDirection: 'column' }}>
-                      <label className="form-label" style={{ fontSize: "0.9rem", marginBottom: "4px" }}>{step.label} (Weight: {weight}%)</label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <input
-                          type="number"
-                          min="0"
-                          placeholder="ผลงาน"
-                          className="form-control"
-                          value={progDone[step.idx] || ""}
-                          onChange={(e) => {
-                            const val = Math.max(0, Number(e.target.value) || 0);
-                            const newDone = [...progDone];
-                            newDone[step.idx] = val;
-                            setProgDone(newDone);
-                          }}
-                        />
-                        <span style={{ color: 'var(--text-light)' }}>/</span>
-                        <input
-                          type="number"
-                          min="0"
-                          placeholder="เป้าหมาย"
-                          className="form-control"
-                          value={progTargets[step.idx] || ""}
-                          onChange={(e) => {
-                            const val = Math.max(0, Number(e.target.value) || 0);
-                            const newTargets = [...progTargets];
-                            newTargets[step.idx] = val;
-                            setProgTargets(newTargets);
-                          }}
-                        />
-                        <span style={{ fontWeight: '500', color: 'var(--text-light)', minWidth: '35px' }}>{step.unit}</span>
+                    return (
+                      <div key={step.idx} style={{ display: 'flex', flexDirection: 'column' }}>
+                        <label className="form-label" style={{ fontSize: "0.9rem", marginBottom: "4px" }}>{step.label} (Weight: {weight}%)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="ผลงาน"
+                            className="form-control"
+                            value={progDone[step.idx] === 0 && progTargets[step.idx] === 0 ? "" : progDone[step.idx]}
+                            onChange={(e) => {
+                              const val = Math.max(0, Number(e.target.value) || 0);
+                              const newDone = [...progDone];
+                              newDone[step.idx] = val;
+                              setProgDone(newDone);
+                            }}
+                          />
+                          <span style={{ color: 'var(--text-light)' }}>/</span>
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder="เป้าหมาย"
+                            className="form-control"
+                            value={progTargets[step.idx] === 0 && progDone[step.idx] === 0 ? "" : progTargets[step.idx]}
+                            onChange={(e) => {
+                              const val = Math.max(0, Number(e.target.value) || 0);
+                              const newTargets = [...progTargets];
+                              newTargets[step.idx] = val;
+                              setProgTargets(newTargets);
+                            }}
+                          />
+                          <span style={{ fontWeight: '500', color: 'var(--text-light)', minWidth: '35px' }}>{step.unit}</span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '8px' }}>
                 <span style={{ fontWeight: '600', marginRight: '12px' }}>Progress งานก่อสร้างรวม:</span>
                 <span style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--pea-purple)' }}>
                   {(() => {
+                    if (constructionType === "5") return (manualProgress || 0).toFixed(2);
                     const w = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : (constructionType === "4" ? [0, 0, 50, 50, 0, 0] : [15, 25, 20, 20, 10, 10]));
                     const total = progDone.reduce((sum, doneVal, idx) => {
                       const targetVal = progTargets[idx];

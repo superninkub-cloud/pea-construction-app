@@ -25,6 +25,7 @@ export interface Project {
   step5_done?: number;
   step6_target?: number;
   step6_done?: number;
+  manual_progress?: number;
   check1: boolean;
   check2: boolean;
   check3: boolean;
