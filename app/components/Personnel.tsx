@@ -182,11 +182,12 @@ export default function PersonnelComponent() {
             // Sort logic
             const getRank = (position: string) => {
               const p = position.toLowerCase();
+              if (p.includes("ผู้ช่วยหัวหน้าแผนก") || p.includes("ผู้ช่วยหัวหน้า")) return 2;
               if (p.includes("หัวหน้าแผนก")) return 1;
-              if (p.includes("หัวหน้า") || p.includes("ผจก") || p.includes("ผู้จัดการ")) return 2;
-              if (p.includes("ช่าง") || p.includes("พนักงานช่าง")) return 3;
-              if (p.includes("ขับรถ")) return 4;
-              return 5;
+              if (p.includes("หัวหน้า") || p.includes("ผจก") || p.includes("ผู้จัดการ")) return 3;
+              if (p.includes("ช่าง") || p.includes("พนักงานช่าง")) return 4;
+              if (p.includes("ขับรถ")) return 5;
+              return 6;
             };
 
             teamPersonnel.sort((a, b) => getRank(a.position) - getRank(b.position));
