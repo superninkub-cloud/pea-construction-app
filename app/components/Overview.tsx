@@ -343,7 +343,7 @@ export default function Overview() {
                     { checked: p.check5, label: 'ตรวจมาตรฐานแล้ว', failLabel: 'ยังไม่ตรวจมาตรฐาน' },
                     { checked: p.check6, label: 'ใบสำคัญจ่ายครบแล้ว', failLabel: 'ใบสำคัญจ่ายไม่ครบ' },
                     { checked: p.check7, label: 'ขออนุมัติโอนงบแล้ว', failLabel: 'ยังไม่ขออนุมัติโอนงบ' },
-                    { checked: p.check8, label: 'ปรับแบบแผนผังแล้ว', failLabel: 'ยังไม่ปรับแบบแผนผัง' }
+                    { checked: p.check8, label: 'ปรับแผนผังและประมาณการแล้ว', failLabel: 'ยังไม่ปรับแผนผังและประมาณการ' }
                   ];
                   const doneCount = steps.filter(s => s.checked).length;
                   const progressPercent = (doneCount / 8) * 100;

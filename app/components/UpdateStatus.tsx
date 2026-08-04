@@ -160,11 +160,17 @@ export default function UpdateStatus() {
       let combinedRemarks = oldRemarks;
       if (newRemarks.trim() !== "" || status.trim() !== "") {
         const yearStr = (new Date().getFullYear() + 543).toString().slice(-2);
-        let newEntry = `📍 [${selectedMonth} ${yearStr}]`;
+        const monthPrefix = `📍 [${selectedMonth} ${yearStr}]`;
+        let newEntry = monthPrefix;
         if (status.trim() !== "") newEntry += ` สถานะ: ${status}`;
         if (newRemarks.trim() !== "") newEntry += ` | ${newRemarks.trim()}`;
 
-        combinedRemarks = oldRemarks.trim() === "" ? newEntry : newEntry + "\n" + oldRemarks.trim();
+        const filteredOldRemarks = oldRemarks
+          .split("\n")
+          .filter(line => !line.startsWith(monthPrefix))
+          .join("\n");
+
+        combinedRemarks = filteredOldRemarks.trim() === "" ? newEntry : newEntry + "\n" + filteredOldRemarks.trim();
       }
 
       const { error: updateError } = await supabase
@@ -510,7 +516,7 @@ export default function UpdateStatus() {
                 { id: "check5", label: "ตรวจมาตรฐานแล้ว" },
                 { id: "check6", label: "ใบสำคัญจ่ายครบแล้ว" },
                 { id: "check7", label: "ขออนุมัติโอนงบแล้ว" },
-                { id: "check8", label: "ปรับแบบแผนผังแล้ว" }
+                { id: "check8", label: "ปรับแผนผังและประมาณการแล้ว" }
               ].map((chk, i) => (
                 <div key={chk.id} className="check-item">
                   <input
