@@ -134,7 +134,7 @@ export default function UpdateStatus() {
           }
           cleanedRemarks = newLines.join('\n');
         }
-        
+
         setOldRemarks(cleanedRemarks);
         setNewRemarks("");
         setChecks({
@@ -189,7 +189,7 @@ export default function UpdateStatus() {
 
         // Prepend new entry
         const tempRemarks = oldRemarks.trim() === "" ? newEntry : newEntry + "\n" + oldRemarks.trim();
-        
+
         // Clean up any duplicates that might have been formed
         const lines = tempRemarks.split('\n');
         const seenMarkers = new Set<string>();
@@ -601,6 +601,22 @@ export default function UpdateStatus() {
               const steps = [p.check1, p.check2, p.check3, p.check4, p.check5, p.check6, p.check7, p.check8];
               const doneCount = steps.filter(Boolean).length;
               const progressPercent = (doneCount / 8) * 100;
+              const type = p.construction_type || "1";
+              const physicalProgress = (() => {
+                if (type === "5") return p.manual_progress || 0;
+                const w = type === "2" ? [20, 30, 25, 25, 0, 0] : (type === "3" ? [20, 25, 25, 20, 0, 10] : (type === "4" ? [0, 0, 50, 50, 0, 0] : [15, 25, 20, 20, 10, 10]));
+                const targets = [p.step1_target, p.step2_target, p.step3_target, p.step4_target, p.step5_target, p.step6_target].map(val => Number(val) || 0);
+                const dones = [p.step1_done, p.step2_done, p.step3_done, p.step4_done, p.step5_done, p.step6_done].map(val => Number(val) || 0);
+
+                return dones.reduce((sum, doneVal, idx) => {
+                  const targetVal = targets[idx];
+                  if (targetVal === 0 || w[idx] === 0) return sum;
+                  const percent = (doneVal / targetVal);
+                  const cappedPercent = Math.min(1, percent);
+                  return sum + (cappedPercent * w[idx]);
+                }, 0);
+              })();
+
               return (
                 <div
                   key={p.id}
@@ -617,10 +633,29 @@ export default function UpdateStatus() {
                   <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', flex: 1, color: 'var(--text-dark)' }}>{p.name}</div>
                   <div style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginBottom: '16px' }}>ผู้ควบคุมงาน: {p.supervisor}</div>
 
-                  <div style={{ width: '100%', backgroundColor: '#f1f5f9', height: '6px', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
-                    <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: progressPercent === 100 ? '#10b981' : 'var(--pea-purple)' }}></div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {/* Physical Progress */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>หน้างาน:</span>
+                      <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1 }}>
+                        <div style={{ height: "100%", width: `${physicalProgress}%`, backgroundColor: physicalProgress === 100 ? "#10b981" : (physicalProgress > 50 ? "#3b82f6" : "#8b5cf6") }}></div>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--pea-purple)', minWidth: '35px', textAlign: 'right' }}>
+                        {physicalProgress.toFixed(1)}%
+                      </span>
+                    </div>
+
+                    {/* Document Progress */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>เอกสาร:</span>
+                      <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1 }}>
+                        <div style={{ height: "100%", width: `${progressPercent}%`, backgroundColor: progressPercent === 100 ? "#10b981" : (progressPercent > 50 ? "#f59e0b" : "#ef4444") }}></div>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-dark)', minWidth: '35px', textAlign: 'right' }}>
+                        {doneCount}/8
+                      </span>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', textAlign: 'right' }}>ความคืบหน้า {doneCount}/8 ขั้นตอน</div>
                 </div>
               )
             })}
