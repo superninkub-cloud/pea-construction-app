@@ -420,7 +420,25 @@ export default function Overview() {
                       </td>
                       <td data-label="ประวัติหมายเหตุ">
                         <div style={{ maxHeight: "100px", overflowY: "auto", fontSize: "0.8rem", whiteSpace: "pre-wrap", color: "var(--text-light)" }}>
-                          {p.remarks || "-"}
+                          {(() => {
+                            if (!p.remarks) return "-";
+                            const lines = p.remarks.split('\n');
+                            const seenMarkers = new Set<string>();
+                            const newLines: string[] = [];
+                            for (const line of lines) {
+                              const match = line.match(/^(📍 \[[^\]]+\])/);
+                              if (match) {
+                                const marker = match[1];
+                                if (!seenMarkers.has(marker)) {
+                                  seenMarkers.add(marker);
+                                  newLines.push(line);
+                                }
+                              } else {
+                                newLines.push(line);
+                              }
+                            }
+                            return newLines.join('\n');
+                          })()}
                         </div>
                       </td>
                       <td data-label="รูปภาพ" style={{ textAlign: "center", paddingRight: "24px" }}>

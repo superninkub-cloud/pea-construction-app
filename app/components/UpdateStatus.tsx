@@ -113,7 +113,29 @@ export default function UpdateStatus() {
           p.step6_done || 0
         ]);
         setManualProgress(p.manual_progress || 0);
-        setOldRemarks(p.remarks || "");
+
+        // Clean up duplicate month markers in existing remarks
+        let cleanedRemarks = p.remarks || "";
+        if (cleanedRemarks) {
+          const lines = cleanedRemarks.split('\n');
+          const seenMarkers = new Set<string>();
+          const newLines: string[] = [];
+          for (const line of lines) {
+            const match = line.match(/^(📍 \[[^\]]+\])/);
+            if (match) {
+              const marker = match[1];
+              if (!seenMarkers.has(marker)) {
+                seenMarkers.add(marker);
+                newLines.push(line);
+              }
+            } else {
+              newLines.push(line);
+            }
+          }
+          cleanedRemarks = newLines.join('\n');
+        }
+        
+        setOldRemarks(cleanedRemarks);
         setNewRemarks("");
         setChecks({
           check1: p.check1, check2: p.check2, check3: p.check3, check4: p.check4,
@@ -165,12 +187,26 @@ export default function UpdateStatus() {
         if (status.trim() !== "") newEntry += ` สถานะ: ${status}`;
         if (newRemarks.trim() !== "") newEntry += ` | ${newRemarks.trim()}`;
 
-        const filteredOldRemarks = oldRemarks
-          .split("\n")
-          .filter(line => !line.startsWith(monthPrefix))
-          .join("\n");
-
-        combinedRemarks = filteredOldRemarks.trim() === "" ? newEntry : newEntry + "\n" + filteredOldRemarks.trim();
+        // Prepend new entry
+        const tempRemarks = oldRemarks.trim() === "" ? newEntry : newEntry + "\n" + oldRemarks.trim();
+        
+        // Clean up any duplicates that might have been formed
+        const lines = tempRemarks.split('\n');
+        const seenMarkers = new Set<string>();
+        const newLines: string[] = [];
+        for (const line of lines) {
+          const match = line.match(/^(📍 \[[^\]]+\])/);
+          if (match) {
+            const marker = match[1];
+            if (!seenMarkers.has(marker)) {
+              seenMarkers.add(marker);
+              newLines.push(line);
+            }
+          } else {
+            newLines.push(line);
+          }
+        }
+        combinedRemarks = newLines.join('\n');
       }
 
       const { error: updateError } = await supabase
