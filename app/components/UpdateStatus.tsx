@@ -18,6 +18,8 @@ export default function UpdateStatus() {
   const [project, setProject] = useState<Project | null>(null);
 
   // Form State
+  const [editWbs, setEditWbs] = useState("");
+  const [editName, setEditName] = useState("");
   const [status, setStatus] = useState("");
   const [projectValue, setProjectValue] = useState("");
   const [pTracking, setPTracking] = useState("");
@@ -101,6 +103,8 @@ export default function UpdateStatus() {
       const p = projects.find(x => x.wbs === selectedWbs);
       if (p) {
         setProject(p);
+        setEditWbs(p.wbs || "");
+        setEditName(p.name || "");
         setStatus(p.status || "");
         setProjectValue(p.value ? p.value.toString() : "");
         setPTracking(p.p_tracking || "");
@@ -223,6 +227,8 @@ export default function UpdateStatus() {
       const { error: updateError } = await supabase
         .from("projects")
         .update({
+          wbs: editWbs,
+          name: editName,
           status,
           value: Number(projectValue) || 0,
           p_tracking: pTracking,
@@ -255,6 +261,9 @@ export default function UpdateStatus() {
       setOldRemarks(combinedRemarks);
       setNewRemarks("");
       setFile(null);
+      if (editWbs !== selectedWbs) {
+        setSelectedWbs(editWbs);
+      }
       fetchProjects();
 
     } catch (error: any) {
@@ -362,8 +371,31 @@ export default function UpdateStatus() {
               ⬅️ ย้อนกลับไปหน้ารายการ
             </button>
             <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '20px', marginBottom: '24px' }}>
-              <h4 style={{ color: "var(--pea-purple)", fontSize: "1.5rem", fontWeight: "700", marginBottom: "4px" }}>{project.wbs}</h4>
-              <h5 style={{ color: "var(--text-dark)", fontSize: "1.1rem", fontWeight: "500" }}>{project.name}</h5>
+              {userRole === "admin" ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <input
+                    type="text"
+                    className="form-control"
+                    style={{ color: "var(--pea-purple)", fontSize: "1.2rem", fontWeight: "700", width: "100%", background: "#f8fafc" }}
+                    value={editWbs}
+                    onChange={(e) => setEditWbs(e.target.value)}
+                    placeholder="รหัส WBS"
+                  />
+                  <input
+                    type="text"
+                    className="form-control"
+                    style={{ color: "var(--text-dark)", fontSize: "1.1rem", fontWeight: "500", width: "100%", background: "#f8fafc" }}
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="ชื่องานโครงการ"
+                  />
+                </div>
+              ) : (
+                <>
+                  <h4 style={{ color: "var(--pea-purple)", fontSize: "1.5rem", fontWeight: "700", marginBottom: "4px" }}>{project.wbs}</h4>
+                  <h5 style={{ color: "var(--text-dark)", fontSize: "1.1rem", fontWeight: "500" }}>{project.name}</h5>
+                </>
+              )}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
