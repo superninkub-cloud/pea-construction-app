@@ -5,7 +5,7 @@ import TopBar from "../components/TopBar";
 import { supabase } from "../../lib/supabaseClient";
 import { wireDataList } from "../../lib/wireData";
 import { Project } from "../../lib/types";
-import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Search, User, MapPin, Calendar, Info } from "lucide-react";
+import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Info } from "lucide-react";
 
 export default function WireReturnPage() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
@@ -29,7 +29,6 @@ export default function WireReturnPage() {
 
   const [filterSupervisor, setFilterSupervisor] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [filterSearch, setFilterSearch] = useState("");
 
   useEffect(() => {
     fetchProjects();
@@ -265,8 +264,7 @@ export default function WireReturnPage() {
   const filteredProjectStats = projectStats.filter(p => {
     const matchSupervisor = filterSupervisor ? p.supervisor === filterSupervisor : true;
     const matchStatus = filterStatus ? p.status === filterStatus : true;
-    const matchSearch = filterSearch ? (p.wbs?.toLowerCase().includes(filterSearch.toLowerCase()) || p.name?.toLowerCase().includes(filterSearch.toLowerCase())) : true;
-    return matchSupervisor && matchStatus && matchSearch;
+    return matchSupervisor && matchStatus;
   });
 
   let totalEstimated = 0;
@@ -338,75 +336,53 @@ export default function WireReturnPage() {
               </div>
             </div>
 
-            <div className="animation-fade-in" style={{ display: 'flex', gap: '16px', flexWrap: "wrap", alignItems: "center", background: 'white', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)', marginBottom: '32px' }}>
-              <div style={{ flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', background: '#f8fafc', padding: '10px 16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                <Search size={18} color="#94a3b8" style={{ marginRight: '12px' }} />
-                <input 
-                  type="text" 
-                  placeholder="ค้นหางานก่อสร้าง (WBS, ชื่องาน)..." 
-                  value={filterSearch}
-                  style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '0.95rem', color: '#334155' }}
-                  onChange={(e) => setFilterSearch(e.target.value)}
-                />
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", background: 'white', border: '1px solid #e2e8f0', padding: '8px 16px', borderRadius: '12px', flexShrink: 0 }}>
-                <User size={18} color="#64748b" />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: "0.75rem", fontWeight: "600", color: "#64748b", marginBottom: '-4px' }}>ผู้ควบคุมงาน</span>
-                  <select 
-                    className="form-select" 
-                    style={{ border: 'none', background: 'transparent', padding: 0, fontSize: '0.9rem', fontWeight: '500', color: '#1e293b', cursor: 'pointer', outline: 'none', boxShadow: 'none' }}
-                    value={filterSupervisor}
-                    onChange={e => setFilterSupervisor(e.target.value)}
-                  >
-                    <option value="">-- ทั้งหมด --</option>
-                    {uniqueSupervisors.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", background: 'white', border: '1px solid #e2e8f0', padding: '8px 16px', borderRadius: '12px', flexShrink: 0 }}>
-                <MapPin size={18} color="#64748b" />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: "0.75rem", fontWeight: "600", color: "#64748b", marginBottom: '-4px' }}>สถานะ</span>
-                  <select 
-                    className="form-select" 
-                    style={{ border: 'none', background: 'transparent', padding: 0, fontSize: '0.9rem', fontWeight: '500', color: '#1e293b', cursor: 'pointer', outline: 'none', boxShadow: 'none' }}
-                    value={filterStatus}
-                    onChange={e => setFilterStatus(e.target.value)}
-                  >
-                    <option value="">-- ทั้งหมด --</option>
-                    {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", background: 'white', border: '1px solid #e2e8f0', padding: '8px 16px', borderRadius: '12px', flexShrink: 0 }}>
-                <Calendar size={18} color="#64748b" />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: "0.75rem", fontWeight: "600", color: "#64748b", marginBottom: '-4px' }}>ช่วงเวลา</span>
-                  <select 
-                    className="form-select" 
-                    style={{ border: 'none', background: 'transparent', padding: 0, fontSize: '0.9rem', fontWeight: '500', color: '#1e293b', cursor: 'pointer', outline: 'none', boxShadow: 'none' }}
-                  >
-                    <option value="">ทั้งหมด</option>
-                  </select>
-                </div>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", margin: 0 }}>รายการงานก่อสร้างที่ต้องส่งคืนเศษสาย</h2>
               
-              {userRole === "admin" && (
-                <button
-                  onClick={() => {
-                    setEditWires([{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }]);
-                    setIsAddModalOpen(true);
-                  }}
-                  className="btn btn-primary"
-                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 20px", fontSize: "0.95rem", fontWeight: "600", whiteSpace: "nowrap", borderRadius: '12px', boxShadow: "0 4px 6px -1px rgba(124, 58, 237, 0.3)", transition: "all 0.2s", height: "54px" }}
-                >
-                  <Plus size={18} /> ดึงงานก่อสร้างมาประเมินเศษสาย
-                </button>
-              )}
+              <div style={{ display: 'flex', gap: '16px', flexWrap: "wrap", alignItems: "center" }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: '#f8fafc', padding: '10px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)' }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>👷 ผู้ควบคุมงาน:</span>
+                    <select 
+                      className="form-select" 
+                      style={{ width: "180px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
+                      value={filterSupervisor}
+                      onChange={e => setFilterSupervisor(e.target.value)}
+                    >
+                      <option value="">แสดงทั้งหมด</option>
+                      {uniqueSupervisors.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+
+                  <div style={{ width: "1px", height: "32px", background: "#cbd5e1" }}></div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>📌 สถานะ:</span>
+                    <select 
+                      className="form-select" 
+                      style={{ width: "160px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
+                      value={filterStatus}
+                      onChange={e => setFilterStatus(e.target.value)}
+                    >
+                      <option value="">แสดงทั้งหมด</option>
+                      {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                {userRole === "admin" && (
+                  <button
+                    onClick={() => {
+                      setEditWires([{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }]);
+                      setIsAddModalOpen(true);
+                    }}
+                    className="btn btn-primary"
+                    style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", fontSize: "0.95rem", fontWeight: "600", whiteSpace: "nowrap", boxShadow: "0 4px 6px -1px rgba(124, 58, 237, 0.3)", transition: "all 0.2s" }}
+                  >
+                    <Plus size={18} /> ดึงงานก่อสร้างมาประเมินเศษสาย
+                  </button>
+                )}
+              </div>
             </div>
             
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))", gap: "24px" }}>
