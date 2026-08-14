@@ -39,6 +39,14 @@ export interface Project {
   scrap_wire_type?: string;
   scrap_wire_length?: number;
   scrap_returned_weight?: number;
+  scrap_wires_data?: ScrapWireData[];
+}
+
+export interface ScrapWireData {
+  id: string;
+  type: string;
+  length: number;
+  returned_weight: number;
 }
 
 export interface Personnel {

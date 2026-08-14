@@ -13,12 +13,14 @@ export default function WireReturnPage() {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("user");
   
+  interface WireItem {
+    id: string;
+    type: string;
+    length: number | "";
+    returned_weight: number | "";
+  }
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{
-    scrap_wire_type: string;
-    scrap_wire_length: number | "";
-    scrap_returned_weight: number | "";
-  }>({ scrap_wire_type: "", scrap_wire_length: "", scrap_returned_weight: "" });
+  const [editWires, setEditWires] = useState<WireItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -52,20 +54,40 @@ export default function WireReturnPage() {
 
   const startEdit = (p: Project) => {
     setEditingId(p.id);
-    setEditForm({
-      scrap_wire_type: p.scrap_wire_type || "",
-      scrap_wire_length: p.scrap_wire_length || "",
-      scrap_returned_weight: p.scrap_returned_weight || ""
-    });
+    if (p.scrap_wires_data && p.scrap_wires_data.length > 0) {
+      setEditWires(p.scrap_wires_data.map(w => ({
+        id: w.id || Date.now().toString() + Math.random(),
+        type: w.type || "",
+        length: w.length || "",
+        returned_weight: w.returned_weight || ""
+      })));
+    } else if (p.scrap_wire_type || p.scrap_wire_length) {
+      setEditWires([{
+        id: Date.now().toString(),
+        type: p.scrap_wire_type || "",
+        length: p.scrap_wire_length || "",
+        returned_weight: p.scrap_returned_weight || ""
+      }]);
+    } else {
+      setEditWires([{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }]);
+    }
   };
 
   const handleSave = async (id: string) => {
     setIsSaving(true);
     try {
+      const formattedWires = editWires.map(w => ({
+        id: w.id,
+        type: w.type,
+        length: Number(w.length) || 0,
+        returned_weight: Number(w.returned_weight) || 0
+      }));
+      
       const { error } = await supabase.from("projects").update({
-        scrap_wire_type: editForm.scrap_wire_type,
-        scrap_wire_length: Number(editForm.scrap_wire_length) || 0,
-        scrap_returned_weight: Number(editForm.scrap_returned_weight) || 0
+        scrap_wires_data: formattedWires,
+        scrap_wire_type: null,
+        scrap_wire_length: null,
+        scrap_returned_weight: null
       }).eq("id", id);
       
       if (error) throw error;
@@ -80,24 +102,32 @@ export default function WireReturnPage() {
   };
 
   const handleAddProject = async () => {
-    if (!addSelectedId || !editForm.scrap_wire_type || editForm.scrap_wire_length === "") {
+    if (!addSelectedId || editWires.some(w => !w.type || w.length === "")) {
       alert("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
     
     setIsSaving(true);
     try {
+      const formattedWires = editWires.map(w => ({
+        id: w.id,
+        type: w.type,
+        length: Number(w.length) || 0,
+        returned_weight: Number(w.returned_weight) || 0
+      }));
+
       const { error } = await supabase.from("projects").update({
-        scrap_wire_type: editForm.scrap_wire_type,
-        scrap_wire_length: Number(editForm.scrap_wire_length) || 0,
-        scrap_returned_weight: Number(editForm.scrap_returned_weight) || 0
+        scrap_wires_data: formattedWires,
+        scrap_wire_type: null,
+        scrap_wire_length: null,
+        scrap_returned_weight: null
       }).eq("id", addSelectedId);
       
       if (error) throw error;
       await fetchProjects();
       setIsAddModalOpen(false);
       setAddSelectedId("");
-      setEditForm({ scrap_wire_type: "", scrap_wire_length: "", scrap_returned_weight: "" });
+      setEditWires([]);
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
@@ -110,18 +140,35 @@ export default function WireReturnPage() {
   let totalReturned = 0;
 
   const projectStats = projects.map(p => {
-    const wire = wireDataList.find(w => w.id === p.scrap_wire_type);
-    const est = wire && p.scrap_wire_length ? (p.scrap_wire_length * 1000) * wire.weightPerMeter : 0;
-    const ret = p.scrap_returned_weight || 0;
+    let est = 0;
+    let ret = 0;
+    
+    if (p.scrap_wire_type && p.scrap_wire_length) {
+      const wire = wireDataList.find(w => w.id === p.scrap_wire_type);
+      est += wire ? (p.scrap_wire_length * 1000) * wire.weightPerMeter : 0;
+      ret += p.scrap_returned_weight || 0;
+    }
+    
+    const wiresData: any[] = p.scrap_wires_data || [];
+    wiresData.forEach(w => {
+      const wire = wireDataList.find(wd => wd.id === w.type);
+      if (wire && w.length) {
+        est += (w.length * 1000) * wire.weightPerMeter;
+      }
+      ret += w.returned_weight || 0;
+    });
     
     totalEstimated += est;
     totalReturned += ret;
+    
+    const combinedWires = [...(p.scrap_wire_type ? [{ type: p.scrap_wire_type, length: p.scrap_wire_length }] : []), ...wiresData];
     
     return {
       ...p,
       estimated: est,
       returned: ret,
-      percentage: est > 0 ? Math.min(100, (ret / est) * 100) : 0
+      percentage: est > 0 ? Math.min(100, (ret / est) * 100) : 0,
+      combinedWires
     };
   });
 
@@ -156,7 +203,7 @@ export default function WireReturnPage() {
               {userRole === "admin" && (
                 <button
                   onClick={() => {
-                    setEditForm({ scrap_wire_type: "", scrap_wire_length: "", scrap_returned_weight: "" });
+                    setEditWires([{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }]);
                     setIsAddModalOpen(true);
                   }}
                   className="btn btn-primary"
@@ -181,23 +228,45 @@ export default function WireReturnPage() {
                     
                     {isEditing ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-                        <div>
-                          <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>ชนิดสายไฟ</label>
-                          <select className="form-select" value={editForm.scrap_wire_type} onChange={(e) => setEditForm({ ...editForm, scrap_wire_type: e.target.value })} style={{ padding: '6px' }}>
-                            <option value="">-- เลือกชนิดสายไฟ --</option>
-                            {wireDataList.map(wire => (
-                              <option key={wire.id} value={wire.id}>{wire.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>ระยะทางที่รื้อถอน (กม.)</label>
-                          <input type="number" min="0" step="0.01" className="form-control" value={editForm.scrap_wire_length} onChange={(e) => setEditForm({ ...editForm, scrap_wire_length: e.target.value === "" ? "" : Number(e.target.value) })} style={{ padding: '6px' }} />
-                        </div>
-                        <div>
-                          <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>น้ำหนักที่ส่งคืนจริง (กก.)</label>
-                          <input type="number" min="0" className="form-control" value={editForm.scrap_returned_weight} onChange={(e) => setEditForm({ ...editForm, scrap_returned_weight: e.target.value === "" ? "" : Number(e.target.value) })} style={{ padding: '6px' }} />
-                        </div>
+                        {editWires.map((wire, idx) => (
+                          <div key={wire.id} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', position: 'relative', background: '#fff' }}>
+                            {editWires.length > 1 && (
+                              <button onClick={() => setEditWires(editWires.filter(w => w.id !== wire.id))} style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><X size={16} /></button>
+                            )}
+                            <div>
+                              <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>ชนิดสายไฟ</label>
+                              <select className="form-select" value={wire.type} onChange={(e) => {
+                                const newWires = [...editWires];
+                                newWires[idx].type = e.target.value;
+                                setEditWires(newWires);
+                              }} style={{ padding: '6px' }}>
+                                <option value="">-- เลือกชนิดสายไฟ --</option>
+                                {wireDataList.map(w => (
+                                  <option key={w.id} value={w.id}>{w.name}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div style={{ marginTop: '8px' }}>
+                              <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>ระยะทางที่รื้อถอน (กม.)</label>
+                              <input type="number" min="0" step="0.01" className="form-control" value={wire.length} onChange={(e) => {
+                                const newWires = [...editWires];
+                                newWires[idx].length = e.target.value === "" ? "" : Number(e.target.value);
+                                setEditWires(newWires);
+                              }} style={{ padding: '6px' }} />
+                            </div>
+                            <div style={{ marginTop: '8px' }}>
+                              <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>น้ำหนักที่ส่งคืนจริง (กก.)</label>
+                              <input type="number" min="0" className="form-control" value={wire.returned_weight} onChange={(e) => {
+                                const newWires = [...editWires];
+                                newWires[idx].returned_weight = e.target.value === "" ? "" : Number(e.target.value);
+                                setEditWires(newWires);
+                              }} style={{ padding: '6px' }} />
+                            </div>
+                          </div>
+                        ))}
+                        <button onClick={() => setEditWires([...editWires, { id: Date.now().toString() + Math.random(), type: "", length: "", returned_weight: "" }])} className="btn" style={{ padding: '6px', fontSize: '0.85rem', background: '#e0e7ff', color: '#4f46e5', border: '1px dashed #4f46e5' }}>
+                          + เพิ่มชนิดสายไฟ
+                        </button>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>
                           <button onClick={() => setEditingId(null)} className="btn" style={{ padding: '6px 12px', fontSize: '0.85rem', background: '#f1f5f9' }}>ยกเลิก</button>
                           <button onClick={() => handleSave(p.id)} disabled={isSaving} className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -208,14 +277,20 @@ export default function WireReturnPage() {
                     ) : (
                       <>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: 'var(--text-light)' }}>ชนิดสายไฟ:</span>
-                            <span style={{ fontWeight: '500' }}>{wireDataList.find(w => w.id === p.scrap_wire_type)?.name || p.scrap_wire_type || "ยังไม่ได้ระบุ"}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: 'var(--text-light)' }}>ระยะทางที่รื้อถอน:</span>
-                            <span style={{ fontWeight: '500' }}>{p.scrap_wire_length || 0} กม.</span>
-                          </div>
+                          {p.combinedWires.length > 0 ? p.combinedWires.map((w: any, idx: number) => (
+                            <div key={idx} style={{ borderBottom: idx < p.combinedWires.length - 1 ? '1px solid #e2e8f0' : 'none', paddingBottom: idx < p.combinedWires.length - 1 ? '8px' : '0' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-light)' }}>ชนิดสายไฟ:</span>
+                                <span style={{ fontWeight: '500' }}>{wireDataList.find(wd => wd.id === w.type)?.name || w.type || "ยังไม่ได้ระบุ"}</span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-light)' }}>ระยะทางที่รื้อถอน:</span>
+                                <span style={{ fontWeight: '500' }}>{w.length || 0} กม.</span>
+                              </div>
+                            </div>
+                          )) : (
+                            <div style={{ textAlign: 'center', color: 'var(--text-light)' }}>ยังไม่ได้ระบุชนิดสายไฟ</div>
+                          )}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -274,25 +349,45 @@ export default function WireReturnPage() {
               </select>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-              <div>
-                <label className="form-label">ชนิดสายไฟที่รื้อถอน</label>
-                <select className="form-select" value={editForm.scrap_wire_type} onChange={(e) => setEditForm({ ...editForm, scrap_wire_type: e.target.value })}>
-                  <option value="">-- เลือกชนิดสายไฟ --</option>
-                  {wireDataList.map(wire => (
-                    <option key={wire.id} value={wire.id}>{wire.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="form-label">ระยะทางที่รื้อถอน (กม.)</label>
-                <input type="number" min="0" step="0.01" className="form-control" value={editForm.scrap_wire_length} onChange={(e) => setEditForm({ ...editForm, scrap_wire_length: e.target.value === "" ? "" : Number(e.target.value) })} />
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+              {editWires.map((wire, idx) => (
+                <div key={wire.id} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', position: 'relative' }}>
+                  {editWires.length > 1 && (
+                    <button onClick={() => setEditWires(editWires.filter(w => w.id !== wire.id))} style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}><X size={16} /></button>
+                  )}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label className="form-label">ชนิดสายไฟที่รื้อถอน</label>
+                      <select className="form-select" value={wire.type} onChange={(e) => {
+                        const newWires = [...editWires];
+                        newWires[idx].type = e.target.value;
+                        setEditWires(newWires);
+                      }}>
+                        <option value="">-- เลือกชนิดสายไฟ --</option>
+                        {wireDataList.map(w => (
+                          <option key={w.id} value={w.id}>{w.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="form-label">ระยะทางที่รื้อถอน (กม.)</label>
+                      <input type="number" min="0" step="0.01" className="form-control" value={wire.length} onChange={(e) => {
+                        const newWires = [...editWires];
+                        newWires[idx].length = e.target.value === "" ? "" : Number(e.target.value);
+                        setEditWires(newWires);
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <button onClick={() => setEditWires([...editWires, { id: Date.now().toString() + Math.random(), type: "", length: "", returned_weight: "" }])} className="btn" style={{ padding: '6px', fontSize: '0.85rem', background: '#e0e7ff', color: '#4f46e5', border: '1px dashed #4f46e5' }}>
+                + เพิ่มชนิดสายไฟ
+              </button>
             </div>
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
               <button className="btn" onClick={() => setIsAddModalOpen(false)} style={{ background: '#f1f5f9', color: 'var(--text-dark)' }}>ยกเลิก</button>
-              <button className="btn btn-primary" onClick={handleAddProject} disabled={isSaving || !addSelectedId || !editForm.scrap_wire_type || editForm.scrap_wire_length === ""}>
+              <button className="btn btn-primary" onClick={handleAddProject} disabled={isSaving || !addSelectedId || editWires.some(w => !w.type || w.length === "")}>
                 {isSaving ? "กำลังบันทึก..." : "เพิ่มในรายการติดตาม"}
               </button>
             </div>
