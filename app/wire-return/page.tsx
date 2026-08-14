@@ -35,8 +35,12 @@ export default function WireReturnPage() {
       const { data, error } = await supabase.from("projects").select("*").order("wbs");
       if (data) {
         setAllProjects(data);
-        // Filter projects that have scrap wire info
-        const filtered = data.filter((p: any) => p.scrap_wire_type || p.scrap_wire_length > 0);
+        // Filter projects that have scrap wire info or are not finished
+        const filtered = data.filter((p: any) => 
+          p.scrap_wire_type || 
+          p.scrap_wire_length > 0 || 
+          (p.status !== "F4" && p.status !== "ยกเลิก")
+        );
         setProjects(filtered);
       }
     } catch (err) {
@@ -176,11 +180,11 @@ export default function WireReturnPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ color: 'var(--text-light)' }}>ชนิดสายไฟ:</span>
-                      <span style={{ fontWeight: '500' }}>{wireDataList.find(w => w.id === p.scrap_wire_type)?.name || p.scrap_wire_type}</span>
+                      <span style={{ fontWeight: '500' }}>{wireDataList.find(w => w.id === p.scrap_wire_type)?.name || p.scrap_wire_type || "ยังไม่ได้ระบุ"}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span style={{ color: 'var(--text-light)' }}>ระยะทางที่รื้อถอน:</span>
-                      <span style={{ fontWeight: '500' }}>{p.scrap_wire_length} กม.</span>
+                      <span style={{ fontWeight: '500' }}>{p.scrap_wire_length || 0} กม.</span>
                     </div>
                   </div>
 
