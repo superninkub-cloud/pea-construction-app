@@ -168,40 +168,80 @@ export default function WireReturnPage() {
             </div>
             
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))", gap: "24px" }}>
-              {projectStats.map(p => (
-                <div key={p.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: p.percentage >= 100 ? '#10b981' : (p.percentage > 0 ? '#f59e0b' : '#ef4444') }}></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
-                    <span className={`badge ${p.check2 ? "badge-success" : "badge-warning"}`}>{p.check2 ? "ส่งคืนแล้ว (เอกสาร)" : "ยังไม่ส่งคืน (เอกสาร)"}</span>
-                  </div>
-                  <div style={{ fontWeight: '600', fontSize: '1.05rem', color: 'var(--text-dark)', marginBottom: '16px' }}>{p.name}</div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-light)' }}>ชนิดสายไฟ:</span>
-                      <span style={{ fontWeight: '500' }}>{wireDataList.find(w => w.id === p.scrap_wire_type)?.name || p.scrap_wire_type || "ยังไม่ได้ระบุ"}</span>
+              {projectStats.map(p => {
+                const isEditing = editingId === p.id;
+                return (
+                  <div key={p.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: p.percentage >= 100 ? '#10b981' : (p.percentage > 0 ? '#f59e0b' : '#ef4444') }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                      <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
+                      <span className={`badge ${p.check2 ? "badge-success" : "badge-warning"}`}>{p.check2 ? "ส่งคืนแล้ว (เอกสาร)" : "ยังไม่ส่งคืน (เอกสาร)"}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-light)' }}>ระยะทางที่รื้อถอน:</span>
-                      <span style={{ fontWeight: '500' }}>{p.scrap_wire_length || 0} กม.</span>
-                    </div>
-                  </div>
+                    <div style={{ fontWeight: '600', fontSize: '1.05rem', color: 'var(--text-dark)', marginBottom: '16px' }}>{p.name}</div>
+                    
+                    {isEditing ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                        <div>
+                          <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>ชนิดสายไฟ</label>
+                          <select className="form-select" value={editForm.scrap_wire_type} onChange={(e) => setEditForm({ ...editForm, scrap_wire_type: e.target.value })} style={{ padding: '6px' }}>
+                            <option value="">-- เลือกชนิดสายไฟ --</option>
+                            {wireDataList.map(wire => (
+                              <option key={wire.id} value={wire.id}>{wire.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>ระยะทางที่รื้อถอน (กม.)</label>
+                          <input type="number" min="0" step="0.01" className="form-control" value={editForm.scrap_wire_length} onChange={(e) => setEditForm({ ...editForm, scrap_wire_length: e.target.value === "" ? "" : Number(e.target.value) })} style={{ padding: '6px' }} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>น้ำหนักที่ส่งคืนจริง (กก.)</label>
+                          <input type="number" min="0" className="form-control" value={editForm.scrap_returned_weight} onChange={(e) => setEditForm({ ...editForm, scrap_returned_weight: e.target.value === "" ? "" : Number(e.target.value) })} style={{ padding: '6px' }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                          <button onClick={() => setEditingId(null)} className="btn" style={{ padding: '6px 12px', fontSize: '0.85rem', background: '#f1f5f9' }}>ยกเลิก</button>
+                          <button onClick={() => handleSave(p.id)} disabled={isSaving} className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Save size={14} /> บันทึก
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-light)' }}>ชนิดสายไฟ:</span>
+                            <span style={{ fontWeight: '500' }}>{wireDataList.find(w => w.id === p.scrap_wire_type)?.name || p.scrap_wire_type || "ยังไม่ได้ระบุ"}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-light)' }}>ระยะทางที่รื้อถอน:</span>
+                            <span style={{ fontWeight: '500' }}>{p.scrap_wire_length || 0} กม.</span>
+                          </div>
+                        </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                      <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>ประมาณการ: {p.estimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
-                      <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>ส่งคืนแล้ว: {p.returned.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
-                    </div>
-                    <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${p.percentage}%`, backgroundColor: p.percentage >= 100 ? "#10b981" : "#3b82f6", transition: "width 0.3s ease" }}></div>
-                    </div>
-                    <div style={{ textAlign: 'right', fontSize: '0.85rem', fontWeight: '600', color: p.percentage >= 100 ? '#10b981' : 'var(--pea-purple)' }}>
-                      {p.percentage.toLocaleString(undefined, { maximumFractionDigits: 2 })}%
-                    </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                            <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>ประมาณการ: {p.estimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>ส่งคืนแล้ว: {p.returned.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
+                          </div>
+                          <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${p.percentage}%`, backgroundColor: p.percentage >= 100 ? "#10b981" : "#3b82f6", transition: "width 0.3s ease" }}></div>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            {userRole === "admin" ? (
+                              <button onClick={() => startEdit(p)} className="btn" style={{ padding: '4px 8px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid #cbd5e1', color: '#475569' }}>
+                                <Edit2 size={12} /> อัพเดทข้อมูล
+                              </button>
+                            ) : <div></div>}
+                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: p.percentage >= 100 ? '#10b981' : 'var(--pea-purple)' }}>
+                              {p.percentage.toLocaleString(undefined, { maximumFractionDigits: 2 })}%
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
               
               {projectStats.length === 0 && (
                 <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
