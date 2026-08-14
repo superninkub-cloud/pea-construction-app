@@ -5,19 +5,36 @@ import TopBar from "../components/TopBar";
 import { supabase } from "../../lib/supabaseClient";
 import { wireDataList } from "../../lib/wireData";
 import { Project } from "../../lib/types";
+import { Edit2, Save, X, Plus } from "lucide-react";
 
 export default function WireReturnPage() {
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState("user");
+  
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{
+    scrap_wire_type: string;
+    scrap_wire_length: number | "";
+    scrap_returned_weight: number | "";
+  }>({ scrap_wire_type: "", scrap_wire_length: "", scrap_returned_weight: "" });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addSelectedId, setAddSelectedId] = useState("");
 
   useEffect(() => {
     fetchProjects();
+    const role = sessionStorage.getItem("pea_role");
+    if (role) setUserRole(role);
   }, []);
 
   const fetchProjects = async () => {
     try {
       const { data, error } = await supabase.from("projects").select("*").order("wbs");
       if (data) {
+        setAllProjects(data);
         // Filter projects that have scrap wire info
         const filtered = data.filter((p: any) => p.scrap_wire_type || p.scrap_wire_length > 0);
         setProjects(filtered);
@@ -26,6 +43,62 @@ export default function WireReturnPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const startEdit = (p: Project) => {
+    setEditingId(p.id);
+    setEditForm({
+      scrap_wire_type: p.scrap_wire_type || "",
+      scrap_wire_length: p.scrap_wire_length || "",
+      scrap_returned_weight: p.scrap_returned_weight || ""
+    });
+  };
+
+  const handleSave = async (id: string) => {
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.from("projects").update({
+        scrap_wire_type: editForm.scrap_wire_type,
+        scrap_wire_length: Number(editForm.scrap_wire_length) || 0,
+        scrap_returned_weight: Number(editForm.scrap_returned_weight) || 0
+      }).eq("id", id);
+      
+      if (error) throw error;
+      await fetchProjects();
+      setEditingId(null);
+    } catch (err) {
+      console.error(err);
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAddProject = async () => {
+    if (!addSelectedId || !editForm.scrap_wire_type || editForm.scrap_wire_length === "") {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.from("projects").update({
+        scrap_wire_type: editForm.scrap_wire_type,
+        scrap_wire_length: Number(editForm.scrap_wire_length) || 0,
+        scrap_returned_weight: Number(editForm.scrap_returned_weight) || 0
+      }).eq("id", addSelectedId);
+      
+      if (error) throw error;
+      await fetchProjects();
+      setIsAddModalOpen(false);
+      setAddSelectedId("");
+      setEditForm({ scrap_wire_type: "", scrap_wire_length: "", scrap_returned_weight: "" });
+    } catch (err) {
+      console.error(err);
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -74,7 +147,21 @@ export default function WireReturnPage() {
               </div>
             </div>
 
-            <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", marginBottom: "16px" }}>รายการงานก่อสร้างที่ต้องส่งคืนเศษสาย</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "16px" }}>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", margin: 0 }}>รายการงานก่อสร้างที่ต้องส่งคืนเศษสาย</h2>
+              {userRole === "admin" && (
+                <button
+                  onClick={() => {
+                    setEditForm({ scrap_wire_type: "", scrap_wire_length: "", scrap_returned_weight: "" });
+                    setIsAddModalOpen(true);
+                  }}
+                  className="btn btn-primary"
+                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "0.9rem" }}
+                >
+                  <Plus size={16} /> ดึงงานก่อสร้างมาประเมินเศษสาย
+                </button>
+              )}
+            </div>
             
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))", gap: "24px" }}>
               {projectStats.map(p => (
@@ -114,13 +201,60 @@ export default function WireReturnPage() {
               
               {projectStats.length === 0 && (
                 <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
-                  ยังไม่มีข้อมูลงานก่อสร้างที่มีการรื้อถอนเศษสาย (กรุณากรอกข้อมูลในหน้าอัพเดทสถานะงาน)
+                  ยังไม่มีข้อมูลงานก่อสร้างที่มีการรื้อถอนเศษสาย
                 </div>
               )}
             </div>
           </>
         )}
       </div>
+
+      {isAddModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="card animation-fade-in" style={{ width: '100%', maxWidth: '600px', margin: 0, position: 'relative' }}>
+            <button
+              onClick={() => setIsAddModalOpen(false)}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)' }}
+            >
+              <X />
+            </button>
+            <h3 style={{ color: 'var(--pea-purple)', marginBottom: '24px', fontWeight: 'bold' }}>ดึงงานก่อสร้างมาประเมินเศษสาย</h3>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label className="form-label">เลือกโครงการ</label>
+              <select className="form-select" value={addSelectedId} onChange={(e) => setAddSelectedId(e.target.value)}>
+                <option value="">-- เลือกโครงการ --</option>
+                {allProjects.filter(p => !projects.find(ext => ext.id === p.id)).map(p => (
+                  <option key={p.id} value={p.id}>[{p.wbs}] {p.name}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+              <div>
+                <label className="form-label">ชนิดสายไฟที่รื้อถอน</label>
+                <select className="form-select" value={editForm.scrap_wire_type} onChange={(e) => setEditForm({ ...editForm, scrap_wire_type: e.target.value })}>
+                  <option value="">-- เลือกชนิดสายไฟ --</option>
+                  {wireDataList.map(wire => (
+                    <option key={wire.id} value={wire.id}>{wire.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="form-label">ระยะทางที่รื้อถอน (กม.)</label>
+                <input type="number" min="0" step="0.01" className="form-control" value={editForm.scrap_wire_length} onChange={(e) => setEditForm({ ...editForm, scrap_wire_length: e.target.value === "" ? "" : Number(e.target.value) })} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
+              <button className="btn" onClick={() => setIsAddModalOpen(false)} style={{ background: '#f1f5f9', color: 'var(--text-dark)' }}>ยกเลิก</button>
+              <button className="btn btn-primary" onClick={handleAddProject} disabled={isSaving || !addSelectedId || !editForm.scrap_wire_type || editForm.scrap_wire_length === ""}>
+                {isSaving ? "กำลังบันทึก..." : "เพิ่มในรายการติดตาม"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
