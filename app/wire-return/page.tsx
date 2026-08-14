@@ -218,12 +218,22 @@ export default function WireReturnPage() {
     const groupedWiresMap = new Map();
     combinedWires.forEach(w => {
       if (!w.type) return;
-      if (groupedWiresMap.has(w.type)) {
-        const existing = groupedWiresMap.get(w.type);
+      const wd = wireDataList.find(x => x.id === w.type);
+      const cat = wd ? wd.category : (w.type || "ยังไม่ได้ระบุ");
+      const est = wd ? (Number(w.length) || 0) * wd.weightPerMeter : 0;
+      
+      if (groupedWiresMap.has(cat)) {
+        const existing = groupedWiresMap.get(cat);
         existing.length = (Number(existing.length) || 0) + (Number(w.length) || 0);
         existing.returned_weight = (Number(existing.returned_weight) || 0) + (Number(w.returned_weight) || 0);
+        existing.estimated = (Number(existing.estimated) || 0) + est;
       } else {
-        groupedWiresMap.set(w.type, { ...w, length: Number(w.length) || 0, returned_weight: Number(w.returned_weight) || 0 });
+        groupedWiresMap.set(cat, { 
+          category: cat, 
+          length: Number(w.length) || 0, 
+          returned_weight: Number(w.returned_weight) || 0,
+          estimated: est
+        });
       }
     });
     
@@ -234,15 +244,11 @@ export default function WireReturnPage() {
     let estForPercentage = 0;
     
     groupedWires.forEach(w => {
-      const wire = wireDataList.find(wd => wd.id === w.type);
-      const wireEst = wire ? w.length * wire.weightPerMeter : 0;
-      const wireRet = w.returned_weight || 0;
+      est += w.estimated;
+      ret += w.returned_weight;
       
-      est += wireEst;
-      ret += wireRet;
-      
-      if (wireRet > 0) {
-        estForPercentage += wireEst;
+      if (w.returned_weight > 0) {
+        estForPercentage += w.estimated;
       }
     });
     
@@ -451,13 +457,12 @@ export default function WireReturnPage() {
                       <>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
                           {p.combinedWires.length > 0 ? p.combinedWires.map((w: any, idx: number) => {
-                            const wire = wireDataList.find(wd => wd.id === w.type);
-                            const estimatedKg = wire ? (w.length || 0) * wire.weightPerMeter : 0;
+                            const estimatedKg = w.estimated || 0;
                             return (
                               <div key={idx} style={{ borderBottom: idx < p.combinedWires.length - 1 ? '1px solid #e2e8f0' : 'none', paddingBottom: idx < p.combinedWires.length - 1 ? '8px' : '0' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                  <span style={{ color: 'var(--text-light)' }}>ชนิดสายไฟ:</span>
-                                  <span style={{ fontWeight: '500' }}>{wire?.name || w.type || "ยังไม่ได้ระบุ"}</span>
+                                  <span style={{ color: 'var(--text-light)' }}>กลุ่มชนิดสายไฟ:</span>
+                                  <span style={{ fontWeight: '500' }}>{w.category}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                   <span style={{ color: 'var(--text-light)' }}>จำนวนเศษสายส่งคืน:</span>
