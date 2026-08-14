@@ -525,8 +525,8 @@ export default function UpdateStatus() {
                     { label: "1. ขุดหลุมปักเสา", idx: 0, unit: "ต้น" },
                     { label: "2. ปักเสา", idx: 1, unit: "ต้น" },
                     { label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา", idx: 2, unit: "ชุด" },
-                    { label: "4. พาดสายแรงสูง", idx: 3, unit: "เมตร" },
-                    { label: "5. พาดสายแรงต่ำ", idx: 4, unit: "เมตร" },
+                    { label: "4. พาดสายแรงสูง", idx: 3, unit: "วงจร-กม." },
+                    { label: "5. พาดสายแรงต่ำ", idx: 4, unit: "วงจร-กม." },
                     { label: "6. งานรื้อถอน", idx: 5, unit: "ต้น" }
                   ].map(step => {
                     const weights = constructionType === "2" ? [20, 30, 25, 25, 0, 0] : (constructionType === "3" ? [20, 25, 25, 20, 0, 10] : (constructionType === "4" ? [0, 0, 50, 50, 0, 0] : [15, 25, 20, 20, 10, 10]));
