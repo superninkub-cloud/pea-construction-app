@@ -96,9 +96,9 @@ export default function WireReturnPage() {
       if (error) throw error;
       await fetchProjects();
       setEditingId(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + (err.message || JSON.stringify(err)));
     } finally {
       setIsSaving(false);
     }
@@ -131,9 +131,9 @@ export default function WireReturnPage() {
       setIsAddModalOpen(false);
       setAddSelectedId("");
       setEditWires([]);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + (err.message || JSON.stringify(err)));
     } finally {
       setIsSaving(false);
     }
