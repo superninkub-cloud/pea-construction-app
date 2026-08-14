@@ -5,7 +5,7 @@ import TopBar from "../components/TopBar";
 import { supabase } from "../../lib/supabaseClient";
 import { wireDataList } from "../../lib/wireData";
 import { Project } from "../../lib/types";
-import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Info } from "lucide-react";
+import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Info, Calculator } from "lucide-react";
 
 export default function WireReturnPage() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
@@ -29,6 +29,12 @@ export default function WireReturnPage() {
 
   const [filterSupervisor, setFilterSupervisor] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+
+  // Calculator State
+  const [calcWireId, setCalcWireId] = useState("");
+  const [calcLength, setCalcLength] = useState("");
+  const [calcWeight, setCalcWeight] = useState("");
+  const [calcActiveInput, setCalcActiveInput] = useState<"length" | "weight" | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -280,6 +286,43 @@ export default function WireReturnPage() {
   const uniqueSupervisors = Array.from(new Set(projectStats.map(p => p.supervisor).filter(Boolean)));
   const uniqueStatuses = Array.from(new Set(projectStats.map(p => p.status).filter(Boolean)));
 
+  // Calculator Logic
+  const selectedCalcWire = wireDataList.find(w => w.id === calcWireId);
+  const handleCalcWireChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newId = e.target.value;
+    setCalcWireId(newId);
+    const wire = wireDataList.find(w => w.id === newId);
+    if (wire) {
+      if (calcActiveInput === "length" && calcLength && !isNaN(Number(calcLength))) {
+        setCalcWeight((Number(calcLength) * wire.weightPerMeter).toFixed(2));
+      } else if (calcActiveInput === "weight" && calcWeight && !isNaN(Number(calcWeight)) && wire.weightPerMeter > 0) {
+        setCalcLength((Number(calcWeight) / wire.weightPerMeter).toFixed(2));
+      }
+    }
+  };
+
+  const handleCalcLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcLength(val);
+    setCalcActiveInput("length");
+    if (selectedCalcWire && val && !isNaN(Number(val))) {
+      setCalcWeight((Number(val) * selectedCalcWire.weightPerMeter).toFixed(2));
+    } else {
+      setCalcWeight("");
+    }
+  };
+
+  const handleCalcWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcWeight(val);
+    setCalcActiveInput("weight");
+    if (selectedCalcWire && selectedCalcWire.weightPerMeter > 0 && val && !isNaN(Number(val))) {
+      setCalcLength((Number(val) / selectedCalcWire.weightPerMeter).toFixed(2));
+    } else {
+      setCalcLength("");
+    }
+  };
+
   return (
     <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0" }}>
       <TopBar title="โหมดสถานะการส่งคืนเศษสาย" />
@@ -332,6 +375,68 @@ export default function WireReturnPage() {
                     {overallPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%
                   </div>
                   <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>ความคืบหน้าการส่งคืน</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Calculator Section */}
+            <div className="card animation-fade-in" style={{ background: 'linear-gradient(to right, #f8fafc, #f1f5f9)', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)' }}>
+                  <Calculator size={20} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>โปรแกรมคำนวณเศษสายไฟฟ้า</h3>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>เลือกประเภทสาย / รหัสพัสดุ</label>
+                  <select 
+                    className="form-select"
+                    style={{ width: '100%', padding: '10px 16px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', fontSize: '0.9rem', color: '#334155', fontWeight: '500', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                    value={calcWireId}
+                    onChange={handleCalcWireChange}
+                  >
+                    <option value="">-- เลือกสายไฟฟ้า --</option>
+                    {wireDataList.map(w => (
+                      <option key={w.id} value={w.id}>[{w.id}] {w.name} ({w.category})</option>
+                    ))}
+                  </select>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '6px', height: '16px' }}>
+                    {selectedCalcWire ? (
+                      <>น้ำหนัก: <span style={{ fontWeight: '600', color: '#3b82f6' }}>{selectedCalcWire.weightPerMeter}</span> กก./เมตร</>
+                    ) : ""}
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>ความยาว (เมตร)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="number"
+                      placeholder="ระบุความยาว"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'length' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput === 'weight' && calcLength ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                      value={calcLength}
+                      onChange={handleCalcLengthChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>ม.</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>น้ำหนัก (กิโลกรัม)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="number"
+                      placeholder="ระบุน้ำหนัก"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'weight' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput === 'length' && calcWeight ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                      value={calcWeight}
+                      onChange={handleCalcWeightChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>กก.</span>
+                  </div>
                 </div>
               </div>
             </div>
