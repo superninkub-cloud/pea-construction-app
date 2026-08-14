@@ -463,6 +463,19 @@ export default function WireReturnPage() {
                                   <span style={{ color: 'var(--text-light)' }}>จำนวนเศษสายส่งคืน:</span>
                                   <span style={{ fontWeight: '500' }}>{w.length || 0} เมตร <span style={{ color: 'var(--pea-purple)', fontSize: '0.9em' }}>({estimatedKg.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.)</span></span>
                                 </div>
+                                {estimatedKg > 0 && (
+                                  <div style={{ marginTop: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
+                                      <span style={{ color: 'var(--text-light)' }}>ส่งคืนแล้ว: {(w.returned_weight || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
+                                      <span style={{ fontWeight: '600', color: (w.returned_weight || 0) > 0 ? '#10b981' : '#f59e0b' }}>
+                                        {(((w.returned_weight || 0) / estimatedKg) * 100).toLocaleString(undefined, { maximumFractionDigits: 2 })}%
+                                      </span>
+                                    </div>
+                                    <div style={{ background: "#f1f5f9", height: "4px", borderRadius: "2px", overflow: "hidden" }}>
+                                      <div style={{ height: "100%", width: `${Math.min((((w.returned_weight || 0) / estimatedKg) * 100), 100)}%`, backgroundColor: ((w.returned_weight || 0) / estimatedKg) * 100 >= 100 ? "#10b981" : "#3b82f6", transition: "width 0.3s ease" }}></div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             );
                           }) : (
