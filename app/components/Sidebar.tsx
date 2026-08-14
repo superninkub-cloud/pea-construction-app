@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut } from "lucide-react";
+import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut, Recycle } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 
 export default function Sidebar() {
@@ -31,6 +31,10 @@ export default function Sidebar() {
         <Link href="/update" className={`nav-item ${pathname === "/update" ? "active" : ""}`}>
           <FileEdit size={20} />
           <span>อัพเดทสถานะงาน</span>
+        </Link>
+        <Link href="/wire-return" className={`nav-item ${pathname === "/wire-return" ? "active" : ""}`}>
+          <Recycle size={20} />
+          <span>สถานะการส่งคืนเศษสาย</span>
         </Link>
         <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`}>
           <CalendarDays size={20} />

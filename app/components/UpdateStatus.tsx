@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
 import { Plus, X } from "lucide-react";
+import { wireDataList } from "../../lib/wireData";
 
 export default function UpdateStatus() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -36,6 +37,9 @@ export default function UpdateStatus() {
     check1: false, check2: false, check3: false, check4: false,
     check5: false, check6: false, check7: false, check8: false
   });
+  const [scrapWireType, setScrapWireType] = useState("");
+  const [scrapWireLength, setScrapWireLength] = useState<number | "">("");
+  const [scrapReturnedWeight, setScrapReturnedWeight] = useState<number | "">("");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
 
@@ -152,6 +156,9 @@ export default function UpdateStatus() {
 
         setOldRemarks(cleanedRemarks);
         setNewRemarks("");
+        setScrapWireType(p.scrap_wire_type || "");
+        setScrapWireLength(p.scrap_wire_length || "");
+        setScrapReturnedWeight(p.scrap_returned_weight || "");
         setChecks({
           check1: p.check1, check2: p.check2, check3: p.check3, check4: p.check4,
           check5: p.check5, check6: p.check6, check7: p.check7, check8: p.check8
@@ -248,6 +255,9 @@ export default function UpdateStatus() {
           step6_target: progTargets[5],
           step6_done: progDone[5],
           manual_progress: manualProgress,
+          scrap_wire_type: scrapWireType,
+          scrap_wire_length: Number(scrapWireLength) || 0,
+          scrap_returned_weight: Number(scrapReturnedWeight) || 0,
           remarks: combinedRemarks,
           image_url: imageUrl,
           ...checks,
@@ -589,6 +599,58 @@ export default function UpdateStatus() {
                   })()}%
                 </span>
               </div>
+            </div>
+
+            <h5 style={{ color: "var(--pea-purple)", marginBottom: "16px", fontWeight: "600", fontSize: '1.1rem' }}>ข้อมูลการส่งคืนเศษสาย</h5>
+            <div style={{ marginBottom: "32px", padding: "20px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                <div>
+                  <label className="form-label">ชนิดสายไฟที่รื้อถอน</label>
+                  <select className="form-select" value={scrapWireType} onChange={(e) => setScrapWireType(e.target.value)}>
+                    <option value="">-- เลือกชนิดสายไฟ --</option>
+                    {wireDataList.map(wire => (
+                      <option key={wire.id} value={wire.id}>{wire.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">ระยะทางที่รื้อถอน (กม.)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="เช่น 1.5"
+                    className="form-control"
+                    value={scrapWireLength}
+                    onChange={(e) => setScrapWireLength(e.target.value === "" ? "" : Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <label className="form-label">น้ำหนักที่ส่งคืนจริง (กก.)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="เช่น 500"
+                    className="form-control"
+                    value={scrapReturnedWeight}
+                    onChange={(e) => setScrapReturnedWeight(e.target.value === "" ? "" : Number(e.target.value))}
+                  />
+                </div>
+              </div>
+              {scrapWireType && scrapWireLength !== "" && (
+                <div style={{ marginTop: '16px', padding: '12px', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                  {(() => {
+                    const wire = wireDataList.find(w => w.id === scrapWireType);
+                    if (!wire) return null;
+                    const estimatedKg = (Number(scrapWireLength) * 1000) * wire.weightPerMeter;
+                    return (
+                      <span style={{ fontSize: '0.9rem', color: '#1e40af' }}>
+                        💡 <strong>ประมาณการน้ำหนักเศษสาย:</strong> {(estimatedKg).toLocaleString(undefined, { maximumFractionDigits: 2 })} กิโลกรัม
+                      </span>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
 
             <h5 style={{ color: "var(--pea-purple)", marginBottom: "16px", fontWeight: "600", fontSize: '1.1rem' }}>ตรวจสอบเช็คลิสท์</h5>

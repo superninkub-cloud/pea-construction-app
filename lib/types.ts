@@ -36,6 +36,9 @@ export interface Project {
   check8: boolean;
   image_url: string;
   updated_at?: string;
+  scrap_wire_type?: string;
+  scrap_wire_length?: number;
+  scrap_returned_weight?: number;
 }
 
 export interface Personnel {
