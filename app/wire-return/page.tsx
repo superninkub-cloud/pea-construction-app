@@ -26,6 +26,9 @@ export default function WireReturnPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addSelectedId, setAddSelectedId] = useState("");
 
+  const [filterSupervisor, setFilterSupervisor] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+
   useEffect(() => {
     fetchProjects();
     const role = sessionStorage.getItem("pea_role");
@@ -136,9 +139,6 @@ export default function WireReturnPage() {
     }
   };
 
-  let totalEstimated = 0;
-  let totalReturned = 0;
-
   const projectStats = projects.map(p => {
     let est = 0;
     let ret = 0;
@@ -158,9 +158,6 @@ export default function WireReturnPage() {
       ret += w.returned_weight || 0;
     });
     
-    totalEstimated += est;
-    totalReturned += ret;
-    
     const combinedWires = [...(p.scrap_wire_type ? [{ type: p.scrap_wire_type, length: p.scrap_wire_length }] : []), ...wiresData];
     
     return {
@@ -172,7 +169,24 @@ export default function WireReturnPage() {
     };
   });
 
+  const filteredProjectStats = projectStats.filter(p => {
+    const matchSupervisor = filterSupervisor ? p.supervisor === filterSupervisor : true;
+    const matchStatus = filterStatus ? p.status === filterStatus : true;
+    return matchSupervisor && matchStatus;
+  });
+
+  let totalEstimated = 0;
+  let totalReturned = 0;
+
+  filteredProjectStats.forEach(p => {
+    totalEstimated += p.estimated;
+    totalReturned += p.returned;
+  });
+
   const overallPercentage = totalEstimated > 0 ? (totalReturned / totalEstimated) * 100 : 0;
+
+  const uniqueSupervisors = Array.from(new Set(projectStats.map(p => p.supervisor).filter(Boolean)));
+  const uniqueStatuses = Array.from(new Set(projectStats.map(p => p.status).filter(Boolean)));
 
   return (
     <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0" }}>
@@ -198,24 +212,47 @@ export default function WireReturnPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "16px" }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "16px", flexWrap: "wrap", gap: "16px" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", margin: 0 }}>รายการงานก่อสร้างที่ต้องส่งคืนเศษสาย</h2>
-              {userRole === "admin" && (
-                <button
-                  onClick={() => {
-                    setEditWires([{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }]);
-                    setIsAddModalOpen(true);
-                  }}
-                  className="btn btn-primary"
-                  style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "0.9rem" }}
+              
+              <div style={{ display: 'flex', gap: '12px', flexWrap: "wrap", alignItems: "center" }}>
+                <select 
+                  className="form-select" 
+                  style={{ width: "200px" }}
+                  value={filterSupervisor}
+                  onChange={e => setFilterSupervisor(e.target.value)}
                 >
-                  <Plus size={16} /> ดึงงานก่อสร้างมาประเมินเศษสาย
-                </button>
-              )}
+                  <option value="">-- ผู้ควบคุมงานทั้งหมด --</option>
+                  {uniqueSupervisors.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+
+                <select 
+                  className="form-select" 
+                  style={{ width: "200px" }}
+                  value={filterStatus}
+                  onChange={e => setFilterStatus(e.target.value)}
+                >
+                  <option value="">-- สถานะทั้งหมด --</option>
+                  {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+
+                {userRole === "admin" && (
+                  <button
+                    onClick={() => {
+                      setEditWires([{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }]);
+                      setIsAddModalOpen(true);
+                    }}
+                    className="btn btn-primary"
+                    style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "0.9rem", whiteSpace: "nowrap" }}
+                  >
+                    <Plus size={16} /> ดึงงานก่อสร้างมาประเมินเศษสาย
+                  </button>
+                )}
+              </div>
             </div>
             
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))", gap: "24px" }}>
-              {projectStats.map(p => {
+              {filteredProjectStats.map(p => {
                 const isEditing = editingId === p.id;
                 return (
                   <div key={p.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -224,7 +261,11 @@ export default function WireReturnPage() {
                       <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
                       <span className={`badge ${p.check2 ? "badge-success" : "badge-warning"}`}>{p.check2 ? "ส่งคืนแล้ว (เอกสาร)" : "ยังไม่ส่งคืน (เอกสาร)"}</span>
                     </div>
-                    <div style={{ fontWeight: '600', fontSize: '1.05rem', color: 'var(--text-dark)', marginBottom: '16px' }}>{p.name}</div>
+                    <div style={{ fontWeight: '600', fontSize: '1.05rem', color: 'var(--text-dark)', marginBottom: '8px' }}>{p.name}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '16px' }}>
+                      <span>ผู้ควบคุมงาน: <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{p.supervisor || '-'}</span></span>
+                      <span>สถานะ: <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{p.status || '-'}</span></span>
+                    </div>
                     
                     {isEditing ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
@@ -318,7 +359,7 @@ export default function WireReturnPage() {
                 );
               })}
               
-              {projectStats.length === 0 && (
+              {filteredProjectStats.length === 0 && (
                 <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
                   ยังไม่มีข้อมูลงานก่อสร้างที่มีการรื้อถอนเศษสาย
                 </div>

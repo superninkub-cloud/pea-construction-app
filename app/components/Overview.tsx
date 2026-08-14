@@ -377,7 +377,7 @@ export default function Overview() {
                             const w = type === "2" ? [20, 30, 25, 25, 0, 0] : (type === "3" ? [20, 25, 25, 20, 0, 10] : (type === "4" ? [0, 0, 50, 50, 0, 0] : [15, 25, 20, 20, 10, 10]));
                             const targets = [p.step1_target, p.step2_target, p.step3_target, p.step4_target, p.step5_target, p.step6_target].map(val => Number(val) || 0);
                             const dones = [p.step1_done, p.step2_done, p.step3_done, p.step4_done, p.step5_done, p.step6_done].map(val => Number(val) || 0);
-                            
+
                             return dones.reduce((sum, doneVal, idx) => {
                               const targetVal = targets[idx];
                               if (targetVal === 0 || w[idx] === 0) return sum;
@@ -386,7 +386,7 @@ export default function Overview() {
                               return sum + (cappedPercent * w[idx]);
                             }, 0);
                           })();
-                          
+
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
                               <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px', textAlign: 'left' }}>หน้างาน:</span>
@@ -399,7 +399,7 @@ export default function Overview() {
                             </div>
                           );
                         })()}
-                        
+
                         {/* Admin 8 Steps Progress */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '8px' }}>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px', textAlign: 'left' }}>เอกสาร:</span>
