@@ -304,29 +304,39 @@ export default function WireReturnPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "16px", flexWrap: "wrap", gap: "16px" }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", margin: 0 }}>รายการงานก่อสร้างที่ต้องส่งคืนเศษสาย</h2>
               
-              <div style={{ display: 'flex', gap: '12px', flexWrap: "wrap", alignItems: "center" }}>
-                <select 
-                  className="form-select" 
-                  style={{ width: "200px" }}
-                  value={filterSupervisor}
-                  onChange={e => setFilterSupervisor(e.target.value)}
-                >
-                  <option value="">-- ผู้ควบคุมงานทั้งหมด --</option>
-                  {uniqueSupervisors.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: "wrap", alignItems: "center" }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: '#f8fafc', padding: '10px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)' }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>👷 ผู้ควบคุมงาน:</span>
+                    <select 
+                      className="form-select" 
+                      style={{ width: "180px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
+                      value={filterSupervisor}
+                      onChange={e => setFilterSupervisor(e.target.value)}
+                    >
+                      <option value="">แสดงทั้งหมด</option>
+                      {uniqueSupervisors.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
 
-                <select 
-                  className="form-select" 
-                  style={{ width: "200px" }}
-                  value={filterStatus}
-                  onChange={e => setFilterStatus(e.target.value)}
-                >
-                  <option value="">-- สถานะทั้งหมด --</option>
-                  {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                  <div style={{ width: "1px", height: "32px", background: "#cbd5e1" }}></div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>📌 สถานะ:</span>
+                    <select 
+                      className="form-select" 
+                      style={{ width: "160px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
+                      value={filterStatus}
+                      onChange={e => setFilterStatus(e.target.value)}
+                    >
+                      <option value="">แสดงทั้งหมด</option>
+                      {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                </div>
 
                 {userRole === "admin" && (
                   <button
@@ -335,9 +345,9 @@ export default function WireReturnPage() {
                       setIsAddModalOpen(true);
                     }}
                     className="btn btn-primary"
-                    style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px", fontSize: "0.9rem", whiteSpace: "nowrap" }}
+                    style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", fontSize: "0.95rem", fontWeight: "600", whiteSpace: "nowrap", boxShadow: "0 4px 6px -1px rgba(124, 58, 237, 0.3)", transition: "all 0.2s" }}
                   >
-                    <Plus size={16} /> ดึงงานก่อสร้างมาประเมินเศษสาย
+                    <Plus size={18} /> ดึงงานก่อสร้างมาประเมินเศษสาย
                   </button>
                 )}
               </div>
