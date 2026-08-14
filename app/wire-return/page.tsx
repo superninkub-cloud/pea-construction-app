@@ -140,32 +140,45 @@ export default function WireReturnPage() {
   };
 
   const projectStats = projects.map(p => {
-    let est = 0;
-    let ret = 0;
+    const combinedWires = [...(p.scrap_wire_type ? [{ type: p.scrap_wire_type, length: p.scrap_wire_length, returned_weight: p.scrap_returned_weight }] : []), ...(p.scrap_wires_data || [])];
     
-    if (p.scrap_wire_type && p.scrap_wire_length) {
-      const wire = wireDataList.find(w => w.id === p.scrap_wire_type);
-      est += wire ? p.scrap_wire_length * wire.weightPerMeter : 0;
-      ret += p.scrap_returned_weight || 0;
-    }
-    
-    const wiresData: any[] = p.scrap_wires_data || [];
-    wiresData.forEach(w => {
-      const wire = wireDataList.find(wd => wd.id === w.type);
-      if (wire && w.length) {
-        est += w.length * wire.weightPerMeter;
+    const groupedWiresMap = new Map();
+    combinedWires.forEach(w => {
+      if (!w.type) return;
+      if (groupedWiresMap.has(w.type)) {
+        const existing = groupedWiresMap.get(w.type);
+        existing.length = (Number(existing.length) || 0) + (Number(w.length) || 0);
+        existing.returned_weight = (Number(existing.returned_weight) || 0) + (Number(w.returned_weight) || 0);
+      } else {
+        groupedWiresMap.set(w.type, { ...w, length: Number(w.length) || 0, returned_weight: Number(w.returned_weight) || 0 });
       }
-      ret += w.returned_weight || 0;
     });
     
-    const combinedWires = [...(p.scrap_wire_type ? [{ type: p.scrap_wire_type, length: p.scrap_wire_length }] : []), ...wiresData];
+    const groupedWires = Array.from(groupedWiresMap.values());
+    
+    let est = 0;
+    let ret = 0;
+    let estForPercentage = 0;
+    
+    groupedWires.forEach(w => {
+      const wire = wireDataList.find(wd => wd.id === w.type);
+      const wireEst = wire ? w.length * wire.weightPerMeter : 0;
+      const wireRet = w.returned_weight || 0;
+      
+      est += wireEst;
+      ret += wireRet;
+      
+      if (wireRet > 0) {
+        estForPercentage += wireEst;
+      }
+    });
     
     return {
       ...p,
       estimated: est,
       returned: ret,
-      percentage: est > 0 ? Math.min(100, (ret / est) * 100) : 0,
-      combinedWires
+      percentage: estForPercentage > 0 ? Math.min(100, (ret / estForPercentage) * 100) : 0,
+      combinedWires: groupedWires
     };
   });
 
@@ -177,13 +190,21 @@ export default function WireReturnPage() {
 
   let totalEstimated = 0;
   let totalReturned = 0;
+  let totalEstForPercentage = 0;
 
   filteredProjectStats.forEach(p => {
     totalEstimated += p.estimated;
     totalReturned += p.returned;
+    
+    p.combinedWires.forEach((w: any) => {
+      const wire = wireDataList.find(wd => wd.id === w.type);
+      if (wire && w.returned_weight > 0) {
+        totalEstForPercentage += w.length * wire.weightPerMeter;
+      }
+    });
   });
 
-  const overallPercentage = totalEstimated > 0 ? (totalReturned / totalEstimated) * 100 : 0;
+  const overallPercentage = totalEstForPercentage > 0 ? (totalReturned / totalEstForPercentage) * 100 : 0;
 
   const uniqueSupervisors = Array.from(new Set(projectStats.map(p => p.supervisor).filter(Boolean)));
   const uniqueStatuses = Array.from(new Set(projectStats.map(p => p.status).filter(Boolean)));
@@ -318,18 +339,22 @@ export default function WireReturnPage() {
                     ) : (
                       <>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-                          {p.combinedWires.length > 0 ? p.combinedWires.map((w: any, idx: number) => (
-                            <div key={idx} style={{ borderBottom: idx < p.combinedWires.length - 1 ? '1px solid #e2e8f0' : 'none', paddingBottom: idx < p.combinedWires.length - 1 ? '8px' : '0' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ color: 'var(--text-light)' }}>ชนิดสายไฟ:</span>
-                                <span style={{ fontWeight: '500' }}>{wireDataList.find(wd => wd.id === w.type)?.name || w.type || "ยังไม่ได้ระบุ"}</span>
+                          {p.combinedWires.length > 0 ? p.combinedWires.map((w: any, idx: number) => {
+                            const wire = wireDataList.find(wd => wd.id === w.type);
+                            const estimatedKg = wire ? (w.length || 0) * wire.weightPerMeter : 0;
+                            return (
+                              <div key={idx} style={{ borderBottom: idx < p.combinedWires.length - 1 ? '1px solid #e2e8f0' : 'none', paddingBottom: idx < p.combinedWires.length - 1 ? '8px' : '0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <span style={{ color: 'var(--text-light)' }}>ชนิดสายไฟ:</span>
+                                  <span style={{ fontWeight: '500' }}>{wire?.name || w.type || "ยังไม่ได้ระบุ"}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <span style={{ color: 'var(--text-light)' }}>จำนวนเศษสายส่งคืน:</span>
+                                  <span style={{ fontWeight: '500' }}>{w.length || 0} เมตร <span style={{ color: 'var(--pea-purple)', fontSize: '0.9em' }}>({estimatedKg.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.)</span></span>
+                                </div>
                               </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ color: 'var(--text-light)' }}>จำนวนเศษสายส่งคืน:</span>
-                                <span style={{ fontWeight: '500' }}>{w.length || 0} เมตร</span>
-                              </div>
-                            </div>
-                          )) : (
+                            );
+                          }) : (
                             <div style={{ textAlign: 'center', color: 'var(--text-light)' }}>ยังไม่ได้ระบุชนิดสายไฟ</div>
                           )}
                         </div>
