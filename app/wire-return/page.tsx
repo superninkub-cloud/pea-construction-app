@@ -145,7 +145,7 @@ export default function WireReturnPage() {
     
     if (p.scrap_wire_type && p.scrap_wire_length) {
       const wire = wireDataList.find(w => w.id === p.scrap_wire_type);
-      est += wire ? (p.scrap_wire_length * 1000) * wire.weightPerMeter : 0;
+      est += wire ? p.scrap_wire_length * wire.weightPerMeter : 0;
       ret += p.scrap_returned_weight || 0;
     }
     
@@ -153,7 +153,7 @@ export default function WireReturnPage() {
     wiresData.forEach(w => {
       const wire = wireDataList.find(wd => wd.id === w.type);
       if (wire && w.length) {
-        est += (w.length * 1000) * wire.weightPerMeter;
+        est += w.length * wire.weightPerMeter;
       }
       ret += w.returned_weight || 0;
     });
@@ -288,7 +288,7 @@ export default function WireReturnPage() {
                               </select>
                             </div>
                             <div style={{ marginTop: '8px' }}>
-                              <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>ระยะทางที่รื้อถอน (กม.)</label>
+                              <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>จำนวนเศษสายส่งคืน (เมตร)</label>
                               <input type="number" min="0" step="0.01" className="form-control" value={wire.length} onChange={(e) => {
                                 const newWires = [...editWires];
                                 newWires[idx].length = e.target.value === "" ? "" : Number(e.target.value);
@@ -325,8 +325,8 @@ export default function WireReturnPage() {
                                 <span style={{ fontWeight: '500' }}>{wireDataList.find(wd => wd.id === w.type)?.name || w.type || "ยังไม่ได้ระบุ"}</span>
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ color: 'var(--text-light)' }}>ระยะทางที่รื้อถอน:</span>
-                                <span style={{ fontWeight: '500' }}>{w.length || 0} กม.</span>
+                                <span style={{ color: 'var(--text-light)' }}>จำนวนเศษสายส่งคืน:</span>
+                                <span style={{ fontWeight: '500' }}>{w.length || 0} เมตร</span>
                               </div>
                             </div>
                           )) : (
@@ -411,7 +411,7 @@ export default function WireReturnPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="form-label">ระยะทางที่รื้อถอน (กม.)</label>
+                      <label className="form-label">จำนวนเศษสายส่งคืน (เมตร)</label>
                       <input type="number" min="0" step="0.01" className="form-control" value={wire.length} onChange={(e) => {
                         const newWires = [...editWires];
                         newWires[idx].length = e.target.value === "" ? "" : Number(e.target.value);
