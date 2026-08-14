@@ -269,21 +269,13 @@ export default function WireReturnPage() {
 
   let totalEstimated = 0;
   let totalReturned = 0;
-  let totalEstForPercentage = 0;
 
   filteredProjectStats.forEach(p => {
     totalEstimated += p.estimated;
     totalReturned += p.returned;
-    
-    p.combinedWires.forEach((w: any) => {
-      const wire = wireDataList.find(wd => wd.id === w.type);
-      if (wire && w.returned_weight > 0) {
-        totalEstForPercentage += w.length * wire.weightPerMeter;
-      }
-    });
   });
 
-  const overallPercentage = totalEstForPercentage > 0 ? (totalReturned / totalEstForPercentage) * 100 : 0;
+  const overallPercentage = totalEstimated > 0 ? (totalReturned / totalEstimated) * 100 : 0;
 
   const uniqueSupervisors = Array.from(new Set(projectStats.map(p => p.supervisor).filter(Boolean)));
   const uniqueStatuses = Array.from(new Set(projectStats.map(p => p.status).filter(Boolean)));
