@@ -33,8 +33,9 @@ export default function WireReturnPage() {
   // Calculator State
   const [calcWireId, setCalcWireId] = useState("");
   const [calcLength, setCalcLength] = useState("");
+  const [calcPercentage, setCalcPercentage] = useState("100");
   const [calcWeight, setCalcWeight] = useState("");
-  const [calcActiveInput, setCalcActiveInput] = useState<"length" | "weight" | null>(null);
+  const [calcActiveInput, setCalcActiveInput] = useState<"length" | "weight" | "percentage" | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -288,15 +289,25 @@ export default function WireReturnPage() {
 
   // Calculator Logic
   const selectedCalcWire = wireDataList.find(w => w.id === calcWireId);
+
   const handleCalcWireChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newId = e.target.value;
     setCalcWireId(newId);
     const wire = wireDataList.find(w => w.id === newId);
     if (wire) {
-      if (calcActiveInput === "length" && calcLength && !isNaN(Number(calcLength))) {
-        setCalcWeight((Number(calcLength) * wire.weightPerMeter).toFixed(2));
+      if ((calcActiveInput === "length" || calcActiveInput === "percentage") && calcLength && !isNaN(Number(calcLength))) {
+        const p = Number(calcPercentage) || 0;
+        setCalcWeight((Number(calcLength) * (p / 100) * wire.weightPerMeter).toFixed(2));
       } else if (calcActiveInput === "weight" && calcWeight && !isNaN(Number(calcWeight)) && wire.weightPerMeter > 0) {
-        setCalcLength((Number(calcWeight) / wire.weightPerMeter).toFixed(2));
+        if (calcLength && !isNaN(Number(calcLength)) && Number(calcLength) > 0) {
+           const newPercent = (Number(calcWeight) / (Number(calcLength) * wire.weightPerMeter)) * 100;
+           setCalcPercentage(newPercent.toFixed(1));
+        } else {
+           const p = Number(calcPercentage) || 100;
+           if (p > 0) {
+             setCalcLength((Number(calcWeight) / (wire.weightPerMeter * (p / 100))).toFixed(2));
+           }
+        }
       }
     }
   };
@@ -306,9 +317,25 @@ export default function WireReturnPage() {
     setCalcLength(val);
     setCalcActiveInput("length");
     if (selectedCalcWire && val && !isNaN(Number(val))) {
-      setCalcWeight((Number(val) * selectedCalcWire.weightPerMeter).toFixed(2));
+      const p = Number(calcPercentage) || 0;
+      setCalcWeight((Number(val) * (p / 100) * selectedCalcWire.weightPerMeter).toFixed(2));
     } else {
       setCalcWeight("");
+    }
+  };
+
+  const handleCalcPercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcPercentage(val);
+    setCalcActiveInput("percentage");
+    if (selectedCalcWire && calcLength && !isNaN(Number(calcLength))) {
+      const p = Number(val) || 0;
+      setCalcWeight((Number(calcLength) * (p / 100) * selectedCalcWire.weightPerMeter).toFixed(2));
+    } else if (selectedCalcWire && calcWeight && !isNaN(Number(calcWeight))) {
+      const p = Number(val) || 0;
+      if (p > 0) {
+        setCalcLength((Number(calcWeight) / (selectedCalcWire.weightPerMeter * (p / 100))).toFixed(2));
+      }
     }
   };
 
@@ -317,9 +344,17 @@ export default function WireReturnPage() {
     setCalcWeight(val);
     setCalcActiveInput("weight");
     if (selectedCalcWire && selectedCalcWire.weightPerMeter > 0 && val && !isNaN(Number(val))) {
-      setCalcLength((Number(val) / selectedCalcWire.weightPerMeter).toFixed(2));
-    } else {
-      setCalcLength("");
+      if (calcLength && !isNaN(Number(calcLength)) && Number(calcLength) > 0) {
+        const newPercent = (Number(val) / (Number(calcLength) * selectedCalcWire.weightPerMeter)) * 100;
+        setCalcPercentage(newPercent.toFixed(1));
+      } else {
+        const p = Number(calcPercentage) || 100;
+        if (p > 0) {
+          setCalcLength((Number(val) / (selectedCalcWire.weightPerMeter * (p / 100))).toFixed(2));
+        }
+      }
+    } else if (!val) {
+      setCalcPercentage("100");
     }
   };
 
@@ -388,7 +423,7 @@ export default function WireReturnPage() {
                 <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>โปรแกรมคำนวณเศษสายไฟฟ้า</h3>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>เลือกประเภทสาย / รหัสพัสดุ</label>
                   <select 
@@ -415,7 +450,7 @@ export default function WireReturnPage() {
                     <input 
                       type="number"
                       placeholder="ระบุความยาว"
-                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'length' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput === 'weight' && calcLength ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'length' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'length' && calcLength ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
                       value={calcLength}
                       onChange={handleCalcLengthChange}
                       disabled={!selectedCalcWire}
@@ -425,12 +460,27 @@ export default function WireReturnPage() {
                 </div>
 
                 <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>% ส่งคืน</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="number"
+                      placeholder="เช่น 100"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'percentage' ? '#0f172a' : '#64748b', fontWeight: calcActiveInput !== 'percentage' && calcPercentage !== "100" ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                      value={calcPercentage}
+                      onChange={handleCalcPercentageChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>%</span>
+                  </div>
+                </div>
+
+                <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>น้ำหนัก (กิโลกรัม)</label>
                   <div style={{ position: 'relative' }}>
                     <input 
                       type="number"
                       placeholder="ระบุน้ำหนัก"
-                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'weight' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput === 'length' && calcWeight ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'weight' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'weight' && calcWeight ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
                       value={calcWeight}
                       onChange={handleCalcWeightChange}
                       disabled={!selectedCalcWire}
