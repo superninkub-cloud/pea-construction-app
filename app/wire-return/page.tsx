@@ -20,7 +20,8 @@ export default function WireReturnPage() {
     returned_weight: number | "";
   }
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editWires, setEditWires] = useState<WireItem[]>([]);
+  const [editWires, setEditWires] = useState<ScrapWireData[]>([]);
+  const [categoryReturnedWeights, setCategoryReturnedWeights] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -57,34 +58,78 @@ export default function WireReturnPage() {
 
   const startEdit = (p: Project) => {
     setEditingId(p.id);
+    let initialWires: ScrapWireData[] = [];
     if (p.scrap_wires_data && p.scrap_wires_data.length > 0) {
-      setEditWires(p.scrap_wires_data.map(w => ({
+      initialWires = p.scrap_wires_data.map(w => ({
         id: w.id || Date.now().toString() + Math.random(),
         type: w.type || "",
         length: w.length || "",
         returned_weight: w.returned_weight || ""
-      })));
+      }));
     } else if (p.scrap_wire_type || p.scrap_wire_length) {
-      setEditWires([{
+      initialWires = [{
         id: Date.now().toString(),
         type: p.scrap_wire_type || "",
         length: p.scrap_wire_length || "",
         returned_weight: p.scrap_returned_weight || ""
-      }]);
+      }];
     } else {
-      setEditWires([{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }]);
+      initialWires = [{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }];
     }
+    setEditWires(initialWires);
+
+    const initialCatWeights: Record<string, string> = {};
+    initialWires.forEach(w => {
+      const wd = wireDataList.find(x => x.id === w.type);
+      const cat = wd ? wd.category : (w.type || "ยังไม่ได้ระบุ");
+      if (w.returned_weight) {
+        initialCatWeights[cat] = (Number(initialCatWeights[cat] || 0) + Number(w.returned_weight)).toString();
+      }
+    });
+    setCategoryReturnedWeights(initialCatWeights);
   };
 
   const handleSave = async (id: string) => {
     setIsSaving(true);
     try {
-      const formattedWires = editWires.map(w => ({
-        id: w.id,
-        type: w.type,
-        length: Number(w.length) || 0,
-        returned_weight: Number(w.returned_weight) || 0
-      }));
+      // Calculate total estimated weight per category
+      const catEstMap: Record<string, number> = {};
+      editWires.forEach(w => {
+        const wd = wireDataList.find(x => x.id === w.type);
+        const cat = wd ? wd.category : (w.type || "ยังไม่ได้ระบุ");
+        const est = wd ? (Number(w.length) || 0) * wd.weightPerMeter : 0;
+        catEstMap[cat] = (catEstMap[cat] || 0) + est;
+      });
+
+      const formattedWires = editWires.map(w => {
+        const wd = wireDataList.find(x => x.id === w.type);
+        const cat = wd ? wd.category : (w.type || "ยังไม่ได้ระบุ");
+        const est = wd ? (Number(w.length) || 0) * wd.weightPerMeter : 0;
+        const catTotalEst = catEstMap[cat] || 0;
+        const catRetWeight = Number(categoryReturnedWeights[cat]) || 0;
+        
+        let distributedRet = 0;
+        if (catTotalEst > 0) {
+          distributedRet = catRetWeight * (est / catTotalEst);
+        } else if (editWires.filter(x => {
+          const xwd = wireDataList.find(y => y.id === x.type);
+          return (xwd ? xwd.category : (x.type || "ยังไม่ได้ระบุ")) === cat;
+        }).length > 0) {
+          // If total estimated is 0, just divide evenly
+          const count = editWires.filter(x => {
+            const xwd = wireDataList.find(y => y.id === x.type);
+            return (xwd ? xwd.category : (x.type || "ยังไม่ได้ระบุ")) === cat;
+          }).length;
+          distributedRet = catRetWeight / count;
+        }
+
+        return {
+          id: w.id,
+          type: w.type,
+          length: Number(w.length) || 0,
+          returned_weight: distributedRet
+        };
+      });
       
       const { error } = await supabase.from("projects").update({
         scrap_wires_data: formattedWires,
@@ -112,12 +157,41 @@ export default function WireReturnPage() {
     
     setIsSaving(true);
     try {
-      const formattedWires = editWires.map(w => ({
-        id: w.id,
-        type: w.type,
-        length: Number(w.length) || 0,
-        returned_weight: Number(w.returned_weight) || 0
-      }));
+    try {
+      // Calculate total estimated weight per category
+      const catEstMap: Record<string, number> = {};
+      editWires.forEach(w => {
+        const wd = wireDataList.find(x => x.id === w.type);
+        const cat = wd ? wd.category : (w.type || "ยังไม่ได้ระบุ");
+        const est = wd ? (Number(w.length) || 0) * wd.weightPerMeter : 0;
+        catEstMap[cat] = (catEstMap[cat] || 0) + est;
+      });
+
+      const formattedWires = editWires.map(w => {
+        const wd = wireDataList.find(x => x.id === w.type);
+        const cat = wd ? wd.category : (w.type || "ยังไม่ได้ระบุ");
+        const est = wd ? (Number(w.length) || 0) * wd.weightPerMeter : 0;
+        const catTotalEst = catEstMap[cat] || 0;
+        const catRetWeight = Number(categoryReturnedWeights[cat]) || 0;
+        
+        let distributedRet = 0;
+        if (catTotalEst > 0) {
+          distributedRet = catRetWeight * (est / catTotalEst);
+        } else {
+          const count = editWires.filter(x => {
+            const xwd = wireDataList.find(y => y.id === x.type);
+            return (xwd ? xwd.category : (x.type || "ยังไม่ได้ระบุ")) === cat;
+          }).length;
+          distributedRet = count > 0 ? catRetWeight / count : 0;
+        }
+
+        return {
+          id: w.id,
+          type: w.type,
+          length: Number(w.length) || 0,
+          returned_weight: distributedRet
+        };
+      });
 
       const { error } = await supabase.from("projects").update({
         scrap_wires_data: formattedWires,
@@ -290,6 +364,7 @@ export default function WireReturnPage() {
                     
                     {isEditing ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                        <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>1. ระบุความยาวเศษสายที่รื้อถอน</div>
                         {editWires.map((wire, idx) => (
                           <div key={wire.id} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', position: 'relative', background: '#fff' }}>
                             {editWires.length > 1 && (
@@ -316,19 +391,56 @@ export default function WireReturnPage() {
                                 setEditWires(newWires);
                               }} style={{ padding: '6px' }} />
                             </div>
-                            <div style={{ marginTop: '8px' }}>
-                              <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>น้ำหนักที่ส่งคืนจริง (กก.)</label>
-                              <input type="number" min="0" className="form-control" value={wire.returned_weight} onChange={(e) => {
-                                const newWires = [...editWires];
-                                newWires[idx].returned_weight = e.target.value === "" ? "" : Number(e.target.value);
-                                setEditWires(newWires);
-                              }} style={{ padding: '6px' }} />
-                            </div>
                           </div>
                         ))}
                         <button onClick={() => setEditWires([...editWires, { id: Date.now().toString() + Math.random(), type: "", length: "", returned_weight: "" }])} className="btn" style={{ padding: '6px', fontSize: '0.85rem', background: '#e0e7ff', color: '#4f46e5', border: '1px dashed #4f46e5' }}>
                           + เพิ่มชนิดสายไฟ
                         </button>
+                        
+                        {editWires.some(w => w.type) && (
+                          <div style={{ marginTop: '16px', borderTop: '1px solid #cbd5e1', paddingTop: '16px' }}>
+                            <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b', marginBottom: '12px' }}>2. กรอกน้ำหนักที่ส่งคืนจริงรวมตามกลุ่มสายไฟ</div>
+                            
+                            {(() => {
+                              const editCategoriesMap = new Map();
+                              editWires.forEach(w => {
+                                if (!w.type) return;
+                                const wd = wireDataList.find(x => x.id === w.type);
+                                const cat = wd ? wd.category : w.type;
+                                const est = wd ? (Number(w.length) || 0) * wd.weightPerMeter : 0;
+                                if (editCategoriesMap.has(cat)) {
+                                  editCategoriesMap.get(cat).estimated += est;
+                                } else {
+                                  editCategoriesMap.set(cat, { category: cat, estimated: est });
+                                }
+                              });
+                              
+                              return Array.from(editCategoriesMap.values()).map(catData => (
+                                <div key={catData.category} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', background: '#fff', marginBottom: '8px' }}>
+                                  <div style={{ fontWeight: '600', color: 'var(--pea-purple)', marginBottom: '4px' }}>{catData.category}</div>
+                                  <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '8px' }}>
+                                    ประมาณการรวม: {catData.estimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.
+                                  </div>
+                                  <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>น้ำหนักที่ส่งคืนจริงรวม (กก.)</label>
+                                  <input 
+                                    type="number" 
+                                    min="0" 
+                                    className="form-control" 
+                                    value={categoryReturnedWeights[catData.category] || ""} 
+                                    onChange={(e) => {
+                                      setCategoryReturnedWeights({
+                                        ...categoryReturnedWeights,
+                                        [catData.category]: e.target.value
+                                      });
+                                    }} 
+                                    style={{ padding: '6px', borderColor: categoryReturnedWeights[catData.category] ? '#10b981' : '#cbd5e1' }} 
+                                    placeholder="กรอกน้ำหนักรวมที่ชั่งได้จริง"
+                                  />
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        )}
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>
                           <button onClick={() => setEditingId(null)} className="btn" style={{ padding: '6px 12px', fontSize: '0.85rem', background: '#f1f5f9' }}>ยกเลิก</button>
                           <button onClick={() => handleSave(p.id)} disabled={isSaving} className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -450,6 +562,51 @@ export default function WireReturnPage() {
                 + เพิ่มชนิดสายไฟ
               </button>
             </div>
+
+            {editWires.some(w => w.type) && (
+              <div style={{ marginBottom: '24px', borderTop: '1px solid #cbd5e1', paddingTop: '16px' }}>
+                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b', marginBottom: '12px' }}>สรุปน้ำหนักที่ส่งคืนจริงรวมตามกลุ่มสายไฟ</div>
+                
+                {(() => {
+                  const editCategoriesMap = new Map();
+                  editWires.forEach(w => {
+                    if (!w.type) return;
+                    const wd = wireDataList.find(x => x.id === w.type);
+                    const cat = wd ? wd.category : w.type;
+                    const est = wd ? (Number(w.length) || 0) * wd.weightPerMeter : 0;
+                    if (editCategoriesMap.has(cat)) {
+                      editCategoriesMap.get(cat).estimated += est;
+                    } else {
+                      editCategoriesMap.set(cat, { category: cat, estimated: est });
+                    }
+                  });
+                  
+                  return Array.from(editCategoriesMap.values()).map(catData => (
+                    <div key={catData.category} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', background: '#fff', marginBottom: '8px' }}>
+                      <div style={{ fontWeight: '600', color: 'var(--pea-purple)', marginBottom: '4px' }}>{catData.category}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '8px' }}>
+                        ประมาณการรวม: {catData.estimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.
+                      </div>
+                      <label style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', display: 'block' }}>น้ำหนักที่ส่งคืนจริงรวม (กก.)</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        className="form-control" 
+                        value={categoryReturnedWeights[catData.category] || ""} 
+                        onChange={(e) => {
+                          setCategoryReturnedWeights({
+                            ...categoryReturnedWeights,
+                            [catData.category]: e.target.value
+                          });
+                        }} 
+                        style={{ padding: '6px', borderColor: categoryReturnedWeights[catData.category] ? '#10b981' : '#cbd5e1' }} 
+                        placeholder="กรอกน้ำหนักรวมที่ชั่งได้จริง"
+                      />
+                    </div>
+                  ));
+                })()}
+              </div>
+            )}
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
               <button className="btn" onClick={() => setIsAddModalOpen(false)} style={{ background: '#f1f5f9', color: 'var(--text-dark)' }}>ยกเลิก</button>
