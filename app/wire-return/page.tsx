@@ -157,7 +157,6 @@ export default function WireReturnPage() {
     
     setIsSaving(true);
     try {
-    try {
       // Calculate total estimated weight per category
       const catEstMap: Record<string, number> = {};
       editWires.forEach(w => {
