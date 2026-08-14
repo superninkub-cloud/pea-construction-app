@@ -11,6 +11,8 @@ export default function UpdateStatus() {
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
   const [selectedSupervisor, setSelectedSupervisor] = useState("ALL");
+  const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState("ALL");
   const [selectedWbs, setSelectedWbs] = useState("");
 
   const [project, setProject] = useState<Project | null>(null);
@@ -72,18 +74,27 @@ export default function UpdateStatus() {
       setFilteredProjects(projData);
       const uniqueSups = Array.from(new Set(projData.map(p => p.supervisor || "ไม่มีข้อมูล")));
       setSupervisors(uniqueSups as string[]);
+      
+      const uniqueStatuses = Array.from(new Set(projData.map(p => p.status || "ไม่มีสถานะ")));
+      setAvailableStatuses(uniqueStatuses as string[]);
     }
   };
 
   useEffect(() => {
-    if (selectedSupervisor === "ALL") {
-      setFilteredProjects(projects);
-    } else {
-      setFilteredProjects(projects.filter(p => (p.supervisor || "ไม่มีข้อมูล") === selectedSupervisor));
+    let filtered = projects;
+    
+    if (selectedSupervisor !== "ALL") {
+      filtered = filtered.filter(p => (p.supervisor || "ไม่มีข้อมูล") === selectedSupervisor);
     }
+    
+    if (selectedStatusFilter !== "ALL") {
+      filtered = filtered.filter(p => (p.status || "ไม่มีสถานะ") === selectedStatusFilter);
+    }
+
+    setFilteredProjects(filtered);
     setSelectedWbs("");
     setProject(null);
-  }, [selectedSupervisor, projects]);
+  }, [selectedSupervisor, selectedStatusFilter, projects]);
 
   useEffect(() => {
     if (selectedWbs) {
@@ -310,12 +321,19 @@ export default function UpdateStatus() {
     <>
       <TopBar title="อัพเดทสถานะงาน" />
       <div className="content-area animation-fade-in">
-        <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
+        <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '20px' }}>
           <div>
             <label className="form-label">👷 กรองตามผู้ควบคุมงาน</label>
             <select className="form-select" value={selectedSupervisor} onChange={(e) => setSelectedSupervisor(e.target.value)}>
               <option value="ALL">-- แสดงทั้งหมด --</option>
               {supervisors.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="form-label">📊 กรองตามสถานะงาน</label>
+            <select className="form-select" value={selectedStatusFilter} onChange={(e) => setSelectedStatusFilter(e.target.value)}>
+              <option value="ALL">-- แสดงทั้งหมด --</option>
+              {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
