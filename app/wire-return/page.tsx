@@ -20,7 +20,7 @@ export default function WireReturnPage() {
     returned_weight: number | "";
   }
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editWires, setEditWires] = useState<ScrapWireData[]>([]);
+  const [editWires, setEditWires] = useState<WireItem[]>([]);
   const [categoryReturnedWeights, setCategoryReturnedWeights] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -58,7 +58,7 @@ export default function WireReturnPage() {
 
   const startEdit = (p: Project) => {
     setEditingId(p.id);
-    let initialWires: ScrapWireData[] = [];
+    let initialWires: WireItem[] = [];
     if (p.scrap_wires_data && p.scrap_wires_data.length > 0) {
       initialWires = p.scrap_wires_data.map(w => ({
         id: w.id || Date.now().toString() + Math.random(),
