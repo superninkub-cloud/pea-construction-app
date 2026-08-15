@@ -86,36 +86,7 @@ export default function Overview() {
   });
 
 
-  // Calculate Scrap Wire Return Stats by Category
-  const wireCategoryStatsMap = new Map();
-  filteredProjects.forEach(p => {
-    const combinedWires = [...(p.scrap_wire_type ? [{ type: p.scrap_wire_type, length: p.scrap_wire_length, returned_weight: p.scrap_returned_weight }] : []), ...(p.scrap_wires_data || [])];
-    
-    combinedWires.forEach((w: any) => {
-      if (!w.type || w.type === 'ไม่ต้องส่งคืน') return;
-      const wd = wireDataList.find(x => x.id === w.type);
-      const cat = wd ? wd.category : (w.type || "ยังไม่ได้ระบุ");
-      const est = wd ? (Number(w.length) || 0) * wd.weightPerMeter : 0;
-      const ret = Number(w.returned_weight) || 0;
-      const len = Number(w.length) || 0;
-      
-      if (wireCategoryStatsMap.has(cat)) {
-        const existing = wireCategoryStatsMap.get(cat);
-        existing.estimated += est;
-        existing.returned += ret;
-        existing.length += len;
-      } else {
-        wireCategoryStatsMap.set(cat, {
-          category: cat,
-          estimated: est,
-          returned: ret,
-          length: len
-        });
-      }
-    });
-  });
 
-  const wireCategoryStats = Array.from(wireCategoryStatsMap.values()).filter(s => s.estimated > 0).sort((a, b) => b.estimated - a.estimated);
 
   if (loading) {
     return (
@@ -351,44 +322,7 @@ export default function Overview() {
         </div>
 
 
-        {wireCategoryStats.length > 0 && (
-          <div className="card" style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '20px', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Layers size={20} color="var(--pea-purple)" />
-              สรุปปริมาณเศษสายแยกตามชนิดสายไฟ
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-              {wireCategoryStats.map(stat => {
-                const percentage = stat.estimated > 0 ? (stat.returned / stat.estimated) * 100 : 0;
-                return (
-                  <div key={stat.category} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'flex-start' }}>
-                      <span style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.9rem', flex: 1, paddingRight: '8px' }}>{stat.category}</span>
-                      <span style={{ fontWeight: '700', color: percentage >= 90 ? '#10b981' : (percentage > 50 ? '#f59e0b' : '#ef4444') }}>
-                        {percentage.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '12px' }}>
-                      <div style={{ height: "100%", width: `${Math.min(percentage, 100)}%`, backgroundColor: percentage >= 90 ? "#10b981" : (percentage > 50 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                      <span>ความยาวรื้อถอน:</span>
-                      <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.length.toLocaleString(undefined, { maximumFractionDigits: 1 })} เมตร</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                      <span>เป้าหมายน้ำหนัก:</span>
-                      <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.estimated.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)' }}>
-                      <span>ส่งคืนแล้ว:</span>
-                      <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.returned.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+
 
         <div className="card table-responsive" style={{ padding: "0" }}>
           <table className="table-custom">

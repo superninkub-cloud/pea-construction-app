@@ -5,7 +5,7 @@ import TopBar from "../components/TopBar";
 import { supabase } from "../../lib/supabaseClient";
 import { wireDataList } from "../../lib/wireData";
 import { Project } from "../../lib/types";
-import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Info, Calculator, BarChart3 } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Calculator, Info, FileEdit, PieChart, BarChart3, Package, Recycle, Layers } from "lucide-react";
 
 export default function WireReturnPage() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
@@ -279,6 +279,28 @@ export default function WireReturnPage() {
 
   const overallPercentage = totalEstimated > 0 ? (totalReturned / totalEstimated) * 100 : 0;
 
+  const wireCategoryStatsMap = new Map();
+  filteredProjectStats.forEach(p => {
+    p.combinedWires.forEach((w: any) => {
+      if (w.category === 'ไม่ต้องส่งคืน') return;
+      if (wireCategoryStatsMap.has(w.category)) {
+        const existing = wireCategoryStatsMap.get(w.category);
+        existing.estimated += w.estimated;
+        existing.returned += w.returned_weight;
+        existing.length += w.length;
+      } else {
+        wireCategoryStatsMap.set(w.category, {
+          category: w.category,
+          estimated: w.estimated,
+          returned: w.returned_weight,
+          length: w.length
+        });
+      }
+    });
+  });
+
+  const wireCategoryStats = Array.from(wireCategoryStatsMap.values()).filter(s => s.estimated > 0).sort((a, b) => b.estimated - a.estimated);
+
   const uniqueSupervisors = Array.from(new Set(projectStats.map(p => p.supervisor).filter(Boolean)));
   const uniqueStatuses = Array.from(new Set(projectStats.map(p => p.status).filter(Boolean)));
 
@@ -450,6 +472,45 @@ export default function WireReturnPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {wireCategoryStats.length > 0 && (
+              <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Layers size={20} color="var(--pea-purple)" />
+                  สรุปปริมาณเศษสายแยกตามชนิดสายไฟ
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  {wireCategoryStats.map(stat => {
+                    const percentage = stat.estimated > 0 ? (stat.returned / stat.estimated) * 100 : 0;
+                    return (
+                      <div key={stat.category} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'flex-start' }}>
+                          <span style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.9rem', flex: 1, paddingRight: '8px' }}>{stat.category}</span>
+                          <span style={{ fontWeight: '700', color: percentage >= 90 ? '#10b981' : (percentage > 50 ? '#f59e0b' : '#ef4444') }}>
+                            {percentage.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '12px' }}>
+                          <div style={{ height: "100%", width: `${Math.min(percentage, 100)}%`, backgroundColor: percentage >= 90 ? "#10b981" : (percentage > 50 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                          <span>ความยาวรื้อถอน:</span>
+                          <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.length.toLocaleString(undefined, { maximumFractionDigits: 1 })} เมตร</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
+                          <span>เป้าหมายน้ำหนัก:</span>
+                          <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.estimated.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)' }}>
+                          <span>ส่งคืนแล้ว:</span>
+                          <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.returned.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
