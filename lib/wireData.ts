@@ -30,6 +30,7 @@ export const wireDataList: WireData[] = [
   { id: "1020020000", name: "COND.,ACSR 25/4 SQ.MM.TIS.86", category: "สายอลูมิเนียมแกนเหล็ก", weightPerMeter: 0 },
   { id: "1020020001", name: "COND.,ACSR 35/6 SQ.MM.TIS.86", category: "สายอลูมิเนียมแกนเหล็ก", weightPerMeter: 0.139 },
   { id: "1020020002", name: "COND.,ACSR 50/8 SQ.MM.TIS.86", category: "สายอลูมิเนียมแกนเหล็ก", weightPerMeter: 0.195 },
+  { id: "1020020004", name: "COND.,ACSR 95/15 SQ.MM.TIS.86", category: "สายอลูมิเนียมแกนเหล็ก", weightPerMeter: 0.33 },
   { id: "1020020005", name: "CONDUCTOR,ACSR 120/20 SQ.MM.TIS.86", category: "สายอลูมิเนียมแกนเหล็ก", weightPerMeter: 0.381 },
   { id: "1020020006", name: "CONDUCTOR,ACSR 150/25 SQ.MM.TIS.86", category: "สายอลูมิเนียมแกนเหล็ก", weightPerMeter: 0.491 },
   { id: "1020020007", name: "CONDUCTOR,ACSR 185/30 SQ.MM.TIS.86", category: "สายอลูมิเนียมแกนเหล็ก", weightPerMeter: 0.741 },

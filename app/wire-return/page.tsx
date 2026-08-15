@@ -248,22 +248,17 @@ export default function WireReturnPage() {
     
     let est = 0;
     let ret = 0;
-    let estForPercentage = 0;
     
     groupedWires.forEach(w => {
       est += w.estimated;
       ret += w.returned_weight;
-      
-      if (w.returned_weight > 0) {
-        estForPercentage += w.estimated;
-      }
     });
     
     return {
       ...p,
       estimated: est,
       returned: ret,
-      percentage: estForPercentage > 0 ? Math.min(100, (ret / estForPercentage) * 100) : 0,
+      percentage: est > 0 ? (ret / est) * 100 : 0,
       combinedWires: groupedWires
     };
   });
@@ -703,7 +698,7 @@ export default function WireReturnPage() {
                             {(() => {
                               const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
                               const isGreen = p.percentage >= 90 || isNoReturn || p.check2;
-                              return <div style={{ height: "100%", width: `${p.percentage}%`, backgroundColor: isGreen ? "#10b981" : "#ef4444", transition: "width 0.3s ease" }}></div>;
+                              return <div style={{ height: "100%", width: `${Math.min(p.percentage, 100)}%`, backgroundColor: isGreen ? "#10b981" : "#ef4444", transition: "width 0.3s ease" }}></div>;
                             })()}
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
