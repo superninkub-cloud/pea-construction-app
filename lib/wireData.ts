@@ -135,4 +135,9 @@ export const wireDataList: WireData[] = [
   { id: "1020089909", name: "CABLE,CU,NYY 0.6/1 KV. 50 SQ.MM.", category: "สายทองแดง NYY", weightPerMeter: 0 },
   { id: "1020089954", name: "CONDUCTOR,CU,NFYW 0.6/1 KV. 2.5 SQ.MM.", category: "สายทองแดง NFYW", weightPerMeter: 0 },
   { id: "1020089957", name: "CONDUCTOR,CU,NFYW 0.6/1 KV. 10 SQ.MM.", category: "สายทองแดง NFYW", weightPerMeter: 0 },
+  { id: "1-50-001-0004", name: "เศษสายอลูมิเนียมแกนเหล็กชำรุด", category: "แผนกรื้อถอน", weightPerMeter: 1 },
+  { id: "1-50-002-0001", name: "เศษเหล็กและวัสดุ", category: "แผนกรื้อถอน", weightPerMeter: 1 },
+  { id: "1-50-001-0002", name: "เศษสายอลูมิเนียมหุ้ม พีวีซี สี", category: "แผนกรื้อถอน", weightPerMeter: 1 },
+  { id: "1-50-001-0006", name: "เศษสายเคเบิลอากาศชำรุด", category: "แผนกรื้อถอน", weightPerMeter: 1 },
+  { id: "1-50-001-0001", name: "เศษสายอลูมิเนียมเปลือยชำรุด", category: "แผนกรื้อถอน", weightPerMeter: 1 },
 ];
