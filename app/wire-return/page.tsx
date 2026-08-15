@@ -545,10 +545,26 @@ export default function WireReturnPage() {
                 const isEditing = editingId === p.id;
                 return (
                   <div key={p.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: p.percentage >= 90 ? '#10b981' : '#ef4444' }}></div>
+                    {(() => {
+                      const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
+                      return <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: (p.percentage >= 90 || isNoReturn || p.check2) ? '#10b981' : '#ef4444' }}></div>;
+                    })()}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                       <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
-                      <span className={`badge ${p.check2 ? "badge-success" : "badge-warning"}`}>{p.check2 ? "ส่งคืนเศษสายครบแล้ว" : "ยังไม่คืนเศษสาย"}</span>
+                      {(() => {
+                        const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
+                        const isComplete = p.percentage >= 90;
+                        let badgeClass = "badge-warning";
+                        let badgeText = "ยังไม่คืนเศษสาย";
+                        if (isNoReturn) {
+                          badgeClass = "badge-success";
+                          badgeText = "ไม่ต้องส่งคืน";
+                        } else if (isComplete || p.check2) {
+                          badgeClass = "badge-success";
+                          badgeText = "ส่งคืนเศษสายครบแล้ว";
+                        }
+                        return <span className={`badge ${badgeClass}`}>{badgeText}</span>;
+                      })()}
                     </div>
                     <div style={{ fontWeight: '600', fontSize: '1.05rem', color: 'var(--text-dark)', marginBottom: '8px' }}>{p.name}</div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-light)', marginBottom: '16px' }}>
@@ -572,6 +588,7 @@ export default function WireReturnPage() {
                                 setEditWires(newWires);
                               }} style={{ padding: '6px' }}>
                                 <option value="">-- เลือกชนิดสายไฟ --</option>
+                                <option value="ไม่ต้องส่งคืน">ไม่ต้องส่งคืน</option>
                                 {wireDataList.map(w => (
                                   <option key={w.id} value={w.id}>{w.name}</option>
                                 ))}
@@ -683,7 +700,11 @@ export default function WireReturnPage() {
                             <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>ส่งคืนแล้ว: {p.returned.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
                           </div>
                           <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${p.percentage}%`, backgroundColor: p.percentage >= 90 ? "#10b981" : "#ef4444", transition: "width 0.3s ease" }}></div>
+                            {(() => {
+                              const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
+                              const isGreen = p.percentage >= 90 || isNoReturn || p.check2;
+                              return <div style={{ height: "100%", width: `${p.percentage}%`, backgroundColor: isGreen ? "#10b981" : "#ef4444", transition: "width 0.3s ease" }}></div>;
+                            })()}
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             {userRole === "admin" ? (
@@ -691,9 +712,15 @@ export default function WireReturnPage() {
                                 <Edit2 size={12} /> อัพเดทข้อมูล
                               </button>
                             ) : <div></div>}
-                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: p.percentage >= 90 ? '#10b981' : '#ef4444' }}>
-                              {p.percentage.toLocaleString(undefined, { maximumFractionDigits: 2 })}%
-                            </span>
+                            {(() => {
+                              const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
+                              const isGreen = p.percentage >= 90 || isNoReturn || p.check2;
+                              return (
+                                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: isGreen ? '#10b981' : '#ef4444' }}>
+                                  {isNoReturn ? "ไม่ต้องส่งคืน" : `${p.percentage.toLocaleString(undefined, { maximumFractionDigits: 2 })}%`}
+                                </span>
+                              );
+                            })()}
                           </div>
                         </div>
                       </>
@@ -748,6 +775,7 @@ export default function WireReturnPage() {
                         setEditWires(newWires);
                       }}>
                         <option value="">-- เลือกชนิดสายไฟ --</option>
+                        <option value="ไม่ต้องส่งคืน">ไม่ต้องส่งคืน</option>
                         {wireDataList.map(w => (
                           <option key={w.id} value={w.id}>{w.name}</option>
                         ))}
