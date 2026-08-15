@@ -5,7 +5,7 @@ import TopBar from "../components/TopBar";
 import { supabase } from "../../lib/supabaseClient";
 import { wireDataList } from "../../lib/wireData";
 import { Project } from "../../lib/types";
-import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Info, Calculator } from "lucide-react";
+import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Info, Calculator, BarChart3 } from "lucide-react";
 
 export default function WireReturnPage() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
@@ -282,6 +282,23 @@ export default function WireReturnPage() {
   const uniqueSupervisors = Array.from(new Set(projectStats.map(p => p.supervisor).filter(Boolean)));
   const uniqueStatuses = Array.from(new Set(projectStats.map(p => p.status).filter(Boolean)));
 
+  const supervisorStats = Array.from(new Set(projectStats.map(p => p.supervisor || "ไม่ระบุ"))).map(sup => {
+    let est = 0;
+    let ret = 0;
+    
+    projectStats.filter(p => (p.supervisor || "ไม่ระบุ") === sup).forEach(p => {
+      est += p.estimated;
+      ret += p.returned;
+    });
+    
+    return {
+      supervisor: sup,
+      estimated: est,
+      returned: ret,
+      percentage: est > 0 ? (ret / est) * 100 : 0
+    };
+  }).filter(s => s.estimated > 0).sort((a, b) => b.percentage - a.percentage);
+
   // Calculator Logic
   const selectedCalcWire = wireDataList.find(w => w.id === calcWireId);
 
@@ -485,6 +502,34 @@ export default function WireReturnPage() {
                 </div>
               </div>
             </div>
+
+            {supervisorStats.length > 0 && (
+              <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <BarChart3 size={20} color="var(--pea-purple)" />
+                  เปรียบเทียบการส่งคืนเศษสายแยกตามผู้ควบคุมงาน
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  {supervisorStats.map(stat => (
+                    <div key={stat.supervisor} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
+                        <span style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{stat.supervisor}</span>
+                        <span style={{ fontWeight: '700', color: stat.percentage >= 90 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') }}>
+                          {stat.percentage.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '8px' }}>
+                        <div style={{ height: "100%", width: `${Math.min(stat.percentage, 100)}%`, backgroundColor: stat.percentage >= 90 ? "#10b981" : (stat.percentage > 50 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)' }}>
+                        <span>เป้าหมาย: {stat.estimated.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
+                        <span>ส่งคืนแล้ว: {stat.returned.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", margin: 0 }}>รายการงานก่อสร้างที่ต้องส่งคืนเศษสาย</h2>

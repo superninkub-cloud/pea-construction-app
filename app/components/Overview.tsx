@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
-import { Home, CheckCircle2, CircleDashed } from "lucide-react";
+import { Home, CheckCircle2, CircleDashed, BarChart3 } from "lucide-react";
+import { wireDataList } from "../../lib/wireData";
 
 export default function Overview() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -83,6 +84,33 @@ export default function Overview() {
     );
     return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
   });
+
+  // Calculate Scrap Wire Return Stats by Supervisor
+  const supervisorStats = Array.from(new Set(filteredProjects.map(p => p.supervisor || "ไม่ระบุ"))).map(sup => {
+    let est = 0;
+    let ret = 0;
+    
+    filteredProjects.filter(p => (p.supervisor || "ไม่ระบุ") === sup).forEach(p => {
+      // Calculate from scrap_wires_data
+      const combinedWires = [...(p.scrap_wire_type ? [{ type: p.scrap_wire_type, length: p.scrap_wire_length, returned_weight: p.scrap_returned_weight }] : []), ...(p.scrap_wires_data || [])];
+      
+      combinedWires.forEach((w: any) => {
+        if (!w.type || w.type === 'ไม่ต้องส่งคืน') return;
+        const wd = wireDataList.find(x => x.id === w.type);
+        if (wd) {
+           est += (Number(w.length) || 0) * wd.weightPerMeter;
+        }
+        ret += Number(w.returned_weight) || 0;
+      });
+    });
+    
+    return {
+      supervisor: sup,
+      estimated: est,
+      returned: ret,
+      percentage: est > 0 ? (ret / est) * 100 : 0
+    };
+  }).filter(s => s.estimated > 0).sort((a, b) => b.percentage - a.percentage);
 
   if (loading) {
     return (
@@ -316,6 +344,34 @@ export default function Overview() {
             </div>
           </div>
         </div>
+
+        {supervisorStats.length > 0 && (
+          <div className="card" style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '20px', color: 'var(--text-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BarChart3 size={20} color="var(--pea-purple)" />
+              เปรียบเทียบการส่งคืนเศษสายแยกตามผู้ควบคุมงาน
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+              {supervisorStats.map(stat => (
+                <div key={stat.supervisor} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
+                    <span style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{stat.supervisor}</span>
+                    <span style={{ fontWeight: '700', color: stat.percentage >= 90 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') }}>
+                      {stat.percentage.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '8px' }}>
+                    <div style={{ height: "100%", width: `${Math.min(stat.percentage, 100)}%`, backgroundColor: stat.percentage >= 90 ? "#10b981" : (stat.percentage > 50 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)' }}>
+                    <span>เป้าหมาย: {stat.estimated.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
+                    <span>ส่งคืนแล้ว: {stat.returned.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="card table-responsive" style={{ padding: "0" }}>
           <table className="table-custom">
