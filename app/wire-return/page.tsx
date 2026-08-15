@@ -5,7 +5,10 @@ import TopBar from "../components/TopBar";
 import { supabase } from "../../lib/supabaseClient";
 import { wireDataList } from "../../lib/wireData";
 import { Project } from "../../lib/types";
-import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Info, Calculator, BarChart3, Layers } from "lucide-react";
+import { Edit2, Save, X, Plus, Package, Recycle, PieChart as PieChartIcon, Info, Calculator, BarChart3, Layers } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+
+const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
 
 export default function WireReturnPage() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
@@ -434,7 +437,7 @@ export default function WireReturnPage() {
 
               <div className="card animation-fade-in" style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
                 <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#faf5ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a855f7', flexShrink: 0 }}>
-                  <PieChart size={32} />
+                  <PieChartIcon size={32} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#a855f7', fontSize: '0.95rem', fontWeight: '600', marginBottom: '4px' }}>
@@ -482,35 +485,63 @@ export default function WireReturnPage() {
                   <Layers size={20} color="var(--pea-purple)" />
                   สรุปปริมาณเศษสายแยกตามชนิดสายไฟ
                 </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                  {wireCategoryStats.map(stat => {
-                    const percentage = stat.estimated > 0 ? (stat.returned / stat.estimated) * 100 : 0;
-                    return (
-                      <div key={stat.category} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'flex-start' }}>
-                          <span style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.9rem', flex: 1, paddingRight: '8px' }}>{stat.category}</span>
-                          <span style={{ fontWeight: '700', color: percentage >= 90 ? '#10b981' : (percentage > 50 ? '#f59e0b' : '#ef4444') }}>
-                            {percentage.toFixed(1)}%
-                          </span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
+                  <div style={{ flex: '1 1 300px', minHeight: '320px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={wireCategoryStats}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={70}
+                          outerRadius={100}
+                          paddingAngle={4}
+                          dataKey="estimated"
+                          nameKey="category"
+                        >
+                          {wireCategoryStats.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value) => `${Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.`}
+                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  <div style={{ flex: '2 1 400px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                    {wireCategoryStats.map((stat, index) => {
+                      const percentage = stat.estimated > 0 ? (stat.returned / stat.estimated) * 100 : 0;
+                      return (
+                        <div key={stat.category} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0', position: 'relative', overflow: 'hidden' }}>
+                          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', backgroundColor: COLORS[index % COLORS.length] }}></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'flex-start', paddingLeft: '8px' }}>
+                            <span style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.9rem', flex: 1, paddingRight: '8px' }}>{stat.category}</span>
+                            <span style={{ fontWeight: '700', color: percentage >= 90 ? '#10b981' : (percentage > 50 ? '#f59e0b' : '#ef4444') }}>
+                              {percentage.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '12px', marginLeft: '8px' }}>
+                            <div style={{ height: "100%", width: `${Math.min(percentage, 100)}%`, backgroundColor: COLORS[index % COLORS.length], transition: "width 0.3s ease" }}></div>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px', marginLeft: '8px' }}>
+                            <span>ความยาวรื้อถอน:</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.length.toLocaleString(undefined, { maximumFractionDigits: 1 })} ม.</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px', marginLeft: '8px' }}>
+                            <span>เป้าหมายน้ำหนัก:</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.estimated.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginLeft: '8px' }}>
+                            <span>ส่งคืนแล้ว:</span>
+                            <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.returned.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
+                          </div>
                         </div>
-                        <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '12px' }}>
-                          <div style={{ height: "100%", width: `${Math.min(percentage, 100)}%`, backgroundColor: percentage >= 90 ? "#10b981" : (percentage > 50 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                          <span>ความยาวรื้อถอน:</span>
-                          <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.length.toLocaleString(undefined, { maximumFractionDigits: 1 })} เมตร</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '4px' }}>
-                          <span>เป้าหมายน้ำหนัก:</span>
-                          <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.estimated.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)' }}>
-                          <span>ส่งคืนแล้ว:</span>
-                          <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{stat.returned.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
