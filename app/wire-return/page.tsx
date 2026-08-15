@@ -52,7 +52,7 @@ export default function WireReturnPage() {
         const filtered = data.filter((p: any) => 
           p.scrap_wire_type || 
           p.scrap_wire_length > 0 || 
-          (p.status !== "F4" && p.status !== "ยกเลิก")
+          (p.status !== "ยกเลิก")
         );
         setProjects(filtered);
       }
