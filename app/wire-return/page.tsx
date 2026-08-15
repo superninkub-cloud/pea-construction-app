@@ -5,7 +5,7 @@ import TopBar from "../components/TopBar";
 import { supabase } from "../../lib/supabaseClient";
 import { wireDataList } from "../../lib/wireData";
 import { Project } from "../../lib/types";
-import { ArrowLeft, Save, Plus, Trash2, Calculator, Info, FileEdit, PieChart, BarChart3, Package, Recycle, Layers } from "lucide-react";
+import { Edit2, Save, X, Plus, Package, Recycle, PieChart, Info, Calculator, BarChart3, Layers } from "lucide-react";
 
 export default function WireReturnPage() {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
