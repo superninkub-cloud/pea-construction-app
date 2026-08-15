@@ -545,7 +545,7 @@ export default function WireReturnPage() {
                 const isEditing = editingId === p.id;
                 return (
                   <div key={p.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: p.percentage >= 100 ? '#10b981' : (p.percentage > 0 ? '#f59e0b' : '#ef4444') }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: p.percentage >= 90 ? '#10b981' : '#ef4444' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                       <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
                       <span className={`badge ${p.check2 ? "badge-success" : "badge-warning"}`}>{p.check2 ? "ส่งคืนเศษสายครบแล้ว" : "ยังไม่คืนเศษสาย"}</span>
@@ -661,12 +661,12 @@ export default function WireReturnPage() {
                                   <div style={{ marginTop: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
                                       <span style={{ color: 'var(--text-light)' }}>ส่งคืนแล้ว: {(w.returned_weight || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
-                                      <span style={{ fontWeight: '600', color: (w.returned_weight || 0) > 0 ? '#10b981' : '#f59e0b' }}>
+                                      <span style={{ fontWeight: '600', color: (((w.returned_weight || 0) / estimatedKg) * 100) >= 90 ? '#10b981' : '#ef4444' }}>
                                         {(((w.returned_weight || 0) / estimatedKg) * 100).toLocaleString(undefined, { maximumFractionDigits: 2 })}%
                                       </span>
                                     </div>
                                     <div style={{ background: "#f1f5f9", height: "4px", borderRadius: "2px", overflow: "hidden" }}>
-                                      <div style={{ height: "100%", width: `${Math.min((((w.returned_weight || 0) / estimatedKg) * 100), 100)}%`, backgroundColor: ((w.returned_weight || 0) / estimatedKg) * 100 >= 100 ? "#10b981" : "#3b82f6", transition: "width 0.3s ease" }}></div>
+                                      <div style={{ height: "100%", width: `${Math.min((((w.returned_weight || 0) / estimatedKg) * 100), 100)}%`, backgroundColor: ((w.returned_weight || 0) / estimatedKg) * 100 >= 90 ? "#10b981" : "#ef4444", transition: "width 0.3s ease" }}></div>
                                     </div>
                                   </div>
                                 )}
@@ -683,7 +683,7 @@ export default function WireReturnPage() {
                             <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>ส่งคืนแล้ว: {p.returned.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
                           </div>
                           <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${p.percentage}%`, backgroundColor: p.percentage >= 100 ? "#10b981" : "#3b82f6", transition: "width 0.3s ease" }}></div>
+                            <div style={{ height: "100%", width: `${p.percentage}%`, backgroundColor: p.percentage >= 90 ? "#10b981" : "#ef4444", transition: "width 0.3s ease" }}></div>
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             {userRole === "admin" ? (
@@ -691,7 +691,7 @@ export default function WireReturnPage() {
                                 <Edit2 size={12} /> อัพเดทข้อมูล
                               </button>
                             ) : <div></div>}
-                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: p.percentage >= 100 ? '#10b981' : 'var(--pea-purple)' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: p.percentage >= 90 ? '#10b981' : '#ef4444' }}>
                               {p.percentage.toLocaleString(undefined, { maximumFractionDigits: 2 })}%
                             </span>
                           </div>
