@@ -364,13 +364,15 @@ export default function UpdateStatus() {
                   <option key={p.id} value={p.wbs}>[{p.wbs}] {p.name} - สถานะ: {p.status || "-"}</option>
                 ))}
               </select>
-              <button
-                className="btn btn-primary"
-                style={{ padding: '0 20px', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
-                onClick={() => setIsAddModalOpen(true)}
-              >
-                <Plus size={18} /> เพิ่มงานใหม่
-              </button>
+              {userRole !== "guest" && (
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: '0 20px', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+                  onClick={() => setIsAddModalOpen(true)}
+                >
+                  <Plus size={18} /> เพิ่มงานใหม่
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -696,14 +698,18 @@ export default function UpdateStatus() {
               ) : <div></div>}
 
               <div style={{ display: "flex", gap: "12px" }}>
-                {userRole === "admin" && (
-                  <button className="btn" onClick={handleDeleteProject} disabled={loading} style={{ minWidth: '140px', background: '#fee2e2', color: '#b91c1c' }}>
-                    🗑️ ลบโครงการ
-                  </button>
+                {userRole !== "guest" && (
+                  <>
+                    {userRole === "admin" && (
+                      <button className="btn" onClick={handleDeleteProject} disabled={loading} style={{ minWidth: '140px', background: '#fee2e2', color: '#b91c1c' }}>
+                        🗑️ ลบโครงการ
+                      </button>
+                    )}
+                    <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ minWidth: '160px' }}>
+                      {loading ? "กำลังบันทึก..." : "💾 บันทึกข้อมูล"}
+                    </button>
+                  </>
                 )}
-                <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ minWidth: '160px' }}>
-                  {loading ? "กำลังบันทึก..." : "💾 บันทึกข้อมูล"}
-                </button>
               </div>
             </div>
           </div>

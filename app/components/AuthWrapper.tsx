@@ -34,6 +34,13 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     }
   };
 
+  const handleGuestLogin = () => {
+    sessionStorage.setItem("pea_auth", "true");
+    sessionStorage.setItem("pea_role", "guest");
+    setIsAuthenticated(true);
+    setError(false);
+  };
+
   // Avoid hydration mismatch by waiting for client mount
   if (!isClient) return null;
 
@@ -134,12 +141,34 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
               fontSize: "1rem",
               fontWeight: "600",
               cursor: "pointer",
-              transition: "background-color 0.2s"
+              transition: "background-color 0.2s",
+              marginBottom: "12px"
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#6b21a8"}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#7e22ce"}
           >
             เข้าสู่ระบบ
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleGuestLogin}
+            style={{
+              width: "100%",
+              padding: "12px",
+              backgroundColor: "#f1f5f9",
+              color: "#475569",
+              border: "1px solid #cbd5e1",
+              borderRadius: "8px",
+              fontSize: "1rem",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#e2e8f0"; e.currentTarget.style.color = "#1e293b"; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#f1f5f9"; e.currentTarget.style.color = "#475569"; }}
+          >
+            เข้าใช้งานโหมดผู้เยี่ยมชม (ดูเท่านั้น)
           </button>
         </form>
       </div>

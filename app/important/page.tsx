@@ -295,20 +295,22 @@ export default function ImportantTasksPage() {
               ข้อมูลอ้างอิงจากแฟ้มการประชุม แผนก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา (กฟก.3)
             </p>
           </div>
-          <button
-            onClick={handleAddProject}
-            style={{
-              display: "flex", alignItems: "center", gap: "8px",
-              backgroundColor: "#2563eb", color: "white",
-              padding: "8px 16px", borderRadius: "8px",
-              fontWeight: "600", fontSize: "0.95rem",
-              border: "none", cursor: "pointer",
-              boxShadow: "0 2px 4px rgba(37,99,235,0.2)",
-              marginTop: "4px"
-            }}
-          >
-            <Plus size={18} /> เพิ่มโครงการ
-          </button>
+          {userRole !== "guest" && (
+            <button
+              onClick={handleAddProject}
+              style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                backgroundColor: "#2563eb", color: "white",
+                padding: "8px 16px", borderRadius: "8px",
+                fontWeight: "600", fontSize: "0.95rem",
+                border: "none", cursor: "pointer",
+                boxShadow: "0 2px 4px rgba(37,99,235,0.2)",
+                marginTop: "4px"
+              }}
+            >
+              <Plus size={18} /> เพิ่มโครงการ
+            </button>
+          )}
         </div>
 
         <div style={{ 
@@ -364,16 +366,18 @@ export default function ImportantTasksPage() {
                   
                   {!isEditing ? (
                     <div style={{ display: "flex", gap: "4px" }}>
-                      <button 
-                        onClick={() => startEdit(proj)}
-                        style={{ 
-                          display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", 
-                          color: "#3b82f6", backgroundColor: "white", border: "1px solid #bfdbfe", 
-                          padding: "4px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
-                        }}
-                      >
-                        <Edit2 size={12} /> แก้ไข
-                      </button>
+                      {userRole !== "guest" && (
+                        <button 
+                          onClick={() => startEdit(proj)}
+                          style={{ 
+                            display: "flex", alignItems: "center", gap: "4px", fontSize: "0.8rem", 
+                            color: "#3b82f6", backgroundColor: "white", border: "1px solid #bfdbfe", 
+                            padding: "4px 8px", borderRadius: "12px", cursor: "pointer", fontWeight: "600"
+                          }}
+                        >
+                          <Edit2 size={12} /> แก้ไข
+                        </button>
+                      )}
                       {userRole === "admin" && (
                         <button 
                           onClick={() => handleDelete(proj.id)}

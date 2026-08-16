@@ -151,16 +151,18 @@ export default function PersonnelComponent() {
     <div style={{ padding: "24px", height: "100%", overflowY: "auto" }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <h2 style={{ color: "var(--pea-purple)", fontWeight: "700", margin: 0 }}>👥 ข้อมูลบุคลากร</h2>
-        <button className="btn btn-primary" onClick={() => {
-          setEditId(null);
-          setFormData({ full_name: "", position: "", phone: "", team: "อุดมศักดิ์" });
-          setPreviewUrl(null);
-          setFile(null);
-          setIsAddModalOpen(true);
-          setMessage({ text: "", type: "" });
-        }}>
-          + เพิ่มข้อมูลบุคลากร
-        </button>
+        {userRole !== "guest" && (
+          <button className="btn btn-primary" onClick={() => {
+            setEditId(null);
+            setFormData({ full_name: "", position: "", phone: "", team: "อุดมศักดิ์" });
+            setPreviewUrl(null);
+            setFile(null);
+            setIsAddModalOpen(true);
+            setMessage({ text: "", type: "" });
+          }}>
+            + เพิ่มข้อมูลบุคลากร
+          </button>
+        )}
       </div>
 
       <div className="card" style={{ padding: '24px', marginBottom: '24px' }}>
