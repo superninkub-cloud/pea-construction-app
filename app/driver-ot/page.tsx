@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import TopBar from "../components/TopBar";
-import { supabase } from "../../lib/supabaseClient";
 
 // Driver Data based on user requirements
 const driverTypes = [
@@ -12,8 +11,27 @@ const driverTypes = [
   { id: "type3plus", name: "ชนิดที่ 3+", desc: "รถเทรเลอร์ลากจูงติดเครน", base: 27120, ot15: 169.50, ot10: 113.00, ot30: 339.00, accom: 400 }
 ];
 
+const driversList = [
+  { plate: "84-1643 นฐ", desc: "รถสว่านขุดเจาะ", driver: "ณัฐพล พืชพันธ์" },
+  { plate: "86-4715 นฐ", desc: "รถเทรลเลอร์", driver: "ฉลองชัย ปานเรือง" },
+  { plate: "90-7312 นฐ", desc: "รถเครนขนาดพิกัด 30ตัน/เมตร", driver: "ขวัญเรือน มีถาวร" },
+  { plate: "90-7311 นฐ", desc: "รถเครนขนาดพิกัด 30ตัน/เมตร", driver: "อินทพร สร้อยสังวาลย์" },
+  { plate: "90-3515 นฐ", desc: "รถสว่านขุดเจาะ", driver: "อนิวัต จุลมูล" },
+  { plate: "90-2235 นฐ", desc: "รถบรรทุก 6 ตัน คิดเครนพับ", driver: "กิตติภัฏ กาฬษร" },
+  { plate: "85-3090 นฐ", desc: "รถเทรลเลอร์", driver: "ธวัชชัย โต๊ะศรีสุข" },
+  { plate: "90-2230 นฐ", desc: "รถบรรทุก 6 ตัน คิดเครนพับ", driver: "วิสูตร เสือคล้าย" },
+  { plate: "90-2952 นฐ", desc: "รถสว่านขุดเจาะ", driver: "วิสูตร เสือคล้าย" },
+  { plate: "55-0774 กทม", desc: "รถเครนขนาดพิกัด 30ตัน/เมตร", driver: "เสนาะ ดาวเรือง" },
+  { plate: "90-0423 นฐ", desc: "รถบรรทุก 6 ตัน คิดเครนพับ", driver: "โหนก แก้วบัวดี" },
+  { plate: "90-2951 นฐ", desc: "รถสว่านขุดเจาะ", driver: "ไพฑูรย์ สุขสมบัติ" },
+  { plate: "90-7310 นฐ", desc: "รถเครนขนาดพิกัด 30ตัน/เมตร", driver: "มานิตย์ ใจชื้น" },
+  { plate: "89-5774 นฐ", desc: "รถเครนขนาดพิกัด 25ตัน/เมตร", driver: "อุเทน นามศร" },
+  { plate: "84-9636 นฐ", desc: "รถเครนขนาดพิกัด 25ตัน/เมตร", driver: "อุเทน นามศร" },
+  { plate: "89-2131 นฐ", desc: "รถบรรทุก 6 ตัน คิดเครนพับ", driver: "พงษ์พันธ์ จุติโรจนปกรณ์" },
+  { plate: "89-6967 นฐ", desc: "รถสว่านขุดเจาะ", driver: "ผดุงเกียรติ ศรีใส" }
+];
+
 export default function DriverOTPage() {
-  const [drivers, setDrivers] = useState<{ plate: string; driver: string }[]>([]);
   const [selectedDriverIdx, setSelectedDriverIdx] = useState("");
   
   const [selectedType, setSelectedType] = useState(driverTypes[1]); // Default to 2+
@@ -22,35 +40,19 @@ export default function DriverOTPage() {
   const [ot30Hours, setOt30Hours] = useState("");
   const [accomDays, setAccomDays] = useState("");
 
-  useEffect(() => {
-    const fetchDrivers = async () => {
-      const { data, error } = await supabase.from('vehicles').select('*');
-      if (!error && data) {
-        const masterCars = data.map(c => ({ plate: c.plate_number, driver: c.default_driver }));
-        if (!masterCars.find(c => c.plate === '90-1843 นฐ')) {
-          masterCars.push({ plate: '90-1843 นฐ', driver: 'นายขวัญนคร ศรีจันทร์อินทร์' });
-        }
-        masterCars.sort((a, b) => a.plate.localeCompare(b.plate, 'th'));
-        setDrivers(masterCars);
-      }
-    };
-    fetchDrivers();
-  }, []);
-
   const handleDriverSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     setSelectedDriverIdx(val);
     
     if (val !== "") {
-      const car = drivers[Number(val)];
+      const car = driversList[Number(val)];
       if (car) {
-        const noCranePlates = ["90-1844 นฐ", "89-5769 นฐ", "90-1845 นฐ", "90-1842 นฐ", "90-1843 นฐ"];
-        if (noCranePlates.includes(car.plate) || car.plate.includes("หาง")) {
-          // ไม่มีเครน -> ชนิดที่ 2
-          setSelectedType(driverTypes[0]);
+        if (car.desc.includes("รถเทรลเลอร์")) {
+          setSelectedType(driverTypes[3]); // ชนิดที่ 3+
+        } else if (car.desc.includes("เครนขนาดพิกัด")) {
+          setSelectedType(driverTypes[2]); // ชนิดที่ 2+พิเศษ
         } else {
-          // มีเครน -> เดาว่าเป็นชนิดที่ 2+ (ผู้ใช้เปลี่ยนเองได้ถ้าเป็น 2+พิเศษ หรือ 3+)
-          setSelectedType(driverTypes[1]);
+          setSelectedType(driverTypes[1]); // ชนิดที่ 2+ (รถสว่าน, เครนพับ)
         }
       }
     }
@@ -72,7 +74,7 @@ export default function DriverOTPage() {
   };
 
   const results = calculateTotal();
-  const activeDriver = selectedDriverIdx !== "" ? drivers[Number(selectedDriverIdx)] : null;
+  const activeDriver = selectedDriverIdx !== "" ? driversList[Number(selectedDriverIdx)] : null;
 
   return (
     <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0", background: "#f8fafc" }}>
@@ -92,7 +94,7 @@ export default function DriverOTPage() {
               </h3>
               
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>ดึงข้อมูลคนขับจากระบบยานพาหนะ (C3 Vehicle)</label>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>รายชื่อพนักงานขับรถชุดงานก่อสร้าง</label>
                 <select 
                   className="form-control" 
                   value={selectedDriverIdx} 
@@ -100,7 +102,7 @@ export default function DriverOTPage() {
                   style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#f8fafc", cursor: "pointer" }}
                 >
                   <option value="">-- ไม่ระบุ / ระบุเอง --</option>
-                  {drivers.map((d, idx) => (
+                  {driversList.map((d, idx) => (
                     <option key={idx} value={idx}>
                       {d.plate} : {d.driver}
                     </option>
