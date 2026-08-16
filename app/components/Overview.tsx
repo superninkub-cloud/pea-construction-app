@@ -11,7 +11,8 @@ export default function Overview() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [monthFilter, setMonthFilter] = useState("ALL");
   const [supervisorFilter, setSupervisorFilter] = useState("ALL");
   const [yearFilter, setYearFilter] = useState("ALL");
@@ -71,7 +72,7 @@ export default function Overview() {
       else if (yearFilter === "2569") yearMatched = year === 2569;
     }
 
-    const matchStatus = statusFilter === "ALL" || s === statusFilter;
+    const matchStatus = statusFilters.length === 0 || statusFilters.includes(s);
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
     const matchSupervisor = supervisorFilter === "ALL" || sup === supervisorFilter;
     const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม");
@@ -248,12 +249,48 @@ export default function Overview() {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px' }}>
-                <div>
+                <div style={{ position: 'relative' }}>
                   <label className="form-label">📌 กรองตามสถานะ</label>
-                  <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                    <option value="ALL">แสดงทั้งหมด</option>
-                    {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  <div 
+                    onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                    className="form-control"
+                    style={{ background: "white", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", border: "1px solid #cbd5e1", borderRadius: "8px" }}
+                  >
+                    <span>{statusFilters.length === 0 ? "แสดงทั้งหมด" : `${statusFilters.length} สถานะ`}</span>
+                    <span style={{ fontSize: "0.8rem", color: "#64748b" }}>▼</span>
+                  </div>
+                  
+                  {isStatusDropdownOpen && (
+                    <>
+                      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} onClick={() => setIsStatusDropdownOpen(false)}></div>
+                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: "4px", background: "white", border: "1px solid #cbd5e1", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", zIndex: 10, maxHeight: "250px", overflowY: "auto" }}>
+                        <div 
+                          style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", background: statusFilters.length === 0 ? "#f0fdf4" : "transparent" }}
+                          onClick={() => { setStatusFilters([]); setIsStatusDropdownOpen(false); }}
+                        >
+                          <input type="checkbox" checked={statusFilters.length === 0} readOnly style={{ cursor: 'pointer' }} />
+                          <span>แสดงทั้งหมด</span>
+                        </div>
+                        {statuses.map(s => (
+                          <label key={s} style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: 0, background: statusFilters.includes(s) ? "#f8fafc" : "transparent" }}>
+                            <input 
+                              type="checkbox" 
+                              checked={statusFilters.includes(s)} 
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setStatusFilters([...statusFilters, s]);
+                                } else {
+                                  setStatusFilters(statusFilters.filter(st => st !== s));
+                                }
+                              }}
+                              style={{ cursor: 'pointer' }}
+                            />
+                            <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>{s}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div>
                   <label className="form-label">👷 กรองตามชื่อช่าง</label>
