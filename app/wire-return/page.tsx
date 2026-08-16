@@ -405,11 +405,7 @@ export default function WireReturnPage() {
   return (
     <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0" }}>
       <TopBar title="ภาพรวมสถานะการส่งคืนเศษสาย" />
-      <div style={{ padding: "0 32px", marginTop: "-12px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "6px", color: "#64748b", fontSize: "0.85rem" }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>ข้อมูลล่าสุด ณ วันที่ 31 ธ.ค. 2568 เวลา 10:30 น.</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "4px", cursor: "pointer" }}><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 1 0 2.6-6.4L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 1 0-2.6 6.4L3 16"/></svg>
-      </div>
+
       
       <div style={{ padding: "0 32px" }}>
         {loading ? (
@@ -668,20 +664,7 @@ export default function WireReturnPage() {
                     </select>
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '10px' }}>
-                    <button 
-                      onClick={() => setViewMode("grid")}
-                      style={{ background: viewMode === "grid" ? '#7e22ce' : 'transparent', color: viewMode === "grid" ? 'white' : '#64748b', border: 'none', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-                    </button>
-                    <button 
-                      onClick={() => setViewMode("list")}
-                      style={{ background: viewMode === "list" ? '#7e22ce' : 'transparent', color: viewMode === "list" ? 'white' : '#64748b', border: 'none', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-                    </button>
-                  </div>
+
                 </div>
               </div>
             </div>

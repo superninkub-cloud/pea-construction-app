@@ -20,10 +20,7 @@ export default function TopBar({ title }: { title: string }) {
         <h1 className="topbar-title">{title}</h1>
       </div>
       <div className="user-profile">
-        <div style={{ position: 'relative', marginRight: '8px', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-          <Bell size={20} color="#64748b" />
-          <span style={{ position: 'absolute', top: '-4px', right: '-4px', backgroundColor: '#ef4444', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>5</span>
-        </div>
+
         <div className="avatar" style={{ backgroundColor: '#7e22ce', color: 'white', fontWeight: '600', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>PT</div>
         <div className="user-info" style={{ display: 'flex', flexDirection: 'column' }}>
           <span className="user-name" style={{ fontWeight: '600', fontSize: '0.9rem', color: '#1e293b' }}>ผศก.กรย.(ก3)</span>
