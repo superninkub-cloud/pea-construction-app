@@ -30,7 +30,8 @@ export default function WireReturnPage() {
   const [filterSupervisor, setFilterSupervisor] = useState("");
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-
+  const [filterScrapStatuses, setFilterScrapStatuses] = useState<string[]>([]);
+  const [isScrapStatusDropdownOpen, setIsScrapStatusDropdownOpen] = useState(false);
   // Calculator State
   const [calcWireId, setCalcWireId] = useState("");
   const [calcLength, setCalcLength] = useState("");
@@ -267,7 +268,18 @@ export default function WireReturnPage() {
   const filteredProjectStats = projectStats.filter(p => {
     const matchSupervisor = filterSupervisor ? p.supervisor === filterSupervisor : true;
     const matchStatus = filterStatuses.length > 0 ? filterStatuses.includes(p.status) : true;
-    return matchSupervisor && matchStatus;
+    
+    let scrapStatus = "ยังไม่ส่งคืนเศษสาย";
+    const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
+    const isComplete = p.percentage >= 90 || p.check2;
+    if (isNoReturn) {
+      scrapStatus = "ไม่ต้องส่งคืน";
+    } else if (isComplete) {
+      scrapStatus = "ส่งคืนเศษสายแล้ว";
+    }
+    const matchScrapStatus = filterScrapStatuses.length > 0 ? filterScrapStatuses.includes(scrapStatus) : true;
+
+    return matchSupervisor && matchStatus && matchScrapStatus;
   });
 
   let totalEstimated = 0;
@@ -598,20 +610,52 @@ export default function WireReturnPage() {
                       </>
                     )}
                   </div>
-                </div>
+                  
+                  <div style={{ width: "1px", height: "32px", background: "#cbd5e1" }}></div>
 
-                {userRole === "admin" && (
-                  <button
-                    onClick={() => {
-                      setEditWires([{ id: Date.now().toString(), type: "", length: "", returned_weight: "" }]);
-                      setIsAddModalOpen(true);
-                    }}
-                    className="btn btn-primary"
-                    style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", fontSize: "0.95rem", fontWeight: "600", whiteSpace: "nowrap", boxShadow: "0 4px 6px -1px rgba(124, 58, 237, 0.3)", transition: "all 0.2s" }}
-                  >
-                    <Plus size={18} /> ดึงงานก่อสร้างมาประเมินเศษสาย
-                  </button>
-                )}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", position: "relative" }}>
+                    <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>📌 สถานะส่งคืน:</span>
+                    <div 
+                      onClick={() => setIsScrapStatusDropdownOpen(!isScrapStatusDropdownOpen)}
+                      style={{ width: "170px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                    >
+                      <span>{filterScrapStatuses.length === 0 ? "แสดงทั้งหมด" : `${filterScrapStatuses.length} สถานะ`}</span>
+                      <span style={{ fontSize: "0.8rem", color: "#64748b" }}>▼</span>
+                    </div>
+                    
+                    {isScrapStatusDropdownOpen && (
+                      <>
+                        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} onClick={() => setIsScrapStatusDropdownOpen(false)}></div>
+                        <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "4px", background: "white", border: "1px solid #cbd5e1", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", zIndex: 10, width: "200px", maxHeight: "300px", overflowY: "auto" }}>
+                          <div 
+                            style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", background: filterScrapStatuses.length === 0 ? "#f0fdf4" : "transparent" }}
+                            onClick={() => { setFilterScrapStatuses([]); setIsScrapStatusDropdownOpen(false); }}
+                          >
+                            <input type="checkbox" checked={filterScrapStatuses.length === 0} readOnly style={{ cursor: 'pointer' }} />
+                            <span>แสดงทั้งหมด</span>
+                          </div>
+                          {["ยังไม่ส่งคืนเศษสาย", "ส่งคืนเศษสายแล้ว", "ไม่ต้องส่งคืน"].map(s => (
+                            <label key={s} style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: 0, background: filterScrapStatuses.includes(s) ? "#f8fafc" : "transparent" }}>
+                              <input 
+                                type="checkbox" 
+                                checked={filterScrapStatuses.includes(s)} 
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFilterScrapStatuses([...filterScrapStatuses, s]);
+                                  } else {
+                                    setFilterScrapStatuses(filterScrapStatuses.filter(st => st !== s));
+                                  }
+                                }}
+                                style={{ cursor: 'pointer' }}
+                              />
+                              <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>{s}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
             
