@@ -16,8 +16,7 @@ export default function TopBar({ title }: { title: string }) {
     sessionStorage.removeItem("pea_role");
     window.location.reload();
   };
-
-  let topText = "ผศก.กรย.(ก3)";
+  let topText = "ผกร.กรย.(ก3)";
   let bottomText = "บุคลากรแผนก";
   let avatarText = "PT";
 
