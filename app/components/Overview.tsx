@@ -125,54 +125,54 @@ export default function Overview() {
 
 
           <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-            <div className="stat-card" style={{ borderTop: '4px solid var(--pea-purple)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div className="stat-icon-wrapper" style={{ background: 'var(--pea-purple-soft)', color: 'var(--pea-purple)' }}>
-                  <Home size={24} />
+            <div className="stat-card" style={{ borderTop: '4px solid var(--pea-purple)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                <div className="stat-icon-wrapper" style={{ background: 'var(--pea-purple-soft)', color: 'var(--pea-purple)', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
+                  <Home size={36} />
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div className="stat-title">โครงการทั้งหมด</div>
-                  <div className="stat-value" style={{ color: 'var(--pea-purple)' }}>{filteredProjects.length}</div>
-                  <div className="stat-subtitle">โครงการ</div>
-                </div>
-              </div>
-              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
-                <span className="stat-subtitle">งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: 'var(--pea-purple)' }}>฿ {formatNumber(filteredProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
-              </div>
-            </div>
-
-            <div className="stat-card" style={{ borderTop: '4px solid #10b981' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div className="stat-icon-wrapper" style={{ background: '#d1fae5', color: '#10b981' }}>
-                  <CheckCircle2 size={24} />
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div className="stat-title">สถานะ F4 (ปิดงาน)</div>
-                  <div className="stat-value" style={{ color: '#059669' }}>{filteredProjects.filter(p => p.status === 'F4').length}</div>
-                  <div className="stat-subtitle">โครงการ</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div className="stat-title" style={{ fontSize: '1.15rem' }}>โครงการทั้งหมด</div>
+                  <div className="stat-value" style={{ color: 'var(--pea-purple)', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.length}</div>
+                  <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
-              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
-                <span className="stat-subtitle">งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: '#059669' }}>฿ {formatNumber(filteredProjects.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+              <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
+                <span style={{ fontWeight: '600', color: 'var(--pea-purple)', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
-            <div className="stat-card" style={{ borderTop: '4px solid #f59e0b' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div className="stat-icon-wrapper" style={{ background: '#fef3c7', color: '#d97706' }}>
-                  <CircleDashed size={24} />
+            <div className="stat-card" style={{ borderTop: '4px solid #10b981', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                <div className="stat-icon-wrapper" style={{ background: '#d1fae5', color: '#10b981', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
+                  <CheckCircle2 size={36} />
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div className="stat-title">สถานะอื่นๆ</div>
-                  <div className="stat-value" style={{ color: '#d97706' }}>{filteredProjects.filter(p => p.status !== 'F4').length}</div>
-                  <div className="stat-subtitle">โครงการ</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div className="stat-title" style={{ fontSize: '1.15rem' }}>สถานะ F4 (ปิดงาน)</div>
+                  <div className="stat-value" style={{ color: '#059669', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.filter(p => p.status === 'F4').length}</div>
+                  <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
-              <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
-                <span className="stat-subtitle">งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: '#d97706' }}>฿ {formatNumber(filteredProjects.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+              <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
+                <span style={{ fontWeight: '600', color: '#059669', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+              </div>
+            </div>
+
+            <div className="stat-card" style={{ borderTop: '4px solid #f59e0b', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                <div className="stat-icon-wrapper" style={{ background: '#fef3c7', color: '#d97706', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
+                  <CircleDashed size={36} />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div className="stat-title" style={{ fontSize: '1.15rem' }}>สถานะอื่นๆ</div>
+                  <div className="stat-value" style={{ color: '#d97706', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.filter(p => p.status !== 'F4').length}</div>
+                  <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
+                </div>
+              </div>
+              <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
+                <span style={{ fontWeight: '600', color: '#d97706', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
           </div>
@@ -180,11 +180,11 @@ export default function Overview() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
 
             {/* Donut Chart Card */}
-            <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <h3 style={{ fontSize: '1rem', marginBottom: '20px', alignSelf: 'flex-start', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
+            <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '32px', alignSelf: 'center', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-                <div className="donut-chart-container">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '48px', width: '100%' }}>
+                <div className="donut-chart-container" style={{ width: '220px', height: '220px' }}>
                   <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
                     {/* Background circle */}
                     <path
@@ -221,26 +221,26 @@ export default function Overview() {
                     />
                   </svg>
                   <div className="donut-chart-text">
-                    <div className="value">{filteredProjects.length}</div>
-                    <div className="label">โครงการ</div>
+                    <div className="value" style={{ fontSize: '3.5rem', fontWeight: '700', color: 'var(--text-dark)', lineHeight: '1.1' }}>{filteredProjects.length}</div>
+                    <div className="label" style={{ fontSize: '1.1rem', color: 'var(--text-light)' }}>โครงการ</div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.85rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '60px' }}>F4 (ปิดงาน)</span>
-                    <span style={{ fontWeight: '600', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'F4').length}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontSize: '1.1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
+                    <span style={{ color: 'var(--text-light)', width: '80px' }}>F4 (ปิดงาน)</span>
+                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'F4').length}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '60px' }}>D1</span>
-                    <span style={{ fontWeight: '600', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'D1').length}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></div>
+                    <span style={{ color: 'var(--text-light)', width: '80px' }}>D1</span>
+                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'D1').length}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--pea-purple)' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '60px' }}>อื่นๆ</span>
-                    <span style={{ fontWeight: '600', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: 'var(--pea-purple)' }}></div>
+                    <span style={{ color: 'var(--text-light)', width: '80px' }}>อื่นๆ</span>
+                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length}</span>
                   </div>
                 </div>
               </div>
