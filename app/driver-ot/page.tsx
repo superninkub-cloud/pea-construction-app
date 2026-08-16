@@ -1,0 +1,200 @@
+"use client";
+
+import { useState } from "react";
+import TopBar from "../components/TopBar";
+
+// Driver Data based on user requirements
+const driverTypes = [
+  { id: "type2", name: "ชนิดที่ 2", desc: "รถบรรทุกทั่วไป (ไม่ได้ประจำชุดงานก่อสร้าง)", base: 18720, ot15: 117.00, ot10: 78.00, ot30: 234.00, accom: 400 },
+  { id: "type2plus", name: "ชนิดที่ 2+", desc: "รถบรรทุกติดเครน (6 ตัน, รถสว่าน)", base: 23820, ot15: 148.88, ot10: 99.25, ot30: 297.75, accom: 400 },
+  { id: "type2special", name: "ชนิดที่ 2+พิเศษ", desc: "บังคับเครนพิกัดสูง (25, 30, 35 ตัน/เมตร)", base: 24540, ot15: 153.38, ot10: 102.25, ot30: 306.75, accom: 400 },
+  { id: "type3plus", name: "ชนิดที่ 3+", desc: "รถเทรเลอร์ลากจูงติดเครน", base: 27120, ot15: 169.50, ot10: 113.00, ot30: 339.00, accom: 400 }
+];
+
+export default function DriverOTPage() {
+  const [selectedType, setSelectedType] = useState(driverTypes[1]); // Default to 2+
+  const [ot15Hours, setOt15Hours] = useState("");
+  const [ot10Hours, setOt10Hours] = useState("");
+  const [ot30Hours, setOt30Hours] = useState("");
+  const [accomDays, setAccomDays] = useState("");
+
+  const calculateTotal = () => {
+    const totalOT15 = (Number(ot15Hours) || 0) * selectedType.ot15;
+    const totalOT10 = (Number(ot10Hours) || 0) * selectedType.ot10;
+    const totalOT30 = (Number(ot30Hours) || 0) * selectedType.ot30;
+    const totalAccom = (Number(accomDays) || 0) * selectedType.accom;
+    
+    return {
+      totalOT15,
+      totalOT10,
+      totalOT30,
+      totalAccom,
+      grandTotal: totalOT15 + totalOT10 + totalOT30 + totalAccom
+    };
+  };
+
+  const results = calculateTotal();
+
+  return (
+    <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0", background: "#f8fafc" }}>
+      <TopBar title="โปรแกรมคำนวณค่าล่วงเวลา พขร.(บ)" />
+      
+      <div style={{ padding: "0 32px", maxWidth: "1000px", margin: "0 auto", marginTop: "24px" }}>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "24px" }}>
+          {/* Left Column: Form */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {/* Driver Type Selection */}
+            <div className="card animation-fade-in" style={{ background: "white", padding: "24px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#1e293b", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.4-1.7-1-2.1L17 8H7L3 11.2C2.4 11.6 2 12.3 2 13v3c0 .6.4 1 1 1h2"/><path d="M14 17H9"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg>
+                1. เลือกประเภท พขร.
+              </h3>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {driverTypes.map(type => (
+                  <label key={type.id} style={{ display: "flex", alignItems: "flex-start", gap: "12px", padding: "16px", borderRadius: "12px", border: `2px solid ${selectedType.id === type.id ? '#7e22ce' : '#f1f5f9'}`, background: selectedType.id === type.id ? '#fdfbfe' : 'white', cursor: "pointer", transition: "all 0.2s" }}>
+                    <input 
+                      type="radio" 
+                      name="driverType" 
+                      checked={selectedType.id === type.id} 
+                      onChange={() => setSelectedType(type)}
+                      style={{ marginTop: "4px", accentColor: "#7e22ce", width: "18px", height: "18px" }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: "700", color: selectedType.id === type.id ? '#7e22ce' : '#334155', fontSize: "1rem" }}>{type.name}</div>
+                      <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "4px" }}>{type.desc}</div>
+                      <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "4px" }}>
+                        ตั้งเบิกค่าแรง: <span style={{ fontWeight: "600", color: "#1e293b" }}>{type.base.toLocaleString()} บ.</span> | 
+                        OT 1.5: <span style={{ fontWeight: "600", color: "#1e293b" }}>{type.ot15.toFixed(2)} บ./ชม.</span>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Time Input Form */}
+            <div className="card animation-fade-in" style={{ background: "white", padding: "24px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#1e293b", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                2. กรอกเวลาการทำงาน
+              </h3>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>OT 1.5 เท่า (ชั่วโมง)</label>
+                  <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "8px", marginTop: "-4px" }}>วันทำงาน จันทร์ - เสาร์ (00:00-08:00 และ 17:00-24:00)</p>
+                  <input type="number" min="0" value={ot15Hours} onChange={e => setOt15Hours(e.target.value)} className="form-control" placeholder="0" style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", width: "100%" }} />
+                </div>
+                
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>OT 1.0 เท่า (ชั่วโมง)</label>
+                  <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "8px", marginTop: "-4px" }}>วันหยุดประเพณี/นักขัตฤกษ์/หยุดชดเชย (08:00-17:00)</p>
+                  <input type="number" min="0" value={ot10Hours} onChange={e => setOt10Hours(e.target.value)} className="form-control" placeholder="0" style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", width: "100%" }} />
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>OT 3.0 เท่า (ชั่วโมง)</label>
+                  <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "8px", marginTop: "-4px" }}>วันหยุดประเพณี/นักขัตฤกษ์/หยุดชดเชย (00:00-08:00 และ 17:00-24:00)</p>
+                  <input type="number" min="0" value={ot30Hours} onChange={e => setOt30Hours(e.target.value)} className="form-control" placeholder="0" style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", width: "100%" }} />
+                </div>
+
+                <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "16px", marginTop: "4px" }}>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>ค่าพักแรม (วัน)</label>
+                  <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "8px", marginTop: "-4px" }}>เบิกจ่ายวันละ 400 บาท</p>
+                  <input type="number" min="0" value={accomDays} onChange={e => setAccomDays(e.target.value)} className="form-control" placeholder="0" style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", width: "100%" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Receipt / Results */}
+          <div className="animation-fade-in">
+            <div style={{ background: "white", padding: "32px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)", position: "sticky", top: "24px" }}>
+              <div style={{ textAlign: "center", marginBottom: "24px" }}>
+                <div style={{ width: "64px", height: "64px", background: "#f0fdf4", color: "#10b981", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px auto" }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
+                </div>
+                <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1e293b", margin: 0 }}>สรุปค่าล่วงเวลา</h2>
+                <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "4px" }}>{selectedType.name} - {selectedType.desc.split(' (')[0]}</p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px", borderBottom: "2px dashed #e2e8f0", paddingBottom: "24px", marginBottom: "24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                  <div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>ค่าล่วงเวลา 1.5 เท่า</div>
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{ot15Hours || "0"} ชม. x {selectedType.ot15.toFixed(2)} บ.</div>
+                  </div>
+                  <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#1e293b" }}>
+                    {results.totalOT15.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                  <div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>ค่าล่วงเวลา 1.0 เท่า</div>
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{ot10Hours || "0"} ชม. x {selectedType.ot10.toFixed(2)} บ.</div>
+                  </div>
+                  <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#1e293b" }}>
+                    {results.totalOT10.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                  <div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>ค่าล่วงเวลา 3.0 เท่า</div>
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{ot30Hours || "0"} ชม. x {selectedType.ot30.toFixed(2)} บ.</div>
+                  </div>
+                  <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#1e293b" }}>
+                    {results.totalOT30.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "8px" }}>
+                  <div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>ค่าพักแรม</div>
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{accomDays || "0"} วัน x {selectedType.accom.toFixed(2)} บ.</div>
+                  </div>
+                  <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#1e293b" }}>
+                    {results.totalAccom.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
+                <div style={{ fontSize: "1rem", fontWeight: "700", color: "#1e293b" }}>รวมสุทธิ (Total)</div>
+                <div style={{ fontSize: "1.5rem", fontWeight: "800", color: "#10b981" }}>
+                  {results.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
+                </div>
+              </div>
+              
+              <div style={{ marginTop: "24px", padding: "16px", background: "#eff6ff", borderRadius: "12px", border: "1px solid #bfdbfe", fontSize: "0.8rem", color: "#1e3a8a", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: "2px" }}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <span>
+                  <strong>หมายเหตุ:</strong> การตั้งเบิกค่าแรงต่อเดือนของคุณคือ <strong>{selectedType.base.toLocaleString()} บาท</strong> ยอดสรุปด้านบนคือยอดรวมของค่าล่วงเวลา (OT) และค่าพักแรมเพิ่มเติม
+                </span>
+              </div>
+              
+              <button 
+                onClick={() => {
+                  setOt15Hours("");
+                  setOt10Hours("");
+                  setOt30Hours("");
+                  setAccomDays("");
+                }}
+                style={{ width: "100%", marginTop: "20px", background: "white", border: "1px solid #e2e8f0", color: "#64748b", padding: "12px", borderRadius: "8px", fontWeight: "600", cursor: "pointer", transition: "background 0.2s" }}
+                onMouseOver={e => e.currentTarget.style.background = "#f1f5f9"}
+                onMouseOut={e => e.currentTarget.style.background = "white"}
+              >
+                ล้างข้อมูล (Reset)
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
