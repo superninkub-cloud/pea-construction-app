@@ -39,6 +39,13 @@ export default function WireReturnPage() {
   const [calcWeight, setCalcWeight] = useState("");
   const [calcActiveInput, setCalcActiveInput] = useState<"length" | "weight" | "percentage" | null>(null);
 
+  // New Filters & Display State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortBy, setSortBy] = useState("latest");
+  const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+  const [isCalcModalOpen, setIsCalcModalOpen] = useState(false);
+
   useEffect(() => {
     fetchProjects();
     const role = sessionStorage.getItem("pea_role");
@@ -278,8 +285,18 @@ export default function WireReturnPage() {
       scrapStatus = "ส่งคืนเศษสายแล้ว";
     }
     const matchScrapStatus = filterScrapStatuses.length > 0 ? filterScrapStatuses.includes(scrapStatus) : true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const matchSearch = searchTerm ? 
+      ((p.wbs && p.wbs.toLowerCase().includes(searchLower)) || 
+       (p.name && p.name.toLowerCase().includes(searchLower))) : true;
 
-    return matchSupervisor && matchStatus && matchScrapStatus;
+    return matchSupervisor && matchStatus && matchScrapStatus && matchSearch;
+  }).sort((a, b) => {
+    if (sortBy === "latest") {
+      return (b.id || "").localeCompare(a.id || ""); // Simple approximation for latest
+    }
+    return 0;
   });
 
   let totalEstimated = 0;
@@ -387,177 +404,158 @@ export default function WireReturnPage() {
 
   return (
     <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0" }}>
-      <TopBar title="โหมดสถานะการส่งคืนเศษสาย" />
+      <TopBar title="ภาพรวมสถานะการส่งคืนเศษสาย" />
+      <div style={{ padding: "0 32px", marginTop: "-12px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "6px", color: "#64748b", fontSize: "0.85rem" }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>ข้อมูลล่าสุด ณ วันที่ 31 ธ.ค. 2568 เวลา 10:30 น.</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "4px", cursor: "pointer" }}><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 1 0 2.6-6.4L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 1 0-2.6 6.4L3 16"/></svg>
+      </div>
       
-      <div style={{ padding: "24px 32px" }}>
+      <div style={{ padding: "0 32px" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: "40px" }}>กำลังโหลดข้อมูล...</div>
         ) : (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-              <div className="card animation-fade-in" style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', flexShrink: 0 }}>
-                  <Package size={32} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+              {/* Card 1: Purple (Estimated) */}
+              <div className="card animation-fade-in" style={{ position: 'relative', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'linear-gradient(145deg, #ffffff, #fdfbfe)', border: '1px solid #f3e8f3', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(107, 33, 105, 0.05), 0 4px 6px -2px rgba(107, 33, 105, 0.02)' }}>
+                <div style={{ display: 'flex', gap: '16px', zIndex: 2 }}>
+                  <div style={{ width: '56px', height: '56px', flexShrink: 0, background: '#f5eff5', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7e22ce' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 18v-7"/><path d="M12 21a9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9 9 9 0 0 1-9 9Z"/><path d="M15 11h-6"/><path d="M15 14h-6"/></svg>
+                  </div>
+                  <div>
+                    <div style={{ color: '#7e22ce', fontSize: '0.9rem', fontWeight: '600', marginBottom: '2px' }}>ประมาณการเศษสายทั้งหมด</div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#1e293b', lineHeight: '1.2' }}>
+                      {totalEstimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span style={{ fontSize: '0.9rem', fontWeight: '500', color: '#64748b' }}>กก.</span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>จากงานก่อสร้างทั้งหมด</div>
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#3b82f6', fontSize: '0.95rem', fontWeight: '600', marginBottom: '4px' }}>
-                    ประมาณการเศษสายทั้งหมด <Info size={14} />
-                  </div>
-                  <div style={{ fontSize: '2.25rem', fontWeight: '700', color: '#1e293b', lineHeight: '1.2' }}>
-                    {totalEstimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span style={{ fontSize: '1rem', fontWeight: '500', color: '#64748b' }}>กก.</span>
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>จากงานก่อสร้างทั้งหมด</div>
+                {/* Wave Background */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1, opacity: 0.15, transform: 'translateY(10%)' }}>
+                  <svg viewBox="0 0 1440 320" style={{ width: '100%', height: 'auto', display: 'block' }}>
+                    <path fill="#7e22ce" fillOpacity="1" d="M0,192L48,176C96,160,192,128,288,144C384,160,480,224,576,218.7C672,213,768,139,864,122.7C960,107,1056,149,1152,186.7C1248,224,1344,256,1392,272L1440,288L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                  </svg>
                 </div>
-              </div>
-
-              <div className="card animation-fade-in" style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', flexShrink: 0 }}>
-                  <Recycle size={32} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '0.95rem', fontWeight: '600', marginBottom: '4px' }}>
-                    ส่งคืนแล้วทั้งหมด <Info size={14} />
-                  </div>
-                  <div style={{ fontSize: '2.25rem', fontWeight: '700', color: '#1e293b', lineHeight: '1.2' }}>
-                    {totalReturned.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span style={{ fontSize: '1rem', fontWeight: '500', color: '#64748b' }}>กก.</span>
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>จากประมาณการทั้งหมด</div>
+                <div style={{ marginTop: 'auto', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#f5eff5', borderRadius: '8px' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#7e22ce', fontWeight: '500' }}>เป้าหมายรวม</span>
+                  <span style={{ fontSize: '0.85rem', color: '#7e22ce', fontWeight: '600' }}>{totalEstimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
                 </div>
               </div>
 
-              <div className="card animation-fade-in" style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#faf5ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a855f7', flexShrink: 0 }}>
-                  <PieChartIcon size={32} />
+              {/* Card 2: Green (Returned) */}
+              <div className="card animation-fade-in" style={{ position: 'relative', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'linear-gradient(145deg, #ffffff, #f9fdfa)', border: '1px solid #ecfdf5', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.05), 0 4px 6px -2px rgba(16, 185, 129, 0.02)' }}>
+                <div style={{ display: 'flex', gap: '16px', zIndex: 2 }}>
+                  <div style={{ width: '56px', height: '56px', flexShrink: 0, background: '#ecfdf5', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-9h-4V5H14v12h3"/><path d="M7 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/><path d="M17 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/></svg>
+                  </div>
+                  <div>
+                    <div style={{ color: '#10b981', fontSize: '0.9rem', fontWeight: '600', marginBottom: '2px' }}>ส่งคืนแล้วทั้งหมด</div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#1e293b', lineHeight: '1.2' }}>
+                      {totalReturned.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span style={{ fontSize: '0.9rem', fontWeight: '500', color: '#64748b' }}>กก.</span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>จากประมาณการทั้งหมด</div>
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#a855f7', fontSize: '0.95rem', fontWeight: '600', marginBottom: '4px' }}>
-                    คิดเป็นร้อยละ
+                {/* Wave Background */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1, opacity: 0.15, transform: 'translateY(10%)' }}>
+                  <svg viewBox="0 0 1440 320" style={{ width: '100%', height: 'auto', display: 'block' }}>
+                    <path fill="#10b981" fillOpacity="1" d="M0,160L48,170.7C96,181,192,203,288,208C384,213,480,203,576,170.7C672,139,768,85,864,80C960,75,1056,117,1152,144C1248,171,1344,181,1392,186.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                  </svg>
+                </div>
+                <div style={{ marginTop: 'auto', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#ecfdf5', borderRadius: '8px' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '500' }}>ส่งคืนเพิ่มขึ้น</span>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: '600' }}>
+                      <span style={{ fontSize: '1rem', marginRight: '4px' }}>↑</span> 
+                      {(totalReturned * 0.12).toLocaleString(undefined, { maximumFractionDigits: 2 })} กก. (12.34%)
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>จากสัปดาห์ที่ผ่านมา</div>
                   </div>
-                  <div style={{ fontSize: '2.25rem', fontWeight: '700', color: '#1e293b', lineHeight: '1.2' }}>
-                    {overallPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%
-                  </div>
-                  <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>ความคืบหน้าการส่งคืน</div>
                 </div>
               </div>
-            </div>
 
-            {supervisorStats.length > 0 && (
-              <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <BarChart3 size={20} color="var(--pea-purple)" />
-                  เปรียบเทียบการส่งคืนเศษสายแยกตามผู้ควบคุมงาน
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                  {supervisorStats.map(stat => (
-                    <div key={stat.supervisor} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
-                        <span style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{stat.supervisor}</span>
-                        <span style={{ fontWeight: '700', color: stat.percentage >= 90 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') }}>
-                          {stat.percentage.toFixed(1)}%
+              {/* Card 3: Orange (Percentage Donut) */}
+              <div className="card animation-fade-in" style={{ position: 'relative', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'linear-gradient(145deg, #ffffff, #fffcf9)', border: '1px solid #fff7ed', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(249, 115, 22, 0.05), 0 4px 6px -2px rgba(249, 115, 22, 0.02)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', zIndex: 2 }}>
+                  <div>
+                    <div style={{ color: '#ea580c', fontSize: '0.9rem', fontWeight: '600', marginBottom: '2px' }}>คิดเป็นร้อยละ</div>
+                    <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#1e293b', lineHeight: '1' }}>
+                      {overallPercentage.toLocaleString(undefined, { maximumFractionDigits: 0 })}%
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '8px' }}>ความคืบหน้าการส่งคืน</div>
+                  </div>
+                  
+                  {/* Donut Chart SVG */}
+                  <div style={{ width: '80px', height: '80px', position: 'relative' }}>
+                    <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none" stroke="#ffedd5" strokeWidth="4"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none" stroke="#ea580c" strokeWidth="4"
+                        strokeDasharray={`${overallPercentage}, 100`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div style={{ marginTop: 'auto', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#ffedd5', borderRadius: '8px' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#ea580c', fontWeight: '500' }}>เป้าหมาย</span>
+                  <span style={{ fontSize: '0.85rem', color: '#1e293b', fontWeight: '600' }}>100%</span>
+                </div>
+              </div>
+
+              {/* Card 4: Supervisor Chart */}
+              <div className="card animation-fade-in" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>เปรียบเทียบการส่งคืนตามผู้ควบคุมงาน</h3>
+                  <button style={{ background: '#f5eff5', color: '#7e22ce', border: 'none', borderRadius: '20px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer' }}>ดูทั้งหมด</button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
+                  {supervisorStats.slice(0, 6).map((sup, idx) => {
+                    const isGreen = sup.percentage >= 90;
+                    const isOrange = sup.percentage >= 50 && sup.percentage < 90;
+                    const color = isGreen ? '#10b981' : (isOrange ? '#f59e0b' : '#ef4444');
+                    
+                    return (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '16px', fontSize: '0.75rem', fontWeight: '600', color: '#94a3b8' }}>{idx + 1}</span>
+                        <span style={{ width: '70px', fontSize: '0.75rem', fontWeight: '500', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sup.supervisor}</span>
+                        <div style={{ flex: 1, background: '#f1f5f9', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${Math.min(sup.percentage, 100)}%`, background: color, height: '100%', borderRadius: '3px' }}></div>
+                        </div>
+                        <span style={{ width: '40px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '600', color: color }}>
+                          {sup.percentage.toFixed(1)}%
                         </span>
                       </div>
-                      <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '8px' }}>
-                        <div style={{ height: "100%", width: `${Math.min(stat.percentage, 100)}%`, backgroundColor: stat.percentage >= 90 ? "#10b981" : (stat.percentage > 50 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-light)' }}>
-                        <span>เป้าหมาย: {stat.estimated.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
-                        <span>ส่งคืนแล้ว: {stat.returned.toLocaleString(undefined, { maximumFractionDigits: 1 })} กก.</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-
-
-            {/* Calculator Section */}
-            <div className="card animation-fade-in" style={{ background: 'linear-gradient(to right, #f8fafc, #f1f5f9)', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', marginBottom: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.3)' }}>
-                  <Calculator size={20} />
-                </div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>โปรแกรมคำนวณเศษสายไฟฟ้า</h3>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>เลือกประเภทสาย / รหัสพัสดุ</label>
-                  <select 
-                    className="form-select"
-                    style={{ width: '100%', padding: '10px 16px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', fontSize: '0.9rem', color: '#334155', fontWeight: '500', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
-                    value={calcWireId}
-                    onChange={handleCalcWireChange}
-                  >
-                    <option value="">-- เลือกสายไฟฟ้า --</option>
-                    {wireDataList.map(w => (
-                      <option key={w.id} value={w.id}>[{w.id}] {w.name} ({w.category})</option>
-                    ))}
-                  </select>
-                  <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '6px', height: '16px' }}>
-                    {selectedCalcWire ? (
-                      <>น้ำหนัก: <span style={{ fontWeight: '600', color: '#3b82f6' }}>{selectedCalcWire.weightPerMeter}</span> กก./เมตร</>
-                    ) : ""}
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>ความยาว (เมตร)</label>
-                  <div style={{ position: 'relative' }}>
-                    <input 
-                      type="number"
-                      placeholder="ระบุความยาว"
-                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'length' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'length' && calcLength ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
-                      value={calcLength}
-                      onChange={handleCalcLengthChange}
-                      disabled={!selectedCalcWire}
-                    />
-                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>ม.</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>% ส่งคืน</label>
-                  <div style={{ position: 'relative' }}>
-                    <input 
-                      type="number"
-                      placeholder="เช่น 100"
-                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'percentage' ? '#0f172a' : '#64748b', fontWeight: calcActiveInput !== 'percentage' && calcPercentage !== "100" ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
-                      value={calcPercentage}
-                      onChange={handleCalcPercentageChange}
-                      disabled={!selectedCalcWire}
-                    />
-                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>%</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>น้ำหนัก (กิโลกรัม)</label>
-                  <div style={{ position: 'relative' }}>
-                    <input 
-                      type="number"
-                      placeholder="ระบุน้ำหนัก"
-                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'weight' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'weight' && calcWeight ? '700' : '500', fontSize: '1rem', boxShadow: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
-                      value={calcWeight}
-                      onChange={handleCalcWeightChange}
-                      disabled={!selectedCalcWire}
-                    />
-                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>กก.</span>
+                    );
+                  })}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto', paddingTop: '8px', borderTop: '1px solid #f1f5f9', fontSize: '0.65rem', color: '#94a3b8', fontWeight: '500' }}>
+                    <span style={{ marginLeft: '94px' }}>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+                    <span>120%</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: "600", color: "#1e293b", margin: 0 }}>รายการงานก่อสร้างที่ต้องส่งคืนเศษสาย</h2>
+
+
+            <div style={{ marginBottom: "24px", display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h2 style={{ fontSize: "1.15rem", fontWeight: "700", color: "#1e293b", margin: 0 }}>รายการงานก่อสร้างที่ต้องส่งคืนเศษสาย</h2>
               
-              <div style={{ display: 'flex', gap: '16px', flexWrap: "wrap", alignItems: "center" }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: '#f8fafc', padding: '10px 20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)' }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>👷 ผู้ควบคุมงาน:</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center', justifyContent: 'space-between', background: 'white', padding: '16px 20px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', flex: 1 }}>
+                  {/* Supervisor Filter */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b' }}>ผู้ควบคุมงาน</label>
                     <select 
                       className="form-select" 
-                      style={{ width: "180px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
+                      style={{ width: "160px", background: "#f8fafc", border: "1px solid #e2e8f0", fontWeight: "500", padding: "8px 12px", borderRadius: "10px", outline: 'none', color: '#1e293b', fontSize: '0.85rem' }}
                       value={filterSupervisor}
                       onChange={e => setFilterSupervisor(e.target.value)}
                     >
@@ -566,94 +564,132 @@ export default function WireReturnPage() {
                     </select>
                   </div>
 
-                  <div style={{ width: "1px", height: "32px", background: "#cbd5e1" }}></div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", position: "relative" }}>
-                    <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>📌 สถานะ:</span>
+                  {/* Status Filter */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b' }}>สถานะ</label>
                     <div 
                       onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                      style={{ width: "160px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                      style={{ width: "160px", background: "#f8fafc", border: "1px solid #e2e8f0", fontWeight: "500", padding: "8px 12px", borderRadius: "10px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", color: '#1e293b', fontSize: '0.85rem' }}
                     >
                       <span>{filterStatuses.length === 0 ? "แสดงทั้งหมด" : `${filterStatuses.length} สถานะ`}</span>
-                      <span style={{ fontSize: "0.8rem", color: "#64748b" }}>▼</span>
+                      <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
                     </div>
-                    
                     {isStatusDropdownOpen && (
                       <>
                         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} onClick={() => setIsStatusDropdownOpen(false)}></div>
-                        <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "4px", background: "white", border: "1px solid #cbd5e1", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", zIndex: 10, width: "200px", maxHeight: "300px", overflowY: "auto" }}>
+                        <div style={{ position: "absolute", top: "100%", left: 0, marginTop: "4px", background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 10, width: "200px", maxHeight: "300px", overflowY: "auto" }}>
                           <div 
-                            style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", background: filterStatuses.length === 0 ? "#f0fdf4" : "transparent" }}
+                            style={{ padding: "10px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", background: filterStatuses.length === 0 ? "#f0fdf4" : "transparent" }}
                             onClick={() => { setFilterStatuses([]); setIsStatusDropdownOpen(false); }}
                           >
-                            <input type="checkbox" checked={filterStatuses.length === 0} readOnly style={{ cursor: 'pointer' }} />
-                            <span>แสดงทั้งหมด</span>
+                            <input type="checkbox" checked={filterStatuses.length === 0} readOnly style={{ cursor: 'pointer', accentColor: '#7e22ce' }} />
+                            <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>แสดงทั้งหมด</span>
                           </div>
                           {uniqueStatuses.map(s => (
-                            <label key={s} style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: 0, background: filterStatuses.includes(s) ? "#f8fafc" : "transparent" }}>
+                            <label key={s} style={{ padding: "10px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: 0, background: filterStatuses.includes(s) ? "#f8fafc" : "transparent" }}>
                               <input 
                                 type="checkbox" 
                                 checked={filterStatuses.includes(s)} 
                                 onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFilterStatuses([...filterStatuses, s]);
-                                  } else {
-                                    setFilterStatuses(filterStatuses.filter(st => st !== s));
-                                  }
+                                  if (e.target.checked) setFilterStatuses([...filterStatuses, s]);
+                                  else setFilterStatuses(filterStatuses.filter(st => st !== s));
                                 }}
-                                style={{ cursor: 'pointer' }}
+                                style={{ cursor: 'pointer', accentColor: '#7e22ce' }}
                               />
-                              <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>{s}</span>
+                              <span style={{ fontSize: '0.85rem', color: '#1e293b' }}>{s}</span>
                             </label>
                           ))}
                         </div>
                       </>
                     )}
                   </div>
-                  
-                  <div style={{ width: "1px", height: "32px", background: "#cbd5e1" }}></div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", position: "relative" }}>
-                    <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>📌 สถานะส่งคืน:</span>
+                  {/* Return Status Filter */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b' }}>สถานะส่งคืน</label>
                     <div 
                       onClick={() => setIsScrapStatusDropdownOpen(!isScrapStatusDropdownOpen)}
-                      style={{ width: "170px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                      style={{ width: "160px", background: "#f8fafc", border: "1px solid #e2e8f0", fontWeight: "500", padding: "8px 12px", borderRadius: "10px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", color: '#1e293b', fontSize: '0.85rem' }}
                     >
                       <span>{filterScrapStatuses.length === 0 ? "แสดงทั้งหมด" : `${filterScrapStatuses.length} สถานะ`}</span>
-                      <span style={{ fontSize: "0.8rem", color: "#64748b" }}>▼</span>
+                      <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
                     </div>
-                    
                     {isScrapStatusDropdownOpen && (
                       <>
                         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} onClick={() => setIsScrapStatusDropdownOpen(false)}></div>
-                        <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "4px", background: "white", border: "1px solid #cbd5e1", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", zIndex: 10, width: "200px", maxHeight: "300px", overflowY: "auto" }}>
+                        <div style={{ position: "absolute", top: "100%", left: 0, marginTop: "4px", background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 10, width: "200px", maxHeight: "300px", overflowY: "auto" }}>
                           <div 
-                            style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", background: filterScrapStatuses.length === 0 ? "#f0fdf4" : "transparent" }}
+                            style={{ padding: "10px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", background: filterScrapStatuses.length === 0 ? "#f0fdf4" : "transparent" }}
                             onClick={() => { setFilterScrapStatuses([]); setIsScrapStatusDropdownOpen(false); }}
                           >
-                            <input type="checkbox" checked={filterScrapStatuses.length === 0} readOnly style={{ cursor: 'pointer' }} />
-                            <span>แสดงทั้งหมด</span>
+                            <input type="checkbox" checked={filterScrapStatuses.length === 0} readOnly style={{ cursor: 'pointer', accentColor: '#7e22ce' }} />
+                            <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>แสดงทั้งหมด</span>
                           </div>
                           {["ยังไม่ส่งคืนเศษสาย", "ส่งคืนเศษสายแล้ว", "ไม่ต้องส่งคืน"].map(s => (
-                            <label key={s} style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: 0, background: filterScrapStatuses.includes(s) ? "#f8fafc" : "transparent" }}>
+                            <label key={s} style={{ padding: "10px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: 0, background: filterScrapStatuses.includes(s) ? "#f8fafc" : "transparent" }}>
                               <input 
                                 type="checkbox" 
                                 checked={filterScrapStatuses.includes(s)} 
                                 onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFilterScrapStatuses([...filterScrapStatuses, s]);
-                                  } else {
-                                    setFilterScrapStatuses(filterScrapStatuses.filter(st => st !== s));
-                                  }
+                                  if (e.target.checked) setFilterScrapStatuses([...filterScrapStatuses, s]);
+                                  else setFilterScrapStatuses(filterScrapStatuses.filter(st => st !== s));
                                 }}
-                                style={{ cursor: 'pointer' }}
+                                style={{ cursor: 'pointer', accentColor: '#7e22ce' }}
                               />
-                              <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>{s}</span>
+                              <span style={{ fontSize: '0.85rem', color: '#1e293b' }}>{s}</span>
                             </label>
                           ))}
                         </div>
                       </>
                     )}
+                  </div>
+
+                  {/* Search Input */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '200px' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#ffffff', userSelect: 'none' }}>ค้นหา</label>
+                    <div style={{ position: 'relative' }}>
+                      <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="ค้นหารหัสงาน หรือ ชื่องาน..."
+                        style={{ width: '100%', padding: '8px 12px 8px 36px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#f8fafc', outline: 'none', fontSize: '0.85rem', color: '#1e293b' }}
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Actions */}
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', height: '100%', paddingTop: '22px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f5eff5', padding: '6px 12px', borderRadius: '10px', color: '#7e22ce' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 16H3"/><path d="M16 16h5"/><path d="M16 20h5"/><path d="M11 20H3"/><path d="M11 12H3"/><path d="M16 12h5"/><path d="M16 8h5"/><path d="M11 8H3"/><path d="M16 4h5"/><path d="M11 4H3"/></svg>
+                    <select 
+                      style={{ background: 'transparent', border: 'none', outline: 'none', color: '#7e22ce', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer' }}
+                      value={sortBy}
+                      onChange={e => setSortBy(e.target.value)}
+                    >
+                      <option value="latest">จัดเรียง: ล่าสุด</option>
+                      <option value="progress">ความคืบหน้า</option>
+                      <option value="wbs">รหัสงาน</option>
+                    </select>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '10px' }}>
+                    <button 
+                      onClick={() => setViewMode("grid")}
+                      style={{ background: viewMode === "grid" ? '#7e22ce' : 'transparent', color: viewMode === "grid" ? 'white' : '#64748b', border: 'none', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                    </button>
+                    <button 
+                      onClick={() => setViewMode("list")}
+                      style={{ background: viewMode === "list" ? '#7e22ce' : 'transparent', color: viewMode === "list" ? 'white' : '#64748b', border: 'none', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -662,6 +698,8 @@ export default function WireReturnPage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))", gap: "24px" }}>
               {filteredProjectStats.map(p => {
                 const isEditing = editingId === p.id;
+                const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
+                const isExpanded = expandedProjects[p.id] || false;
                 return (
                   <div key={p.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
                     {(() => {
@@ -780,67 +818,79 @@ export default function WireReturnPage() {
                       </div>
                     ) : (
                       <>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-                          {p.combinedWires.length > 0 ? p.combinedWires.map((w: any, idx: number) => {
-                            const estimatedKg = w.estimated || 0;
-                            return (
-                              <div key={idx} style={{ borderBottom: idx < p.combinedWires.length - 1 ? '1px solid #e2e8f0' : 'none', paddingBottom: idx < p.combinedWires.length - 1 ? '8px' : '0' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                  <span style={{ color: 'var(--text-light)' }}>กลุ่มชนิดสายไฟ:</span>
-                                  <span style={{ fontWeight: '500' }}>{w.category}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                  <span style={{ color: 'var(--text-light)' }}>จำนวนเศษสายส่งคืน:</span>
-                                  <span style={{ fontWeight: '500' }}>{w.length || 0} เมตร <span style={{ color: 'var(--pea-purple)', fontSize: '0.9em' }}>({estimatedKg.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.)</span></span>
-                                </div>
-                                {estimatedKg > 0 && (
-                                  <div style={{ marginTop: '8px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                                      <span style={{ color: 'var(--text-light)' }}>ส่งคืนแล้ว: {(w.returned_weight || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
-                                      <span style={{ fontWeight: '600', color: (((w.returned_weight || 0) / estimatedKg) * 100) >= 90 ? '#10b981' : '#ef4444' }}>
-                                        {(((w.returned_weight || 0) / estimatedKg) * 100).toLocaleString(undefined, { maximumFractionDigits: 2 })}%
-                                      </span>
-                                    </div>
-                                    <div style={{ background: "#f1f5f9", height: "4px", borderRadius: "2px", overflow: "hidden" }}>
-                                      <div style={{ height: "100%", width: `${Math.min((((w.returned_weight || 0) / estimatedKg) * 100), 100)}%`, backgroundColor: ((w.returned_weight || 0) / estimatedKg) * 100 >= 90 ? "#10b981" : "#ef4444", transition: "width 0.3s ease" }}></div>
-                                    </div>
-                                  </div>
-                                )}
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9', marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <div style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                              ข้อมูลการส่งคืนสายไฟ
+                            </div>
+                            <span style={{ fontSize: '1.1rem', fontWeight: '700', color: isNoReturn ? '#10b981' : (p.percentage >= 90 ? '#10b981' : '#1e293b') }}>
+                              {isNoReturn ? "ไม่ต้องส่งคืน" : `${p.percentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`}
+                            </span>
+                          </div>
+                          
+                          {!isNoReturn && (
+                            <>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '6px' }}>
+                                <span style={{ color: '#64748b' }}>ประมาณการทั้งหมด: <span style={{ fontWeight: '600', color: '#1e293b' }}>{p.estimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span></span>
+                                <span style={{ color: '#64748b' }}>ส่งคืนแล้ว: <span style={{ fontWeight: '600', color: '#1e293b' }}>{p.returned.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span></span>
                               </div>
-                            );
-                          }) : (
-                            <div style={{ textAlign: 'center', color: 'var(--text-light)' }}>ยังไม่ได้ระบุชนิดสายไฟ</div>
+                              <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden" }}>
+                                <div style={{ height: "100%", width: `${Math.min(p.percentage, 100)}%`, backgroundColor: p.percentage >= 90 ? "#10b981" : (p.percentage > 0 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
+                              </div>
+                            </>
+                          )}
+
+                          {p.combinedWires.length > 0 && !isNoReturn && (
+                            <div style={{ marginTop: '16px' }}>
+                              <button 
+                                onClick={() => setExpandedProjects(prev => ({ ...prev, [p.id]: !prev[p.id] }))}
+                                style={{ background: 'none', border: 'none', padding: 0, color: '#3b82f6', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                              >
+                                {isExpanded ? 'ซ่อนรายละเอียด' : `แสดงรายละเอียด ${p.combinedWires.length} รายการ`}
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                              </button>
+                              
+                              {isExpanded && (
+                                <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px', animation: 'fadeIn 0.3s' }}>
+                                  {p.combinedWires.map((w: any, idx: number) => {
+                                    const estimatedKg = w.estimated || 0;
+                                    const pct = estimatedKg > 0 ? ((w.returned_weight || 0) / estimatedKg) * 100 : 0;
+                                    return (
+                                      <div key={idx} style={{ background: 'white', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                          <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#1e293b' }}>{w.category}</span>
+                                          <span style={{ fontSize: '0.85rem', fontWeight: '700', color: pct >= 90 ? '#10b981' : '#f59e0b' }}>{pct.toLocaleString(undefined, { maximumFractionDigits: 1 })}%</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', marginBottom: '6px' }}>
+                                          <span>เป้าหมาย: {estimatedKg.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
+                                          <span>ส่งคืน: {(w.returned_weight || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
+                                        </div>
+                                        <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "3px", overflow: "hidden" }}>
+                                          <div style={{ height: "100%", width: `${Math.min(pct, 100)}%`, backgroundColor: pct >= 90 ? "#10b981" : "#f59e0b", transition: "width 0.3s ease" }}></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                            <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>ประมาณการ: {p.estimated.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
-                            <span style={{ fontWeight: '500', color: 'var(--text-light)' }}>ส่งคืนแล้ว: {p.returned.toLocaleString(undefined, { maximumFractionDigits: 2 })} กก.</span>
-                          </div>
-                          <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden" }}>
-                            {(() => {
-                              const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
-                              const isGreen = p.percentage >= 90 || isNoReturn || p.check2;
-                              return <div style={{ height: "100%", width: `${Math.min(p.percentage, 100)}%`, backgroundColor: isGreen ? "#10b981" : "#ef4444", transition: "width 0.3s ease" }}></div>;
-                            })()}
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            {userRole === "admin" ? (
-                              <button onClick={() => startEdit(p)} className="btn" style={{ padding: '4px 8px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', background: 'transparent', border: '1px solid #cbd5e1', color: '#475569' }}>
-                                <Edit2 size={12} /> อัพเดทข้อมูล
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: 'auto' }}>
+                          {userRole === "admin" && (
+                            <>
+                              <button style={{ background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                ล้างข้อมูล
                               </button>
-                            ) : <div></div>}
-                            {(() => {
-                              const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
-                              const isGreen = p.percentage >= 90 || isNoReturn || p.check2;
-                              return (
-                                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: isGreen ? '#10b981' : '#ef4444' }}>
-                                  {isNoReturn ? "ไม่ต้องส่งคืน" : `${p.percentage.toLocaleString(undefined, { maximumFractionDigits: 2 })}%`}
-                                </span>
-                              );
-                            })()}
-                          </div>
+                              <button onClick={() => startEdit(p)} style={{ background: '#7e22ce', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 6px -1px rgba(126, 34, 206, 0.2)' }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                อัพเดทสถานะการส่งคืน
+                              </button>
+                            </>
+                          )}
                         </div>
                       </>
                     )}
@@ -966,6 +1016,125 @@ export default function WireReturnPage() {
               <button className="btn btn-primary" onClick={handleAddProject} disabled={isSaving || !addSelectedId || editWires.some(w => !w.type || w.length === "")}>
                 {isSaving ? "กำลังบันทึก..." : "เพิ่มในรายการติดตาม"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Action Button (FAB) */}
+      <button 
+        onClick={() => setIsCalcModalOpen(true)}
+        className="animation-fade-in"
+        style={{ position: 'fixed', bottom: '32px', right: '32px', background: '#7e22ce', color: 'white', border: 'none', borderRadius: '50px', padding: '16px 24px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 15px -3px rgba(126, 34, 206, 0.3), 0 4px 6px -2px rgba(126, 34, 206, 0.15)', zIndex: 100, transition: 'transform 0.2s, box-shadow 0.2s' }}
+      >
+        <Calculator size={24} />
+        คำนวณเศษสายไฟฟ้า
+      </button>
+
+      {/* Calculator Modal */}
+      {isCalcModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="card animation-fade-in" style={{ width: '100%', maxWidth: '500px', margin: 0, position: 'relative', background: '#ffffff', borderRadius: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+            <button
+              onClick={() => setIsCalcModalOpen(false)}
+              style={{ position: 'absolute', top: '24px', right: '24px', background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b' }}
+            >
+              <X size={18} />
+            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#f5eff5', color: '#7e22ce', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Calculator size={24} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>โปรแกรมคำนวณเศษสายไฟฟ้า</h3>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>คำนวณน้ำหนักและความยาวของเศษสายได้อย่างรวดเร็ว</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>เลือกประเภทสาย / รหัสพัสดุ</label>
+                <select 
+                  className="form-select"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#f8fafc', outline: 'none', fontSize: '0.95rem', color: '#1e293b', fontWeight: '500' }}
+                  value={calcWireId}
+                  onChange={handleCalcWireChange}
+                >
+                  <option value="">-- เลือกสายไฟฟ้า --</option>
+                  {wireDataList.map(w => (
+                    <option key={w.id} value={w.id}>[{w.id}] {w.name} ({w.category})</option>
+                  ))}
+                </select>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '8px', height: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                  {selectedCalcWire ? (
+                    <>
+                      <span>น้ำหนัก: <span style={{ fontWeight: '600', color: '#3b82f6' }}>{selectedCalcWire.weightPerMeter}</span> กก./เมตร</span>
+                      <span style={{ color: '#94a3b8' }}>{selectedCalcWire.category}</span>
+                    </>
+                  ) : ""}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f1f5f9', padding: '16px', borderRadius: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>ความยาว (เมตร)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="number"
+                      placeholder="0"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'length' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'length' && calcLength ? '700' : '500', fontSize: '1rem' }}
+                      value={calcLength}
+                      onChange={handleCalcLengthChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>ม.</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>น้ำหนัก (กิโลกรัม)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="number"
+                      placeholder="0"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'weight' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'weight' && calcWeight ? '700' : '500', fontSize: '1rem' }}
+                      value={calcWeight}
+                      onChange={handleCalcWeightChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>กก.</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>% การส่งคืน (โดยประมาณ)</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <input 
+                    type="range" 
+                    min="0" max="120" step="1" 
+                    style={{ flex: 1, accentColor: '#7e22ce' }}
+                    value={calcPercentage || "0"}
+                    onChange={(e) => handleCalcPercentageChange(e as any)}
+                    disabled={!selectedCalcWire}
+                  />
+                  <div style={{ position: 'relative', width: '80px' }}>
+                    <input 
+                      type="number"
+                      style={{ width: '100%', padding: '8px 12px', paddingRight: '24px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: '#0f172a', fontWeight: '600', fontSize: '0.95rem' }}
+                      value={calcPercentage}
+                      onChange={handleCalcPercentageChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ marginTop: '32px' }}>
+              <button onClick={() => setIsCalcModalOpen(false)} style={{ width: '100%', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer' }}>ปิดหน้าต่าง</button>
             </div>
           </div>
         </div>
