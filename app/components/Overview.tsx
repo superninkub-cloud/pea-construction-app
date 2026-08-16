@@ -91,10 +91,12 @@ export default function Overview() {
     const supProjects = filteredProjects.filter(p => (p.supervisor || "ไม่ระบุ") === sup);
     const total = supProjects.length;
     const f4 = supProjects.filter(p => p.status === 'F4').length;
-    // Percentage out of all F4s (contribution)
-    const percentage = totalF4OfAll > 0 ? (f4 / totalF4OfAll) * 100 : 0;
+    const percentage = total > 0 ? (f4 / total) * 100 : 0;
     return { name: sup, total, f4, percentage };
-  }).filter(s => s.total > 0).sort((a, b) => b.f4 - a.f4);
+  }).filter(s => s.total > 0).sort((a, b) => {
+    if (b.percentage !== a.percentage) return b.percentage - a.percentage;
+    return b.f4 - a.f4;
+  });
 
 
   if (loading) {
@@ -257,14 +259,14 @@ export default function Overview() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'flex-start' }}>
                         <span style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.95rem' }}>{stat.name}</span>
                         <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: stat.percentage >= 15 ? '#10b981' : (stat.percentage >= 5 ? '#f59e0b' : '#ef4444') }}>
+                          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: stat.percentage >= 80 ? '#10b981' : (stat.percentage >= 40 ? '#f59e0b' : '#ef4444') }}>
                             {stat.percentage.toFixed(1)}%
                           </span>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', marginTop: '-2px' }}>(สัดส่วนจาก F4 ทั้งหมด)</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', marginTop: '-2px' }}>(อัตราการปิดงานสำเร็จ)</div>
                         </div>
                       </div>
                       <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '12px' }}>
-                        <div style={{ height: "100%", width: `${Math.min(stat.percentage, 100)}%`, backgroundColor: stat.percentage >= 15 ? "#10b981" : (stat.percentage >= 5 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
+                        <div style={{ height: "100%", width: `${Math.min(stat.percentage, 100)}%`, backgroundColor: stat.percentage >= 80 ? "#10b981" : (stat.percentage >= 40 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-light)', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
                         <span>จำนวนงานทั้งหมด: <span style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{stat.total}</span> โครงการ</span>
