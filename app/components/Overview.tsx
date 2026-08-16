@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
-import { Home, CheckCircle2, CircleDashed, Layers } from "lucide-react";
+import { Home, CheckCircle2, CircleDashed, Layers, Users } from "lucide-react";
 import { wireDataList } from "../../lib/wireData";
 
 export default function Overview() {
@@ -85,8 +85,16 @@ export default function Overview() {
     );
     return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
   });
-
-
+  const totalF4OfAll = filteredProjects.filter(p => p.status === 'F4').length;
+  
+  const supervisorStats = supervisors.map(sup => {
+    const supProjects = filteredProjects.filter(p => (p.supervisor || "ไม่ระบุ") === sup);
+    const total = supProjects.length;
+    const f4 = supProjects.filter(p => p.status === 'F4').length;
+    // Percentage out of all F4s (contribution)
+    const percentage = totalF4OfAll > 0 ? (f4 / totalF4OfAll) * 100 : 0;
+    return { name: sup, total, f4, percentage };
+  }).filter(s => s.total > 0).sort((a, b) => b.f4 - a.f4);
 
 
   if (loading) {
@@ -234,6 +242,38 @@ export default function Overview() {
                 </div>
               </div>
             </div>
+
+            {/* Supervisor Comparison */}
+            {supervisorStats.length > 0 && (
+              <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Users size={20} color="var(--pea-purple)" />
+                  เปรียบเทียบผลงานการปิดงาน (F4) ของช่างแต่ละคน
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                  {supervisorStats.map(stat => (
+                    <div key={stat.name} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'flex-start' }}>
+                        <span style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.95rem' }}>{stat.name}</span>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: stat.percentage >= 15 ? '#10b981' : (stat.percentage >= 5 ? '#f59e0b' : '#ef4444') }}>
+                            {stat.percentage.toFixed(1)}%
+                          </span>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', marginTop: '-2px' }}>(สัดส่วนจาก F4 ทั้งหมด)</div>
+                        </div>
+                      </div>
+                      <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '12px' }}>
+                        <div style={{ height: "100%", width: `${Math.min(stat.percentage, 100)}%`, backgroundColor: stat.percentage >= 15 ? "#10b981" : (stat.percentage >= 5 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-light)', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
+                        <span>จำนวนงานทั้งหมด: <span style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{stat.total}</span> โครงการ</span>
+                        <span>ปิดงาน F4 แล้ว: <span style={{ fontWeight: '600', color: '#10b981' }}>{stat.f4}</span> โครงการ</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Filters Card */}
             <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center' }}>
