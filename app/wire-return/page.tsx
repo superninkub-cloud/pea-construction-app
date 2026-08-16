@@ -515,7 +515,7 @@ export default function WireReturnPage() {
                   <button style={{ background: '#f5eff5', color: '#7e22ce', border: 'none', borderRadius: '20px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer' }}>ดูทั้งหมด</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
-                  {supervisorStats.slice(0, 6).map((sup, idx) => {
+                  {supervisorStats.map((sup, idx) => {
                     const isGreen = sup.percentage >= 90;
                     const isOrange = sup.percentage >= 50 && sup.percentage < 90;
                     const color = isGreen ? '#10b981' : (isOrange ? '#f59e0b' : '#ef4444');
