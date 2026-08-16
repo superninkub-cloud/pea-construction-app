@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TopBar from "../components/TopBar";
+import { supabase } from "../../lib/supabaseClient";
 
 // Driver Data based on user requirements
 const driverTypes = [
@@ -12,11 +13,48 @@ const driverTypes = [
 ];
 
 export default function DriverOTPage() {
+  const [drivers, setDrivers] = useState<{ plate: string; driver: string }[]>([]);
+  const [selectedDriverIdx, setSelectedDriverIdx] = useState("");
+  
   const [selectedType, setSelectedType] = useState(driverTypes[1]); // Default to 2+
   const [ot15Hours, setOt15Hours] = useState("");
   const [ot10Hours, setOt10Hours] = useState("");
   const [ot30Hours, setOt30Hours] = useState("");
   const [accomDays, setAccomDays] = useState("");
+
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      const { data, error } = await supabase.from('vehicles').select('*');
+      if (!error && data) {
+        const masterCars = data.map(c => ({ plate: c.plate_number, driver: c.default_driver }));
+        if (!masterCars.find(c => c.plate === '90-1843 นฐ')) {
+          masterCars.push({ plate: '90-1843 นฐ', driver: 'นายขวัญนคร ศรีจันทร์อินทร์' });
+        }
+        masterCars.sort((a, b) => a.plate.localeCompare(b.plate, 'th'));
+        setDrivers(masterCars);
+      }
+    };
+    fetchDrivers();
+  }, []);
+
+  const handleDriverSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setSelectedDriverIdx(val);
+    
+    if (val !== "") {
+      const car = drivers[Number(val)];
+      if (car) {
+        const noCranePlates = ["90-1844 นฐ", "89-5769 นฐ", "90-1845 นฐ", "90-1842 นฐ", "90-1843 นฐ"];
+        if (noCranePlates.includes(car.plate) || car.plate.includes("หาง")) {
+          // ไม่มีเครน -> ชนิดที่ 2
+          setSelectedType(driverTypes[0]);
+        } else {
+          // มีเครน -> เดาว่าเป็นชนิดที่ 2+ (ผู้ใช้เปลี่ยนเองได้ถ้าเป็น 2+พิเศษ หรือ 3+)
+          setSelectedType(driverTypes[1]);
+        }
+      }
+    }
+  };
 
   const calculateTotal = () => {
     const totalOT15 = (Number(ot15Hours) || 0) * selectedType.ot15;
@@ -34,6 +72,7 @@ export default function DriverOTPage() {
   };
 
   const results = calculateTotal();
+  const activeDriver = selectedDriverIdx !== "" ? drivers[Number(selectedDriverIdx)] : null;
 
   return (
     <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0", background: "#f8fafc" }}>
@@ -44,11 +83,42 @@ export default function DriverOTPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "24px" }}>
           {/* Left Column: Form */}
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            
+            {/* Driver Selection from Database */}
+            <div className="card animation-fade-in" style={{ background: "white", padding: "24px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#1e293b", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                1. เลือกพนักงานขับรถ
+              </h3>
+              
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>ดึงข้อมูลคนขับจากระบบยานพาหนะ (C3 Vehicle)</label>
+                <select 
+                  className="form-control" 
+                  value={selectedDriverIdx} 
+                  onChange={handleDriverSelect}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#f8fafc", cursor: "pointer" }}
+                >
+                  <option value="">-- ไม่ระบุ / ระบุเอง --</option>
+                  {drivers.map((d, idx) => (
+                    <option key={idx} value={idx}>
+                      {d.plate} : {d.driver}
+                    </option>
+                  ))}
+                </select>
+                {activeDriver && (
+                  <div style={{ marginTop: "12px", padding: "12px", background: "#eff6ff", borderRadius: "8px", border: "1px solid #bfdbfe", fontSize: "0.85rem", color: "#1e3a8a" }}>
+                    ระบบได้แนะนำ <strong>{selectedType.name}</strong> ให้โดยอัตโนมัติตามข้อมูลทะเบียนรถ
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Driver Type Selection */}
             <div className="card animation-fade-in" style={{ background: "white", padding: "24px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
               <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#1e293b", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.4-1.7-1-2.1L17 8H7L3 11.2C2.4 11.6 2 12.3 2 13v3c0 .6.4 1 1 1h2"/><path d="M14 17H9"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/></svg>
-                1. เลือกประเภท พขร.
+                2. ยืนยันประเภท พขร.
               </h3>
               
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -78,7 +148,7 @@ export default function DriverOTPage() {
             <div className="card animation-fade-in" style={{ background: "white", padding: "24px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
               <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#1e293b", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                2. กรอกเวลาการทำงาน
+                3. กรอกเวลาการทำงาน
               </h3>
               
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -117,7 +187,16 @@ export default function DriverOTPage() {
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
                 </div>
                 <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1e293b", margin: 0 }}>สรุปค่าล่วงเวลา</h2>
-                <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "4px" }}>{selectedType.name} - {selectedType.desc.split(' (')[0]}</p>
+                <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "4px" }}>
+                  {activeDriver ? (
+                    <span style={{ color: "#2563eb", fontWeight: "600" }}>{activeDriver.driver} ({activeDriver.plate})</span>
+                  ) : (
+                    "พนักงานขับรถ (ไม่ได้ระบุ)"
+                  )}
+                </p>
+                <div style={{ display: "inline-block", background: "#f1f5f9", padding: "4px 12px", borderRadius: "20px", fontSize: "0.8rem", color: "#475569", marginTop: "8px", fontWeight: "500" }}>
+                  {selectedType.name} - {selectedType.desc.split(' (')[0]}
+                </div>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", borderBottom: "2px dashed #e2e8f0", paddingBottom: "24px", marginBottom: "24px" }}>
@@ -178,6 +257,7 @@ export default function DriverOTPage() {
               
               <button 
                 onClick={() => {
+                  setSelectedDriverIdx("");
                   setOt15Hours("");
                   setOt10Hours("");
                   setOt30Hours("");
