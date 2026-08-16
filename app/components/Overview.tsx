@@ -119,7 +119,8 @@ export default function Overview() {
           <p>วันที่พิมพ์: {new Date().toLocaleString('th-TH')}</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '24px' }}>
+
 
           <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
             <div className="stat-card" style={{ borderTop: '4px solid var(--pea-purple)' }}>
@@ -174,7 +175,7 @@ export default function Overview() {
             </div>
           </div>
 
-          <div className="filter-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
 
             {/* Donut Chart Card */}
             <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -274,6 +275,7 @@ export default function Overview() {
                 </div>
               </div>
             )}
+          </div>
 
             {/* Filters Card */}
             <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center' }}>
