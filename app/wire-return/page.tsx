@@ -463,16 +463,7 @@ export default function WireReturnPage() {
                     <path fill="#10b981" fillOpacity="1" d="M0,160L48,170.7C96,181,192,203,288,208C384,213,480,203,576,170.7C672,139,768,85,864,80C960,75,1056,117,1152,144C1248,171,1344,181,1392,186.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
                   </svg>
                 </div>
-                <div style={{ marginTop: 'auto', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#ecfdf5', borderRadius: '8px' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: '500' }}>ส่งคืนเพิ่มขึ้น</span>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: '600' }}>
-                      <span style={{ fontSize: '1rem', marginRight: '4px' }}>↑</span> 
-                      {(totalReturned * 0.12).toLocaleString(undefined, { maximumFractionDigits: 2 })} กก. (12.34%)
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>จากสัปดาห์ที่ผ่านมา</div>
-                  </div>
-                </div>
+
               </div>
 
               {/* Card 3: Orange (Percentage Donut) */}
