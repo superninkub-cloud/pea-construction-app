@@ -419,9 +419,11 @@ export default function UpdateStatus() {
                   <input
                     type="number"
                     className="form-control"
-                    style={{ maxWidth: '130px', padding: '4px 8px' }}
+                    style={{ maxWidth: '130px', padding: '4px 8px', backgroundColor: userRole !== "admin" ? '#f1f5f9' : 'white', cursor: userRole !== "admin" ? 'not-allowed' : 'text' }}
                     value={projectValue}
                     onChange={(e) => setProjectValue(e.target.value)}
+                    disabled={userRole !== "admin"}
+                    readOnly={userRole !== "admin"}
                   />
                   <span style={{ fontWeight: '600', color: '#047857' }}>บาท</span>
                 </div>
