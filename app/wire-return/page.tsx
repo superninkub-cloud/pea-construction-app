@@ -28,7 +28,8 @@ export default function WireReturnPage() {
   const [addSelectedId, setAddSelectedId] = useState("");
 
   const [filterSupervisor, setFilterSupervisor] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
   // Calculator State
   const [calcWireId, setCalcWireId] = useState("");
@@ -265,7 +266,7 @@ export default function WireReturnPage() {
 
   const filteredProjectStats = projectStats.filter(p => {
     const matchSupervisor = filterSupervisor ? p.supervisor === filterSupervisor : true;
-    const matchStatus = filterStatus ? p.status === filterStatus : true;
+    const matchStatus = filterStatuses.length > 0 ? filterStatuses.includes(p.status) : true;
     return matchSupervisor && matchStatus;
   });
 
@@ -555,17 +556,47 @@ export default function WireReturnPage() {
 
                   <div style={{ width: "1px", height: "32px", background: "#cbd5e1" }}></div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", position: "relative" }}>
                     <span style={{ fontSize: "0.95rem", fontWeight: "600", color: "var(--pea-purple)" }}>📌 สถานะ:</span>
-                    <select 
-                      className="form-select" 
-                      style={{ width: "160px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}
-                      value={filterStatus}
-                      onChange={e => setFilterStatus(e.target.value)}
+                    <div 
+                      onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                      style={{ width: "160px", background: "white", border: "1px solid #cbd5e1", fontWeight: "500", padding: "6px 12px", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
                     >
-                      <option value="">แสดงทั้งหมด</option>
-                      {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                      <span>{filterStatuses.length === 0 ? "แสดงทั้งหมด" : `${filterStatuses.length} สถานะ`}</span>
+                      <span style={{ fontSize: "0.8rem", color: "#64748b" }}>▼</span>
+                    </div>
+                    
+                    {isStatusDropdownOpen && (
+                      <>
+                        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} onClick={() => setIsStatusDropdownOpen(false)}></div>
+                        <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "4px", background: "white", border: "1px solid #cbd5e1", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", zIndex: 10, width: "200px", maxHeight: "300px", overflowY: "auto" }}>
+                          <div 
+                            style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", background: filterStatuses.length === 0 ? "#f0fdf4" : "transparent" }}
+                            onClick={() => { setFilterStatuses([]); setIsStatusDropdownOpen(false); }}
+                          >
+                            <input type="checkbox" checked={filterStatuses.length === 0} readOnly style={{ cursor: 'pointer' }} />
+                            <span>แสดงทั้งหมด</span>
+                          </div>
+                          {uniqueStatuses.map(s => (
+                            <label key={s} style={{ padding: "8px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: 0, background: filterStatuses.includes(s) ? "#f8fafc" : "transparent" }}>
+                              <input 
+                                type="checkbox" 
+                                checked={filterStatuses.includes(s)} 
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFilterStatuses([...filterStatuses, s]);
+                                  } else {
+                                    setFilterStatuses(filterStatuses.filter(st => st !== s));
+                                  }
+                                }}
+                                style={{ cursor: 'pointer' }}
+                              />
+                              <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>{s}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
