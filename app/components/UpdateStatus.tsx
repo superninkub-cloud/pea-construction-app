@@ -14,6 +14,7 @@ export default function UpdateStatus() {
   const [selectedSupervisor, setSelectedSupervisor] = useState("ALL");
   const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [selectedWbs, setSelectedWbs] = useState("");
 
   const [project, setProject] = useState<Project | null>(null);
@@ -363,36 +364,44 @@ export default function UpdateStatus() {
               {supervisors.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <div>
-            <label className="form-label" style={{ display: 'block', marginBottom: '8px' }}>📊 กรองตามสถานะงาน</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', background: '#fff', minHeight: '42px', alignItems: 'center' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-dark)' }}>
-                <input 
-                  type="checkbox" 
-                  checked={selectedStatuses.length === 0}
-                  onChange={() => setSelectedStatuses([])}
-                  style={{ accentColor: 'var(--pea-purple)', width: '16px', height: '16px', cursor: 'pointer' }}
-                />
-                <span style={{ fontWeight: selectedStatuses.length === 0 ? '600' : '400' }}>ทั้งหมด</span>
-              </label>
-              {availableStatuses.map(s => (
-                <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-dark)' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={selectedStatuses.includes(s)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedStatuses([...selectedStatuses, s]);
-                      } else {
-                        setSelectedStatuses(selectedStatuses.filter(status => status !== s));
-                      }
-                    }}
-                    style={{ accentColor: 'var(--pea-purple)', width: '16px', height: '16px', cursor: 'pointer' }}
-                  />
-                  <span style={{ fontWeight: selectedStatuses.includes(s) ? '600' : '400' }}>{s}</span>
-                </label>
-              ))}
+          {/* Status Filter */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
+            <label className="form-label" style={{ marginBottom: '4px' }}>📊 กรองตามสถานะงาน</label>
+            <div 
+              onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+              style={{ width: "100%", background: "#fff", border: "1px solid #dee2e6", fontWeight: "400", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", color: '#212529', fontSize: '0.95rem', height: '40px' }}
+            >
+              <span>{selectedStatuses.length === 0 ? "-- แสดงทั้งหมด --" : `${selectedStatuses.length} สถานะ`}</span>
+              <span style={{ fontSize: "0.7rem", color: "#6c757d" }}>▼</span>
             </div>
+            {isStatusDropdownOpen && (
+              <>
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} onClick={() => setIsStatusDropdownOpen(false)}></div>
+                <div style={{ position: "absolute", top: "100%", left: 0, marginTop: "4px", background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 10, width: "100%", minWidth: "200px", maxHeight: "300px", overflowY: "auto" }}>
+                  <div 
+                    style={{ padding: "10px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", background: selectedStatuses.length === 0 ? "#f0fdf4" : "transparent" }}
+                    onClick={() => { setSelectedStatuses([]); setIsStatusDropdownOpen(false); }}
+                  >
+                    <input type="checkbox" checked={selectedStatuses.length === 0} readOnly style={{ cursor: 'pointer', accentColor: '#7e22ce' }} />
+                    <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>-- แสดงทั้งหมด --</span>
+                  </div>
+                  {availableStatuses.map(s => (
+                    <label key={s} style={{ padding: "10px 12px", borderBottom: "1px solid #f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: 0, background: selectedStatuses.includes(s) ? "#f8fafc" : "transparent" }}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedStatuses.includes(s)} 
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedStatuses([...selectedStatuses, s]);
+                          else setSelectedStatuses(selectedStatuses.filter(st => st !== s));
+                        }}
+                        style={{ cursor: 'pointer', accentColor: '#7e22ce' }}
+                      />
+                      <span style={{ fontSize: '0.9rem', color: '#1e293b' }}>{s}</span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
           <div>
             <label className="form-label">📌 เลือกรหัส WBS / ชื่องานโครงการ</label>
