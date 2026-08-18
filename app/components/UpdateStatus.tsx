@@ -449,69 +449,39 @@ export default function UpdateStatus() {
             {/* ข้อมูลงบประมาณและค่าใช้จ่าย */}
             <h5 style={{ color: "var(--pea-purple)", marginBottom: "16px", fontWeight: "600", fontSize: '1.1rem' }}>ข้อมูลงบประมาณและค่าใช้จ่าย</h5>
             <div style={{ marginBottom: "32px", padding: "20px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-                {/* คอลัมน์ซ้าย: ค่าใช้จ่ายหน้างาน */}
-                <div>
-                  <h6 style={{ fontWeight: "600", color: "var(--text-dark)", marginBottom: "12px", borderBottom: "1px solid #e2e8f0", paddingBottom: "8px" }}>งบประมาณค่าใช้จ่ายหน้างาน</h6>
-                  
-                  <div style={{ marginBottom: "12px" }}>
-                    <label className="form-label">ประมาณการค่าใช้จ่ายหน้างาน (บาท)</label>
-                    <input type="number" className="form-control" value={estSiteExpense} onChange={(e) => setEstSiteExpense(e.target.value)} disabled={userRole !== "admin"} />
-                  </div>
-                  
-                  <div style={{ marginBottom: "12px" }}>
-                    <label className="form-label">งบค่าใช้จ่ายหน้างานที่ได้รับจัดสรร (บาท)</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <input type="number" className="form-control" value={allocatedSiteBudget} onChange={(e) => setAllocatedSiteBudget(e.target.value)} disabled={userRole !== "admin"} />
-                      {Number(estSiteExpense) > 0 && (
-                        <span style={{ fontWeight: '600', color: '#3b82f6', minWidth: '80px' }}>
-                          {((Number(allocatedSiteBudget) / Number(estSiteExpense)) * 100).toFixed(2)}%
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div style={{ marginBottom: "12px" }}>
-                    <label className="form-label">เบิกจ่ายค่าใช้จ่ายหน้างาน (บาท)</label>
-                    <input type="number" className="form-control" value={disbursedSiteExpense} onChange={(e) => setDisbursedSiteExpense(e.target.value)} disabled={userRole !== "admin"} />
-                  </div>
-                  
-                  <div style={{ marginTop: "16px", padding: "12px", background: "#fff", borderRadius: "8px", border: "1px dashed #cbd5e1" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontWeight: "600", color: "var(--text-dark)" }}>ค่าใช้จ่ายหน้างานคงเหลือ:</span>
-                      <span style={{ fontSize: "1.1rem", fontWeight: "700", color: (Number(estSiteExpense) - Number(disbursedSiteExpense)) >= 0 ? "#10b981" : "#ef4444" }}>
-                        {(Number(estSiteExpense) - Number(disbursedSiteExpense)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
+                <div style={{ marginBottom: "12px" }}>
+                  <label className="form-label">ประมาณการค่าใช้จ่ายหน้างาน (บาท)</label>
+                  <input type="number" className="form-control" value={estSiteExpense} onChange={(e) => setEstSiteExpense(e.target.value)} disabled={userRole !== "admin"} />
+                </div>
+                
+                <div style={{ marginBottom: "12px" }}>
+                  <label className="form-label">งบค่าใช้จ่ายหน้างานที่ได้รับจัดสรร (บาท)</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input type="number" className="form-control" value={allocatedSiteBudget} onChange={(e) => setAllocatedSiteBudget(e.target.value)} disabled={userRole !== "admin"} />
+                    {Number(estSiteExpense) > 0 && (
+                      <span style={{ fontWeight: '600', color: '#3b82f6', minWidth: '80px', fontSize: '0.9rem' }}>
+                        {((Number(allocatedSiteBudget) / Number(estSiteExpense)) * 100).toFixed(2)}%
                       </span>
-                    </div>
+                    )}
                   </div>
                 </div>
-
-                {/* คอลัมน์ขวา: ค่าดำเนินการ */}
-                <div>
-                  <h6 style={{ fontWeight: "600", color: "var(--text-dark)", marginBottom: "12px", borderBottom: "1px solid #e2e8f0", paddingBottom: "8px" }}>งบประมาณค่าดำเนินการ</h6>
-                  
-                  <div style={{ marginBottom: "12px" }}>
-                    <label className="form-label">ประมาณการค่าดำเนินการ (บาท)</label>
-                    <input type="number" className="form-control" value={estOperatingExpense} onChange={(e) => setEstOperatingExpense(e.target.value)} disabled={userRole !== "admin"} />
-                  </div>
-                  
-                  <div style={{ marginBottom: "12px" }}>
-                    <label className="form-label">เบิกจ่ายค่าดำเนินการ (บาท)</label>
-                    <input type="number" className="form-control" value={disbursedOperatingExpense} onChange={(e) => setDisbursedOperatingExpense(e.target.value)} disabled={userRole !== "admin"} />
-                  </div>
-                  
-                  <div style={{ marginTop: "16px", padding: "12px", background: "#fff", borderRadius: "8px", border: "1px dashed #cbd5e1" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontWeight: "600", color: "var(--text-dark)" }}>ค่าดำเนินการคงเหลือ:</span>
-                      <span style={{ fontSize: "1.1rem", fontWeight: "700", color: (Number(estOperatingExpense) - Number(disbursedOperatingExpense)) >= 0 ? "#10b981" : "#ef4444" }}>
-                        {(Number(estOperatingExpense) - Number(disbursedOperatingExpense)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
-                      </span>
-                    </div>
-                  </div>
+                
+                <div style={{ marginBottom: "12px" }}>
+                  <label className="form-label">เบิกจ่ายค่าใช้จ่ายหน้างาน (บาท)</label>
+                  <input type="number" className="form-control" value={disbursedSiteExpense} onChange={(e) => setDisbursedSiteExpense(e.target.value)} disabled={userRole !== "admin"} />
+                </div>
+              </div>
+              
+              <div style={{ marginTop: "16px", padding: "16px", background: "#fff", borderRadius: "8px", border: "1px dashed #cbd5e1" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontWeight: "600", color: "var(--text-dark)" }}>ค่าใช้จ่ายหน้างานคงเหลือ:</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", color: (Number(estSiteExpense) - Number(disbursedSiteExpense)) >= 0 ? "#10b981" : "#ef4444" }}>
+                    {(Number(estSiteExpense) - Number(disbursedSiteExpense)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
+                  </span>
                 </div>
               </div>
             </div>
-
             <h5 style={{ color: "var(--pea-purple)", marginBottom: "16px", fontWeight: "600", fontSize: '1.1rem' }}>อัพเดทสถานะและการดำเนินงาน</h5>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
