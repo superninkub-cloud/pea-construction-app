@@ -55,6 +55,8 @@ export default function UpdateStatus() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [userRole, setUserRole] = useState("user");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [expandedWbs, setExpandedWbs] = useState<Set<string>>(new Set());
 
   // Add New Project State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -888,8 +890,25 @@ export default function UpdateStatus() {
               </div>
             </div>
           </div>
+          </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '8px', padding: '4px' }}>
+                <button 
+                  onClick={() => setViewMode("grid")}
+                  style={{ padding: '6px 16px', borderRadius: '6px', border: 'none', background: viewMode === "grid" ? '#fff' : 'transparent', color: viewMode === "grid" ? 'var(--pea-purple)' : '#64748b', fontWeight: viewMode === "grid" ? '600' : '500', cursor: 'pointer', boxShadow: viewMode === "grid" ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}>
+                  🔲 แบบตาราง
+                </button>
+                <button 
+                  onClick={() => setViewMode("list")}
+                  style={{ padding: '6px 16px', borderRadius: '6px', border: 'none', background: viewMode === "list" ? '#fff' : 'transparent', color: viewMode === "list" ? 'var(--pea-purple)' : '#64748b', fontWeight: viewMode === "list" ? '600' : '500', cursor: 'pointer', boxShadow: viewMode === "list" ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}>
+                  📄 แบบรายการ
+                </button>
+              </div>
+            </div>
+
+            <div style={{ display: viewMode === "grid" ? 'grid' : 'flex', flexDirection: viewMode === "list" ? 'column' : 'row', gridTemplateColumns: viewMode === "grid" ? 'repeat(auto-fill, minmax(300px, 1fr))' : 'none', gap: viewMode === "grid" ? '20px' : '12px' }}>
             {filteredProjects.map(p => {
               const steps = [p.check1, p.check2, p.check3, p.check4, p.check5, p.check6, p.check7, p.check8];
               const doneCount = steps.filter(Boolean).length;
@@ -910,73 +929,105 @@ export default function UpdateStatus() {
                 }, 0);
               })();
 
+              const isExpanded = expandedWbs.has(p.wbs);
+              const toggleExpand = (e: React.MouseEvent) => {
+                e.stopPropagation();
+                const newSet = new Set(expandedWbs);
+                if (isExpanded) newSet.delete(p.wbs);
+                else newSet.add(p.wbs);
+                setExpandedWbs(newSet);
+              };
+
+              const detailsContent = (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: viewMode === "list" ? '16px' : '0' }}>
+                  {/* Physical Progress */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>หน้างาน:</span>
+                    <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1 }}>
+                      <div style={{ height: "100%", width: `${physicalProgress}%`, backgroundColor: physicalProgress === 100 ? "#10b981" : (physicalProgress > 50 ? "#3b82f6" : "#8b5cf6") }}></div>
+                    </div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--pea-purple)', minWidth: '35px', textAlign: 'right' }}>
+                      {physicalProgress.toFixed(1)}%
+                    </span>
+                  </div>
+
+                  {/* Document Progress */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>เอกสาร:</span>
+                    <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1 }}>
+                      <div style={{ height: "100%", width: `${progressPercent}%`, backgroundColor: progressPercent === 100 ? "#10b981" : (progressPercent > 50 ? "#f59e0b" : "#ef4444") }}></div>
+                    </div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-dark)', minWidth: '35px', textAlign: 'right' }}>
+                      {doneCount}/8
+                    </span>
+                  </div>
+
+                  {/* Budget Progress */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>งบฯเหลือ:</span>
+                    <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1, position: 'relative' }}>
+                      {(() => {
+                        const allocated = Number(p.allocated_site_budget) || 0;
+                        const disbursed = Number(p.disbursed_site_expense) || 0;
+                        const remaining = allocated - disbursed;
+                        let percent = allocated > 0 ? (disbursed / allocated) * 100 : 0;
+                        percent = Math.min(100, Math.max(0, percent));
+                        const isOverBudget = remaining < 0;
+                        
+                        return (
+                          <div style={{ height: "100%", width: `${percent}%`, backgroundColor: isOverBudget ? "#ef4444" : (percent > 80 ? "#f59e0b" : "#10b981") }}></div>
+                        );
+                      })()}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: (Number(p.allocated_site_budget || 0) - Number(p.disbursed_site_expense || 0)) < 0 ? "#ef4444" : "#10b981", minWidth: '35px', textAlign: 'right' }}>
+                      {(() => {
+                        const remaining = (Number(p.allocated_site_budget) || 0) - (Number(p.disbursed_site_expense) || 0);
+                        const absRemaining = Math.abs(remaining);
+                        if (absRemaining >= 1000000) return `${(remaining / 1000000).toFixed(3)}m`;
+                        if (absRemaining >= 1000) return `${(remaining / 1000).toFixed(1)}k`;
+                        return remaining.toFixed(0);
+                      })()}
+                    </span>
+                  </div>
+                </div>
+              );
+
               return (
                 <div
                   key={p.id}
                   className="card"
-                  style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', cursor: 'pointer', border: '1px solid #e2e8f0' }}
+                  style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', cursor: 'pointer', border: '1px solid #e2e8f0', padding: viewMode === "list" ? '12px 16px' : '20px' }}
                   onClick={() => setSelectedWbs(p.wbs)}
                   onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--pea-purple)'}
                   onMouseOut={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                    <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
-                    <span className={`badge ${p.status === "F4" ? "badge-success" : "badge-warning"}`}>{p.status || "-"}</span>
-                  </div>
-                  <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', flex: 1, color: 'var(--text-dark)' }}>{p.name}</div>
-                  <div style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginBottom: '16px' }}>ผู้ควบคุมงาน: {p.supervisor}</div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {/* Physical Progress */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>หน้างาน:</span>
-                      <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1 }}>
-                        <div style={{ height: "100%", width: `${physicalProgress}%`, backgroundColor: physicalProgress === 100 ? "#10b981" : (physicalProgress > 50 ? "#3b82f6" : "#8b5cf6") }}></div>
+                  {viewMode === "grid" ? (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                        <span style={{ fontWeight: '700', color: 'var(--pea-purple)' }}>{p.wbs}</span>
+                        <span className={`badge ${p.status === "F4" ? "badge-success" : "badge-warning"}`}>{p.status || "-"}</span>
                       </div>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--pea-purple)', minWidth: '35px', textAlign: 'right' }}>
-                        {physicalProgress.toFixed(1)}%
-                      </span>
-                    </div>
-
-                    {/* Document Progress */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>เอกสาร:</span>
-                      <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1 }}>
-                        <div style={{ height: "100%", width: `${progressPercent}%`, backgroundColor: progressPercent === 100 ? "#10b981" : (progressPercent > 50 ? "#f59e0b" : "#ef4444") }}></div>
+                      <div style={{ fontWeight: '600', fontSize: '1rem', marginBottom: '8px', flex: 1, color: 'var(--text-dark)' }}>{p.name}</div>
+                      <div style={{ color: 'var(--text-light)', fontSize: '0.8rem', marginBottom: '16px' }}>ผู้ควบคุมงาน: {p.supervisor}</div>
+                      {detailsContent}
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, overflow: 'hidden' }}>
+                          <span style={{ fontWeight: '700', color: 'var(--pea-purple)', minWidth: '160px' }}>{p.wbs}</span>
+                          <span style={{ fontWeight: '600', color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
+                          <span className={`badge ${p.status === "F4" ? "badge-success" : "badge-warning"}`} style={{ marginLeft: 'auto' }}>{p.status || "-"}</span>
+                        </div>
+                        <button 
+                          onClick={toggleExpand}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+                          {isExpanded ? "▲" : "▼"}
+                        </button>
                       </div>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-dark)', minWidth: '35px', textAlign: 'right' }}>
-                        {doneCount}/8
-                      </span>
-                    </div>
-
-                    {/* Budget Progress */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>งบฯเหลือ:</span>
-                      <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1, position: 'relative' }}>
-                        {(() => {
-                          const allocated = Number(p.allocated_site_budget) || 0;
-                          const disbursed = Number(p.disbursed_site_expense) || 0;
-                          const remaining = allocated - disbursed;
-                          let percent = allocated > 0 ? (disbursed / allocated) * 100 : 0;
-                          percent = Math.min(100, Math.max(0, percent));
-                          const isOverBudget = remaining < 0;
-                          
-                          return (
-                            <div style={{ height: "100%", width: `${percent}%`, backgroundColor: isOverBudget ? "#ef4444" : (percent > 80 ? "#f59e0b" : "#10b981") }}></div>
-                          );
-                        })()}
-                      </div>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: (Number(p.allocated_site_budget || 0) - Number(p.disbursed_site_expense || 0)) < 0 ? "#ef4444" : "#10b981", minWidth: '35px', textAlign: 'right' }}>
-                        {(() => {
-                          const remaining = (Number(p.allocated_site_budget) || 0) - (Number(p.disbursed_site_expense) || 0);
-                          const absRemaining = Math.abs(remaining);
-                          if (absRemaining >= 1000000) return `${(remaining / 1000000).toFixed(3)}m`;
-                          if (absRemaining >= 1000) return `${(remaining / 1000).toFixed(1)}k`;
-                          return remaining.toFixed(0);
-                        })()}
-                      </span>
-                    </div>
-                  </div>
+                      {isExpanded && detailsContent}
+                    </>
+                  )}
                 </div>
               )
             })}
@@ -985,6 +1036,7 @@ export default function UpdateStatus() {
                 ยังไม่มีข้อมูลโครงการ กรุณานำเข้าข้อมูลจาก Supabase ก่อนครับ
               </div>
             )}
+            </div>
           </div>
         )}
       </div>
