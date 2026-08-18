@@ -48,8 +48,9 @@ Follow these rules STRICTLY:
    - Find the text summary below the table that looks like: "ค่าใช้จ่ายจริง(เฉพาะที่ควบคุมงบฯ)จำนวน [Y] บาท"
    - Extract the number Y as disbursed_site_expense.
 4. project_value:
-   - Search for text like "วงเงินงบประมาณ", "วงเงินอนุมัติ", "มูลค่างาน", or "รวมมูลค่าทั้งสิ้น" in the document header or summary.
-   - Extract this total project value as project_value.
+   - Find the table titled "3. รายละเอียดการปิดบัญชี" (Details of account closing).
+   - Look at the "รวม" (Total) row at the bottom of this table.
+   - Extract the number from the "จำนวนเงิน(บาท)" column as project_value.
 
 Return ONLY a valid JSON object with the following keys and numerical values (no commas or currency symbols in the numbers). If you cannot find a value, return 0.
 Do NOT include markdown formatting like \`\`\`json. Just the raw JSON object.
