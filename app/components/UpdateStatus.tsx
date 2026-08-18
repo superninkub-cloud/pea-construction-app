@@ -452,13 +452,27 @@ export default function UpdateStatus() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
                 <div style={{ marginBottom: "12px" }}>
                   <label className="form-label">ประมาณการค่าใช้จ่ายหน้างาน (บาท)</label>
-                  <input type="number" className="form-control" value={estSiteExpense} onChange={(e) => setEstSiteExpense(e.target.value)} disabled={userRole !== "admin"} />
+                  <input type="text" className="form-control" 
+                    value={estSiteExpense ? estSiteExpense.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""} 
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/,/g, '');
+                      if (!isNaN(Number(val)) || val === "" || val === ".") setEstSiteExpense(val);
+                    }} 
+                    disabled={userRole !== "admin"} 
+                  />
                 </div>
                 
                 <div style={{ marginBottom: "12px" }}>
                   <label className="form-label">งบค่าใช้จ่ายหน้างานที่ได้รับจัดสรร (บาท)</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input type="number" className="form-control" value={allocatedSiteBudget} onChange={(e) => setAllocatedSiteBudget(e.target.value)} disabled={userRole !== "admin"} />
+                    <input type="text" className="form-control" 
+                      value={allocatedSiteBudget ? allocatedSiteBudget.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""} 
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/,/g, '');
+                        if (!isNaN(Number(val)) || val === "" || val === ".") setAllocatedSiteBudget(val);
+                      }} 
+                      disabled={userRole !== "admin"} 
+                    />
                     {Number(estSiteExpense) > 0 && (
                       <span style={{ fontWeight: '600', color: '#3b82f6', minWidth: '80px', fontSize: '0.9rem' }}>
                         {((Number(allocatedSiteBudget) / Number(estSiteExpense)) * 100).toFixed(2)}%
@@ -469,7 +483,14 @@ export default function UpdateStatus() {
                 
                 <div style={{ marginBottom: "12px" }}>
                   <label className="form-label">เบิกจ่ายค่าใช้จ่ายหน้างาน (บาท)</label>
-                  <input type="number" className="form-control" value={disbursedSiteExpense} onChange={(e) => setDisbursedSiteExpense(e.target.value)} disabled={userRole !== "admin"} />
+                  <input type="text" className="form-control" 
+                    value={disbursedSiteExpense ? disbursedSiteExpense.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""} 
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/,/g, '');
+                      if (!isNaN(Number(val)) || val === "" || val === ".") setDisbursedSiteExpense(val);
+                    }} 
+                    disabled={userRole !== "admin"} 
+                  />
                 </div>
               </div>
               
