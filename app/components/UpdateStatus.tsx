@@ -432,11 +432,14 @@ export default function UpdateStatus() {
                 <strong style={{ color: 'var(--text-light)' }}>มูลค่า:</strong> <br />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                   <input
-                    type="number"
+                    type="text"
                     className="form-control"
-                    style={{ maxWidth: '130px', padding: '4px 8px', backgroundColor: userRole !== "admin" ? '#f1f5f9' : 'white', cursor: userRole !== "admin" ? 'not-allowed' : 'text' }}
-                    value={projectValue}
-                    onChange={(e) => setProjectValue(e.target.value)}
+                    style={{ maxWidth: '140px', padding: '4px 8px', backgroundColor: userRole !== "admin" ? '#f1f5f9' : 'white', cursor: userRole !== "admin" ? 'not-allowed' : 'text' }}
+                    value={projectValue ? projectValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/,/g, '');
+                      if (!isNaN(Number(val)) || val === "" || val === ".") setProjectValue(val);
+                    }}
                     disabled={userRole !== "admin"}
                     readOnly={userRole !== "admin"}
                   />
