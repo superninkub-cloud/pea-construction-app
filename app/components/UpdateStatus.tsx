@@ -49,6 +49,9 @@ export default function UpdateStatus() {
   const [estOperatingExpense, setEstOperatingExpense] = useState("");
   const [disbursedOperatingExpense, setDisbursedOperatingExpense] = useState("");
 
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [userRole, setUserRole] = useState("user");
@@ -299,6 +302,38 @@ export default function UpdateStatus() {
     setLoading(false);
   };
 
+  const handleExtractPDF = async () => {
+    if (!pdfFile || !project) return;
+    setIsExtracting(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", pdfFile);
+      formData.append("wbs", project.wbs || "");
+
+      const res = await fetch("/api/extract-pdf", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to extract");
+      }
+
+      const data = await res.json();
+      
+      if (data.est_site_expense !== undefined) setEstSiteExpense(data.est_site_expense.toString());
+      if (data.allocated_site_budget !== undefined) setAllocatedSiteBudget(data.allocated_site_budget.toString());
+      if (data.disbursed_site_expense !== undefined) setDisbursedSiteExpense(data.disbursed_site_expense.toString());
+      
+      setMessage({ text: "ดึงข้อมูลจาก PDF สำเร็จ! ตรวจสอบความถูกต้องและกดบันทึกข้อมูล", type: "success" });
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ text: `เกิดข้อผิดพลาดในการดึงข้อมูล: ${err.message}`, type: "error" });
+    }
+    setIsExtracting(false);
+  };
+
   const handleDeleteProject = async () => {
     if (!project) return;
     if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบโครงการ ${project.wbs}? ข้อมูลทั้งหมดของโครงการนี้จะหายไป`)) {
@@ -485,6 +520,31 @@ export default function UpdateStatus() {
             {/* ข้อมูลงบประมาณและค่าใช้จ่าย */}
             <h5 style={{ color: "var(--pea-purple)", marginBottom: "16px", fontWeight: "600", fontSize: '1.1rem' }}>ข้อมูลงบประมาณและค่าใช้จ่าย</h5>
             <div style={{ marginBottom: "32px", padding: "20px", background: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+              
+              {userRole === "admin" && (
+                <div style={{ marginBottom: "20px", padding: "16px", background: "#eff6ff", borderRadius: "8px", border: "1px dashed #93c5fd" }}>
+                  <label className="form-label" style={{ color: "#1e40af", fontWeight: "600", marginBottom: "8px" }}>✨ อัพโหลดไฟล์ PDF ดึงข้อมูลด้วย AI (อัตโนมัติ)</label>
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+                    <input 
+                      type="file" 
+                      accept=".pdf" 
+                      className="form-control" 
+                      style={{ maxWidth: "300px", background: "white" }} 
+                      onChange={(e) => setPdfFile(e.target.files ? e.target.files[0] : null)}
+                    />
+                    <button 
+                      className="btn btn-primary" 
+                      style={{ padding: "8px 16px", background: "#3b82f6", borderColor: "#3b82f6" }}
+                      onClick={handleExtractPDF}
+                      disabled={!pdfFile || isExtracting}
+                    >
+                      {isExtracting ? "⏳ กำลังดึงข้อมูล..." : "🤖 ดึงข้อมูลจาก PDF"}
+                    </button>
+                  </div>
+                  <small style={{ color: "#475569", display: "block", marginTop: "8px" }}>*อัพโหลดไฟล์รายงานการปิดงานก่อสร้าง (กส.) เพื่อดึงค่างบประมาณต่างๆ ด้านล่าง</small>
+                </div>
+              )}
+
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
                 <div style={{ marginBottom: "12px" }}>
                   <label className="form-label">ประมาณการค่าใช้จ่ายหน้างาน (บาท)</label>
