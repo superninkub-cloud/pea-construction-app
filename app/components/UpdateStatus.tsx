@@ -948,6 +948,31 @@ export default function UpdateStatus() {
                         {doneCount}/8
                       </span>
                     </div>
+
+                    {/* Budget Progress */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', minWidth: '40px' }}>งบฯเหลือ:</span>
+                      <div style={{ background: "#f1f5f9", height: "6px", borderRadius: "4px", overflow: "hidden", flex: 1, position: 'relative' }}>
+                        {(() => {
+                          const allocated = Number(p.allocated_site_budget) || 0;
+                          const disbursed = Number(p.disbursed_site_expense) || 0;
+                          const remaining = allocated - disbursed;
+                          let percent = allocated > 0 ? (disbursed / allocated) * 100 : 0;
+                          percent = Math.min(100, Math.max(0, percent));
+                          const isOverBudget = remaining < 0;
+                          
+                          return (
+                            <div style={{ height: "100%", width: `${percent}%`, backgroundColor: isOverBudget ? "#ef4444" : (percent > 80 ? "#f59e0b" : "#10b981") }}></div>
+                          );
+                        })()}
+                      </div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: (Number(p.allocated_site_budget || 0) - Number(p.disbursed_site_expense || 0)) < 0 ? "#ef4444" : "#10b981", minWidth: '35px', textAlign: 'right' }}>
+                        {(() => {
+                          const remaining = (Number(p.allocated_site_budget) || 0) - (Number(p.disbursed_site_expense) || 0);
+                          return (remaining >= 1000 || remaining <= -1000) ? `${(remaining/1000).toFixed(1)}k` : remaining.toFixed(0);
+                        })()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )
