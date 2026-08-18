@@ -325,6 +325,7 @@ export default function UpdateStatus() {
       if (data.est_site_expense !== undefined) setEstSiteExpense(data.est_site_expense.toString());
       if (data.allocated_site_budget !== undefined) setAllocatedSiteBudget(data.allocated_site_budget.toString());
       if (data.disbursed_site_expense !== undefined) setDisbursedSiteExpense(data.disbursed_site_expense.toString());
+      if (data.project_value !== undefined && data.project_value > 0) setProjectValue(data.project_value.toString());
       
       alert("ดึงข้อมูลจาก PDF สำเร็จ! ตรวจสอบความถูกต้องและกดบันทึกข้อมูล");
     } catch (err: any) {

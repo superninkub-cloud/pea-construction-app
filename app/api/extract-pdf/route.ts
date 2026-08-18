@@ -47,6 +47,9 @@ Follow these rules STRICTLY:
 3. disbursed_site_expense: 
    - Find the text summary below the table that looks like: "ค่าใช้จ่ายจริง(เฉพาะที่ควบคุมงบฯ)จำนวน [Y] บาท"
    - Extract the number Y as disbursed_site_expense.
+4. project_value:
+   - Search for text like "วงเงินงบประมาณ", "วงเงินอนุมัติ", "มูลค่างาน", or "รวมมูลค่าทั้งสิ้น" in the document header or summary.
+   - Extract this total project value as project_value.
 
 Return ONLY a valid JSON object with the following keys and numerical values (no commas or currency symbols in the numbers). If you cannot find a value, return 0.
 Do NOT include markdown formatting like \`\`\`json. Just the raw JSON object.
@@ -55,7 +58,8 @@ Example output:
 {
   "est_site_expense": 1500000.00,
   "allocated_site_budget": 1200000.50,
-  "disbursed_site_expense": 1200000.50
+  "disbursed_site_expense": 1200000.50,
+  "project_value": 4298483.66
 }
     `;
 
