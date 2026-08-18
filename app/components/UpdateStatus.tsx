@@ -476,8 +476,8 @@ export default function UpdateStatus() {
               <div style={{ marginTop: "16px", padding: "16px", background: "#fff", borderRadius: "8px", border: "1px dashed #cbd5e1" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontWeight: "600", color: "var(--text-dark)" }}>ค่าใช้จ่ายหน้างานคงเหลือ:</span>
-                  <span style={{ fontSize: "1.2rem", fontWeight: "700", color: (Number(estSiteExpense) - Number(disbursedSiteExpense)) >= 0 ? "#10b981" : "#ef4444" }}>
-                    {(Number(estSiteExpense) - Number(disbursedSiteExpense)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", color: (Number(allocatedSiteBudget) - Number(disbursedSiteExpense)) >= 0 ? "#10b981" : "#ef4444" }}>
+                    {(Number(allocatedSiteBudget) - Number(disbursedSiteExpense)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
                   </span>
                 </div>
               </div>
