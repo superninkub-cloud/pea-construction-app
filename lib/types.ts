@@ -40,6 +40,11 @@ export interface Project {
   scrap_wire_length?: number;
   scrap_returned_weight?: number;
   scrap_wires_data?: ScrapWireData[];
+  est_site_expense?: number;
+  allocated_site_budget?: number;
+  disbursed_site_expense?: number;
+  est_operating_expense?: number;
+  disbursed_operating_expense?: number;
 }
 
 export interface ScrapWireData {
