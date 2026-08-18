@@ -969,7 +969,10 @@ export default function UpdateStatus() {
                       <span style={{ fontSize: '0.75rem', fontWeight: '600', color: (Number(p.allocated_site_budget || 0) - Number(p.disbursed_site_expense || 0)) < 0 ? "#ef4444" : "#10b981", minWidth: '35px', textAlign: 'right' }}>
                         {(() => {
                           const remaining = (Number(p.allocated_site_budget) || 0) - (Number(p.disbursed_site_expense) || 0);
-                          return (remaining >= 1000 || remaining <= -1000) ? `${(remaining/1000).toFixed(1)}k` : remaining.toFixed(0);
+                          const absRemaining = Math.abs(remaining);
+                          if (absRemaining >= 1000000) return `${(remaining / 1000000).toFixed(3)}m`;
+                          if (absRemaining >= 1000) return `${(remaining / 1000).toFixed(1)}k`;
+                          return remaining.toFixed(0);
                         })()}
                       </span>
                     </div>
