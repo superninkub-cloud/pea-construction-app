@@ -13,7 +13,7 @@ export default function UpdateStatus() {
   const [supervisors, setSupervisors] = useState<string[]>([]);
   const [selectedSupervisor, setSelectedSupervisor] = useState("ALL");
   const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState("ALL");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedWbs, setSelectedWbs] = useState("");
 
   const [project, setProject] = useState<Project | null>(null);
@@ -98,14 +98,14 @@ export default function UpdateStatus() {
       filtered = filtered.filter(p => (p.supervisor || "ไม่มีข้อมูล") === selectedSupervisor);
     }
     
-    if (selectedStatusFilter !== "ALL") {
-      filtered = filtered.filter(p => (p.status || "ไม่มีสถานะ") === selectedStatusFilter);
+    if (selectedStatuses.length > 0) {
+      filtered = filtered.filter(p => selectedStatuses.includes(p.status || "ไม่มีสถานะ"));
     }
 
     setFilteredProjects(filtered);
     setSelectedWbs("");
     setProject(null);
-  }, [selectedSupervisor, selectedStatusFilter, projects]);
+  }, [selectedSupervisor, selectedStatuses, projects]);
 
   useEffect(() => {
     if (selectedWbs) {
@@ -364,11 +364,35 @@ export default function UpdateStatus() {
             </select>
           </div>
           <div>
-            <label className="form-label">📊 กรองตามสถานะงาน</label>
-            <select className="form-select" value={selectedStatusFilter} onChange={(e) => setSelectedStatusFilter(e.target.value)}>
-              <option value="ALL">-- แสดงทั้งหมด --</option>
-              {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <label className="form-label" style={{ display: 'block', marginBottom: '8px' }}>📊 กรองตามสถานะงาน</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', background: '#fff', minHeight: '42px', alignItems: 'center' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-dark)' }}>
+                <input 
+                  type="checkbox" 
+                  checked={selectedStatuses.length === 0}
+                  onChange={() => setSelectedStatuses([])}
+                  style={{ accentColor: 'var(--pea-purple)', width: '16px', height: '16px', cursor: 'pointer' }}
+                />
+                <span style={{ fontWeight: selectedStatuses.length === 0 ? '600' : '400' }}>ทั้งหมด</span>
+              </label>
+              {availableStatuses.map(s => (
+                <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-dark)' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedStatuses.includes(s)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedStatuses([...selectedStatuses, s]);
+                      } else {
+                        setSelectedStatuses(selectedStatuses.filter(status => status !== s));
+                      }
+                    }}
+                    style={{ accentColor: 'var(--pea-purple)', width: '16px', height: '16px', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontWeight: selectedStatuses.includes(s) ? '600' : '400' }}>{s}</span>
+                </label>
+              ))}
+            </div>
           </div>
           <div>
             <label className="form-label">📌 เลือกรหัส WBS / ชื่องานโครงการ</label>
