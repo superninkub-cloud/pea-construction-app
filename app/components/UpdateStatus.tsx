@@ -326,10 +326,10 @@ export default function UpdateStatus() {
       if (data.allocated_site_budget !== undefined) setAllocatedSiteBudget(data.allocated_site_budget.toString());
       if (data.disbursed_site_expense !== undefined) setDisbursedSiteExpense(data.disbursed_site_expense.toString());
       
-      setMessage({ text: "ดึงข้อมูลจาก PDF สำเร็จ! ตรวจสอบความถูกต้องและกดบันทึกข้อมูล", type: "success" });
+      alert("ดึงข้อมูลจาก PDF สำเร็จ! ตรวจสอบความถูกต้องและกดบันทึกข้อมูล");
     } catch (err: any) {
       console.error(err);
-      setMessage({ text: `เกิดข้อผิดพลาดในการดึงข้อมูล: ${err.message}`, type: "error" });
+      alert(`เกิดข้อผิดพลาดในการดึงข้อมูล: ${err.message}`);
     }
     setIsExtracting(false);
   };
