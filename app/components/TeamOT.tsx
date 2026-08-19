@@ -65,8 +65,10 @@ export default function TeamOTComponent() {
 
       const [h1, m1] = startTime.split(':').map(Number);
       const [h2, m2] = endTime.split(':').map(Number);
-      let d1 = new Date(); d1.setHours(h1, m1, 0, 0);
-      let d2 = new Date(); d2.setHours(h2, m2, 0, 0);
+      let d1 = new Date(startDate);
+      d1.setHours(h1, m1, 0, 0);
+      let d2 = new Date(endDate || startDate);
+      d2.setHours(h2, m2, 0, 0);
       if (d2 < d1) d2.setDate(d2.getDate() + 1); // Cross midnight
       
       let ot15Mins = 0;
