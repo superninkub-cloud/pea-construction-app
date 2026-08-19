@@ -69,37 +69,34 @@ export default function TeamOTComponent() {
       let d2 = new Date(); d2.setHours(h2, m2, 0, 0);
       if (d2 < d1) d2.setDate(d2.getDate() + 1); // Cross midnight
       
-      // Auto-allocate hours
-      let bucketA = 0; // 08:00 - 17:00
-      let bucketB = 0; // 17:00 - 08:00
+      let ot15Mins = 0;
+      let ot20Mins = 0;
+      let ot30Mins = 0;
       let totalMinutes = 0;
 
       let current = new Date(d1);
       while (current < d2) {
         const h = current.getHours();
         if (h !== 12) { // ไม่นับเวลา 12:00 - 13:00 (พักเที่ยง)
-          if (h >= 8 && h < 17) bucketA++;
-          else bucketB++;
           totalMinutes++;
+          const isSunday = current.getDay() === 0;
+          const isDayHoliday = isSunday || isHoliday;
+          
+          if (isDayHoliday) {
+            if (h >= 8 && h < 17) ot20Mins++;
+            else ot30Mins++;
+          } else {
+            if (h < 8 || h >= 17) ot15Mins++;
+          }
         }
         current.setMinutes(current.getMinutes() + 1);
       }
       
       setCalculatedHours(totalMinutes > 0 ? totalMinutes / 60 : 0);
 
-      let hA = bucketA / 60;
-      let hB = bucketB / 60;
-
-      let ot15 = 0;
-      let ot20 = 0;
-      let ot30 = 0;
-
-      if (isHolidayOrSunday) {
-        ot20 = Math.round(hA * 100) / 100;
-        ot30 = Math.round(hB * 100) / 100;
-      } else {
-        ot15 = Math.round(hB * 100) / 100;
-      }
+      const ot15 = Math.round((ot15Mins / 60) * 100) / 100;
+      const ot20 = Math.round((ot20Mins / 60) * 100) / 100;
+      const ot30 = Math.round((ot30Mins / 60) * 100) / 100;
 
       setMembers(prev => prev.map(m => m.selected ? { ...m, ot15, ot20, ot30 } : m));
 

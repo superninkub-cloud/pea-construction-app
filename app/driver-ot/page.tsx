@@ -87,37 +87,34 @@ export default function DriverOTPage() {
       let d2 = new Date(); d2.setHours(h2, m2, 0, 0);
       if (d2 < d1) d2.setDate(d2.getDate() + 1); // Cross midnight
       
-      // Auto-allocate hours
-      let bucketA = 0; // 08:00 - 17:00
-      let bucketB = 0; // 17:00 - 08:00
+      let ot15Mins = 0;
+      let ot10Mins = 0;
+      let ot30Mins = 0;
       let totalMinutes = 0;
 
       let current = new Date(d1);
       while (current < d2) {
         const h = current.getHours();
         if (h !== 12) { // ไม่นับเวลา 12:00 - 13:00 (พักเที่ยง)
-          if (h >= 8 && h < 17) bucketA++;
-          else bucketB++;
           totalMinutes++;
+          const isSunday = current.getDay() === 0;
+          const isDayHoliday = isSunday || isHoliday;
+          
+          if (isDayHoliday) {
+            if (h >= 8 && h < 17) ot10Mins++;
+            else ot30Mins++;
+          } else {
+            if (h < 8 || h >= 17) ot15Mins++;
+          }
         }
         current.setMinutes(current.getMinutes() + 1);
       }
 
       setCalculatedHours(totalMinutes > 0 ? totalMinutes / 60 : 0);
 
-      let hA = bucketA / 60;
-      let hB = bucketB / 60;
-
-      let ot15 = 0;
-      let ot10 = 0;
-      let ot30 = 0;
-
-      if (isHolidayOrSunday) {
-        ot10 = hA;
-        ot30 = hB;
-      } else {
-        ot15 = hB;
-      }
+      const ot15 = ot15Mins / 60;
+      const ot10 = ot10Mins / 60;
+      const ot30 = ot30Mins / 60;
 
       setOt15Hours(ot15 > 0 ? (Math.round(ot15 * 100) / 100).toString() : "");
       setOt10Hours(ot10 > 0 ? (Math.round(ot10 * 100) / 100).toString() : "");
