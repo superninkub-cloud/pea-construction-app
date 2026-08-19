@@ -260,11 +260,7 @@ export default function DriverOTPage() {
                 {calculatedHours > 0 && (
                   <div style={{ background: "#f0fdf4", padding: "12px", borderRadius: "8px", border: "1px solid #bbf7d0", fontSize: "0.9rem", color: "#166534", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
                     <span>ระยะเวลาที่คำนวณได้: <strong>{calculatedHours.toFixed(2)} ชั่วโมง</strong></span>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button onClick={() => applyCalculatedHours('ot15')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 1.5</button>
-                      <button onClick={() => applyCalculatedHours('ot10')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 1.0</button>
-                      <button onClick={() => applyCalculatedHours('ot30')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 3.0</button>
-                    </div>
+                    <span style={{ fontSize: "0.8rem" }}>(ระบบได้จัดสรรชั่วโมงลงในช่อง OT ให้แล้ว)</span>
                   </div>
                 )}
 
