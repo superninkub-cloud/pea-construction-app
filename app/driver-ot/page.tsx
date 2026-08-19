@@ -3,6 +3,56 @@
 import { useState, useEffect } from "react";
 import TopBar from "../components/TopBar";
 
+const TimeInput = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => {
+  const [internalVal, setInternalVal] = useState(value);
+  
+  useEffect(() => { setInternalVal(value); }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let v = e.target.value.replace(/[^0-9:]/g, '');
+    if (v.length > 5) v = v.slice(0, 5);
+    setInternalVal(v);
+  };
+
+  const handleBlur = () => {
+    let val = internalVal;
+    if (!val) {
+      onChange("");
+      return;
+    }
+    if (!val.includes(':')) {
+      if (val.length <= 2) val = val + ':00';
+      else if (val.length === 3) val = '0' + val[0] + ':' + val.substring(1);
+      else if (val.length >= 4) val = val.substring(0,2) + ':' + val.substring(2,4);
+    }
+    let [h, m] = val.split(':');
+    h = Math.min(23, Math.max(0, parseInt(h || '0'))).toString().padStart(2, '0');
+    m = Math.min(59, Math.max(0, parseInt(m || '0'))).toString().padStart(2, '0');
+    
+    const finalVal = isNaN(Number(h)) || isNaN(Number(m)) ? "" : `${h}:${m}`;
+    setInternalVal(finalVal);
+    onChange(finalVal);
+  };
+
+  return (
+    <div>
+      <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>{label}</label>
+      <div style={{ position: 'relative' }}>
+        <input 
+          type="text" 
+          placeholder="00:00"
+          value={internalVal} 
+          onChange={handleChange}
+          onBlur={handleBlur}
+          className="form-control" 
+          style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} 
+        />
+        <div style={{ position: 'absolute', right: '12px', top: '10px', color: '#94a3b8', pointerEvents: 'none', fontSize: '0.9rem' }}>น.</div>
+      </div>
+    </div>
+  );
+};
+
 // Driver Data based on user requirements
 const driverTypes = [
   { id: "type2", name: "ชนิดที่ 2", desc: "รถบรรทุกทั่วไป (ไม่ได้ประจำชุดงานก่อสร้าง)", base: 18720, ot15: 117.00, ot10: 78.00, ot30: 234.00, accom: 400 },
@@ -189,14 +239,8 @@ export default function DriverOTPage() {
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>วันที่สิ้นสุด</label>
                     <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
                   </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาเริ่มต้น</label>
-                    <input type="time" lang="en-GB" value={startTime} onChange={e => setStartTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาสิ้นสุด</label>
-                    <input type="time" lang="en-GB" value={endTime} onChange={e => setEndTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
-                  </div>
+                  <TimeInput label="เวลาเริ่มต้น" value={startTime} onChange={setStartTime} />
+                  <TimeInput label="เวลาสิ้นสุด" value={endTime} onChange={setEndTime} />
                 </div>
 
                 {calculatedHours > 0 && (
