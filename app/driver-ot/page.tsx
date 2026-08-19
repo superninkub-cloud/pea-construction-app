@@ -3,51 +3,28 @@
 import { useState, useEffect } from "react";
 import TopBar from "../components/TopBar";
 
-const TimeInput = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => {
-  const [internalVal, setInternalVal] = useState(value);
-  
-  useEffect(() => { setInternalVal(value); }, [value]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let v = e.target.value.replace(/[^0-9:]/g, '');
-    if (v.length > 5) v = v.slice(0, 5);
-    setInternalVal(v);
-  };
-
-  const handleBlur = () => {
-    let val = internalVal;
-    if (!val) {
-      onChange("");
-      return;
-    }
-    if (!val.includes(':')) {
-      if (val.length <= 2) val = val + ':00';
-      else if (val.length === 3) val = '0' + val[0] + ':' + val.substring(1);
-      else if (val.length >= 4) val = val.substring(0,2) + ':' + val.substring(2,4);
-    }
-    let [h, m] = val.split(':');
-    h = Math.min(23, Math.max(0, parseInt(h || '0'))).toString().padStart(2, '0');
-    m = Math.min(59, Math.max(0, parseInt(m || '0'))).toString().padStart(2, '0');
-    
-    const finalVal = isNaN(Number(h)) || isNaN(Number(m)) ? "" : `${h}:${m}`;
-    setInternalVal(finalVal);
-    onChange(finalVal);
-  };
-
+const DropdownTimePicker = ({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) => {
+  const [h, m] = value ? value.split(':') : ['', ''];
   return (
     <div>
       <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>{label}</label>
-      <div style={{ position: 'relative' }}>
-        <input 
-          type="text" 
-          placeholder="00:00"
-          value={internalVal} 
-          onChange={handleChange}
-          onBlur={handleBlur}
-          className="form-control" 
-          style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} 
-        />
-        <div style={{ position: 'absolute', right: '12px', top: '10px', color: '#94a3b8', pointerEvents: 'none', fontSize: '0.9rem' }}>น.</div>
+      <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "white", padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+        <select value={h} onChange={e => onChange(`${e.target.value}:${m || '00'}`)} style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '1rem', cursor: 'pointer', appearance: 'none', textAlign: 'center', width: '40px' }}>
+          <option value="">--</option>
+          {Array.from({length: 24}).map((_, i) => {
+            const val = i.toString().padStart(2, '0');
+            return <option key={val} value={val}>{val}</option>;
+          })}
+        </select>
+        <span style={{ fontWeight: "bold" }}>:</span>
+        <select value={m} onChange={e => onChange(`${h || '00'}:${e.target.value}`)} style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '1rem', cursor: 'pointer', appearance: 'none', textAlign: 'center', width: '40px' }}>
+          <option value="">--</option>
+          {Array.from({length: 60}).map((_, i) => {
+            const val = i.toString().padStart(2, '0');
+            return <option key={val} value={val}>{val}</option>;
+          })}
+        </select>
+        <span style={{ fontSize: "0.8rem", color: "#64748b", marginLeft: "auto" }}>น.</span>
       </div>
     </div>
   );
@@ -94,28 +71,59 @@ export default function DriverOTPage() {
   const [endDate, setEndDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [isHoliday, setIsHoliday] = useState(false);
   const [calculatedHours, setCalculatedHours] = useState<number>(0);
 
   useEffect(() => {
-    if (startTime && endTime) {
+    if (startTime && endTime && startDate) {
+      const dateObj = new Date(startDate);
+      const isSunday = dateObj.getDay() === 0;
+      const isHolidayOrSunday = isSunday || isHoliday;
+
       const [h1, m1] = startTime.split(':').map(Number);
       const [h2, m2] = endTime.split(':').map(Number);
+      
       let d1 = new Date(); d1.setHours(h1, m1, 0, 0);
       let d2 = new Date(); d2.setHours(h2, m2, 0, 0);
       if (d2 < d1) d2.setDate(d2.getDate() + 1); // Cross midnight
       
       const hrs = (d2.getTime() - d1.getTime()) / (1000 * 60 * 60);
       setCalculatedHours(hrs > 0 ? hrs : 0);
+
+      // Auto-allocate hours
+      let bucketA = 0; // 08:00 - 17:00
+      let bucketB = 0; // 17:00 - 08:00
+
+      let current = new Date(d1);
+      while (current < d2) {
+        const h = current.getHours();
+        if (h >= 8 && h < 17) bucketA++;
+        else bucketB++;
+        current.setMinutes(current.getMinutes() + 1);
+      }
+
+      let hA = bucketA / 60;
+      let hB = bucketB / 60;
+
+      let ot15 = 0;
+      let ot10 = 0;
+      let ot30 = 0;
+
+      if (isHolidayOrSunday) {
+        ot10 = hA;
+        ot30 = hB;
+      } else {
+        ot15 = hB;
+      }
+
+      setOt15Hours(ot15 > 0 ? (Math.round(ot15 * 100) / 100).toString() : "");
+      setOt10Hours(ot10 > 0 ? (Math.round(ot10 * 100) / 100).toString() : "");
+      setOt30Hours(ot30 > 0 ? (Math.round(ot30 * 100) / 100).toString() : "");
+
     } else {
       setCalculatedHours(0);
     }
-  }, [startTime, endTime]);
-
-  const applyCalculatedHours = (type: 'ot15' | 'ot10' | 'ot30') => {
-    if (type === 'ot15') setOt15Hours(calculatedHours.toString());
-    if (type === 'ot10') setOt10Hours(calculatedHours.toString());
-    if (type === 'ot30') setOt30Hours(calculatedHours.toString());
-  };
+  }, [startTime, endTime, startDate, isHoliday]);
   const handleDriverSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     setSelectedDriverIdx(val);
@@ -230,6 +238,12 @@ export default function DriverOTPage() {
               </h3>
               
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ marginBottom: "16px" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.9rem", color: "#334155", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                    <input type="checkbox" checked={isHoliday} onChange={e => setIsHoliday(e.target.checked)} style={{ width: "16px", height: "16px" }} />
+                    ระบุว่าเป็นวันหยุดนักขัตฤกษ์ (สำหรับวันจันทร์-เสาร์)
+                  </label>
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", paddingBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>วันที่เริ่มต้น</label>
@@ -239,8 +253,8 @@ export default function DriverOTPage() {
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>วันที่สิ้นสุด</label>
                     <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
                   </div>
-                  <TimeInput label="เวลาเริ่มต้น" value={startTime} onChange={setStartTime} />
-                  <TimeInput label="เวลาสิ้นสุด" value={endTime} onChange={setEndTime} />
+                  <DropdownTimePicker label="เวลาเริ่มต้น" value={startTime} onChange={setStartTime} />
+                  <DropdownTimePicker label="เวลาสิ้นสุด" value={endTime} onChange={setEndTime} />
                 </div>
 
                 {calculatedHours > 0 && (
