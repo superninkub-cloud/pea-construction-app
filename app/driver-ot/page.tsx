@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TopBar from "../components/TopBar";
 
 // Driver Data based on user requirements
@@ -44,6 +44,28 @@ export default function DriverOTPage() {
   const [endDate, setEndDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [calculatedHours, setCalculatedHours] = useState<number>(0);
+
+  useEffect(() => {
+    if (startTime && endTime) {
+      const [h1, m1] = startTime.split(':').map(Number);
+      const [h2, m2] = endTime.split(':').map(Number);
+      let d1 = new Date(); d1.setHours(h1, m1, 0, 0);
+      let d2 = new Date(); d2.setHours(h2, m2, 0, 0);
+      if (d2 < d1) d2.setDate(d2.getDate() + 1); // Cross midnight
+      
+      const hrs = (d2.getTime() - d1.getTime()) / (1000 * 60 * 60);
+      setCalculatedHours(hrs > 0 ? hrs : 0);
+    } else {
+      setCalculatedHours(0);
+    }
+  }, [startTime, endTime]);
+
+  const applyCalculatedHours = (type: 'ot15' | 'ot10' | 'ot30') => {
+    if (type === 'ot15') setOt15Hours(calculatedHours.toString());
+    if (type === 'ot10') setOt10Hours(calculatedHours.toString());
+    if (type === 'ot30') setOt30Hours(calculatedHours.toString());
+  };
   const handleDriverSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     setSelectedDriverIdx(val);
@@ -176,6 +198,17 @@ export default function DriverOTPage() {
                     <input type="time" lang="en-GB" value={endTime} onChange={e => setEndTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
                   </div>
                 </div>
+
+                {calculatedHours > 0 && (
+                  <div style={{ background: "#f0fdf4", padding: "12px", borderRadius: "8px", border: "1px solid #bbf7d0", fontSize: "0.9rem", color: "#166534", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                    <span>ระยะเวลาที่คำนวณได้: <strong>{calculatedHours.toFixed(2)} ชั่วโมง</strong></span>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button onClick={() => applyCalculatedHours('ot15')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 1.5</button>
+                      <button onClick={() => applyCalculatedHours('ot10')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 1.0</button>
+                      <button onClick={() => applyCalculatedHours('ot30')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 3.0</button>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>OT 1.5 เท่า (ชั่วโมง)</label>

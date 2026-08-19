@@ -27,6 +27,26 @@ export default function TeamOTComponent() {
   const [defaultDays, setDefaultDays] = useState<number>(0);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [calculatedHours, setCalculatedHours] = useState<number>(0);
+
+  useEffect(() => {
+    if (startTime && endTime) {
+      const [h1, m1] = startTime.split(':').map(Number);
+      const [h2, m2] = endTime.split(':').map(Number);
+      let d1 = new Date(); d1.setHours(h1, m1, 0, 0);
+      let d2 = new Date(); d2.setHours(h2, m2, 0, 0);
+      if (d2 < d1) d2.setDate(d2.getDate() + 1); // Cross midnight
+      
+      const hrs = (d2.getTime() - d1.getTime()) / (1000 * 60 * 60);
+      setCalculatedHours(hrs > 0 ? hrs : 0);
+    } else {
+      setCalculatedHours(0);
+    }
+  }, [startTime, endTime]);
+
+  const applyCalculatedHours = (type: 'ot15' | 'ot10' | 'ot30') => {
+    setMembers(prev => prev.map(m => m.selected ? { ...m, [type]: calculatedHours } : m));
+  };
 
   useEffect(() => {
     fetchTeams();
@@ -210,7 +230,18 @@ export default function TeamOTComponent() {
                   </div>
                 </div>
 
-                <div style={{ background: "#eff6ff", padding: "12px", borderRadius: "8px", border: "1px solid #bfdbfe", fontSize: "0.9rem", color: "#1e3a8a", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
+                {calculatedHours > 0 && (
+                  <div style={{ background: "#f0fdf4", padding: "12px", borderRadius: "8px", border: "1px solid #bbf7d0", fontSize: "0.9rem", color: "#166534", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px", flexWrap: "wrap", gap: "12px" }}>
+                    <span>ระยะเวลาที่คำนวณได้: <strong>{calculatedHours.toFixed(2)} ชั่วโมง</strong></span>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button onClick={() => applyCalculatedHours('ot15')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 1.5</button>
+                      <button onClick={() => applyCalculatedHours('ot10')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 1.0</button>
+                      <button onClick={() => applyCalculatedHours('ot30')} style={{ background: "white", border: "1px solid #166534", borderRadius: "4px", padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", color: "#166534" }}>ใส่ช่อง OT 3.0</button>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ background: "#eff6ff", padding: "12px", borderRadius: "8px", border: "1px solid #bfdbfe", fontSize: "0.9rem", color: "#1e3a8a", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px" }}>
                   <span>จำนวนวันทำงานตั้งต้น:</span>
                   <span style={{ fontWeight: "700", fontSize: "1.1rem" }}>{defaultDays} วัน</span>
                 </div>
