@@ -61,5 +61,6 @@ export interface Personnel {
   phone: string;
   team: string;
   image_url: string;
+  wage?: string;
   created_at: string;
 }

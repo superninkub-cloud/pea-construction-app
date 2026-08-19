@@ -17,6 +17,7 @@ export default function PersonnelComponent() {
     position: "",
     phone: "",
     team: "อุดมศักดิ์",
+    wage: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -83,6 +84,7 @@ export default function PersonnelComponent() {
           position: formData.position,
           phone: formData.phone,
           team: formData.team,
+          wage: formData.wage,
           ...(imageUrl ? { image_url: imageUrl } : {}) // Update image only if we uploaded a new one or had a preview
         }).eq("id", editId);
 
@@ -95,6 +97,7 @@ export default function PersonnelComponent() {
           position: formData.position,
           phone: formData.phone,
           team: formData.team,
+          wage: formData.wage,
           image_url: imageUrl,
         }]);
 
@@ -104,7 +107,7 @@ export default function PersonnelComponent() {
 
       setIsAddModalOpen(false);
       setEditId(null);
-      setFormData({ full_name: "", position: "", phone: "", team: "อุดมศักดิ์" });
+      setFormData({ full_name: "", position: "", phone: "", team: "อุดมศักดิ์", wage: "" });
       setFile(null);
       setPreviewUrl(null);
       fetchPersonnel();
@@ -122,6 +125,7 @@ export default function PersonnelComponent() {
       position: p.position,
       phone: p.phone || "",
       team: p.team || "อุดมศักดิ์",
+      wage: p.wage || "",
     });
     setPreviewUrl(p.image_url || null);
     setFile(null);
@@ -154,7 +158,7 @@ export default function PersonnelComponent() {
         {userRole !== "guest" && (
           <button className="btn btn-primary" onClick={() => {
             setEditId(null);
-            setFormData({ full_name: "", position: "", phone: "", team: "อุดมศักดิ์" });
+            setFormData({ full_name: "", position: "", phone: "", team: "อุดมศักดิ์", wage: "" });
             setPreviewUrl(null);
             setFile(null);
             setIsAddModalOpen(true);
@@ -258,6 +262,12 @@ export default function PersonnelComponent() {
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                           สังกัด: {p.team}
                         </div>
+                        {p.position.includes("พนักงาน บ") && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            ค่าแรง: {p.wage || "-"}
+                          </div>
+                        )}
 
                         {userRole === "admin" && (
                           <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
@@ -333,6 +343,13 @@ export default function PersonnelComponent() {
                   {teams.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
+
+              {formData.position.includes("พนักงาน บ") && (
+                <div>
+                  <label className="form-label">ค่าแรง (บาท/วัน)</label>
+                  <input type="text" className="form-control" value={formData.wage} onChange={e => setFormData({ ...formData, wage: e.target.value })} placeholder="เช่น 500" />
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
