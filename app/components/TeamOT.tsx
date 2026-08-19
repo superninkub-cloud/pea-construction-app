@@ -10,6 +10,9 @@ interface TeamMember {
   wage: number;
   selected: boolean;
   days: number;
+  ot15: number;
+  ot10: number;
+  ot30: number;
 }
 
 export default function TeamOTComponent() {
@@ -22,10 +25,6 @@ export default function TeamOTComponent() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [defaultDays, setDefaultDays] = useState<number>(0);
-
-  const [ot15Hours, setOt15Hours] = useState("");
-  const [ot10Hours, setOt10Hours] = useState("");
-  const [ot30Hours, setOt30Hours] = useState("");
 
   useEffect(() => {
     fetchTeams();
@@ -75,7 +74,10 @@ export default function TeamOTComponent() {
         full_name: p.full_name,
         wage: p.wage ? Number(p.wage) : 0,
         selected: true,
-        days: defaultDays
+        days: defaultDays,
+        ot15: 0,
+        ot10: 0,
+        ot30: 0
       })));
     }
     setLoading(false);
@@ -95,6 +97,10 @@ export default function TeamOTComponent() {
     setMembers(prev => prev.map(m => m.id === id ? { ...m, days: days } : m));
   };
 
+  const handleMemberOTChange = (id: string, field: 'ot15' | 'ot10' | 'ot30', value: number) => {
+    setMembers(prev => prev.map(m => m.id === id ? { ...m, [field]: value } : m));
+  };
+
   const calculateTotals = () => {
     const activeMembers = members.filter(m => m.selected);
     
@@ -102,10 +108,10 @@ export default function TeamOTComponent() {
     let totalOT15 = 0;
     let totalOT10 = 0;
     let totalOT30 = 0;
-
-    const ot15H = Number(ot15Hours) || 0;
-    const ot10H = Number(ot10Hours) || 0;
-    const ot30H = Number(ot30Hours) || 0;
+    
+    let sumOT15H = 0;
+    let sumOT10H = 0;
+    let sumOT30H = 0;
 
     activeMembers.forEach(m => {
       // Base wage for the period
@@ -115,9 +121,13 @@ export default function TeamOTComponent() {
       const hourlyRate = m.wage / 8;
       
       // OT for this member
-      totalOT15 += hourlyRate * 1.5 * ot15H;
-      totalOT10 += hourlyRate * 1.0 * ot10H;
-      totalOT30 += hourlyRate * 3.0 * ot30H;
+      totalOT15 += hourlyRate * 1.5 * m.ot15;
+      totalOT10 += hourlyRate * 1.0 * m.ot10;
+      totalOT30 += hourlyRate * 3.0 * m.ot30;
+      
+      sumOT15H += m.ot15;
+      sumOT10H += m.ot10;
+      sumOT30H += m.ot30;
     });
 
     return {
@@ -127,7 +137,10 @@ export default function TeamOTComponent() {
       totalOT30,
       totalOT: totalOT15 + totalOT10 + totalOT30,
       grandTotal: totalBaseWage + totalOT15 + totalOT10 + totalOT30,
-      activeCount: activeMembers.length
+      activeCount: activeMembers.length,
+      sumOT15H,
+      sumOT10H,
+      sumOT30H
     };
   };
 
@@ -188,21 +201,6 @@ export default function TeamOTComponent() {
                   <span>จำนวนวันทำงานตั้งต้น:</span>
                   <span style={{ fontWeight: "700", fontSize: "1.1rem" }}>{defaultDays} วัน</span>
                 </div>
-
-                <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "16px", marginTop: "4px" }}>
-                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>OT 1.5 เท่า (ชั่วโมงรวมของทีม)</label>
-                  <input type="number" min="0" value={ot15Hours} onChange={e => setOt15Hours(e.target.value)} className="form-control" placeholder="0" style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", width: "100%" }} />
-                </div>
-                
-                <div>
-                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>OT 1.0 เท่า (ชั่วโมงรวมของทีม)</label>
-                  <input type="number" min="0" value={ot10Hours} onChange={e => setOt10Hours(e.target.value)} className="form-control" placeholder="0" style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", width: "100%" }} />
-                </div>
-
-                <div>
-                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>OT 3.0 เท่า (ชั่วโมงรวมของทีม)</label>
-                  <input type="number" min="0" value={ot30Hours} onChange={e => setOt30Hours(e.target.value)} className="form-control" placeholder="0" style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", width: "100%" }} />
-                </div>
               </div>
             </div>
 
@@ -228,30 +226,71 @@ export default function TeamOTComponent() {
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "500px", overflowY: "auto", paddingRight: "4px" }}>
                   {members.map(m => (
-                    <div key={m.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "8px", border: `1px solid ${m.selected ? '#34d399' : '#e2e8f0'}`, background: m.selected ? '#f0fdf4' : '#f8fafc', transition: "all 0.2s" }}>
-                      <input 
-                        type="checkbox" 
-                        checked={m.selected} 
-                        onChange={() => toggleMemberSelection(m.id)}
-                        style={{ width: "18px", height: "18px", accentColor: "#10b981", cursor: "pointer" }}
-                      />
-                      <div style={{ flex: 1, opacity: m.selected ? 1 : 0.5 }}>
-                        <div style={{ fontWeight: "600", color: "#1e293b", fontSize: "0.95rem" }}>{m.full_name}</div>
-                        <div style={{ fontSize: "0.8rem", color: "#64748b" }}>ค่าแรง: {m.wage > 0 ? `${m.wage} บ./วัน` : <span style={{color: '#ef4444'}}>ไม่ได้ระบุค่าแรง</span>}</div>
-                      </div>
-                      
-                      {/* Individual Days Input */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: m.selected ? 1 : 0.5 }}>
+                    <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "16px", borderRadius: "12px", border: `1px solid ${m.selected ? '#34d399' : '#e2e8f0'}`, background: m.selected ? '#f0fdf4' : '#f8fafc', transition: "all 0.2s" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                         <input 
-                          type="number" 
-                          min="0"
-                          value={m.days}
-                          onChange={(e) => handleMemberDaysChange(m.id, Number(e.target.value))}
-                          disabled={!m.selected}
-                          style={{ width: "60px", padding: "6px", borderRadius: "6px", border: "1px solid #cbd5e1", textAlign: "center" }}
+                          type="checkbox" 
+                          checked={m.selected} 
+                          onChange={() => toggleMemberSelection(m.id)}
+                          style={{ width: "18px", height: "18px", accentColor: "#10b981", cursor: "pointer" }}
                         />
-                        <span style={{ fontSize: "0.85rem", color: "#64748b" }}>วัน</span>
+                        <div style={{ flex: 1, opacity: m.selected ? 1 : 0.5 }}>
+                          <div style={{ fontWeight: "600", color: "#1e293b", fontSize: "0.95rem" }}>{m.full_name}</div>
+                          <div style={{ fontSize: "0.8rem", color: "#64748b" }}>ค่าแรง: {m.wage > 0 ? `${m.wage} บ./วัน` : <span style={{color: '#ef4444'}}>ไม่ได้ระบุค่าแรง</span>}</div>
+                        </div>
+                        
+                        {/* Individual Days Input */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", opacity: m.selected ? 1 : 0.5 }}>
+                          <input 
+                            type="number" 
+                            min="0"
+                            value={m.days}
+                            onChange={(e) => handleMemberDaysChange(m.id, Number(e.target.value))}
+                            disabled={!m.selected}
+                            style={{ width: "60px", padding: "6px", borderRadius: "6px", border: "1px solid #cbd5e1", textAlign: "center" }}
+                          />
+                          <span style={{ fontSize: "0.85rem", color: "#64748b" }}>วัน</span>
+                        </div>
                       </div>
+
+                      {/* Individual OT Inputs */}
+                      {m.selected && (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginTop: "8px", paddingTop: "12px", borderTop: "1px dashed #cbd5e1" }}>
+                          <div>
+                            <div style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "4px", textAlign: "center" }}>OT 1.5</div>
+                            <input 
+                              type="number" 
+                              min="0"
+                              value={m.ot15 === 0 ? "" : m.ot15}
+                              onChange={(e) => handleMemberOTChange(m.id, 'ot15', Number(e.target.value))}
+                              placeholder="0"
+                              style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #cbd5e1", textAlign: "center", fontSize: "0.9rem" }}
+                            />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "4px", textAlign: "center" }}>OT 1.0</div>
+                            <input 
+                              type="number" 
+                              min="0"
+                              value={m.ot10 === 0 ? "" : m.ot10}
+                              onChange={(e) => handleMemberOTChange(m.id, 'ot10', Number(e.target.value))}
+                              placeholder="0"
+                              style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #cbd5e1", textAlign: "center", fontSize: "0.9rem" }}
+                            />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "4px", textAlign: "center" }}>OT 3.0</div>
+                            <input 
+                              type="number" 
+                              min="0"
+                              value={m.ot30 === 0 ? "" : m.ot30}
+                              onChange={(e) => handleMemberOTChange(m.id, 'ot30', Number(e.target.value))}
+                              placeholder="0"
+                              style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #cbd5e1", textAlign: "center", fontSize: "0.9rem" }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -296,7 +335,7 @@ export default function TeamOTComponent() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "8px" }}>
                   <div>
                     <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>ค่าล่วงเวลา 1.5 เท่า รวม</div>
-                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{ot15Hours || "0"} ชม. (คิดจากเรทรายบุคคล)</div>
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{results.sumOT15H || "0"} ชม. (คิดจากเรทรายบุคคล)</div>
                   </div>
                   <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#1e293b" }}>
                     {results.totalOT15.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
@@ -306,7 +345,7 @@ export default function TeamOTComponent() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
                   <div>
                     <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>ค่าล่วงเวลา 1.0 เท่า รวม</div>
-                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{ot10Hours || "0"} ชม. (คิดจากเรทรายบุคคล)</div>
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{results.sumOT10H || "0"} ชม. (คิดจากเรทรายบุคคล)</div>
                   </div>
                   <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#1e293b" }}>
                     {results.totalOT10.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
@@ -316,7 +355,7 @@ export default function TeamOTComponent() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
                   <div>
                     <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>ค่าล่วงเวลา 3.0 เท่า รวม</div>
-                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{ot30Hours || "0"} ชม. (คิดจากเรทรายบุคคล)</div>
+                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{results.sumOT30H || "0"} ชม. (คิดจากเรทรายบุคคล)</div>
                   </div>
                   <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#1e293b" }}>
                     {results.totalOT30.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
