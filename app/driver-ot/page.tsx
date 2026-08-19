@@ -39,7 +39,11 @@ export default function DriverOTPage() {
   const [ot10Hours, setOt10Hours] = useState("");
   const [ot30Hours, setOt30Hours] = useState("");
   const [accomDays, setAccomDays] = useState("");
-
+  
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const handleDriverSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     setSelectedDriverIdx(val);
@@ -154,6 +158,25 @@ export default function DriverOTPage() {
               </h3>
               
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", paddingBottom: "16px", borderBottom: "1px solid #e2e8f0" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>วันที่เริ่มต้น</label>
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>วันที่สิ้นสุด</label>
+                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาเริ่มต้น</label>
+                    <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาสิ้นสุด</label>
+                    <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                  </div>
+                </div>
+
                 <div>
                   <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>OT 1.5 เท่า (ชั่วโมง)</label>
                   <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "8px", marginTop: "-4px" }}>วันทำงาน จันทร์ - เสาร์ (00:00-08:00 และ 17:00-24:00)</p>
@@ -270,6 +293,10 @@ export default function DriverOTPage() {
                   setOt10Hours("");
                   setOt30Hours("");
                   setAccomDays("");
+                  setStartDate("");
+                  setEndDate("");
+                  setStartTime("");
+                  setEndTime("");
                 }}
                 style={{ width: "100%", marginTop: "20px", background: "white", border: "1px solid #e2e8f0", color: "#64748b", padding: "12px", borderRadius: "8px", fontWeight: "600", cursor: "pointer", transition: "background 0.2s" }}
                 onMouseOver={e => e.currentTarget.style.background = "#f1f5f9"}
@@ -292,9 +319,13 @@ export default function DriverOTPage() {
             <strong>ชื่อ-สกุล:</strong> {activeDriver ? activeDriver.driver : '-'} 
             <span style={{ marginLeft: "16px" }}><strong>ทะเบียนรถ:</strong> {activeDriver ? activeDriver.plate : '-'}</span>
           </p>
-          <p style={{ fontSize: "12pt" }}>
+          <p style={{ fontSize: "12pt", marginBottom: "4px" }}>
             <strong>ประเภทรถ:</strong> {selectedType.name} - {selectedType.desc.split(' (')[0]}
             <span style={{ marginLeft: "16px" }}><strong>ตั้งเบิกค่าแรง:</strong> {selectedType.base.toLocaleString()} บาท/เดือน</span>
+          </p>
+          <p style={{ fontSize: "12pt" }}>
+            <strong>วันที่ปฏิบัติงาน:</strong> {startDate || '-'} {endDate && endDate !== startDate ? `ถึง ${endDate}` : ''}
+            <span style={{ marginLeft: "16px" }}><strong>เวลา:</strong> {startTime || '-'} น. ถึง {endTime || '-'} น.</span>
           </p>
         </div>
         

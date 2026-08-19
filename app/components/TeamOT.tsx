@@ -25,6 +25,8 @@ export default function TeamOTComponent() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [defaultDays, setDefaultDays] = useState<number>(0);
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
   useEffect(() => {
     fetchTeams();
@@ -196,8 +198,19 @@ export default function TeamOTComponent() {
                     <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
                   </div>
                 </div>
+                
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาเริ่มต้น</label>
+                    <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาสิ้นสุด</label>
+                    <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                  </div>
+                </div>
 
-                <div style={{ background: "#eff6ff", padding: "12px", borderRadius: "8px", border: "1px solid #bfdbfe", fontSize: "0.9rem", color: "#1e3a8a", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ background: "#eff6ff", padding: "12px", borderRadius: "8px", border: "1px solid #bfdbfe", fontSize: "0.9rem", color: "#1e3a8a", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
                   <span>จำนวนวันทำงานตั้งต้น:</span>
                   <span style={{ fontWeight: "700", fontSize: "1.1rem" }}>{defaultDays} วัน</span>
                 </div>
@@ -394,7 +407,12 @@ export default function TeamOTComponent() {
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h2 style={{ fontSize: "18pt", fontWeight: "bold", marginBottom: "8px" }}>รายการคำนวณค่าล่วงเวลาพนักงาน บ.</h2>
           <p style={{ fontSize: "12pt", marginBottom: "4px" }}><strong>ชุดงาน:</strong> {selectedTeam || '-'}</p>
-          <p style={{ fontSize: "12pt" }}><strong>ช่วงเวลา:</strong> {startDate || '-'} ถึง {endDate || '-'} (จำนวน {defaultDays} วัน)</p>
+          <p style={{ fontSize: "12pt", marginBottom: "4px" }}>
+            <strong>วันที่ปฏิบัติงาน:</strong> {startDate || '-'} {endDate && endDate !== startDate ? `ถึง ${endDate}` : ''} (จำนวน {defaultDays} วัน)
+          </p>
+          <p style={{ fontSize: "12pt" }}>
+            <strong>เวลา:</strong> {startTime || '-'} น. ถึง {endTime || '-'} น.
+          </p>
         </div>
         
         <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "32px", fontSize: "11pt" }}>
