@@ -80,7 +80,7 @@ export default function DriverOTPage() {
     <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0", background: "#f8fafc" }}>
       <TopBar title="โปรแกรมคำนวณค่าล่วงเวลา พขร.(บ)" />
       
-      <div style={{ padding: "0 32px", maxWidth: "1000px", margin: "0 auto", marginTop: "24px" }}>
+      <div className="no-print" style={{ padding: "0 32px", maxWidth: "1000px", margin: "0 auto", marginTop: "24px" }}>
         
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "24px" }}>
           {/* Left Column: Form */}
@@ -189,7 +189,13 @@ export default function DriverOTPage() {
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
                 </div>
                 <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1e293b", margin: 0 }}>สรุปค่าล่วงเวลา</h2>
-                <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "4px" }}>
+                
+                <button onClick={() => window.print()} className="btn btn-primary" style={{ marginTop: "16px", borderRadius: "20px", padding: "8px 16px", fontSize: "0.85rem" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  Export PDF
+                </button>
+
+                <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "12px" }}>
                   {activeDriver ? (
                     <span style={{ color: "#2563eb", fontWeight: "600" }}>{activeDriver.driver} ({activeDriver.plate})</span>
                   ) : (
@@ -276,6 +282,79 @@ export default function DriverOTPage() {
           </div>
         </div>
 
+      </div>
+
+      {/* Print Document View */}
+      <div className="print-only" style={{ padding: "40px", color: "black", background: "white", width: "100%", maxWidth: "100%" }}>
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "18pt", fontWeight: "bold", marginBottom: "8px" }}>รายการคำนวณค่าล่วงเวลา พขร. (บ)</h2>
+          <p style={{ fontSize: "12pt", marginBottom: "4px" }}>
+            <strong>ชื่อ-สกุล:</strong> {activeDriver ? activeDriver.driver : '-'} 
+            <span style={{ marginLeft: "16px" }}><strong>ทะเบียนรถ:</strong> {activeDriver ? activeDriver.plate : '-'}</span>
+          </p>
+          <p style={{ fontSize: "12pt" }}>
+            <strong>ประเภทรถ:</strong> {selectedType.name} - {selectedType.desc.split(' (')[0]}
+            <span style={{ marginLeft: "16px" }}><strong>ตั้งเบิกค่าแรง:</strong> {selectedType.base.toLocaleString()} บาท/เดือน</span>
+          </p>
+        </div>
+        
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "32px", fontSize: "12pt" }}>
+          <thead>
+            <tr>
+              <th style={{ border: "1px solid #000", padding: "12px", textAlign: "left", background: "#f1f5f9" }}>รายการ</th>
+              <th style={{ border: "1px solid #000", padding: "12px", textAlign: "center", background: "#f1f5f9" }}>จำนวน</th>
+              <th style={{ border: "1px solid #000", padding: "12px", textAlign: "right", background: "#f1f5f9" }}>อัตรา (บาท)</th>
+              <th style={{ border: "1px solid #000", padding: "12px", textAlign: "right", background: "#f1f5f9" }}>รวม (บาท)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "12px" }}>ค่าล่วงเวลา 1.5 เท่า</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "center" }}>{ot15Hours || "0"} ชม.</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "right" }}>{selectedType.ot15.toFixed(2)}</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "right" }}>{results.totalOT15.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "12px" }}>ค่าล่วงเวลา 1.0 เท่า</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "center" }}>{ot10Hours || "0"} ชม.</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "right" }}>{selectedType.ot10.toFixed(2)}</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "right" }}>{results.totalOT10.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "12px" }}>ค่าล่วงเวลา 3.0 เท่า</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "center" }}>{ot30Hours || "0"} ชม.</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "right" }}>{selectedType.ot30.toFixed(2)}</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "right" }}>{results.totalOT30.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+            <tr>
+              <td style={{ border: "1px solid #000", padding: "12px" }}>ค่าพักแรม</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "center" }}>{accomDays || "0"} วัน</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "right" }}>{selectedType.accom.toFixed(2)}</td>
+              <td style={{ border: "1px solid #000", padding: "12px", textAlign: "right" }}>{results.totalAccom.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colSpan={3} style={{ border: "1px solid #000", padding: "12px", textAlign: "right", fontWeight: "bold" }}>รวมสุทธิ (บาท)</th>
+              <th style={{ border: "1px solid #000", padding: "12px", textAlign: "right", fontWeight: "bold", background: "#f0fdf4" }}>
+                {results.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+        
+        <div style={{ display: "flex", justifyContent: "space-around", marginTop: "80px" }}>
+          <div style={{ textAlign: "center", width: "220px" }}>
+            <div style={{ borderBottom: "1px dashed #000", height: "1px", marginBottom: "12px" }}></div>
+            <div style={{ fontSize: "11pt" }}>ผู้จัดทำ / ผู้ขอเบิก</div>
+            <div style={{ fontSize: "10pt", color: "#666", marginTop: "4px" }}>วันที่: ...../...../.....</div>
+          </div>
+          <div style={{ textAlign: "center", width: "220px" }}>
+            <div style={{ borderBottom: "1px dashed #000", height: "1px", marginBottom: "12px" }}></div>
+            <div style={{ fontSize: "11pt" }}>ผู้อนุมัติ</div>
+            <div style={{ fontSize: "10pt", color: "#666", marginTop: "4px" }}>วันที่: ...../...../.....</div>
+          </div>
+        </div>
       </div>
     </div>
   );

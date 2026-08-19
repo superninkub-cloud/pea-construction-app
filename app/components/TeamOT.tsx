@@ -150,7 +150,7 @@ export default function TeamOTComponent() {
     <div style={{ height: "100%", overflowY: "auto", padding: "0 0 40px 0", background: "#f8fafc" }}>
       <TopBar title="โปรแกรมคำนวณ OT พนักงาน บ." />
       
-      <div style={{ padding: "0 32px", maxWidth: "1200px", margin: "0 auto", marginTop: "24px" }}>
+      <div className="no-print" style={{ padding: "0 32px", maxWidth: "1200px", margin: "0 auto", marginTop: "24px" }}>
         
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "24px" }}>
           {/* Left Column: Form & Member Selection */}
@@ -306,7 +306,13 @@ export default function TeamOTComponent() {
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
                 </div>
                 <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1e293b", margin: 0 }}>สรุปค่าใช้จ่ายทีม</h2>
-                <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "4px" }}>
+                
+                <button onClick={() => window.print()} className="btn btn-primary" style={{ marginTop: "16px", borderRadius: "20px", padding: "8px 16px", fontSize: "0.85rem" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  Export PDF
+                </button>
+
+                <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "12px" }}>
                   {selectedTeam ? (
                     <span style={{ color: "#2563eb", fontWeight: "600" }}>ชุดงาน: {selectedTeam}</span>
                   ) : (
@@ -381,6 +387,79 @@ export default function TeamOTComponent() {
           </div>
         </div>
 
+      </div>
+
+      {/* Print Document View */}
+      <div className="print-only" style={{ padding: "40px", color: "black", background: "white", width: "100%", maxWidth: "100%" }}>
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <h2 style={{ fontSize: "18pt", fontWeight: "bold", marginBottom: "8px" }}>รายการคำนวณค่าล่วงเวลาพนักงาน บ.</h2>
+          <p style={{ fontSize: "12pt", marginBottom: "4px" }}><strong>ชุดงาน:</strong> {selectedTeam || '-'}</p>
+          <p style={{ fontSize: "12pt" }}><strong>ช่วงเวลา:</strong> {startDate || '-'} ถึง {endDate || '-'} (จำนวน {defaultDays} วัน)</p>
+        </div>
+        
+        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "32px", fontSize: "11pt" }}>
+          <thead>
+            <tr>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>ลำดับ</th>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "left", background: "#f1f5f9" }}>ชื่อ-สกุล</th>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "right", background: "#f1f5f9" }}>ค่าแรง/วัน</th>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>วันทำงาน</th>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>OT 1.5<br/>(ชม.)</th>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>OT 1.0<br/>(ชม.)</th>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>OT 3.0<br/>(ชม.)</th>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "right", background: "#f1f5f9" }}>รวมสุทธิ<br/>(บาท)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {members.filter(m => m.selected).map((m, idx) => {
+              const hourlyRate = m.wage / 8;
+              const baseWage = m.wage * m.days;
+              const ot15Cost = hourlyRate * 1.5 * m.ot15;
+              const ot10Cost = hourlyRate * 1.0 * m.ot10;
+              const ot30Cost = hourlyRate * 3.0 * m.ot30;
+              const totalCost = baseWage + ot15Cost + ot10Cost + ot30Cost;
+              
+              return (
+                <tr key={m.id}>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{idx + 1}</td>
+                  <td style={{ border: "1px solid #000", padding: "8px" }}>{m.full_name}</td>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right" }}>{m.wage.toLocaleString()}</td>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.days}</td>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.ot15 || '-'}</td>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.ot10 || '-'}</td>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.ot30 || '-'}</td>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right" }}>{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+              );
+            })}
+            {members.filter(m => m.selected).length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ border: "1px solid #000", padding: "16px", textAlign: "center", color: "#64748b" }}>ไม่มีข้อมูลพนักงาน</td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colSpan={7} style={{ border: "1px solid #000", padding: "8px", textAlign: "right", fontWeight: "bold" }}>รวมค่าใช้จ่ายทั้งสิ้น (บาท)</th>
+              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "right", fontWeight: "bold", background: "#f0fdf4" }}>
+                {results.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+        
+        <div style={{ display: "flex", justifyContent: "space-around", marginTop: "80px" }}>
+          <div style={{ textAlign: "center", width: "220px" }}>
+            <div style={{ borderBottom: "1px dashed #000", height: "1px", marginBottom: "12px" }}></div>
+            <div style={{ fontSize: "11pt" }}>ผู้จัดทำ / ผู้ขอเบิก</div>
+            <div style={{ fontSize: "10pt", color: "#666", marginTop: "4px" }}>วันที่: ...../...../.....</div>
+          </div>
+          <div style={{ textAlign: "center", width: "220px" }}>
+            <div style={{ borderBottom: "1px dashed #000", height: "1px", marginBottom: "12px" }}></div>
+            <div style={{ fontSize: "11pt" }}>ผู้อนุมัติ</div>
+            <div style={{ fontSize: "10pt", color: "#666", marginTop: "4px" }}>วันที่: ...../...../.....</div>
+          </div>
+        </div>
       </div>
     </div>
   );
