@@ -73,6 +73,7 @@ export default function DriverOTPage() {
   const [endTime, setEndTime] = useState("");
   const [isHoliday, setIsHoliday] = useState(false);
   const [calculatedHours, setCalculatedHours] = useState<number>(0);
+  const [timeSpans, setTimeSpans] = useState<string[]>([]);
 
   useEffect(() => {
     if (startTime && endTime && startDate) {
@@ -94,6 +95,9 @@ export default function DriverOTPage() {
       let ot30Mins = 0;
       let totalMinutes = 0;
 
+      let spans: any[] = [];
+      let currentSpan: any = null;
+
       let current = new Date(d1);
       while (current < d2) {
         const h = current.getHours();
@@ -108,10 +112,37 @@ export default function DriverOTPage() {
           } else {
             if (h < 8 || h >= 17) ot15Mins++;
           }
+
+          if (!currentSpan) {
+            currentSpan = { start: new Date(current), end: new Date(current) };
+          } else {
+            const diff = current.getTime() - currentSpan.end.getTime();
+            if (diff > 60000 || current.getDate() !== currentSpan.start.getDate()) {
+              currentSpan.end.setMinutes(currentSpan.end.getMinutes() + 1);
+              spans.push(currentSpan);
+              currentSpan = { start: new Date(current), end: new Date(current) };
+            } else {
+              currentSpan.end = new Date(current);
+            }
+          }
         }
         current.setMinutes(current.getMinutes() + 1);
       }
 
+      if (currentSpan) {
+        currentSpan.end.setMinutes(currentSpan.end.getMinutes() + 1);
+        spans.push(currentSpan);
+      }
+
+      const formattedSpans = spans.map(span => {
+        const dStr = span.start.toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' });
+        const tStart = span.start.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        let tEnd = span.end.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        if (tEnd === '00:00' || tEnd === '24:00') tEnd = '24:00';
+        return `วันที่ ${dStr} ช่วง ${tStart}-${tEnd} น.`;
+      });
+      
+      setTimeSpans(formattedSpans);
       setCalculatedHours(totalMinutes > 0 ? totalMinutes / 60 : 0);
 
       const ot15 = ot15Mins / 60;
@@ -124,8 +155,9 @@ export default function DriverOTPage() {
 
     } else {
       setCalculatedHours(0);
+      setTimeSpans([]);
     }
-  }, [startTime, endTime, startDate, isHoliday]);
+  }, [startTime, endTime, startDate, endDate, isHoliday]);
   const handleDriverSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     setSelectedDriverIdx(val);

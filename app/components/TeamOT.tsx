@@ -56,6 +56,7 @@ export default function TeamOTComponent() {
   const [endTime, setEndTime] = useState("");
   const [isHoliday, setIsHoliday] = useState(false);
   const [calculatedHours, setCalculatedHours] = useState<number>(0);
+  const [timeSpans, setTimeSpans] = useState<string[]>([]);
 
   useEffect(() => {
     if (startTime && endTime && startDate) {
@@ -75,6 +76,10 @@ export default function TeamOTComponent() {
       let ot20Mins = 0;
       let ot30Mins = 0;
       let totalMinutes = 0;
+      
+      const normalWorkDays = new Set<string>();
+      let spans: any[] = [];
+      let currentSpan: any = null;
 
       let current = new Date(d1);
       while (current < d2) {
@@ -89,53 +94,61 @@ export default function TeamOTComponent() {
             else ot30Mins++;
           } else {
             if (h < 8 || h >= 17) ot15Mins++;
+            else {
+              normalWorkDays.add(current.toDateString());
+            }
+          }
+
+          if (!currentSpan) {
+            currentSpan = { start: new Date(current), end: new Date(current) };
+          } else {
+            const diff = current.getTime() - currentSpan.end.getTime();
+            if (diff > 60000 || current.getDate() !== currentSpan.start.getDate()) {
+              currentSpan.end.setMinutes(currentSpan.end.getMinutes() + 1);
+              spans.push(currentSpan);
+              currentSpan = { start: new Date(current), end: new Date(current) };
+            } else {
+              currentSpan.end = new Date(current);
+            }
           }
         }
         current.setMinutes(current.getMinutes() + 1);
       }
+
+      if (currentSpan) {
+        currentSpan.end.setMinutes(currentSpan.end.getMinutes() + 1);
+        spans.push(currentSpan);
+      }
+
+      const formattedSpans = spans.map(span => {
+        const dStr = span.start.toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' });
+        const tStart = span.start.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        let tEnd = span.end.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        if (tEnd === '00:00' || tEnd === '24:00') tEnd = '24:00';
+        return `วันที่ ${dStr} ช่วง ${tStart}-${tEnd} น.`;
+      });
       
+      setTimeSpans(formattedSpans);
       setCalculatedHours(totalMinutes > 0 ? totalMinutes / 60 : 0);
+
+      const calculatedDays = normalWorkDays.size;
+      setDefaultDays(calculatedDays);
 
       const ot15 = Math.round((ot15Mins / 60) * 100) / 100;
       const ot20 = Math.round((ot20Mins / 60) * 100) / 100;
       const ot30 = Math.round((ot30Mins / 60) * 100) / 100;
 
-      setMembers(prev => prev.map(m => m.selected ? { ...m, ot15, ot20, ot30 } : m));
+      setMembers(prev => prev.map(m => m.selected ? { ...m, ot15, ot20, ot30, days: calculatedDays } : m));
 
     } else {
       setCalculatedHours(0);
+      setTimeSpans([]);
     }
-  }, [startTime, endTime, startDate, isHoliday]);
+  }, [startTime, endTime, startDate, endDate, isHoliday]);
 
   useEffect(() => {
     fetchTeams();
   }, []);
-
-  // Recalculate days when dates change or holiday status changes
-  useEffect(() => {
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      
-      let diffDays = 0;
-      // Ensure we have valid dates and start is before or equal to end
-      if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
-        let current = new Date(start);
-        while (current <= end) {
-          const isSunday = current.getDay() === 0;
-          if (!isSunday && !isHoliday) {
-            diffDays++;
-          }
-          current.setDate(current.getDate() + 1);
-        }
-      }
-      
-      setDefaultDays(diffDays);
-      
-      // Update all currently selected members' days
-      setMembers(prev => prev.map(m => ({ ...m, days: diffDays })));
-    }
-  }, [startDate, endDate, isHoliday]);
 
   const fetchTeams = async () => {
     const { data, error } = await supabase
@@ -303,9 +316,21 @@ export default function TeamOTComponent() {
                 </div>
 
                 {calculatedHours > 0 && (
-                  <div style={{ background: "#f0fdf4", padding: "12px", borderRadius: "8px", border: "1px solid #bbf7d0", fontSize: "0.9rem", color: "#166534", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px", flexWrap: "wrap", gap: "12px" }}>
-                    <span>ระยะเวลาที่คำนวณได้: <strong>{calculatedHours.toFixed(2)} ชั่วโมง</strong></span>
-                    <span style={{ fontSize: "0.8rem" }}>(ระบบได้จัดสรรชั่วโมงลงในช่อง OT ให้แล้ว)</span>
+                  <div style={{ background: "#f0fdf4", padding: "12px", borderRadius: "8px", border: "1px solid #bbf7d0", fontSize: "0.9rem", color: "#166534", marginTop: "12px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                      <span>ระยะเวลาที่คำนวณได้: <strong>{calculatedHours.toFixed(2)} ชั่วโมง</strong></span>
+                      <span style={{ fontSize: "0.8rem" }}>(ระบบจัดสรรให้แล้ว)</span>
+                    </div>
+                    {timeSpans.length > 0 && (
+                      <div style={{ fontSize: "0.85rem", marginTop: "8px", color: "#15803d", borderTop: "1px dashed #bbf7d0", paddingTop: "8px" }}>
+                        <div style={{ fontWeight: "600", marginBottom: "4px" }}>แยกเวลาทำงาน:</div>
+                        <ul style={{ margin: 0, paddingLeft: "20px" }}>
+                          {timeSpans.map((ts, idx) => (
+                            <li key={idx}>{ts}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
 
