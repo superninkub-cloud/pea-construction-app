@@ -38,7 +38,6 @@ interface TeamMember {
   selected: boolean;
   days: number;
   ot15: number;
-  ot10: number;
   ot20: number;
   ot30: number;
 }
@@ -89,7 +88,6 @@ export default function TeamOTComponent() {
       let hB = bucketB / 60;
 
       let ot15 = 0;
-      let ot10 = 0;
       let ot20 = 0;
       let ot30 = 0;
 
@@ -100,7 +98,7 @@ export default function TeamOTComponent() {
         ot15 = Math.round(hB * 100) / 100;
       }
 
-      setMembers(prev => prev.map(m => m.selected ? { ...m, ot15, ot10, ot20, ot30 } : m));
+      setMembers(prev => prev.map(m => m.selected ? { ...m, ot15, ot20, ot30 } : m));
 
     } else {
       setCalculatedHours(0);
@@ -157,7 +155,6 @@ export default function TeamOTComponent() {
         selected: true,
         days: defaultDays,
         ot15: 0,
-        ot10: 0,
         ot20: 0,
         ot30: 0
       })));
@@ -179,7 +176,7 @@ export default function TeamOTComponent() {
     setMembers(prev => prev.map(m => m.id === id ? { ...m, days: days } : m));
   };
 
-  const handleMemberOTChange = (id: string, field: 'ot15' | 'ot10' | 'ot30', value: number) => {
+  const handleMemberOTChange = (id: string, field: 'ot15' | 'ot20' | 'ot30', value: number) => {
     setMembers(prev => prev.map(m => m.id === id ? { ...m, [field]: value } : m));
   };
 
@@ -188,12 +185,10 @@ export default function TeamOTComponent() {
     
     let totalBaseWage = 0;
     let totalOT15 = 0;
-    let totalOT10 = 0;
     let totalOT20 = 0;
     let totalOT30 = 0;
     
     let sumOT15H = 0;
-    let sumOT10H = 0;
     let sumOT20H = 0;
     let sumOT30H = 0;
 
@@ -206,12 +201,10 @@ export default function TeamOTComponent() {
       
       // OT for this member
       totalOT15 += hourlyRate * 1.5 * m.ot15;
-      totalOT10 += hourlyRate * 1.0 * m.ot10;
       totalOT20 += hourlyRate * 2.0 * m.ot20;
       totalOT30 += hourlyRate * 3.0 * m.ot30;
       
       sumOT15H += m.ot15;
-      sumOT10H += m.ot10;
       sumOT20H += m.ot20;
       sumOT30H += m.ot30;
     });
@@ -219,14 +212,12 @@ export default function TeamOTComponent() {
     return {
       totalBaseWage,
       totalOT15,
-      totalOT10,
       totalOT20,
       totalOT30,
-      totalOT: totalOT15 + totalOT10 + totalOT20 + totalOT30,
-      grandTotal: totalBaseWage + totalOT15 + totalOT10 + totalOT20 + totalOT30,
+      totalOT: totalOT15 + totalOT20 + totalOT30,
+      grandTotal: totalBaseWage + totalOT15 + totalOT20 + totalOT30,
       activeCount: activeMembers.length,
       sumOT15H,
-      sumOT10H,
       sumOT20H,
       sumOT30H
     };
@@ -375,12 +366,12 @@ export default function TeamOTComponent() {
                             />
                           </div>
                           <div>
-                            <div style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "4px", textAlign: "center" }}>OT 1.0</div>
+                            <div style={{ fontSize: "0.75rem", color: "#2563eb", marginBottom: "4px", textAlign: "center" }}>OT 2.0</div>
                             <input 
                               type="number" 
                               min="0"
-                              value={m.ot10 === 0 ? "" : m.ot10}
-                              onChange={(e) => handleMemberOTChange(m.id, 'ot10', Number(e.target.value))}
+                              value={m.ot20 === 0 ? "" : m.ot20}
+                              onChange={(e) => handleMemberOTChange(m.id, 'ot20', Number(e.target.value))}
                               placeholder="0"
                               style={{ width: "100%", padding: "6px", borderRadius: "6px", border: "1px solid #cbd5e1", textAlign: "center", fontSize: "0.9rem" }}
                             />
@@ -455,16 +446,6 @@ export default function TeamOTComponent() {
                   </div>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-                  <div>
-                    <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>ค่าล่วงเวลา 1.0 เท่า รวม</div>
-                    <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{results.sumOT10H || "0"} ชม. (คิดจากเรทรายบุคคล)</div>
-                  </div>
-                  <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#1e293b" }}>
-                    {results.totalOT10.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บ.
-                  </div>
-                </div>
-
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "8px" }}>
                   <div>
                     <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "#2563eb" }}>ค่าล่วงเวลา 2.0 เท่า รวม</div>
@@ -527,7 +508,6 @@ export default function TeamOTComponent() {
               <th style={{ border: "1px solid #000", padding: "8px", textAlign: "right", background: "#f1f5f9" }}>ค่าแรง/วัน</th>
               <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>วันทำงาน</th>
               <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>OT 1.5<br/>(ชม.)</th>
-              <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>OT 1.0<br/>(ชม.)</th>
               <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>OT 2.0<br/>(ชม.)</th>
               <th style={{ border: "1px solid #000", padding: "8px", textAlign: "center", background: "#f1f5f9" }}>OT 3.0<br/>(ชม.)</th>
               <th style={{ border: "1px solid #000", padding: "8px", textAlign: "right", background: "#f1f5f9" }}>รวมสุทธิ<br/>(บาท)</th>
@@ -538,10 +518,9 @@ export default function TeamOTComponent() {
               const hourlyRate = m.wage / 8;
               const baseWage = m.wage * m.days;
               const ot15Cost = hourlyRate * 1.5 * m.ot15;
-              const ot10Cost = hourlyRate * 1.0 * m.ot10;
               const ot20Cost = hourlyRate * 2.0 * m.ot20;
               const ot30Cost = hourlyRate * 3.0 * m.ot30;
-              const totalCost = baseWage + ot15Cost + ot10Cost + ot20Cost + ot30Cost;
+              const totalCost = baseWage + ot15Cost + ot20Cost + ot30Cost;
               
               return (
                 <tr key={m.id}>
@@ -550,7 +529,6 @@ export default function TeamOTComponent() {
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right" }}>{m.wage.toLocaleString()}</td>
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.days}</td>
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.ot15 || '-'}</td>
-                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.ot10 || '-'}</td>
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.ot20 || '-'}</td>
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "center" }}>{m.ot30 || '-'}</td>
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right" }}>{totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
@@ -559,13 +537,13 @@ export default function TeamOTComponent() {
             })}
             {members.filter(m => m.selected).length === 0 && (
               <tr>
-                <td colSpan={9} style={{ border: "1px solid #000", padding: "16px", textAlign: "center", color: "#64748b" }}>ไม่มีข้อมูลพนักงาน</td>
+                <td colSpan={8} style={{ border: "1px solid #000", padding: "16px", textAlign: "center", color: "#64748b" }}>ไม่มีข้อมูลพนักงาน</td>
               </tr>
             )}
           </tbody>
           <tfoot>
             <tr>
-              <th colSpan={8} style={{ border: "1px solid #000", padding: "8px", textAlign: "right", fontWeight: "bold" }}>รวมค่าใช้จ่ายทั้งสิ้น (บาท)</th>
+              <th colSpan={7} style={{ border: "1px solid #000", padding: "8px", textAlign: "right", fontWeight: "bold" }}>รวมค่าใช้จ่ายทั้งสิ้น (บาท)</th>
               <th style={{ border: "1px solid #000", padding: "8px", textAlign: "right", fontWeight: "bold", background: "#f0fdf4" }}>
                 {results.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </th>
