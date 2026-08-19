@@ -112,19 +112,31 @@ export default function TeamOTComponent() {
     fetchTeams();
   }, []);
 
-  // Recalculate days when dates change
+  // Recalculate days when dates change or holiday status changes
   useEffect(() => {
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive
-      setDefaultDays(diffDays > 0 ? diffDays : 0);
       
-      // Update all currently selected members' days if they match the old default
-      setMembers(prev => prev.map(m => ({ ...m, days: diffDays > 0 ? diffDays : 0 })));
+      let diffDays = 0;
+      // Ensure we have valid dates and start is before or equal to end
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+        let current = new Date(start);
+        while (current <= end) {
+          const isSunday = current.getDay() === 0;
+          if (!isSunday && !isHoliday) {
+            diffDays++;
+          }
+          current.setDate(current.getDate() + 1);
+        }
+      }
+      
+      setDefaultDays(diffDays);
+      
+      // Update all currently selected members' days
+      setMembers(prev => prev.map(m => ({ ...m, days: diffDays })));
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, isHoliday]);
 
   const fetchTeams = async () => {
     const { data, error } = await supabase
