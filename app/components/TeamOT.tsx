@@ -202,11 +202,11 @@ export default function TeamOTComponent() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "12px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาเริ่มต้น</label>
-                    <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                    <input type="time" lang="en-GB" value={startTime} onChange={e => setStartTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาสิ้นสุด</label>
-                    <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                    <input type="time" lang="en-GB" value={endTime} onChange={e => setEndTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
                   </div>
                 </div>
 
@@ -411,7 +411,7 @@ export default function TeamOTComponent() {
             <strong>วันที่ปฏิบัติงาน:</strong> {startDate || '-'} {endDate && endDate !== startDate ? `ถึง ${endDate}` : ''} (จำนวน {defaultDays} วัน)
           </p>
           <p style={{ fontSize: "12pt" }}>
-            <strong>เวลา:</strong> {startTime || '-'} น. ถึง {endTime || '-'} น.
+            <strong>เวลา:</strong> {startTime ? startTime.replace(':', '.') : '-'} น. ถึง {endTime ? endTime.replace(':', '.') : '-'} น.
           </p>
         </div>
         

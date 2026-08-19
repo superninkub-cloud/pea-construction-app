@@ -169,11 +169,11 @@ export default function DriverOTPage() {
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาเริ่มต้น</label>
-                    <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                    <input type="time" lang="en-GB" value={startTime} onChange={e => setStartTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>เวลาสิ้นสุด</label>
-                    <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
+                    <input type="time" lang="en-GB" value={endTime} onChange={e => setEndTime(e.target.value)} className="form-control" style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }} />
                   </div>
                 </div>
 
@@ -325,7 +325,7 @@ export default function DriverOTPage() {
           </p>
           <p style={{ fontSize: "12pt" }}>
             <strong>วันที่ปฏิบัติงาน:</strong> {startDate || '-'} {endDate && endDate !== startDate ? `ถึง ${endDate}` : ''}
-            <span style={{ marginLeft: "16px" }}><strong>เวลา:</strong> {startTime || '-'} น. ถึง {endTime || '-'} น.</span>
+            <span style={{ marginLeft: "16px" }}><strong>เวลา:</strong> {startTime ? startTime.replace(':', '.') : '-'} น. ถึง {endTime ? endTime.replace(':', '.') : '-'} น.</span>
           </p>
         </div>
         
