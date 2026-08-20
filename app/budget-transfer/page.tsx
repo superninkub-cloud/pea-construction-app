@@ -206,8 +206,64 @@ export default function BudgetTransferPage() {
   };
 
   const exportToWord = () => {
-    const content = document.querySelector('.print-only')?.innerHTML;
-    if (!content) return;
+    const el = document.querySelector('.print-only');
+    if (!el) return;
+    
+    // Create a clone to manipulate for Word export
+    const clone = el.cloneNode(true) as HTMLElement;
+    
+    // Replace .print-signatures flexbox with an HTML table for MS Word compatibility
+    const sigContainers = clone.querySelectorAll('.print-signatures');
+    sigContainers.forEach(container => {
+      const boxes = Array.from(container.querySelectorAll('.signature-box'));
+      const table = document.createElement('table');
+      table.style.width = '100%';
+      table.style.border = 'none';
+      table.style.marginTop = '40px';
+      
+      const tr = document.createElement('tr');
+      boxes.forEach(box => {
+        const td = document.createElement('td');
+        td.style.width = `${100 / (boxes.length || 1)}%`;
+        td.style.textAlign = 'center';
+        td.style.border = 'none';
+        td.style.verticalAlign = 'top';
+        td.innerHTML = box.innerHTML;
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+      container.replaceWith(table);
+    });
+
+    // Replace flex headers (if any) with tables
+    const flexHeaders = clone.querySelectorAll('div[style*="display: flex"]');
+    flexHeaders.forEach(header => {
+      if (header.children.length === 2 && !header.classList.contains('print-signatures')) {
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.border = 'none';
+        const tr = document.createElement('tr');
+        
+        const td1 = document.createElement('td');
+        td1.style.border = 'none';
+        td1.style.width = '50%';
+        td1.style.textAlign = 'left';
+        td1.innerHTML = header.children[0].innerHTML;
+        
+        const td2 = document.createElement('td');
+        td2.style.border = 'none';
+        td2.style.width = '50%';
+        td2.style.textAlign = 'right';
+        td2.innerHTML = header.children[1].innerHTML;
+        
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        table.appendChild(tr);
+        header.replaceWith(table);
+      }
+    });
+
+    const content = clone.innerHTML;
     
     const html = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -215,17 +271,21 @@ export default function BudgetTransferPage() {
         <meta charset='utf-8'>
         <title>Export</title>
         <style>
-          body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; }
+          @font-family {
+            font-family: 'TH Sarabun New';
+            src: local('TH Sarabun New');
+          }
+          body { font-family: 'TH Sarabun New', 'Sarabun', sans-serif; font-size: 16pt; }
           table { width: 100%; border-collapse: collapse; }
           th, td { border: 1px solid black; padding: 4px; }
           .print-header { text-align: center; }
           .print-header-text { font-size: 16pt; font-weight: bold; text-align: left; }
           .print-meta-table { width: 100%; margin-bottom: 20px; }
-          .print-section-title { font-weight: bold; font-size: 14pt; margin-top: 20px; margin-bottom: 10px; }
+          .print-meta-table td { border: none !important; padding: 2px; }
+          .print-section-title { font-weight: bold; font-size: 16pt; margin-top: 20px; margin-bottom: 10px; }
           .print-paragraph { text-indent: 40px; margin-bottom: 15px; }
-          .print-data-table { width: 100%; font-size: 12pt; margin-bottom: 20px; }
-          .print-signatures { display: flex; justify-content: space-around; margin-top: 60px; }
-          .signature-box { text-align: center; width: 300px; }
+          .print-data-table { width: 100%; font-size: 14pt; margin-bottom: 20px; }
+          .signature-box { text-align: center; }
         </style>
       </head>
       <body>
@@ -244,6 +304,31 @@ export default function BudgetTransferPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const exportToPdf = async () => {
+    const element = document.querySelector('.print-only') as HTMLElement;
+    if (!element) return;
+    
+    try {
+      // Import html2pdf dynamically
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      const isLandscape = step3View === 'approval';
+      
+      const opt = {
+        margin:       10,
+        filename:     `เอกสารขออนุมัติโอนงบ_${docNo || 'Draft'}.pdf`,
+        image:        { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: (isLandscape ? 'landscape' : 'portrait') as 'landscape' | 'portrait' }
+      };
+      
+      html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("เกิดข้อผิดพลาดในการสร้างไฟล์ PDF กรุณาลองใหม่อีกครั้ง");
+    }
   };
 
   const totalAmount = transfers.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
@@ -984,6 +1069,9 @@ export default function BudgetTransferPage() {
 
                   <button className="btn btn-outline" onClick={exportToWord} style={{ color: '#2563eb', borderColor: '#bfdbfe', background: '#eff6ff' }}>
                     <Save size={18} /> ดาวน์โหลดเป็น Word
+                  </button>
+                  <button className="btn btn-outline" onClick={exportToPdf} style={{ color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2' }}>
+                    <FileType size={18} /> ดาวน์โหลดเป็น PDF
                   </button>
                   <button className="btn btn-primary" onClick={handleSave}>
                     <Save size={18} /> สั่งพิมพ์เอกสาร
