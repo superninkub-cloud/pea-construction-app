@@ -149,7 +149,8 @@ export default function BudgetTransferPage() {
     
     // Phase 1: Transfer from Field Surpluses to Field Deficits
     for (let d of fieldDeficits) {
-      let needed = d.amount;
+      // Round up to the next 100 to ensure remaining balance is > 0
+      let needed = (Math.floor(d.amount / 100) + 1) * 100;
       for (let s of fieldSurpluses) {
         if (needed <= 0.001) break;
         if (s.amount <= 0.001) continue;
