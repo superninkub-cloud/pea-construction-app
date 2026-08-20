@@ -542,25 +542,58 @@ export default function BudgetTransferPage() {
         <div className="print-section-title" style={{ marginTop: '20px' }}>3. ข้อพิจารณา - สรุป</div>
         <p className="print-paragraph">จากรายละเอียดข้อมูลเบื้องต้น กรย.(ก3) พิจารณาแล้ว เพื่อให้งานก่อสร้าง{projectName ? `งาน${projectName}` : ''}ดังกล่าวข้างต้น สามารถดำเนินการปิดงานก่อสร้างเพื่อขึ้นทะเบียนทรัพย์สินได้ตามระเบียบ จึงเห็นควรอนุมัติค่าใช้จ่ายหน้างานเพิ่มเติม ดังนี้</p>
         
+        {(() => {
+          // Group transfers by receiver
+          const receivers = Array.from(new Set(transfers.map(t => `${t.networkTo}|${t.categoryTo}`)));
+          let listIndex = 1;
+          const items: React.ReactNode[] = [];
+          
+          receivers.forEach(receiverKey => {
+            const [netTo, catTo] = receiverKey.split('|');
+            const relatedTransfers = transfers.filter(t => t.networkTo === netTo && t.categoryTo === catTo);
+            
+            let groupTotal = 0;
+            const startIdx = listIndex;
+            
+            relatedTransfers.forEach(t => {
+              groupTotal += t.amount;
+              const netFromStr = getFullNetworkName(networkDataList.find(n => n.network === t.networkFrom)?.networkName || '').replace('แผนก', '').trim();
+              const netToStr = getFullNetworkName(networkDataList.find(n => n.network === t.networkTo)?.networkName || '').replace('แผนก', '').trim();
+              
+              items.push(
+                <div key={`transfer-${t.id}`} style={{ textIndent: '40px', marginBottom: '8px' }}>
+                  3.{listIndex} โอน{t.categoryFrom}แผนก{netFromStr} ไปเป็น {t.categoryTo}แผนก{netToStr} จำนวน {fmt(t.amount)} บาท
+                </div>
+              );
+              listIndex++;
+            });
+            
+            if (relatedTransfers.length > 1) {
+               const netToStr = getFullNetworkName(networkDataList.find(n => n.network === netTo)?.networkName || '').replace('แผนก', '').trim();
+               items.push(
+                 <div key={`summary-${receiverKey}`} style={{ textIndent: '40px', marginBottom: '16px' }}>
+                   3.{listIndex} เมื่อโอนตามข้อ 3.{startIdx} - 3.{listIndex - 1} แล้วทำให้{catTo}แผนก{netToStr} เพิ่มขึ้น เป็นเงิน {fmt(groupTotal)} บาท
+                 </div>
+               );
+               listIndex++;
+            }
+          });
+          
+          return (
+            <div style={{ marginBottom: '20px' }}>
+              {items}
+            </div>
+          );
+        })()}
+        
         {networkDataList.map((net, i) => {
           let netTransfers = transfers.filter(t => t.networkFrom === net.network || t.networkTo === net.network);
           if (netTransfers.length === 0) return null;
           
-          const num = i + 1;
-
           return (
-            <div key={net.network}>
-              <div className="print-table-title" style={{ textAlign: 'left', textIndent: '40px' }}>3.{num} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
-              
-              <div style={{ textIndent: '60px', marginBottom: '10px' }}>
-                {netTransfers.map((t, idx) => {
-                  const isGiving = t.networkFrom === net.network;
-                  if (isGiving) {
-                    return <div key={idx}>- โอน{t.categoryFrom} ไปเป็น{t.categoryTo} โครงข่าย {t.networkTo} จำนวน {fmt(t.amount)}.- บาท</div>;
-                  } else {
-                    return <div key={idx}>- รับโอน{t.categoryTo} จาก{t.categoryFrom} โครงข่าย {t.networkFrom} จำนวน {fmt(t.amount)}.- บาท</div>;
-                  }
-                })}
+            <div key={net.network} style={{ pageBreakInside: 'avoid' }}>
+              <div className="print-table-title" style={{ textAlign: 'left', marginTop: '15px' }}>
+                 ตารางแสดงงบประมาณโครงข่าย {net.network} {getFullNetworkName(net.networkName)}
               </div>
 
               <table className="print-data-table">
@@ -670,25 +703,25 @@ export default function BudgetTransferPage() {
         <div id="flow-chart-container" style={{ position: 'relative', overflowX: 'auto', background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', minHeight: '400px' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px' }}>ตารางจำลองโอนงบ ZPSR018</h3>
           
-          <table style={{ width: '100%', minWidth: '1000px', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+          <table style={{ width: '100%', minWidth: '1200px', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
             <thead>
               <tr>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '3%' }}>ที่</th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '10%' }}>เลขที่โครงข่าย<br/>(แผนก)</th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '7%' }}>รายการ</th>
-                <th colSpan={7} style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '80%' }}>ค่าใช้จ่ายจริง(บาท)</th>
+                <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '3%' }}>ที่</th>
+                <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '12%' }}>เลขที่โครงข่าย<br/>(แผนก)</th>
+                <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '7%' }}>รายการ</th>
+                <th colSpan={7} style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '78%' }}>ค่าใช้จ่ายจริง(บาท)</th>
               </tr>
               <tr>
                 <th style={{ border: '1px solid #000' }}></th>
                 <th style={{ border: '1px solid #000' }}></th>
                 <th style={{ border: '1px solid #000' }}></th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าพัสดุ</th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>พัสดุเข้างาน</th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าแรงงาน<br/>/ค่าจ้างเหมา</th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าควบคุมงาน</th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าขนส่ง/<br/>ยานพาหนะ</th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าเบ็ดเตล็ด</th>
-                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าดำเนินการ</th>
+                <th style={{ border: '1px solid #000', padding: '12px 8px', textAlign: 'center' }}>ค่าพัสดุ</th>
+                <th style={{ border: '1px solid #000', padding: '12px 8px', textAlign: 'center' }}>พัสดุเข้างาน</th>
+                <th style={{ border: '1px solid #000', padding: '12px 8px', textAlign: 'center' }}>ค่าแรงงาน<br/>/ค่าจ้างเหมา</th>
+                <th style={{ border: '1px solid #000', padding: '12px 8px', textAlign: 'center' }}>ค่าควบคุมงาน</th>
+                <th style={{ border: '1px solid #000', padding: '12px 8px', textAlign: 'center' }}>ค่าขนส่ง/<br/>ยานพาหนะ</th>
+                <th style={{ border: '1px solid #000', padding: '12px 8px', textAlign: 'center' }}>ค่าเบ็ดเตล็ด</th>
+                <th style={{ border: '1px solid #000', padding: '12px 8px', textAlign: 'center' }}>ค่าดำเนินการ</th>
               </tr>
             </thead>
             <tbody>
@@ -720,32 +753,32 @@ export default function BudgetTransferPage() {
                   <React.Fragment key={net.network}>
                     {/* Row 1: Budget */}
                     <tr>
-                      <td rowSpan={3} style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', verticalAlign: 'top' }}>{idx + 1}</td>
-                      <td rowSpan={3} style={{ border: '1px solid #000', padding: '4px', verticalAlign: 'top' }}>{net.network}<br/>{getFullNetworkName(net.networkName).split(' ')[0]}</td>
-                      <td style={{ border: '1px solid #000', padding: '4px', borderBottom: 'none' }}></td>
+                      <td rowSpan={3} style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', verticalAlign: 'top' }}>{idx + 1}</td>
+                      <td rowSpan={3} style={{ border: '1px solid #000', padding: '8px', verticalAlign: 'top' }}>{net.network}<br/>{getFullNetworkName(net.networkName).split(' ')[0]}</td>
+                      <td style={{ border: '1px solid #000', padding: '8px', borderBottom: 'none' }}></td>
                       {cols.map((c, i) => (
-                        <td key={i} style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', borderBottom: 'none' }}>
+                        <td key={i} style={{ border: '1px solid #000', padding: '8px', textAlign: 'right', borderBottom: 'none' }}>
                            {c.dummy ? '0.00' : fmtZpsr(getVal(c.name, 'budget'))}
                         </td>
                       ))}
                     </tr>
                     {/* Row 2: Disbursed */}
                     <tr>
-                      <td style={{ border: '1px solid #000', padding: '4px', borderTop: 'none', borderBottom: 'none' }}>ค่าจริง</td>
+                      <td style={{ border: '1px solid #000', padding: '8px', borderTop: 'none', borderBottom: 'none' }}>ค่าจริง</td>
                       {cols.map((c, i) => (
-                        <td key={i} style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', borderTop: 'none', borderBottom: 'none' }}>
+                        <td key={i} style={{ border: '1px solid #000', padding: '8px', textAlign: 'right', borderTop: 'none', borderBottom: 'none' }}>
                            {c.dummy ? '0.00' : fmtZpsr(getVal(c.name, 'disbursed'))}
                         </td>
                       ))}
                     </tr>
                     {/* Row 3: Remaining */}
                     <tr>
-                      <td style={{ border: '1px solid #000', padding: '4px', borderTop: 'none' }}>ผลต่าง</td>
+                      <td style={{ border: '1px solid #000', padding: '8px', borderTop: 'none' }}>ผลต่าง</td>
                       {cols.map((c, i) => {
                         const remaining = c.dummy ? 0 : getVal(c.name, 'remaining');
                         const cellId = `cell-${net.network}-${c.key}`;
                         return (
-                          <td key={i} style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', borderTop: 'none' }}>
+                          <td key={i} style={{ border: '1px solid #000', padding: '8px', textAlign: 'right', borderTop: 'none', height: '100px', verticalAlign: 'top' }}>
                              <div id={cellId} style={{ display: 'inline-block', padding: '2px', position: 'relative' }}>
                                {fmtZpsr(remaining)}
                              </div>
@@ -767,6 +800,10 @@ export default function BudgetTransferPage() {
             // Generate robust distinct colors for arrows
             const colors = ['#dc2626', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#db2777', '#0ea5e9', '#65a30d'];
             const color = colors[i % colors.length];
+            
+            // Calculate offsets so overlapping arrows are staggered
+            const startOffset = (i % 3 - 1) * 20; 
+            const endOffset = (i % 2 === 0 ? 1 : -1) * 15;
 
             return (
               <Xarrow
@@ -774,24 +811,25 @@ export default function BudgetTransferPage() {
                 start={fromId}
                 end={toId}
                 color={color}
-                strokeWidth={2}
+                strokeWidth={2.5}
                 path="grid" // Uses orthogonal lines avoiding elements
                 headSize={6}
-                startAnchor="bottom"
-                endAnchor="bottom"
-                gridBreak="20%"
+                startAnchor={{ position: "bottom", offset: { x: startOffset } }}
+                endAnchor={{ position: "bottom", offset: { x: endOffset } }}
+                gridBreak="30%"
                 labels={{ 
                   middle: (
                     <div style={{ 
                       background: 'white', 
-                      padding: '2px 6px', 
+                      padding: '2px 8px', 
                       border: `1.5px solid ${color}`, 
-                      borderRadius: '6px', 
-                      fontSize: '0.75rem', 
+                      borderRadius: '8px', 
+                      fontSize: '0.85rem', 
                       fontWeight: 'bold',
                       color: color,
                       boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      zIndex: 10
+                      zIndex: 10,
+                      transform: `translate(${startOffset/2}px, 0px)`
                     }}>
                       โอน {fmt(t.amount)}
                     </div>
@@ -1245,22 +1283,7 @@ export default function BudgetTransferPage() {
                 </div>
                 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '8px' }}>
-                    <button 
-                      className={`btn ${step3View === 'memo' ? 'btn-primary' : 'btn-outline'}`} 
-                      style={{ padding: '6px 12px', fontSize: '0.85rem', border: 'none', borderRadius: '6px' }}
-                      onClick={() => setStep3View('memo')}
-                    >
-                      บันทึกข้อความ (ขอโอนงบ)
-                    </button>
-                    <button 
-                      className={`btn ${step3View === 'approval' ? 'btn-primary' : 'btn-outline'}`} 
-                      style={{ padding: '6px 12px', fontSize: '0.85rem', border: 'none', borderRadius: '6px' }}
-                      onClick={() => setStep3View('approval')}
-                    >
-                      แบบฟอร์มขออนุมัติค่าใช้จ่าย
-                    </button>
-                  </div>
+                  <div style={{ display: 'none' }}></div>
 
                   <button className="btn btn-outline" onClick={exportToWord} style={{ color: '#2563eb', borderColor: '#bfdbfe', background: '#eff6ff' }}>
                     <Save size={18} /> ดาวน์โหลดเป็น Word
@@ -1278,8 +1301,11 @@ export default function BudgetTransferPage() {
               </div>
               
               {/* Document Preview Box */}
-              <div className="document-preview-container">
-                {step3View === 'memo' ? renderOfficialDocument() : renderExpenseApprovalForm()}
+              <div className="document-preview-container" id="printable-documents">
+                {renderOfficialDocument()}
+                <div style={{ pageBreakBefore: 'always', margin: '40px 0', borderBottom: '2px dashed #cbd5e1' }} className="no-print" />
+                <div style={{ pageBreakBefore: 'always' }} className="print-only" />
+                {renderExpenseApprovalForm()}
               </div>
 
               <div className="wizard-footer">
@@ -1309,7 +1335,9 @@ export default function BudgetTransferPage() {
       
       {/* Actual Print Content (Rendered again strictly for printing) */}
       <div className="print-only">
-        {step3View === 'memo' ? renderOfficialDocument() : renderExpenseApprovalForm()}
+        {renderOfficialDocument()}
+        <div style={{ pageBreakBefore: 'always' }} />
+        {renderExpenseApprovalForm()}
       </div>
       
     </div>
