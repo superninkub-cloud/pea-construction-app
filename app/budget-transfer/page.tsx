@@ -391,7 +391,7 @@ export default function BudgetTransferPage() {
   };
 
   return (
-    <div className="budget-transfer-container" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="budget-transfer-container" style={{ height: '100%', overflowY: 'auto', padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
       
       {/* Header */}
       <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
