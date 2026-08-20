@@ -36,13 +36,15 @@ export default function BudgetTransferPage() {
   // Additional Official Memo Fields
   const [refDocNo, setRefDocNo] = useState('');
   const [refDocDate, setRefDocDate] = useState('');
-  const [docFrom, setDocFrom] = useState('กชย.(ก3)');
+  const [docFrom, setDocFrom] = useState('กรย.(ก3)');
   const [docTo, setDocTo] = useState('ฝวบ.(ก3)');
   const [supervisorName, setSupervisorName] = useState('');
-  const [signer1Name, setSigner1Name] = useState('');
-  const [signer1Title, setSigner1Title] = useState('');
-  const [signer2Name, setSigner2Name] = useState('');
-  const [signer2Title, setSigner2Title] = useState('');
+  const [supervisorLevel, setSupervisorLevel] = useState('');
+  const [signer1Name, setSigner1Name] = useState('นายอนันต์ กาญจนอุปถัมภ์');
+  const [signer1Title, setSigner1Title] = useState('รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)');
+  const [signer2Preset, setSigner2Preset] = useState('metee');
+  const [signer2Name, setSigner2Name] = useState('นายเมธี สุกก่ำ');
+  const [signer2Title, setSigner2Title] = useState('อฝ.วบ.(ก3)');
   
   // AI Extracted Data
   const [networkDataList, setNetworkDataList] = useState<NetworkData[]>([]);
@@ -254,7 +256,7 @@ export default function BudgetTransferPage() {
 
         <div className="print-section-title">1. เรื่องเดิม</div>
         <p className="print-paragraph">
-          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติให้งาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())} บาท ซึ่งมี {supervisorName || '................................'} เป็นผู้ควบคุมงาน
+          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติให้งาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())} บาท ซึ่งมี {supervisorName || '................................'} พชง.{supervisorLevel || '.....'} ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน
         </p>
 
         <div className="print-section-title">2. ข้อมูล</div>
@@ -453,9 +455,15 @@ export default function BudgetTransferPage() {
                   <label className="form-label">หมายเลขงาน (WBS)</label>
                   <input type="text" className="form-control" placeholder="เช่น P-TDD02.3-I-LYAIA.0015" value={wbs} onChange={(e) => setWbs(e.target.value)} />
                 </div>
-                <div>
-                  <label className="form-label">ผู้ควบคุมงาน</label>
-                  <input type="text" className="form-control" placeholder="เช่น นายสมชาย รักดี" value={supervisorName} onChange={(e) => setSupervisorName(e.target.value)} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '10px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="form-label">ชื่อผู้ควบคุมงาน</label>
+                    <input type="text" className="form-control" placeholder="เช่น อุดมศักดิ์ จันทร์กลิ่น" value={supervisorName} onChange={(e) => setSupervisorName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="form-label">ระดับ พชง.</label>
+                    <input type="number" className="form-control" placeholder="เช่น 7" value={supervisorLevel} onChange={(e) => setSupervisorLevel(e.target.value)} />
+                  </div>
                 </div>
                 <div>
                   <label className="form-label">เลขที่เอกสาร</label>
@@ -475,11 +483,11 @@ export default function BudgetTransferPage() {
                 </div>
                 <div>
                   <label className="form-label">จาก (ผู้เสนอ)</label>
-                  <input type="text" className="form-control" placeholder="เช่น กชย.(ก3)" value={docFrom} onChange={(e) => setDocFrom(e.target.value)} />
+                  <input type="text" className="form-control" value={docFrom} readOnly style={{ backgroundColor: '#f1f5f9' }} />
                 </div>
                 <div>
                   <label className="form-label">ถึง/เรียน (ผู้อนุมัติ)</label>
-                  <input type="text" className="form-control" placeholder="เช่น ฝวบ.(ก3)" value={docTo} onChange={(e) => setDocTo(e.target.value)} />
+                  <input type="text" className="form-control" value={docTo} readOnly style={{ backgroundColor: '#f1f5f9' }} />
                 </div>
               </div>
 
@@ -492,13 +500,38 @@ export default function BudgetTransferPage() {
                   <label className="form-label">ตำแหน่งผู้เสนอ</label>
                   <input type="text" className="form-control" placeholder="เช่น รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)" value={signer1Title} onChange={(e) => setSigner1Title(e.target.value)} />
                 </div>
+                <div style={{ gridColumn: '1 / -1', marginBottom: '8px' }}>
+                  <label className="form-label">เลือกชุดผู้อนุมัติ</label>
+                  <select 
+                    className="form-control" 
+                    value={signer2Preset}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSigner2Preset(val);
+                      if (val === 'metee') {
+                        setSigner2Name('นายเมธี สุกก่ำ');
+                        setSigner2Title('อฝ.วบ.(ก3)');
+                      } else if (val === 'sommai') {
+                        setSigner2Name('นายสมหมาย ชื่นด้วง');
+                        setSigner2Title('รฝ.วบ.(ก3) รักษาการแทน อฝ.วบ.(ก3)');
+                      } else {
+                        setSigner2Name('');
+                        setSigner2Title('');
+                      }
+                    }}
+                  >
+                    <option value="metee">นายเมธี สุกก่ำ / อฝ.วบ.(ก3)</option>
+                    <option value="sommai">นายสมหมาย ชื่นด้วง / รฝ.วบ.(ก3) รักษาการแทน อฝ.วบ.(ก3)</option>
+                    <option value="custom">-- กำหนดเอง --</option>
+                  </select>
+                </div>
                 <div>
                   <label className="form-label">ชื่อผู้อนุมัติ</label>
-                  <input type="text" className="form-control" placeholder="เช่น นายเมธี สุกกำ" value={signer2Name} onChange={(e) => setSigner2Name(e.target.value)} />
+                  <input type="text" className="form-control" placeholder="เช่น นายเมธี สุกก่ำ" value={signer2Name} onChange={(e) => { setSigner2Name(e.target.value); setSigner2Preset('custom'); }} />
                 </div>
                 <div>
                   <label className="form-label">ตำแหน่งผู้อนุมัติ</label>
-                  <input type="text" className="form-control" placeholder="เช่น อฝ.วบ.(ก3)" value={signer2Title} onChange={(e) => setSigner2Title(e.target.value)} />
+                  <input type="text" className="form-control" placeholder="เช่น อฝ.วบ.(ก3)" value={signer2Title} onChange={(e) => { setSigner2Title(e.target.value); setSigner2Preset('custom'); }} />
                 </div>
               </div>
 
