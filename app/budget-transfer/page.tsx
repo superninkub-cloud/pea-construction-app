@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Save, FileText, ArrowRight, ArrowRightLeft, UploadCloud, Loader2, HelpCircle, Lightbulb, ShieldCheck, FileType, Copy, Image as ImageIcon } from 'lucide-react';
 import { toPng } from 'html-to-image';
+import dynamic from 'next/dynamic';
+
+const Xarrow = dynamic(() => import('react-xarrows'), { ssr: false });
 
 type BudgetCategory = {
   budget: number;
@@ -658,29 +661,139 @@ export default function BudgetTransferPage() {
             <ImageIcon size={18} /> บันทึกเป็นภาพ
           </button>
         </div>
-        <div id="flow-chart-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '8px', textAlign: 'center' }}>ผังลูกศรแสดงทิศทางการโอนเงิน</h3>
-          {transfers.map((t, idx) => (
-          <div key={t.id || idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
-            <div style={{ background: '#dbeafe', border: '1px solid #bfdbfe', padding: '16px', borderRadius: '8px', flex: 1, textAlign: 'center' }}>
-              <div style={{ fontWeight: 'bold', color: '#1e40af' }}>{getFullNetworkName(networkDataList.find(n => n.network === t.networkFrom)?.networkName || '')}</div>
-              <div style={{ fontSize: '0.9rem', color: '#1e3a8a', marginTop: '4px' }}>{t.networkFrom} - {t.categoryFrom}</div>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b' }}>
-              <div style={{ fontWeight: 'bold', color: 'var(--pea-purple)', fontSize: '1.1rem', marginBottom: '4px' }}>{fmt(t.amount)} ฿</div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{ width: '80px', height: '3px', background: 'var(--pea-purple)' }}></div>
-                <div style={{ width: 0, height: 0, borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderLeft: '12px solid var(--pea-purple)' }}></div>
-              </div>
-            </div>
+        <div id="flow-chart-container" style={{ position: 'relative', overflowX: 'auto', background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', minHeight: '400px' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px' }}>ตารางจำลองโอนงบ ZPSR018</h3>
+          
+          <table style={{ width: '100%', minWidth: '1000px', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '3%' }}>ที่</th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '10%' }}>เลขที่โครงข่าย<br/>(แผนก)</th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '7%' }}>รายการ</th>
+                <th colSpan={7} style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', backgroundColor: '#f3f4f6', width: '80%' }}>ค่าใช้จ่ายจริง(บาท)</th>
+              </tr>
+              <tr>
+                <th style={{ border: '1px solid #000' }}></th>
+                <th style={{ border: '1px solid #000' }}></th>
+                <th style={{ border: '1px solid #000' }}></th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าพัสดุ</th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>พัสดุเข้างาน</th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าแรงงาน<br/>/ค่าจ้างเหมา</th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าควบคุมงาน</th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าขนส่ง/<br/>ยานพาหนะ</th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าเบ็ดเตล็ด</th>
+                <th style={{ border: '1px solid #000', padding: '8px', textAlign: 'center' }}>ค่าดำเนินการ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {networkDataList.map((net, idx) => {
+                const getVal = (catName: string, field: 'budget'|'disbursed'|'remaining') => {
+                  const catKey = Object.keys(net.categories).find(k => k.includes(catName) || catName.includes(k.replace('งาน','')));
+                  return catKey ? net.categories[catKey][field] : 0;
+                };
 
-            <div style={{ background: '#fef08a', border: '1px solid #fde047', padding: '16px', borderRadius: '8px', flex: 1, textAlign: 'center' }}>
-              <div style={{ fontWeight: 'bold', color: '#854d0e' }}>{getFullNetworkName(networkDataList.find(n => n.network === t.networkTo)?.networkName || '')}</div>
-              <div style={{ fontSize: '0.9rem', color: '#713f12', marginTop: '4px' }}>{t.networkTo} - {t.categoryTo}</div>
-            </div>
-          </div>
-        ))}
+                const cols = [
+                   { name: 'พัสดุ', key: 'ค่าพัสดุ' }, 
+                   { name: 'พัสดุเข้างาน', dummy: true },
+                   { name: 'แรง', key: 'ค่าแรง' },
+                   { name: 'ควบคุมงาน', key: 'ค่าควบคุมงาน' },
+                   { name: 'ขนส่ง', key: 'ค่าขนส่ง' },
+                   { name: 'เบ็ดเตล็ด', key: 'ค่าเบ็ดเตล็ด' },
+                   { name: 'ดำเนินการ', key: 'ค่าดำเนินการ' }
+                ];
+                
+                // Helper to format in ZPSR style (0.00 is just 0.00, negative has - at end)
+                const fmtZpsr = (num: number) => {
+                  if (!num || Math.abs(num) < 0.01) return "0.00";
+                  let isNeg = num < 0;
+                  let s = Math.abs(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  return isNeg ? s + "-" : s;
+                };
+
+                return (
+                  <React.Fragment key={net.network}>
+                    {/* Row 1: Budget */}
+                    <tr>
+                      <td rowSpan={3} style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', verticalAlign: 'top' }}>{idx + 1}</td>
+                      <td rowSpan={3} style={{ border: '1px solid #000', padding: '4px', verticalAlign: 'top' }}>{net.network}<br/>{getFullNetworkName(net.networkName).split(' ')[0]}</td>
+                      <td style={{ border: '1px solid #000', padding: '4px', borderBottom: 'none' }}></td>
+                      {cols.map((c, i) => (
+                        <td key={i} style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', borderBottom: 'none' }}>
+                           {c.dummy ? '0.00' : fmtZpsr(getVal(c.name, 'budget'))}
+                        </td>
+                      ))}
+                    </tr>
+                    {/* Row 2: Disbursed */}
+                    <tr>
+                      <td style={{ border: '1px solid #000', padding: '4px', borderTop: 'none', borderBottom: 'none' }}>ค่าจริง</td>
+                      {cols.map((c, i) => (
+                        <td key={i} style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', borderTop: 'none', borderBottom: 'none' }}>
+                           {c.dummy ? '0.00' : fmtZpsr(getVal(c.name, 'disbursed'))}
+                        </td>
+                      ))}
+                    </tr>
+                    {/* Row 3: Remaining */}
+                    <tr>
+                      <td style={{ border: '1px solid #000', padding: '4px', borderTop: 'none' }}>ผลต่าง</td>
+                      {cols.map((c, i) => {
+                        const remaining = c.dummy ? 0 : getVal(c.name, 'remaining');
+                        const cellId = `cell-${net.network}-${c.key}`;
+                        return (
+                          <td key={i} style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', borderTop: 'none' }}>
+                             <div id={cellId} style={{ display: 'inline-block', padding: '2px', position: 'relative' }}>
+                               {fmtZpsr(remaining)}
+                             </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+          
+          {/* Draw Arrows */}
+          {transfers.map((t, i) => {
+            const fromId = `cell-${t.networkFrom}-${t.categoryFrom}`;
+            const toId = `cell-${t.networkTo}-${t.categoryTo}`;
+            
+            // Generate robust distinct colors for arrows
+            const colors = ['#dc2626', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#db2777', '#0ea5e9', '#65a30d'];
+            const color = colors[i % colors.length];
+
+            return (
+              <Xarrow
+                key={t.id}
+                start={fromId}
+                end={toId}
+                color={color}
+                strokeWidth={2}
+                path="grid" // Uses orthogonal lines avoiding elements
+                headSize={6}
+                startAnchor="bottom"
+                endAnchor="bottom"
+                gridBreak="20%"
+                labels={{ 
+                  middle: (
+                    <div style={{ 
+                      background: 'white', 
+                      padding: '2px 6px', 
+                      border: `1.5px solid ${color}`, 
+                      borderRadius: '6px', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 'bold',
+                      color: color,
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      zIndex: 10
+                    }}>
+                      โอน {fmt(t.amount)}
+                    </div>
+                  ) 
+                }}
+              />
+            );
+          })}
         </div>
       </div>
     );
