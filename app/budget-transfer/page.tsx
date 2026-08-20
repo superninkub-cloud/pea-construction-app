@@ -60,7 +60,7 @@ export default function BudgetTransferPage() {
   
   // UI States
   const [step2View, setStep2View] = useState<'table' | 'flow'>('table');
-  const [step3View, setStep3View] = useState<'memo' | 'approval'>('approval');
+  const [step3View, setStep3View] = useState<'memo' | 'approval'>('memo');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
 
@@ -1296,20 +1296,32 @@ export default function BudgetTransferPage() {
                 </div>
                 
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <div style={{ display: 'none' }}></div>
-
+                  <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '8px' }}>
+                    <button 
+                      className={`btn ${step3View === 'memo' ? 'btn-primary' : 'btn-outline'}`} 
+                      style={{ padding: '6px 12px', fontSize: '0.85rem', border: 'none', borderRadius: '6px' }}
+                      onClick={() => setStep3View('memo')}
+                    >
+                      ขออนุมัติโอนงบ (หน้าแรก)
+                    </button>
+                    <button 
+                      className={`btn ${step3View === 'approval' ? 'btn-primary' : 'btn-outline'}`} 
+                      style={{ padding: '6px 12px', fontSize: '0.85rem', border: 'none', borderRadius: '6px' }}
+                      onClick={() => setStep3View('approval')}
+                    >
+                      ฟอร์มอนุมัติค่าใช้จ่าย (หน้าสอง)
+                    </button>
+                  </div>
                   <button className="btn btn-primary" onClick={handleSave}>
-                    <Save size={18} /> สั่งพิมพ์
+                    <Save size={18} /> สั่งพิมพ์หน้านี้
                   </button>
                 </div>
               </div>
               
               {/* Document Preview Box */}
               <div className="document-preview-container" id="printable-documents">
-                {renderOfficialDocument()}
-                <div style={{ pageBreakBefore: 'always', margin: '40px 0', borderBottom: '2px dashed #cbd5e1' }} className="no-print" />
-                <div style={{ pageBreakBefore: 'always' }} className="print-only" />
-                {renderExpenseApprovalForm()}
+                {step3View === 'memo' && renderOfficialDocument()}
+                {step3View === 'approval' && renderExpenseApprovalForm()}
               </div>
 
               <div className="wizard-footer no-print">
