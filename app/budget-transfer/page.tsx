@@ -53,6 +53,8 @@ export default function BudgetTransferPage() {
   const [transfers, setTransfers] = useState<TransferItem[]>([]);
   
   // UI States
+  const [step2View, setStep2View] = useState<'table' | 'flow'>('table');
+  const [step3View, setStep3View] = useState<'memo' | 'approval'>('approval');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
 
@@ -392,6 +394,194 @@ export default function BudgetTransferPage() {
     );
   };
 
+  const renderVisualFlow = () => {
+    if (transfers.length === 0) return (
+      <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)', background: '#f8fafc', borderRadius: '12px' }}>
+        ยังไม่มีรายการโอนงบประมาณ
+      </div>
+    );
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '8px' }}>ผังลูกศรแสดงทิศทางการโอนเงิน</h3>
+        {transfers.map((t, idx) => (
+          <div key={t.id || idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
+            <div style={{ background: '#dbeafe', border: '1px solid #bfdbfe', padding: '16px', borderRadius: '8px', flex: 1, textAlign: 'center' }}>
+              <div style={{ fontWeight: 'bold', color: '#1e40af' }}>{getFullNetworkName(networkDataList.find(n => n.network === t.networkFrom)?.networkName || '')}</div>
+              <div style={{ fontSize: '0.9rem', color: '#1e3a8a', marginTop: '4px' }}>{t.networkFrom} - {t.categoryFrom}</div>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#64748b' }}>
+              <div style={{ fontWeight: 'bold', color: 'var(--pea-purple)', fontSize: '1.1rem', marginBottom: '4px' }}>{fmt(t.amount)} ฿</div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: '80px', height: '3px', background: 'var(--pea-purple)' }}></div>
+                <div style={{ width: 0, height: 0, borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderLeft: '12px solid var(--pea-purple)' }}></div>
+              </div>
+            </div>
+
+            <div style={{ background: '#fef08a', border: '1px solid #fde047', padding: '16px', borderRadius: '8px', flex: 1, textAlign: 'center' }}>
+              <div style={{ fontWeight: 'bold', color: '#854d0e' }}>{getFullNetworkName(networkDataList.find(n => n.network === t.networkTo)?.networkName || '')}</div>
+              <div style={{ fontSize: '0.9rem', color: '#713f12', marginTop: '4px' }}>{t.networkTo} - {t.categoryTo}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderExpenseApprovalForm = () => {
+    const allNetworks = Array.from(new Set([
+      ...transfers.map(t => t.networkFrom),
+      ...transfers.map(t => t.networkTo)
+    ]));
+    allNetworks.sort();
+
+    return (
+      <div className="print-document">
+        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '10px' }}>การไฟฟ้าส่วนภูมิภาค</div>
+        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '20px' }}>แบบฟอร์มขออนุมัติค่าใช้จ่ายหน้างาน</div>
+        
+        <table className="print-meta-table">
+          <tbody>
+            <tr>
+              <td style={{ width: '50px' }}>จาก</td>
+              <td>{docFrom || '................................'}</td>
+              <td style={{ width: '30px' }}>ถึง</td>
+              <td>{docTo || '................................'}</td>
+            </tr>
+            <tr>
+              <td>เรื่อง</td>
+              <td colSpan={3}>ขออนุมัติโอนค่าใช้จ่ายหน้างาน</td>
+            </tr>
+            <tr>
+              <td>เรียน</td>
+              <td colSpan={3}>{signer2Title || '................................'}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p className="print-paragraph">
+          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติงาน{projectName || '................................'} นั้น ในชั้นนี้ เห็นควรอนุมัติค่าใช้จ่ายหน้างานในการก่อสร้าง (เพิ่มเติม) ดังรายการต่อไปนี้
+        </p>
+
+        <table className="print-data-table" style={{ fontSize: '10pt', marginTop: '10px' }}>
+          <thead>
+            <tr>
+              <th rowSpan={2} style={{ width: '15%' }}>งบ<br/>โครงข่าย<br/>รายการ</th>
+              {allNetworks.map(net => {
+                const networkName = networkDataList.find(n => n.network === net)?.networkName;
+                return (
+                  <th key={net} style={{ width: `${85 / (allNetworks.length || 1)}%`, fontWeight: 'normal' }}>
+                    กฟภ.<br/>{net}<br/>{getFullNetworkName(networkName || '')}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map(cat => {
+              const rowHasData = allNetworks.some(net => {
+                return transfers.some(t => (t.networkFrom === net && t.categoryFrom === cat) || (t.networkTo === net && t.categoryTo === cat));
+              });
+
+              if (!rowHasData) return null;
+
+              return (
+                <tr key={cat}>
+                  <td>{cat}</td>
+                  {allNetworks.map(net => {
+                    const involved = transfers.filter(t => (t.networkFrom === net && t.categoryFrom === cat) || (t.networkTo === net && t.categoryTo === cat));
+                    const totalForCell = involved.reduce((sum, t) => sum + t.amount, 0);
+                    return (
+                      <td key={net} style={{ textAlign: 'right' }}>
+                        {totalForCell > 0 ? `${fmt(totalForCell)}.-` : ''}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+            <tr>
+              <td style={{ fontWeight: 'bold' }}>รวม</td>
+              {allNetworks.map(net => {
+                const totalForNet = transfers.filter(t => t.networkFrom === net || t.networkTo === net).reduce((sum, t) => sum + t.amount, 0);
+                return <td key={net} style={{ textAlign: 'right', fontWeight: 'bold' }}>{fmt(totalForNet)}.-</td>;
+              })}
+            </tr>
+            <tr>
+              <td style={{ fontWeight: 'bold' }}>รวมทั้งสิ้น</td>
+              <td colSpan={allNetworks.length} style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                {fmt(totalAmount)}.- บาท
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div style={{ textAlign: 'center', fontWeight: 'bold', margin: '20px 0 10px 0' }}>เปรียบเทียบค่าใช้จ่ายที่ขออนุมัติกับค่าใช้จ่ายตามประมาณการ</div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          {allNetworks.map(net => {
+            const networkObj = networkDataList.find(n => n.network === net);
+            if (!networkObj) return null;
+            return (
+              <table key={net} className="print-data-table" style={{ fontSize: '9pt', marginBottom: '0' }}>
+                <thead>
+                  <tr>
+                    <th rowSpan={2} style={{ width: '25%' }}>รายการ</th>
+                    <th colSpan={4}>{getFullNetworkName(networkObj.networkName)}</th>
+                  </tr>
+                  <tr>
+                    <th style={{ fontSize: '8pt' }}>ประมาณการ</th>
+                    <th style={{ fontSize: '8pt' }}>อนุมัติ 2 ครั้ง</th>
+                    <th style={{ fontSize: '8pt' }}>ร้อยละ</th>
+                    <th style={{ fontSize: '8pt' }}>คงเหลือ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categories.map(cat => {
+                    const catKey = Object.keys(networkObj.categories).find(k => k.includes(cat) || cat.includes(k.replace('งาน','')));
+                    if (!catKey) return null;
+                    const vals = networkObj.categories[catKey];
+                    const percent = vals.budget > 0 ? (vals.disbursed / vals.budget) * 100 : 0;
+                    
+                    return (
+                      <tr key={cat}>
+                        <td>{cat}</td>
+                        <td style={{ textAlign: 'right' }}>{fmt(vals.budget)}</td>
+                        <td style={{ textAlign: 'right' }}>{fmt(vals.disbursed)}</td>
+                        <td style={{ textAlign: 'right' }}>{fmt(percent)}</td>
+                        <td style={{ textAlign: 'center' }}>-</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            );
+          })}
+        </div>
+        
+        <p className="print-paragraph" style={{ marginTop: '20px', textAlign: 'center' }}>
+          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติค่าใช้จ่ายหน้างานเป็นเงิน {fmt(totalAmount)}.- บาท
+          โดยให้ {supervisorName || 'ผู้ควบคุมงาน'} เป็นผู้เบิกและสั่งจ่ายจากเงินรายได้ของ กฟภ. ต่อไป
+        </p>
+
+        <div className="print-signatures" style={{ marginTop: '40px' }}>
+          <div className="signature-box" style={{ width: '45%' }}>
+            <div className="sig-line">(..................................................)</div>
+            <div className="sig-name">({signer1Name || '..................................................'})</div>
+            <div className="sig-title">{signer1Title || '..................................................'}</div>
+          </div>
+          <div className="signature-box" style={{ width: '45%' }}>
+            <div className="sig-status" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>อนุมัติ</div>
+            <div style={{ height: '30px' }}></div>
+            <div className="sig-line">(..................................................)</div>
+            <div className="sig-name">({signer2Name || '..................................................'})</div>
+            <div className="sig-title">{signer2Title || '..................................................'}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="budget-transfer-container" style={{ height: '100%', overflowY: 'auto', padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
       
@@ -566,16 +756,35 @@ export default function BudgetTransferPage() {
                   <ArrowRightLeft size={20} />
                   <h2 style={{ fontSize: '1.1rem', fontWeight: '600' }}>รายการโอนงบประมาณ</h2>
                 </div>
-                <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.85rem' }} onClick={() => setTransfers([...transfers, { id: Math.random().toString(36).substr(2,9), networkFrom: '', categoryFrom: '', networkTo: '', categoryTo: '', amount: 0 }])}>
-                  <Plus size={16} /> เพิ่มรายการ
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '8px' }}>
+                    <button 
+                      className={`btn ${step2View === 'table' ? 'btn-primary' : 'btn-outline'}`} 
+                      style={{ padding: '6px 12px', fontSize: '0.85rem', border: 'none', borderRadius: '6px' }}
+                      onClick={() => setStep2View('table')}
+                    >
+                      แบบตาราง
+                    </button>
+                    <button 
+                      className={`btn ${step2View === 'flow' ? 'btn-primary' : 'btn-outline'}`} 
+                      style={{ padding: '6px 12px', fontSize: '0.85rem', border: 'none', borderRadius: '6px' }}
+                      onClick={() => setStep2View('flow')}
+                    >
+                      แบบผังลูกศร
+                    </button>
+                  </div>
+                  <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.85rem' }} onClick={() => { setStep2View('table'); setTransfers([...transfers, { id: Math.random().toString(36).substr(2,9), networkFrom: '', categoryFrom: '', networkTo: '', categoryTo: '', amount: 0 }]); }}>
+                    <Plus size={16} /> เพิ่มรายการ
+                  </button>
+                </div>
               </div>
 
-              {transfers.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)', background: '#f8fafc', borderRadius: '12px' }}>
-                  ยังไม่มีรายการโอน กรุณากลับไปอัพโหลด PDF หรือกด &quot;เพิ่มรายการ&quot;
-                </div>
-              ) : (
+              {step2View === 'flow' ? renderVisualFlow() : (
+                transfers.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)', background: '#f8fafc', borderRadius: '12px' }}>
+                    ยังไม่มีรายการโอน กรุณากลับไปอัพโหลด PDF หรือกด &quot;เพิ่มรายการ&quot;
+                  </div>
+                ) : (
                 <div className="table-responsive">
                   <table className="table-custom">
                     <thead>
@@ -652,14 +861,34 @@ export default function BudgetTransferPage() {
                   <Save size={20} />
                   <h2 style={{ fontSize: '1.1rem', fontWeight: '600' }}>ดูตัวอย่างและพิมพ์เอกสาร</h2>
                 </div>
-                <button className="btn btn-primary" onClick={handleSave}>
-                  <Save size={18} /> สั่งพิมพ์เอกสาร
-                </button>
+                
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '8px' }}>
+                    <button 
+                      className={`btn ${step3View === 'memo' ? 'btn-primary' : 'btn-outline'}`} 
+                      style={{ padding: '6px 12px', fontSize: '0.85rem', border: 'none', borderRadius: '6px' }}
+                      onClick={() => setStep3View('memo')}
+                    >
+                      บันทึกข้อความ (ขอโอนงบ)
+                    </button>
+                    <button 
+                      className={`btn ${step3View === 'approval' ? 'btn-primary' : 'btn-outline'}`} 
+                      style={{ padding: '6px 12px', fontSize: '0.85rem', border: 'none', borderRadius: '6px' }}
+                      onClick={() => setStep3View('approval')}
+                    >
+                      แบบฟอร์มขออนุมัติค่าใช้จ่าย
+                    </button>
+                  </div>
+
+                  <button className="btn btn-primary" onClick={handleSave}>
+                    <Save size={18} /> สั่งพิมพ์เอกสาร
+                  </button>
+                </div>
               </div>
               
               {/* Document Preview Box */}
               <div className="document-preview-container">
-                {renderOfficialDocument()}
+                {step3View === 'memo' ? renderOfficialDocument() : renderExpenseApprovalForm()}
               </div>
 
               <div className="wizard-footer">
@@ -689,7 +918,7 @@ export default function BudgetTransferPage() {
       
       {/* Actual Print Content (Rendered again strictly for printing) */}
       <div className="print-only">
-        {renderOfficialDocument()}
+        {step3View === 'memo' ? renderOfficialDocument() : renderExpenseApprovalForm()}
       </div>
       
     </div>
