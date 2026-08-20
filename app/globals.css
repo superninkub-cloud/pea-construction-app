@@ -851,21 +851,26 @@ body {
     size: A4;
     margin: 20mm;
   }
-  body * {
-    visibility: hidden;
+  
+  .no-print {
+    display: none !important;
   }
-  .print-only, .print-only * {
-    visibility: visible;
+  
+  html, body, main, .content-area, .budget-transfer-container, .wizard-layout, .wizard-main {
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+    background: white !important;
   }
+
   .print-only {
-    position: absolute;
-    left: 0;
-    top: 0;
+    display: block !important;
     width: 100%;
     margin: 0;
     padding: 0;
     font-family: "Sarabun", "Prompt", sans-serif;
   }
+  
   .document-preview-container {
     box-shadow: none;
     border: none;
@@ -873,7 +878,7 @@ body {
     margin: 0;
     max-width: 100%;
     max-height: none;
-    overflow-y: visible;
+    overflow: visible !important;
   }
 }
 

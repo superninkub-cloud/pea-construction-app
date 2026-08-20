@@ -804,6 +804,7 @@ export default function BudgetTransferPage() {
             // Calculate offsets so overlapping arrows are staggered
             const startOffset = (i % 3 - 1) * 20; 
             const endOffset = (i % 2 === 0 ? 1 : -1) * 15;
+            const yOffset = (i % 5 - 2) * 22; // Stagger labels vertically (-44, -22, 0, 22, 44)
 
             return (
               <Xarrow
@@ -829,7 +830,7 @@ export default function BudgetTransferPage() {
                       color: color,
                       boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                       zIndex: 10,
-                      transform: `translate(${startOffset/2}px, 0px)`
+                      transform: `translate(${startOffset/2}px, ${yOffset}px)`
                     }}>
                       โอน {fmt(t.amount)}
                     </div>
