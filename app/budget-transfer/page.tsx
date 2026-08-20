@@ -45,6 +45,7 @@ export default function BudgetTransferPage() {
   const [signer2Preset, setSigner2Preset] = useState('metee');
   const [signer2Name, setSigner2Name] = useState('นายเมธี สุกก่ำ');
   const [signer2Title, setSigner2Title] = useState('อฝ.วบ.(ก3)');
+  const [reasonText, setReasonText] = useState('ปัจจุบันงานก่อสร้างดังกล่าวได้ดำเนินการแล้วเสร็จและจ่ายไฟแล้ว แต่เนื่องจากในการดำเนินการก่อสร้างมีความจำเป็นต้องดับกระแสไฟและระดมชุดงานเพื่อปฏิบัติงานในวันอาทิตย์หลายครั้ง ซึ่งในการปฏิบัติงานวันอาทิตย์นั้น กฟภ.ต้องจ่ายค่าแรงงานเป็น 2 เท่าของค่าแรงงานปกติ จึงส่งผลให้ค่าใช้จ่ายหน้างานในบางส่วนไม่เพียงพอ');
   
   // AI Extracted Data
   const [networkDataList, setNetworkDataList] = useState<NetworkData[]>([]);
@@ -59,6 +60,7 @@ export default function BudgetTransferPage() {
   const [uploadError, setUploadError] = useState('');
 
   const categories = [
+    "ค่าพัสดุ",
     "ค่าแรง",
     "ค่าควบคุมงาน",
     "ค่าขนส่ง",
@@ -165,6 +167,47 @@ export default function BudgetTransferPage() {
     alert('ระบบได้สั่งพิมพ์เอกสารเรียบร้อยแล้ว');
   };
 
+  const exportToWord = () => {
+    const content = document.querySelector('.print-only')?.innerHTML;
+    if (!content) return;
+    
+    const html = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>Export</title>
+        <style>
+          body { font-family: 'Sarabun', 'TH Sarabun New', sans-serif; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid black; padding: 4px; }
+          .print-header { text-align: center; }
+          .print-header-text { font-size: 16pt; font-weight: bold; text-align: left; }
+          .print-meta-table { width: 100%; margin-bottom: 20px; }
+          .print-section-title { font-weight: bold; font-size: 14pt; margin-top: 20px; margin-bottom: 10px; }
+          .print-paragraph { text-indent: 40px; margin-bottom: 15px; }
+          .print-data-table { width: 100%; font-size: 12pt; margin-bottom: 20px; }
+          .print-signatures { display: flex; justify-content: space-around; margin-top: 60px; }
+          .signature-box { text-align: center; width: 300px; }
+        </style>
+      </head>
+      <body>
+        ${content}
+      </body>
+      </html>
+    `;
+    
+    const blob = new Blob(['\ufeff', html], {
+      type: 'application/msword'
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `เอกสารขออนุมัติโอนงบ_${docNo || 'Draft'}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const totalAmount = transfers.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
   // Helper to translate network abbreviations to full names
@@ -223,6 +266,18 @@ export default function BudgetTransferPage() {
     return total;
   };
 
+  const calculateBudgetByCategoryGroup = (groups: string[]) => {
+    let total = 0;
+    networkDataList.forEach(net => {
+      Object.entries(net.categories).forEach(([catKey, vals]) => {
+        if (groups.some(g => catKey.includes(g) || g.includes(catKey.replace('งาน','')))) {
+          total += vals.budget;
+        }
+      });
+    });
+    return total;
+  };
+
   const renderOfficialDocument = () => {
     return (
       <div className="print-document">
@@ -258,12 +313,12 @@ export default function BudgetTransferPage() {
 
         <div className="print-section-title">1. เรื่องเดิม</div>
         <p className="print-paragraph">
-          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติให้งาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())} บาท ซึ่งมี {supervisorName || '................................'} พชง.{supervisorLevel || '.....'} ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน
+          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติให้งาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())} บาท แยกเป็นค่าพัสดุจำนวน {fmt(calculateBudgetByCategoryGroup(['พัสดุ']))} บาท ค่าใช้จ่ายหน้างาน {fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))} บาท และค่าดำเนินการ {fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))} บาท ซึ่งมี {supervisorName || '................................'} พชง.{supervisorLevel || '.....'} ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน
         </p>
 
         <div className="print-section-title">2. ข้อมูล</div>
         <p className="print-paragraph">
-          ปัจจุบันงานก่อสร้างดังกล่าวได้ดำเนินการแล้วเสร็จและจ่ายไฟแล้ว แต่เนื่องจากในการดำเนินการก่อสร้างมีความจำเป็นต้อง... ส่งผลให้ค่าใช้จ่ายหน้างานในบางส่วนไม่เพียงพอ โดยปัจจุบันมีรายละเอียดการเบิกจ่าย ดังนี้
+          {reasonText}
         </p>
 
         {networkDataList.map((net, i) => (
@@ -460,7 +515,11 @@ export default function BudgetTransferPage() {
         </table>
 
         <p className="print-paragraph">
-          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติงาน{projectName || '................................'} นั้น ในชั้นนี้ เห็นควรอนุมัติค่าใช้จ่ายหน้างานในการก่อสร้าง (เพิ่มเติม) ดังรายการต่อไปนี้
+          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติงาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())} บาท ซึ่งมี {supervisorName || '................................'} พชง.{supervisorLevel || '.....'} ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน นั้น ในชั้นนี้ เห็นควรอนุมัติค่าใช้จ่ายหน้างานในการก่อสร้าง (เพิ่มเติม) ดังรายการต่อไปนี้
+        </p>
+        <p className="print-paragraph" style={{ marginTop: '10px' }}>
+          <span style={{ fontWeight: 'bold' }}>2. ข้อมูล</span><br/>
+          {reasonText}
         </p>
 
         <table className="print-data-table" style={{ fontSize: '10pt', marginTop: '10px' }}>
@@ -679,6 +738,10 @@ export default function BudgetTransferPage() {
                   <label className="form-label">ถึง/เรียน (ผู้อนุมัติ)</label>
                   <input type="text" className="form-control" value={docTo} readOnly style={{ backgroundColor: '#f1f5f9' }} />
                 </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label className="form-label">เหตุผลเพิ่มเติม (ข้อ 2. ข้อมูล)</label>
+                  <textarea className="form-control" rows={3} value={reasonText} onChange={(e) => setReasonText(e.target.value)}></textarea>
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px', background: '#f8fafc', padding: '16px', borderRadius: '12px' }}>
@@ -880,6 +943,9 @@ export default function BudgetTransferPage() {
                     </button>
                   </div>
 
+                  <button className="btn btn-outline" onClick={exportToWord} style={{ color: '#2563eb', borderColor: '#bfdbfe', background: '#eff6ff' }}>
+                    <Save size={18} /> ดาวน์โหลดเป็น Word
+                  </button>
                   <button className="btn btn-primary" onClick={handleSave}>
                     <Save size={18} /> สั่งพิมพ์เอกสาร
                   </button>

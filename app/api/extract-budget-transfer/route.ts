@@ -35,6 +35,7 @@ Your task is to extract the budget data for each network to help generate an off
 Look for the table titled "2. รายละเอียดค่าใช้จ่ายงานก่อสร้าง สถานะรายงาน".
 Inside this table, there are multiple networks (e.g., HT-C-E, HT-R-E, TR-C-E, TL-C-E, LT-C-E, LT-R-E, TL-R-E).
 For each network, find the rows for the following cost categories ONLY:
+- ค่าพัสดุ
 - ค่าแรงงาน (or ค่าแรง)
 - ค่าควบคุมงาน
 - ค่าขนส่ง/ยานพาหนะ (or ค่าขนส่ง)
@@ -56,6 +57,7 @@ Use this EXACT JSON format:
     "network": "6001381469",
     "networkName": "HT-C-E",
     "categories": {
+      "ค่าพัสดุ": { "budget": 100000.00, "disbursed": 50000.00, "remaining": 50000.00 },
       "ค่าแรง": { "budget": 140358.00, "disbursed": 115155.00, "remaining": 25203.00 },
       "ค่าควบคุมงาน": { "budget": 42107.00, "disbursed": 23005.00, "remaining": 19102.00 },
       "ค่าขนส่ง": { "budget": 46665.00, "disbursed": 34969.18, "remaining": 11695.82 },
