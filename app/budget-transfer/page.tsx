@@ -580,46 +580,19 @@ export default function BudgetTransferPage() {
             }
           });
           
-          const maxNum = listIndex - 1;
-          const section3Text = maxNum > 1 ? `ตามข้อ 3.1 - 3.${maxNum}` : `ตามข้อ 3.1`;
-          
           return (
-            <>
-              <div style={{ marginBottom: '20px' }}>
-                {items}
-              </div>
-              <p className="print-paragraph" style={{ marginTop: '20px' }}>
-                จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ {section3Text} พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
-              </p>
-            </>
+            <div style={{ marginBottom: '20px' }}>
+              {items}
+            </div>
           );
         })()}
-
-        <div className="print-signatures vertical" style={{ marginTop: '50px' }}>
-          <div className="signature-box right" style={{ marginBottom: '40px' }}>
-            <div className="sig-name">({signer1Name || 'นายอนันต์ กาญจนอุปถัมภ์'})</div>
-            <div className="sig-title">{signer1Title || 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)'}</div>
-          </div>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
-            <div className="signature-box" style={{ textAlign: 'left', minWidth: '350px' }}>
-              <div className="sig-status">- ผจก.{peaOffice || '........................'}</div>
-              <div className="sig-status" style={{ paddingLeft: '20px', marginTop: '30px' }}><strong>อนุมัติ</strong> และให้ดำเนินการในส่วนเกี่ยวข้องต่อไป</div>
-            </div>
-            
-            <div className="signature-box right">
-              <div className="sig-name">({signer2Name || 'นายเมธี สุกก่ำ'})</div>
-              <div className="sig-title">{signer2Title || 'อฝ.วบ.(ก3)'}</div>
-            </div>
-          </div>
-        </div>
 
         {networkDataList.map((net, i) => {
           let netTransfers = transfers.filter(t => t.networkFrom === net.network || t.networkTo === net.network);
           if (netTransfers.length === 0) return null;
           
           return (
-            <div key={net.network} style={{ pageBreakBefore: 'always' }}>
+            <div key={net.network} style={{ pageBreakInside: 'avoid', marginTop: '30px' }}>
               <div className="print-table-title" style={{ textAlign: 'left', marginTop: '15px' }}>
                  ตารางแสดงงบประมาณโครงข่าย {net.network} {getFullNetworkName(net.networkName)}
               </div>
@@ -673,6 +646,44 @@ export default function BudgetTransferPage() {
             </div>
           );
         })}
+
+        {(() => {
+          const receivers = Array.from(new Set(transfers.map(t => `${t.networkTo}|${t.categoryTo}`)));
+          let listIndex = 1;
+          receivers.forEach(receiverKey => {
+            const [netTo, catTo] = receiverKey.split('|');
+            const relatedTransfers = transfers.filter(t => t.networkTo === netTo && t.categoryTo === catTo);
+            relatedTransfers.forEach(t => listIndex++);
+            if (relatedTransfers.length > 1) listIndex++;
+          });
+          const maxNum = listIndex - 1;
+          const section3Text = maxNum > 1 ? `ตามข้อ 3.1 - 3.${maxNum}` : `ตามข้อ 3.1`;
+          
+          return (
+            <p className="print-paragraph" style={{ marginTop: '20px' }}>
+              จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ {section3Text} พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
+            </p>
+          );
+        })()}
+
+        <div className="print-signatures vertical" style={{ marginTop: '50px' }}>
+          <div className="signature-box right" style={{ marginBottom: '40px' }}>
+            <div className="sig-name">({signer1Name || 'นายอนันต์ กาญจนอุปถัมภ์'})</div>
+            <div className="sig-title">{signer1Title || 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)'}</div>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
+            <div className="signature-box" style={{ textAlign: 'left', minWidth: '350px' }}>
+              <div className="sig-status">- ผจก.{peaOffice || '........................'}</div>
+              <div className="sig-status" style={{ paddingLeft: '20px', marginTop: '30px' }}><strong>อนุมัติ</strong> และให้ดำเนินการในส่วนเกี่ยวข้องต่อไป</div>
+            </div>
+            
+            <div className="signature-box right">
+              <div className="sig-name">({signer2Name || 'นายเมธี สุกก่ำ'})</div>
+              <div className="sig-title">{signer2Title || 'อฝ.วบ.(ก3)'}</div>
+            </div>
+          </div>
+        </div>
 
         <div className="sig-lines-container" style={{ display: 'none' }}>
         </div>
