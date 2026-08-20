@@ -55,15 +55,25 @@ export default function BudgetTransferPage() {
         body: formData,
       });
 
+      const contentType = res.headers.get("content-type");
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to extract data');
+        if (contentType && contentType.includes("application/json")) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to extract data');
+        } else {
+          // Fallback if Vercel returns HTML (e.g. 504 Timeout or 413 Payload Too Large)
+          const text = await res.text();
+          throw new Error(`Server Error (${res.status}): The request might have timed out or the file is too large.`);
+        }
       }
 
-      const data: NetworkDiff[] = await res.json();
-      autoCalculateTransfers(data);
-      // Automatically go to next step
-      setCurrentStep(2);
+      if (contentType && contentType.includes("application/json")) {
+        const data: NetworkDiff[] = await res.json();
+        autoCalculateTransfers(data);
+        setCurrentStep(2);
+      } else {
+        throw new Error('Invalid response from server. Expected JSON.');
+      }
     } catch (err: any) {
       setUploadError(err.message || 'เกิดข้อผิดพลาดในการประมวลผลไฟล์ PDF');
     } finally {
