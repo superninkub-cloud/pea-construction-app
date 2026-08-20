@@ -146,6 +146,18 @@ export default function BudgetTransferPage() {
     ]);
   };
 
+  const handleSave = () => {
+    window.print();
+    alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
+    setDocNo('');
+    setDate('');
+    setWbs('');
+    setProjectName('');
+    setTransfers([]);
+    setUploadError('');
+    setCurrentStep(1);
+  };
+
   const updateTransfer = (id: string, field: keyof TransferItem, value: string | number) => {
     setTransfers(transfers.map(t => 
       t.id === id ? { ...t, [field]: value } : t
@@ -371,9 +383,9 @@ export default function BudgetTransferPage() {
                 )}
               </div>
 
-              <div className="wizard-footer">
+              <div className="wizard-footer no-print">
                 <button className="btn btn-outline" onClick={() => setCurrentStep(2)}>กลับ</button>
-                <button className="btn btn-primary">
+                <button className="btn btn-primary" onClick={handleSave}>
                   <Save size={18} /> บันทึกและเสร็จสิ้น
                 </button>
               </div>
