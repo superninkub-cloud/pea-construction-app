@@ -905,6 +905,7 @@ export default function BudgetTransferPage() {
                     </tfoot>
                   </table>
                 </div>
+                )
               )}
 
               <div className="wizard-footer">
