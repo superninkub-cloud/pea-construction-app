@@ -163,6 +163,21 @@ export default function BudgetTransferPage() {
 
   const totalAmount = transfers.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
+  // Helper to translate network abbreviations to full names
+  const getFullNetworkName = (abbr: string) => {
+    const mapping: Record<string, string> = {
+      'HT-C-E': 'แผนกก่อสร้างแรงสูงภายนอก',
+      'HT-R-E': 'แผนกรื้อถอนแรงสูงภายนอก',
+      'TR-C-E': 'แผนกก่อสร้างหม้อแปลงภายนอก',
+      'TR-R-E': 'แผนกรื้อถอนหม้อแปลงภายนอก',
+      'LT-C-E': 'แผนกก่อสร้างแรงต่ำภายนอก',
+      'LT-R-E': 'แผนกรื้อถอนแรงต่ำภายนอก',
+      'TL-C-E': 'แผนกก่อสร้างสายส่งภายนอก',
+      'TL-R-E': 'แผนกรื้อถอนสายส่งภายนอก'
+    };
+    return mapping[abbr] || abbr;
+  };
+
   // Helper for formatting currency
   const fmt = (num: number | undefined) => {
     if (num === undefined) return "0.00";
@@ -249,7 +264,7 @@ export default function BudgetTransferPage() {
 
         {networkDataList.map((net, i) => (
           <div key={net.network}>
-            <div className="print-table-title">2.{i+1} {net.networkName || 'โครงข่าย'} โครงข่าย {net.network}</div>
+            <div className="print-table-title">2.{i+1} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
             <table className="print-data-table">
               <thead>
                 <tr>
@@ -301,7 +316,7 @@ export default function BudgetTransferPage() {
 
           return (
             <div key={net.network} className="print-page-break">
-              <div className="print-table-title">{net.networkName || 'โครงข่าย'} โครงข่าย {net.network}</div>
+              <div className="print-table-title">{getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
               <table className="print-data-table">
                 <thead>
                   <tr>
