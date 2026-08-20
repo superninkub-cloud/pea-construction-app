@@ -729,6 +729,8 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   margin-bottom: 24px;
   max-width: 800px;
+  max-height: 70vh;
+  overflow-y: auto;
   margin-left: auto;
   margin-right: auto;
   font-family: "Sarabun", "Prompt", sans-serif; /* Thai official font fallback */
@@ -850,6 +852,8 @@ body {
     padding: 0;
     margin: 0;
     max-width: 100%;
+    max-height: none;
+    overflow-y: visible;
   }
 }
 

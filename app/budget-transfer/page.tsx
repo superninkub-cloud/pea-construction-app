@@ -208,7 +208,7 @@ export default function BudgetTransferPage() {
     return (
       <div className="print-document">
         <div className="print-header">
-          <img src="https://upload.wikimedia.org/wikipedia/th/thumb/a/a2/Provincial_Electricity_Authority_Logo.svg/1200px-Provincial_Electricity_Authority_Logo.svg.png" alt="PEA Logo" className="print-logo" />
+          <img src="/pea-logo.png" alt="PEA Logo" className="print-logo" />
           <div className="print-header-text">การไฟฟ้าส่วนภูมิภาค<br/>PROVINCIAL ELECTRICITY AUTHORITY</div>
         </div>
 
