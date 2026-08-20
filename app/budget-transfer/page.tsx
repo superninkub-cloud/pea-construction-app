@@ -613,9 +613,19 @@ export default function BudgetTransferPage() {
           );
         })}
 
-        <p className="print-paragraph" style={{ marginTop: '30px' }}>
-          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ ตามข้อ 3.1 พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
-        </p>
+        {(() => {
+          let maxNum = 0;
+          networkDataList.forEach((net, i) => {
+            let netTransfers = transfers.filter(t => t.networkFrom === net.network || t.networkTo === net.network);
+            if (netTransfers.length > 0) maxNum = i + 1;
+          });
+          const section3Text = maxNum > 1 ? `ตามข้อ 3.1 - 3.${maxNum}` : `ตามข้อ 3.1`;
+          return (
+            <p className="print-paragraph" style={{ marginTop: '30px' }}>
+              จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ {section3Text} พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
+            </p>
+          );
+        })()}
 
         <div className="print-signatures vertical">
           <div className="signature-box right">
@@ -634,11 +644,7 @@ export default function BudgetTransferPage() {
           </div>
         </div>
 
-        <div className="sig-lines-container">
-          <div>รฝ.วบ.(ก3) ........................................ วันที่ ..............................</div>
-          <div>รก.รย.(ก3) ........................................ วันที่ ..............................</div>
-          <div>หผ.กร.(ก3) ........................................ วันที่ ..............................</div>
-          <div>ชผ.กร.(ก3) ........................................ วันที่ ..............................</div>
+        <div className="sig-lines-container" style={{ display: 'none' }}>
         </div>
 
       </div>
@@ -921,7 +927,7 @@ export default function BudgetTransferPage() {
                       <td style={{ textAlign: 'center' }}>{fmt(vals.budget)}</td>
                       <td style={{ textAlign: 'center' }}>{fmt(vals.disbursed)}</td>
                       <td style={{ textAlign: 'center' }}>{fmt(percent)}</td>
-                      <td style={{ textAlign: 'center' }}>{fmt(vals.remaining)}</td>
+                      <td style={{ textAlign: 'center' }}>-</td>
                     </tr>
                   );
                 })}
