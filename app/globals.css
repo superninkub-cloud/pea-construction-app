@@ -856,11 +856,15 @@ body {
     display: none !important;
   }
   
-  html, body, main, .content-area, .budget-transfer-container, .wizard-layout, .wizard-main {
+  html, body, .app-layout, .main-wrapper, main, .content-area, .budget-transfer-container, .wizard-layout, .wizard-main {
     height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    width: auto !important;
     overflow: visible !important;
     position: static !important;
     background: white !important;
+    display: block !important;
   }
 
   .print-only {

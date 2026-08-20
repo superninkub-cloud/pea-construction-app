@@ -1286,15 +1286,6 @@ export default function BudgetTransferPage() {
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <div style={{ display: 'none' }}></div>
 
-                  <button className="btn btn-outline" onClick={exportToWord} style={{ color: '#2563eb', borderColor: '#bfdbfe', background: '#eff6ff' }}>
-                    <Save size={18} /> ดาวน์โหลดเป็น Word
-                  </button>
-                  <button className="btn btn-outline" onClick={exportToPdf} style={{ color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2' }}>
-                    <FileType size={18} /> ดาวน์โหลด PDF
-                  </button>
-                  <button className="btn btn-outline" onClick={handleCopyToWord} style={{ color: '#059669', borderColor: '#a7f3d0', background: '#ecfdf5' }}>
-                    <Copy size={18} /> คัดลอกลง Word
-                  </button>
                   <button className="btn btn-primary" onClick={handleSave}>
                     <Save size={18} /> สั่งพิมพ์
                   </button>
