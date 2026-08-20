@@ -130,7 +130,7 @@ export default function BudgetTransferPage() {
 
         {transfers.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            ยังไม่มีรายการโอนงบประมาณ กรุณากด "เพิ่มรายการ"
+            ยังไม่มีรายการโอนงบประมาณ กรุณากด &quot;เพิ่มรายการ&quot;
           </div>
         ) : (
           <div className="overflow-x-auto">
