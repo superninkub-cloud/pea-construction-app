@@ -113,8 +113,11 @@ export default function BudgetTransferPage() {
   };
 
   const autoCalculateTransfers = (data: NetworkData[]) => {
-    let deficits: { network: string; category: string; amount: number }[] = [];
-    let surpluses: { network: string; category: string; amount: number }[] = [];
+    let fieldDeficits: { network: string; category: string; amount: number }[] = [];
+    let fieldSurpluses: { network: string; category: string; amount: number }[] = [];
+    let opsSurpluses: { network: string; category: string; amount: number }[] = [];
+
+    const fieldCategories = ["ค่าแรง", "ค่าควบคุมงาน", "ค่าขนส่ง", "ค่าเบ็ดเตล็ด"];
 
     data.forEach(net => {
       Object.entries(net.categories).forEach(([cat, vals]) => {
@@ -124,12 +127,19 @@ export default function BudgetTransferPage() {
         if (cat.includes('ขนส่ง')) normalizedCat = 'ค่าขนส่ง';
         if (cat.includes('เบ็ดเตล็ด')) normalizedCat = 'ค่าเบ็ดเตล็ด';
         if (cat.includes('ดำเนินการ')) normalizedCat = 'ค่าดำเนินการ';
+        if (cat.includes('พัสดุ')) normalizedCat = 'ค่าพัสดุ';
 
-        if (categories.includes(normalizedCat)) {
+        if (normalizedCat === 'ค่าพัสดุ') return; // Cannot transfer material
+
+        if (fieldCategories.includes(normalizedCat)) {
           if (vals.remaining < 0) {
-            deficits.push({ network: net.network, category: normalizedCat, amount: Math.abs(vals.remaining) });
+            fieldDeficits.push({ network: net.network, category: normalizedCat, amount: Math.abs(vals.remaining) });
           } else if (vals.remaining > 0) {
-            surpluses.push({ network: net.network, category: normalizedCat, amount: vals.remaining });
+            fieldSurpluses.push({ network: net.network, category: normalizedCat, amount: vals.remaining });
+          }
+        } else if (normalizedCat === 'ค่าดำเนินการ') {
+          if (vals.remaining > 0) {
+            opsSurpluses.push({ network: net.network, category: normalizedCat, amount: vals.remaining });
           }
         }
       });
@@ -137,9 +147,10 @@ export default function BudgetTransferPage() {
 
     const newTransfers: TransferItem[] = [];
     
-    for (let d of deficits) {
+    // Phase 1: Transfer from Field Surpluses to Field Deficits
+    for (let d of fieldDeficits) {
       let needed = d.amount;
-      for (let s of surpluses) {
+      for (let s of fieldSurpluses) {
         if (needed <= 0.001) break;
         if (s.amount <= 0.001) continue;
 
@@ -157,6 +168,33 @@ export default function BudgetTransferPage() {
         needed -= transferAmount;
         s.amount -= transferAmount;
       }
+      d.amount = needed; // Update remaining deficit
+    }
+
+    // Phase 2: If there are still field deficits, use Operations Surpluses
+    for (let d of fieldDeficits) {
+      let needed = d.amount;
+      if (needed <= 0.001) continue;
+      
+      for (let s of opsSurpluses) {
+        if (needed <= 0.001) break;
+        if (s.amount <= 0.001) continue;
+
+        const transferAmount = Math.min(needed, s.amount);
+        
+        newTransfers.push({
+          id: Math.random().toString(36).substr(2, 9),
+          networkFrom: s.network,
+          categoryFrom: s.category,
+          networkTo: d.network,
+          categoryTo: d.category,
+          amount: Number(transferAmount.toFixed(2))
+        });
+
+        needed -= transferAmount;
+        s.amount -= transferAmount;
+      }
+      d.amount = needed;
     }
     
     setTransfers(newTransfers);
