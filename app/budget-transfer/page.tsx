@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Plus, Trash2, Save, FileText, ArrowRight, ArrowRightLeft, UploadCloud, Loader2, HelpCircle, Lightbulb, ShieldCheck, FileType } from 'lucide-react';
+import { Plus, Trash2, Save, FileText, ArrowRight, ArrowRightLeft, UploadCloud, Loader2, HelpCircle, Lightbulb, ShieldCheck, FileType, Copy, Image as ImageIcon } from 'lucide-react';
+import { toPng } from 'html-to-image';
 
 type BudgetCategory = {
   budget: number;
@@ -204,6 +205,39 @@ export default function BudgetTransferPage() {
   const handleSave = () => {
     window.print();
     alert('ระบบได้สั่งพิมพ์เอกสารเรียบร้อยแล้ว');
+  };
+
+  const handleCopyToWord = async () => {
+    const el = document.querySelector('.print-only');
+    if (!el) return;
+    try {
+      const html = el.innerHTML;
+      const blob = new Blob([html], { type: 'text/html' });
+      // We also need plain text fallback
+      const textBlob = new Blob([el.textContent || ''], { type: 'text/plain' });
+      const clipboardItem = new ClipboardItem({ 
+        'text/html': blob,
+        'text/plain': textBlob
+      });
+      await navigator.clipboard.write([clipboardItem]);
+      alert('คัดลอกสำเร็จ! สามารถกด Paste (Ctrl+V) ลงใน Word ได้เลยครับ');
+    } catch (err) {
+      alert('เบราว์เซอร์ของคุณอาจไม่รองรับฟังก์ชันนี้ กรุณาดาวน์โหลดเป็น Word แทนครับ');
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    const el = document.querySelector('#flow-chart-container') as HTMLElement;
+    if (!el) return;
+    try {
+      const dataUrl = await toPng(el, { backgroundColor: '#ffffff', style: { padding: '20px' } });
+      const link = document.createElement('a');
+      link.download = 'budget-transfer-flow.png';
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      alert('ไม่สามารถบันทึกภาพได้');
+    }
   };
 
   const exportToWord = () => {
@@ -436,21 +470,21 @@ export default function BudgetTransferPage() {
           </tbody>
         </table>
 
-        <div className="print-section-title">๑. เรื่องเดิม</div>
+        <div className="print-section-title">1. เรื่องเดิม</div>
         <p className="print-paragraph">
           ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติให้งาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())}.- บาท แยกเป็นค่าพัสดุจำนวน {fmt(calculateBudgetByCategoryGroup(['พัสดุ']))}.- บาท ค่าใช้จ่ายหน้างาน เป็นเงิน {fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))}.- บาท และค่าดำเนินการ เป็นเงิน {fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}.- บาท ซึ่งมี {supervisorName || '................................'} พชง.{supervisorLevel || '.....'} ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน
         </p>
 
-        <div className="print-section-title">๒. ข้อมูล</div>
+        <div className="print-section-title">2. ข้อมูล</div>
         <p className="print-paragraph">
           {reasonText}
         </p>
 
         {networkDataList.map((net, i) => {
-          const numThai = ['๑','๒','๓','๔','๕','๖','๗','๘','๙'][i] || (i+1);
+          const num = i + 1;
           return (
           <div key={net.network}>
-            <div className="print-table-title" style={{ textAlign: 'left', textIndent: '40px' }}>๒.{numThai} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
+            <div className="print-table-title" style={{ textAlign: 'left', textIndent: '40px' }}>2.{num} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
             <table className="print-data-table">
               <thead>
                 <tr>
@@ -480,18 +514,18 @@ export default function BudgetTransferPage() {
           );
         })}
 
-        <div className="print-section-title" style={{ marginTop: '20px' }}>๓. ข้อพิจารณา - สรุป</div>
+        <div className="print-section-title" style={{ marginTop: '20px' }}>3. ข้อพิจารณา - สรุป</div>
         <p className="print-paragraph">จากรายละเอียดข้อมูลเบื้องต้น กรย.(ก3) พิจารณาแล้ว เพื่อให้งานก่อสร้าง{projectName ? `งาน${projectName}` : ''}ดังกล่าวข้างต้น สามารถดำเนินการปิดงานก่อสร้างเพื่อขึ้นทะเบียนทรัพย์สินได้ตามระเบียบ จึงเห็นควรอนุมัติค่าใช้จ่ายหน้างานเพิ่มเติม ดังนี้</p>
         
         {networkDataList.map((net, i) => {
           let netTransfers = transfers.filter(t => t.networkFrom === net.network || t.networkTo === net.network);
           if (netTransfers.length === 0) return null;
           
-          const numThai = ['๑','๒','๓','๔','๕','๖','๗','๘','๙'][i] || (i+1);
+          const num = i + 1;
 
           return (
             <div key={net.network}>
-              <div className="print-table-title" style={{ textAlign: 'left', textIndent: '40px' }}>๓.{numThai} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
+              <div className="print-table-title" style={{ textAlign: 'left', textIndent: '40px' }}>3.{num} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
               
               <div style={{ textIndent: '60px', marginBottom: '10px' }}>
                 {netTransfers.map((t, idx) => {
@@ -555,7 +589,7 @@ export default function BudgetTransferPage() {
         })}
 
         <p className="print-paragraph" style={{ marginTop: '30px' }}>
-          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ ตามข้อ ๓.๑ พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
+          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ ตามข้อ 3.1 พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
         </p>
 
         <div className="print-signatures vertical">
@@ -593,9 +627,15 @@ export default function BudgetTransferPage() {
       </div>
     );
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '8px' }}>ผังลูกศรแสดงทิศทางการโอนเงิน</h3>
-        {transfers.map((t, idx) => (
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          <button className="btn btn-outline" onClick={handleDownloadImage} style={{ borderColor: '#22c55e', color: '#16a34a' }}>
+            <ImageIcon size={18} /> บันทึกเป็นรูปภาพ (PNG)
+          </button>
+        </div>
+        <div id="flow-chart-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '8px', textAlign: 'center' }}>ผังลูกศรแสดงทิศทางการโอนเงิน</h3>
+          {transfers.map((t, idx) => (
           <div key={t.id || idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
             <div style={{ background: '#dbeafe', border: '1px solid #bfdbfe', padding: '16px', borderRadius: '8px', flex: 1, textAlign: 'center' }}>
               <div style={{ fontWeight: 'bold', color: '#1e40af' }}>{getFullNetworkName(networkDataList.find(n => n.network === t.networkFrom)?.networkName || '')}</div>
@@ -616,6 +656,7 @@ export default function BudgetTransferPage() {
             </div>
           </div>
         ))}
+        </div>
       </div>
     );
   };
@@ -1081,10 +1122,13 @@ export default function BudgetTransferPage() {
                     <Save size={18} /> ดาวน์โหลดเป็น Word
                   </button>
                   <button className="btn btn-outline" onClick={exportToPdf} style={{ color: '#dc2626', borderColor: '#fecaca', background: '#fef2f2' }}>
-                    <FileType size={18} /> ดาวน์โหลดเป็น PDF
+                    <FileType size={18} /> ดาวน์โหลด PDF
+                  </button>
+                  <button className="btn btn-outline" onClick={handleCopyToWord} style={{ color: '#059669', borderColor: '#a7f3d0', background: '#ecfdf5' }}>
+                    <Copy size={18} /> คัดลอกลง Word
                   </button>
                   <button className="btn btn-primary" onClick={handleSave}>
-                    <Save size={18} /> สั่งพิมพ์เอกสาร
+                    <Save size={18} /> สั่งพิมพ์
                   </button>
                 </div>
               </div>
