@@ -407,14 +407,15 @@ export default function BudgetTransferPage() {
       <div className="print-document">
         <div className="print-header">
           <img src="/pea-logo.png" alt="PEA Logo" className="print-logo" />
-          <div className="print-header-text">การไฟฟ้าส่วนภูมิภาค<br/>PROVINCIAL ELECTRICITY AUTHORITY</div>
+          <div className="print-header-text">การไฟฟ้าส่วนภูมิภาค</div>
+          <div className="print-header-text-eng">PROVINCIAL ELECTRICITY AUTHORITY</div>
         </div>
 
         <table className="print-meta-table">
           <tbody>
             <tr>
-              <td style={{ width: '50px' }}>จาก</td>
-              <td>{docFrom || '................................'}</td>
+              <td style={{ width: '40px' }}>จาก</td>
+              <td style={{ width: '40%' }}>{docFrom || '................................'}</td>
               <td style={{ width: '30px' }}>ถึง</td>
               <td>{docTo || '................................'}</td>
             </tr>
@@ -430,24 +431,26 @@ export default function BudgetTransferPage() {
             </tr>
             <tr>
               <td>เรียน</td>
-              <td colSpan={3}>{docTo || '................................'}</td>
+              <td colSpan={3}>{docTo || '................................'} ผ่าน รฝ.วบ.(ก3)</td>
             </tr>
           </tbody>
         </table>
 
-        <div className="print-section-title">1. เรื่องเดิม</div>
+        <div className="print-section-title">๑. เรื่องเดิม</div>
         <p className="print-paragraph">
-          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติให้งาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())} บาท แยกเป็นค่าพัสดุจำนวน {fmt(calculateBudgetByCategoryGroup(['พัสดุ']))} บาท ค่าใช้จ่ายหน้างาน {fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))} บาท และค่าดำเนินการ {fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))} บาท ซึ่งมี {supervisorName || '................................'} พชง.{supervisorLevel || '.....'} ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน
+          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติให้งาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())}.- บาท แยกเป็นค่าพัสดุจำนวน {fmt(calculateBudgetByCategoryGroup(['พัสดุ']))}.- บาท ค่าใช้จ่ายหน้างาน เป็นเงิน {fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))}.- บาท และค่าดำเนินการ เป็นเงิน {fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}.- บาท ซึ่งมี {supervisorName || '................................'} พชง.{supervisorLevel || '.....'} ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน
         </p>
 
-        <div className="print-section-title">2. ข้อมูล</div>
+        <div className="print-section-title">๒. ข้อมูล</div>
         <p className="print-paragraph">
           {reasonText}
         </p>
 
-        {networkDataList.map((net, i) => (
+        {networkDataList.map((net, i) => {
+          const numThai = ['๑','๒','๓','๔','๕','๖','๗','๘','๙'][i] || (i+1);
+          return (
           <div key={net.network}>
-            <div className="print-table-title">2.{i+1} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
+            <div className="print-table-title" style={{ textAlign: 'left', textIndent: '40px' }}>๒.{numThai} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
             <table className="print-data-table">
               <thead>
                 <tr>
@@ -464,42 +467,43 @@ export default function BudgetTransferPage() {
                   if (vals.budget === 0 && vals.disbursed === 0) return null;
                   return (
                     <tr key={cat}>
-                      <td>{cat}</td>
-                      <td style={{ textAlign: 'right' }}>{fmt(vals.budget)}</td>
-                      <td style={{ textAlign: 'right' }}>{fmt(vals.disbursed)}</td>
-                      <td style={{ textAlign: 'right' }}>{fmt(vals.remaining)}</td>
+                      <td style={{ textAlign: 'left' }}>{cat}</td>
+                      <td style={{ textAlign: 'center' }}>{fmt(vals.budget)}</td>
+                      <td style={{ textAlign: 'center' }}>{fmt(vals.disbursed)}</td>
+                      <td style={{ textAlign: 'center', color: vals.remaining < 0 ? 'red' : 'inherit' }}>{fmt(vals.remaining)}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
-        ))}
+          );
+        })}
 
-        <div className="print-section-title" style={{ marginTop: '20px' }}>3. ข้อพิจารณา - สรุป</div>
-        <p className="print-paragraph">จากรายละเอียดข้อมูลเบื้องต้น พิจารณาแล้ว เพื่อให้งานก่อสร้างดังกล่าวข้างต้น สามารถดำเนินการปิดงานก่อสร้างเพื่อขึ้นทะเบียนทรัพย์สินได้ตามระเบียบ จึงเห็นควรอนุมัติค่าใช้จ่ายหน้างานเพิ่มเติม ดังนี้</p>
+        <div className="print-section-title" style={{ marginTop: '20px' }}>๓. ข้อพิจารณา - สรุป</div>
+        <p className="print-paragraph">จากรายละเอียดข้อมูลเบื้องต้น กรย.(ก3) พิจารณาแล้ว เพื่อให้งานก่อสร้าง{projectName ? `งาน${projectName}` : ''}ดังกล่าวข้างต้น สามารถดำเนินการปิดงานก่อสร้างเพื่อขึ้นทะเบียนทรัพย์สินได้ตามระเบียบ จึงเห็นควรอนุมัติค่าใช้จ่ายหน้างานเพิ่มเติม ดังนี้</p>
         
-        <div className="print-transfers-list">
-          {transfers.map((t, i) => (
-            <div key={t.id} className="transfer-list-item">
-              3.{i+1} โอน{t.categoryFrom} โครงข่าย {t.networkFrom} ไปเป็น {t.categoryTo} โครงข่าย {t.networkTo} จำนวน {fmt(t.amount)} บาท
-            </div>
-          ))}
-          <div className="transfer-list-item" style={{ marginTop: '8px' }}>
-            3.{transfers.length + 1} เมื่อโอนตามข้อ 3.1 - 3.{transfers.length} แล้วทำให้รายละเอียดงบประมาณเปลี่ยนแปลงไป ดังนี้
-          </div>
-        </div>
-
         {networkDataList.map((net, i) => {
-          let hasChanges = false;
-          transfers.forEach(t => {
-            if (t.networkFrom === net.network || t.networkTo === net.network) hasChanges = true;
-          });
-          if (!hasChanges) return null;
+          let netTransfers = transfers.filter(t => t.networkFrom === net.network || t.networkTo === net.network);
+          if (netTransfers.length === 0) return null;
+          
+          const numThai = ['๑','๒','๓','๔','๕','๖','๗','๘','๙'][i] || (i+1);
 
           return (
-            <div key={net.network} className="print-page-break">
-              <div className="print-table-title">{getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
+            <div key={net.network}>
+              <div className="print-table-title" style={{ textAlign: 'left', textIndent: '40px' }}>๓.{numThai} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}</div>
+              
+              <div style={{ textIndent: '60px', marginBottom: '10px' }}>
+                {netTransfers.map((t, idx) => {
+                  const isGiving = t.networkFrom === net.network;
+                  if (isGiving) {
+                    return <div key={idx}>- โอน{t.categoryFrom} ไปเป็น{t.categoryTo} โครงข่าย {t.networkTo} จำนวน {fmt(t.amount)}.- บาท</div>;
+                  } else {
+                    return <div key={idx}>- รับโอน{t.categoryTo} จาก{t.categoryFrom} โครงข่าย {t.networkFrom} จำนวน {fmt(t.amount)}.- บาท</div>;
+                  }
+                })}
+              </div>
+
               <table className="print-data-table">
                 <thead>
                   <tr>
@@ -534,13 +538,13 @@ export default function BudgetTransferPage() {
 
                     return (
                       <tr key={cat}>
-                        <td>{cat}</td>
-                        <td style={{ textAlign: 'right' }}>{fmt(vals.budget)}</td>
-                        <td style={{ textAlign: 'right' }}>{fmt(vals.disbursed)}</td>
-                        <td style={{ textAlign: 'right' }}>{fmt(vals.remaining)}</td>
-                        <td style={{ textAlign: 'right' }}>{diffAmount !== 0 ? (diffAmount > 0 ? `+${fmt(diffAmount)}` : fmt(diffAmount)) : '-'}</td>
-                        <td style={{ textAlign: 'right' }}>{fmt(finalBudget)}</td>
-                        <td style={{ textAlign: 'right' }}>{fmt(finalRemaining)}</td>
+                        <td style={{ textAlign: 'left' }}>{cat}</td>
+                        <td style={{ textAlign: 'center' }}>{fmt(vals.budget)}</td>
+                        <td style={{ textAlign: 'center' }}>{fmt(vals.disbursed)}</td>
+                        <td style={{ textAlign: 'center', color: vals.remaining < 0 ? 'red' : 'inherit' }}>{fmt(vals.remaining)}</td>
+                        <td style={{ textAlign: 'center' }}>{diffAmount !== 0 ? (diffAmount > 0 ? `+${fmt(diffAmount)}` : fmt(diffAmount)) : '-'}</td>
+                        <td style={{ textAlign: 'center' }}>{fmt(finalBudget)}</td>
+                        <td style={{ textAlign: 'center' }}>{fmt(finalRemaining)}</td>
                       </tr>
                     );
                   })}
@@ -550,23 +554,32 @@ export default function BudgetTransferPage() {
           );
         })}
 
-        <p className="print-paragraph" style={{ marginTop: '30px', textAlign: 'center' }}>
-          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติค่าใช้จ่ายหน้างานเป็นเงิน {fmt(totalAmount)} บาท 
-          โดยให้ ผจก.กฟส. เป็นผู้เบิกและสั่งจ่ายจากเงินรายได้ของ กฟภ. ต่อไป
+        <p className="print-paragraph" style={{ marginTop: '30px' }}>
+          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ ตามข้อ ๓.๑ พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
         </p>
 
-        <div className="print-signatures">
-          <div className="signature-box">
-            <div className="sig-line">(..................................................)</div>
-            <div className="sig-name">({signer1Name || '..................................................'})</div>
-            <div className="sig-title">{signer1Title || '..................................................'}</div>
+        <div className="print-signatures vertical">
+          <div className="signature-box right">
+            <div className="sig-name">(นายอนันต์ กาญจนอุปถัมภ์)</div>
+            <div className="sig-title">รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)</div>
           </div>
-          <div className="signature-box">
-            <div className="sig-status">อนุมัติ และให้ดำเนินการในส่วนเกี่ยวข้องต่อไป</div>
-            <div className="sig-line">(..................................................)</div>
-            <div className="sig-name">({signer2Name || '..................................................'})</div>
-            <div className="sig-title">{signer2Title || '..................................................'}</div>
+          
+          <div className="signature-box" style={{ textAlign: 'left', marginLeft: '10%' }}>
+            <div className="sig-status">- ผจก.กฟจ.นฐ. ผจก.กฟส.กพส.</div>
+            <div className="sig-status" style={{ paddingLeft: '20px' }}><strong>อนุมัติ</strong> และให้ดำเนินการในส่วนเกี่ยวข้องต่อไป</div>
           </div>
+          
+          <div className="signature-box right">
+            <div className="sig-name">(นายเมธี สุกก่ำ)</div>
+            <div className="sig-title">อฝ.วบ.(ก3)</div>
+          </div>
+        </div>
+
+        <div className="sig-lines-container">
+          <div>รฝ.วบ.(ก3) ........................................ วันที่ ..............................</div>
+          <div>รก.รย.(ก3) ........................................ วันที่ ..............................</div>
+          <div>หผ.กร.(ก3) ........................................ วันที่ ..............................</div>
+          <div>ชผ.กร.(ก3) ........................................ วันที่ ..............................</div>
         </div>
 
       </div>
@@ -616,14 +629,14 @@ export default function BudgetTransferPage() {
 
     return (
       <div className="print-document">
-        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '10px' }}>การไฟฟ้าส่วนภูมิภาค</div>
-        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '20px' }}>แบบฟอร์มขออนุมัติค่าใช้จ่ายหน้างาน</div>
+        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '15pt', marginBottom: '5px' }}>การไฟฟ้าส่วนภูมิภาค</div>
+        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '15pt', marginBottom: '20px' }}>แบบฟอร์มขออนุมัติค่าใช้จ่ายหน้างาน</div>
         
         <table className="print-meta-table">
           <tbody>
             <tr>
-              <td style={{ width: '50px' }}>จาก</td>
-              <td>{docFrom || '................................'}</td>
+              <td style={{ width: '40px' }}>จาก</td>
+              <td style={{ width: '40%' }}>{docFrom || '................................'}</td>
               <td style={{ width: '30px' }}>ถึง</td>
               <td>{docTo || '................................'}</td>
             </tr>
@@ -633,31 +646,28 @@ export default function BudgetTransferPage() {
             </tr>
             <tr>
               <td>เรียน</td>
-              <td colSpan={3}>{signer2Title || '................................'}</td>
+              <td colSpan={3}>{docTo || '................................'} ผ่าน รฝ.วบ.(ก3)</td>
             </tr>
           </tbody>
         </table>
 
-        <p className="print-paragraph">
-          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติงาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())} บาท ซึ่งมี {supervisorName || '................................'} พชง.{supervisorLevel || '.....'} ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน นั้น ในชั้นนี้ เห็นควรอนุมัติค่าใช้จ่ายหน้างานในการก่อสร้าง (เพิ่มเติม) ดังรายการต่อไปนี้
-        </p>
-        <p className="print-paragraph" style={{ marginTop: '10px' }}>
-          <span style={{ fontWeight: 'bold' }}>2. ข้อมูล</span><br/>
-          {reasonText}
+        <p className="print-paragraph" style={{ textIndent: '40px' }}>
+          ตามหนังสือ {refDocNo || '................................'} ลงวันที่ {refDocDate || '................................'} อนุมัติให้งาน{projectName || '................................'} หมายเลขงาน (WBS) {wbs || '................................'} นั้น ในขั้นนี้เห็นควรอนุมัติค่าใช้จ่ายหน้างานในการก่อสร้าง (เพิ่มเติม) ดังรายการต่อไปนี้
         </p>
 
-        <table className="print-data-table" style={{ fontSize: '10pt', marginTop: '10px' }}>
+        <table className="print-data-table" style={{ marginTop: '10px' }}>
           <thead>
             <tr>
-              <th rowSpan={2} style={{ width: '15%' }}>งบ<br/>โครงข่าย<br/>รายการ</th>
-              {allNetworks.map(net => {
-                const networkName = networkDataList.find(n => n.network === net)?.networkName;
-                return (
-                  <th key={net} style={{ width: `${85 / (allNetworks.length || 1)}%`, fontWeight: 'normal' }}>
-                    กฟภ.<br/>{net}<br/>{getFullNetworkName(networkName || '')}
-                  </th>
-                );
-              })}
+              <th style={{ width: '20%', textAlign: 'center' }}>งบ</th>
+              {allNetworks.map(net => <th key={net} style={{ fontWeight: 'normal', textAlign: 'center' }}>กฟภ.</th>)}
+            </tr>
+            <tr>
+              <th style={{ textAlign: 'center' }}>โครงข่าย</th>
+              {allNetworks.map(net => <th key={net} style={{ fontWeight: 'normal', textAlign: 'center' }}>{net}</th>)}
+            </tr>
+            <tr>
+              <th style={{ textAlign: 'center' }}>รายการ</th>
+              {allNetworks.map(net => <th key={net} style={{ fontWeight: 'normal', textAlign: 'center' }}>{getFullNetworkName(networkDataList.find(n => n.network === net)?.networkName || '').replace('แผนก','')}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -670,13 +680,13 @@ export default function BudgetTransferPage() {
 
               return (
                 <tr key={cat}>
-                  <td>{cat}</td>
+                  <td style={{ textAlign: 'left' }}>{cat}</td>
                   {allNetworks.map(net => {
                     const involved = transfers.filter(t => (t.networkFrom === net && t.categoryFrom === cat) || (t.networkTo === net && t.categoryTo === cat));
                     const totalForCell = involved.reduce((sum, t) => sum + t.amount, 0);
                     return (
-                      <td key={net} style={{ textAlign: 'right' }}>
-                        {totalForCell > 0 ? `${fmt(totalForCell)}.-` : ''}
+                      <td key={net} style={{ textAlign: 'center' }}>
+                        {totalForCell > 0 ? `${fmt(totalForCell)}.-` : '-'}
                       </td>
                     );
                   })}
@@ -684,81 +694,80 @@ export default function BudgetTransferPage() {
               );
             })}
             <tr>
-              <td style={{ fontWeight: 'bold' }}>รวม</td>
+              <td style={{ textAlign: 'left', fontWeight: 'bold' }}>รวม</td>
               {allNetworks.map(net => {
                 const totalForNet = transfers.filter(t => t.networkFrom === net || t.networkTo === net).reduce((sum, t) => sum + t.amount, 0);
-                return <td key={net} style={{ textAlign: 'right', fontWeight: 'bold' }}>{fmt(totalForNet)}.-</td>;
+                return <td key={net} style={{ textAlign: 'center', fontWeight: 'bold' }}>{totalForNet > 0 ? `${fmt(totalForNet)}.-` : '-'}</td>;
               })}
             </tr>
             <tr>
-              <td style={{ fontWeight: 'bold' }}>รวมทั้งสิ้น</td>
-              <td colSpan={allNetworks.length} style={{ textAlign: 'center', fontWeight: 'bold' }}>
+              <td style={{ textAlign: 'left', fontWeight: 'bold' }}>รวมทั้งสิ้น</td>
+              <td colSpan={allNetworks.length} style={{ textAlign: 'left', fontWeight: 'bold', paddingLeft: '20px' }}>
                 {fmt(totalAmount)}.- บาท
               </td>
             </tr>
           </tbody>
         </table>
         
-        <div style={{ textAlign: 'center', fontWeight: 'bold', margin: '20px 0 10px 0' }}>เปรียบเทียบค่าใช้จ่ายที่ขออนุมัติกับค่าใช้จ่ายตามประมาณการ</div>
+        <div style={{ textIndent: '40px', margin: '20px 0 10px 0' }}>เปรียบเทียบค่าใช้จ่ายที่ขออนุมัติกับค่าใช้จ่ายตามประมาณการ</div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          {allNetworks.map(net => {
-            const networkObj = networkDataList.find(n => n.network === net);
-            if (!networkObj) return null;
-            return (
-              <table key={net} className="print-data-table" style={{ fontSize: '9pt', marginBottom: '0' }}>
-                <thead>
-                  <tr>
-                    <th rowSpan={2} style={{ width: '25%' }}>รายการ</th>
-                    <th colSpan={4}>{getFullNetworkName(networkObj.networkName)}</th>
-                  </tr>
-                  <tr>
-                    <th style={{ fontSize: '8pt' }}>ประมาณการ</th>
-                    <th style={{ fontSize: '8pt' }}>อนุมัติ 2 ครั้ง</th>
-                    <th style={{ fontSize: '8pt' }}>ร้อยละ</th>
-                    <th style={{ fontSize: '8pt' }}>คงเหลือ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.map(cat => {
-                    const catKey = Object.keys(networkObj.categories).find(k => k.includes(cat) || cat.includes(k.replace('งาน','')));
-                    if (!catKey) return null;
-                    const vals = networkObj.categories[catKey];
-                    const percent = vals.budget > 0 ? (vals.disbursed / vals.budget) * 100 : 0;
-                    
-                    return (
-                      <tr key={cat}>
-                        <td>{cat}</td>
-                        <td style={{ textAlign: 'right' }}>{fmt(vals.budget)}</td>
-                        <td style={{ textAlign: 'right' }}>{fmt(vals.disbursed)}</td>
-                        <td style={{ textAlign: 'right' }}>{fmt(percent)}</td>
-                        <td style={{ textAlign: 'center' }}>-</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            );
-          })}
-        </div>
+        {allNetworks.map(net => {
+          const networkObj = networkDataList.find(n => n.network === net);
+          if (!networkObj) return null;
+          return (
+            <table key={net} className="print-data-table" style={{ marginBottom: '15px' }}>
+              <thead>
+                <tr>
+                  <th rowSpan={2} style={{ width: '25%' }}>รายการ</th>
+                  <th colSpan={4}>{getFullNetworkName(networkObj.networkName).replace('แผนก', 'แผนก ')}</th>
+                </tr>
+                <tr>
+                  <th style={{ fontWeight: 'normal' }}>ประมาณการ</th>
+                  <th style={{ fontWeight: 'normal' }}>อนุมัติ 2 ครั้ง</th>
+                  <th style={{ fontWeight: 'normal' }}>ร้อยละ</th>
+                  <th style={{ fontWeight: 'normal' }}>คงเหลือ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map(cat => {
+                  const catKey = Object.keys(networkObj.categories).find(k => k.includes(cat) || cat.includes(k.replace('งาน','')));
+                  if (!catKey) return null;
+                  const vals = networkObj.categories[catKey];
+                  if (vals.budget === 0 && vals.disbursed === 0) return null;
+                  const percent = vals.budget > 0 ? (vals.disbursed / vals.budget) * 100 : 0;
+                  
+                  return (
+                    <tr key={cat}>
+                      <td style={{ textAlign: 'left' }}>{cat}</td>
+                      <td style={{ textAlign: 'center' }}>{fmt(vals.budget)}</td>
+                      <td style={{ textAlign: 'center' }}>{fmt(vals.disbursed)}</td>
+                      <td style={{ textAlign: 'center' }}>{fmt(percent)}</td>
+                      <td style={{ textAlign: 'center' }}>{fmt(vals.remaining)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          );
+        })}
         
-        <p className="print-paragraph" style={{ marginTop: '20px', textAlign: 'center' }}>
-          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติค่าใช้จ่ายหน้างานเป็นเงิน {fmt(totalAmount)}.- บาท
-          โดยให้ {supervisorName || 'ผู้ควบคุมงาน'} เป็นผู้เบิกและสั่งจ่ายจากเงินรายได้ของ กฟภ. ต่อไป
+        <p className="print-paragraph" style={{ marginTop: '30px' }}>
+          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติ ค่าใช้จ่ายหน้างาน(เพิ่มเติม)เป็น {fmt(totalAmount)}.- บาท 
+          โดยให้ ผจก.กฟส. เป็นผู้เบิกและสั่งจ่ายจากเงินรายได้ของ ผจก.กฟส. ต่อไป
         </p>
 
         <div className="print-signatures" style={{ marginTop: '40px' }}>
-          <div className="signature-box" style={{ width: '45%' }}>
-            <div className="sig-line">(..................................................)</div>
-            <div className="sig-name">({signer1Name || '..................................................'})</div>
-            <div className="sig-title">{signer1Title || '..................................................'}</div>
+          <div className="signature-box" style={{ marginTop: 'auto' }}>
+            <div className="sig-line">..................................................</div>
+            <div className="sig-name">({signer1Name || 'นายอนันต์ กาญจนอุปถัมภ์'})</div>
+            <div className="sig-title">{signer1Title || 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)'}</div>
           </div>
-          <div className="signature-box" style={{ width: '45%' }}>
-            <div className="sig-status" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>อนุมัติ</div>
-            <div style={{ height: '30px' }}></div>
-            <div className="sig-line">(..................................................)</div>
-            <div className="sig-name">({signer2Name || '..................................................'})</div>
-            <div className="sig-title">{signer2Title || '..................................................'}</div>
+          
+          <div className="signature-box right" style={{ textAlign: 'center' }}>
+            <div className="sig-status" style={{ fontWeight: 'bold', fontSize: '15pt', marginBottom: '40px' }}>อนุมัติ</div>
+            <div className="sig-line">..................................................</div>
+            <div className="sig-name">({signer2Name || 'นายเมธี สุกก่ำ'})</div>
+            <div className="sig-title">{signer2Title || 'อฝ.วบ.(ก3)'}</div>
           </div>
         </div>
       </div>
