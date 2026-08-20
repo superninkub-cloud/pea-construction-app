@@ -42,6 +42,7 @@ export default function BudgetTransferPage() {
   const [refDocDate, setRefDocDate] = useState('');
   const [docFrom, setDocFrom] = useState('กรย.(ก3)');
   const [docTo, setDocTo] = useState('อฝ.วบ.(ก3)');
+  const [peaOffice, setPeaOffice] = useState('');
   const [supervisorName, setSupervisorName] = useState('');
   const [supervisorLevel, setSupervisorLevel] = useState('');
   const [signer1Name, setSigner1Name] = useState('นายอนันต์ กาญจนอุปถัมภ์');
@@ -476,7 +477,7 @@ export default function BudgetTransferPage() {
               <td style={{ width: '40px' }}>จาก</td>
               <td style={{ width: '40%' }}>{docFrom || '................................'}</td>
               <td style={{ width: '30px' }}>ถึง</td>
-              <td>{docTo || '................................'}</td>
+              <td>ฝวบ.(ก3)</td>
             </tr>
             <tr>
               <td>เลขที่</td>
@@ -579,19 +580,46 @@ export default function BudgetTransferPage() {
             }
           });
           
+          const maxNum = listIndex - 1;
+          const section3Text = maxNum > 1 ? `ตามข้อ 3.1 - 3.${maxNum}` : `ตามข้อ 3.1`;
+          
           return (
-            <div style={{ marginBottom: '20px' }}>
-              {items}
-            </div>
+            <>
+              <div style={{ marginBottom: '20px' }}>
+                {items}
+              </div>
+              <p className="print-paragraph" style={{ marginTop: '20px' }}>
+                จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ {section3Text} พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
+              </p>
+            </>
           );
         })()}
-        
+
+        <div className="print-signatures vertical" style={{ marginTop: '50px' }}>
+          <div className="signature-box right" style={{ marginBottom: '40px' }}>
+            <div className="sig-name">({signer1Name || 'นายอนันต์ กาญจนอุปถัมภ์'})</div>
+            <div className="sig-title">{signer1Title || 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)'}</div>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
+            <div className="signature-box" style={{ textAlign: 'left', minWidth: '350px' }}>
+              <div className="sig-status">- ผจก.{peaOffice || '........................'}</div>
+              <div className="sig-status" style={{ paddingLeft: '20px', marginTop: '30px' }}><strong>อนุมัติ</strong> และให้ดำเนินการในส่วนเกี่ยวข้องต่อไป</div>
+            </div>
+            
+            <div className="signature-box right">
+              <div className="sig-name">({signer2Name || 'นายเมธี สุกก่ำ'})</div>
+              <div className="sig-title">{signer2Title || 'อฝ.วบ.(ก3)'}</div>
+            </div>
+          </div>
+        </div>
+
         {networkDataList.map((net, i) => {
           let netTransfers = transfers.filter(t => t.networkFrom === net.network || t.networkTo === net.network);
           if (netTransfers.length === 0) return null;
           
           return (
-            <div key={net.network} style={{ pageBreakInside: 'avoid' }}>
+            <div key={net.network} style={{ pageBreakBefore: 'always' }}>
               <div className="print-table-title" style={{ textAlign: 'left', marginTop: '15px' }}>
                  ตารางแสดงงบประมาณโครงข่าย {net.network} {getFullNetworkName(net.networkName)}
               </div>
@@ -645,37 +673,6 @@ export default function BudgetTransferPage() {
             </div>
           );
         })}
-
-        {(() => {
-          let maxNum = 0;
-          networkDataList.forEach((net, i) => {
-            let netTransfers = transfers.filter(t => t.networkFrom === net.network || t.networkTo === net.network);
-            if (netTransfers.length > 0) maxNum = i + 1;
-          });
-          const section3Text = maxNum > 1 ? `ตามข้อ 3.1 - 3.${maxNum}` : `ตามข้อ 3.1`;
-          return (
-            <p className="print-paragraph" style={{ marginTop: '30px' }}>
-              จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติโอนงบค่าใช้จ่ายต่างๆ {section3Text} พร้อมลงนามในแบบฟอร์มโอนค่าใช้จ่ายตามเอกสารแนบให้ต่อไป พร้อมนี้ได้แนบเรื่องเดิมมาเพื่อประกอบการพิจารณาด้วยแล้ว
-            </p>
-          );
-        })()}
-
-        <div className="print-signatures vertical">
-          <div className="signature-box right">
-            <div className="sig-name">(นายอนันต์ กาญจนอุปถัมภ์)</div>
-            <div className="sig-title">รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)</div>
-          </div>
-          
-          <div className="signature-box" style={{ textAlign: 'left', marginLeft: '10%' }}>
-            <div className="sig-status">- ผจก.กฟจ.นฐ. ผจก.กฟส.กพส.</div>
-            <div className="sig-status" style={{ paddingLeft: '20px' }}><strong>อนุมัติ</strong> และให้ดำเนินการในส่วนเกี่ยวข้องต่อไป</div>
-          </div>
-          
-          <div className="signature-box right">
-            <div className="sig-name">(นายเมธี สุกก่ำ)</div>
-            <div className="sig-title">อฝ.วบ.(ก3)</div>
-          </div>
-        </div>
 
         <div className="sig-lines-container" style={{ display: 'none' }}>
         </div>
@@ -1090,6 +1087,10 @@ export default function BudgetTransferPage() {
                 <div>
                   <label className="form-label">จาก (ผู้เสนอ)</label>
                   <input type="text" className="form-control" value={docFrom} readOnly style={{ backgroundColor: '#f1f5f9' }} />
+                </div>
+                <div>
+                  <label className="form-label">กฟฟ. ที่ขออนุมัติ</label>
+                  <input type="text" className="form-control" placeholder="เช่น กฟส.ลญ." value={peaOffice} onChange={(e) => setPeaOffice(e.target.value)} />
                 </div>
                 <div>
                   <label className="form-label">ถึง/เรียน (ผู้อนุมัติ)</label>
