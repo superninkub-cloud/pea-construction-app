@@ -61,7 +61,6 @@ export default function BudgetTransferPage() {
   const [uploadError, setUploadError] = useState('');
 
   const categories = [
-    "ค่าพัสดุ",
     "ค่าแรง",
     "ค่าควบคุมงาน",
     "ค่าขนส่ง",
@@ -175,7 +174,8 @@ export default function BudgetTransferPage() {
 
     // Phase 2: If there are still field deficits, use Operations Surpluses
     for (let d of fieldDeficits) {
-      let needed = d.amount;
+      // Round up to the next 100 to ensure remaining balance is > 0
+      let needed = (Math.floor(d.amount / 100) + 1) * 100;
       if (needed <= 0.001) continue;
       
       for (let s of opsSurpluses) {
