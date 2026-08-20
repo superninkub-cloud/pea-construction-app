@@ -38,7 +38,7 @@ export default function BudgetTransferPage() {
   const [refDocNo, setRefDocNo] = useState('');
   const [refDocDate, setRefDocDate] = useState('');
   const [docFrom, setDocFrom] = useState('กรย.(ก3)');
-  const [docTo, setDocTo] = useState('ฝวบ.(ก3)');
+  const [docTo, setDocTo] = useState('อฝ.วบ.(ก3)');
   const [supervisorName, setSupervisorName] = useState('');
   const [supervisorLevel, setSupervisorLevel] = useState('');
   const [signer1Name, setSigner1Name] = useState('นายอนันต์ กาญจนอุปถัมภ์');
@@ -153,9 +153,12 @@ export default function BudgetTransferPage() {
       let needed = (Math.floor(d.amount / 100) + 1) * 100;
       for (let s of fieldSurpluses) {
         if (needed <= 0.001) break;
-        if (s.amount <= 0.001) continue;
+        
+        let maxTake = Math.floor(s.amount / 100) * 100;
+        if (maxTake >= s.amount) maxTake -= 100;
+        if (maxTake <= 0.001) continue;
 
-        const transferAmount = Math.min(needed, s.amount);
+        const transferAmount = Math.min(needed, maxTake);
         
         newTransfers.push({
           id: Math.random().toString(36).substr(2, 9),
@@ -180,9 +183,12 @@ export default function BudgetTransferPage() {
       
       for (let s of opsSurpluses) {
         if (needed <= 0.001) break;
-        if (s.amount <= 0.001) continue;
 
-        const transferAmount = Math.min(needed, s.amount);
+        let maxTake = Math.floor(s.amount / 100) * 100;
+        if (maxTake >= s.amount) maxTake -= 100;
+        if (maxTake <= 0.001) continue;
+
+        const transferAmount = Math.min(needed, maxTake);
         
         newTransfers.push({
           id: Math.random().toString(36).substr(2, 9),
@@ -223,6 +229,21 @@ export default function BudgetTransferPage() {
       alert('คัดลอกสำเร็จ! สามารถกด Paste (Ctrl+V) ลงใน Word ได้เลยครับ');
     } catch (err) {
       alert('เบราว์เซอร์ของคุณอาจไม่รองรับฟังก์ชันนี้ กรุณาดาวน์โหลดเป็น Word แทนครับ');
+    }
+  };
+
+  const handleCopyImage = async () => {
+    const el = document.querySelector('#flow-chart-container') as HTMLElement;
+    if (!el) return;
+    try {
+      const dataUrl = await toPng(el, { backgroundColor: '#ffffff', style: { padding: '20px' } });
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const clipboardItem = new ClipboardItem({ 'image/png': blob });
+      await navigator.clipboard.write([clipboardItem]);
+      alert('คัดลอกรูปภาพสำเร็จ! สามารถนำไป Paste (Ctrl+V) ได้เลยครับ');
+    } catch (err) {
+      alert('ไม่สามารถคัดลอกภาพได้ ลองดาวน์โหลดแทนครับ');
     }
   };
 
@@ -386,6 +407,7 @@ export default function BudgetTransferPage() {
   // Helper for formatting currency
   const fmt = (num: number | undefined) => {
     if (num === undefined) return "0.00";
+    if (Math.abs(num) < 0.01) return "-";
     return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
@@ -628,9 +650,12 @@ export default function BudgetTransferPage() {
     );
     return (
       <div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px', gap: '8px' }}>
+          <button className="btn btn-outline" onClick={handleCopyImage} style={{ borderColor: '#2563eb', color: '#1d4ed8' }}>
+            <Copy size={18} /> คัดลอกรูปภาพ
+          </button>
           <button className="btn btn-outline" onClick={handleDownloadImage} style={{ borderColor: '#22c55e', color: '#16a34a' }}>
-            <ImageIcon size={18} /> บันทึกเป็นรูปภาพ (PNG)
+            <ImageIcon size={18} /> บันทึกเป็นภาพ
           </button>
         </div>
         <div id="flow-chart-container" style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '24px', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
