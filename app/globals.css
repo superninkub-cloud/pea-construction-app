@@ -720,3 +720,136 @@ body {
   margin-bottom: 24px;
 }
 
+
+/* --- Official Document Print Layout --- */
+.document-preview-container {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: "Sarabun", "Prompt", sans-serif; /* Thai official font fallback */
+  color: #000;
+  border: 1px solid #e2e8f0;
+}
+.print-document {
+  font-size: 14pt;
+  line-height: 1.5;
+}
+.print-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.print-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+.print-header-text {
+  font-size: 16pt;
+  font-weight: bold;
+  text-align: left;
+}
+.print-meta-table {
+  width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+}
+.print-meta-table td {
+  padding: 4px 0;
+  vertical-align: top;
+}
+.print-section-title {
+  font-weight: bold;
+  font-size: 14pt;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding-left: 20px;
+}
+.print-paragraph {
+  text-indent: 40px;
+  margin-bottom: 15px;
+  text-align: justify;
+}
+.print-table-title {
+  text-align: center;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-size: 13pt;
+}
+.print-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 12pt;
+}
+.print-data-table th, .print-data-table td {
+  border: 1px solid #000;
+  padding: 6px;
+}
+.print-data-table th {
+  text-align: center;
+  font-weight: normal;
+}
+.print-transfers-list {
+  padding-left: 40px;
+  margin-bottom: 20px;
+}
+.transfer-list-item {
+  margin-bottom: 5px;
+}
+.print-signatures {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 60px;
+  page-break-inside: avoid;
+}
+.signature-box {
+  text-align: center;
+  width: 300px;
+}
+.sig-status {
+  margin-bottom: 30px;
+}
+.sig-line {
+  margin-bottom: 10px;
+}
+.print-page-break {
+  page-break-before: always;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .print-only, .print-only * {
+    visibility: visible;
+  }
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "Sarabun", "Prompt", sans-serif;
+  }
+  .document-preview-container {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+  }
+}
+
