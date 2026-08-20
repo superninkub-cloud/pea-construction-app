@@ -870,7 +870,7 @@ export default function BudgetTransferPage() {
               <td style={{ width: '40px' }}>จาก</td>
               <td style={{ width: '40%' }}>{docFrom || '................................'}</td>
               <td style={{ width: '30px' }}>ถึง</td>
-              <td>{docTo || '................................'}</td>
+              <td>ฝวบ.(ก3)</td>
             </tr>
             <tr>
               <td>เรื่อง</td>
@@ -1031,7 +1031,7 @@ export default function BudgetTransferPage() {
         <div className="wizard-main">
           
           {/* Stepper */}
-          <div className="wizard-stepper">
+          <div className="wizard-stepper no-print">
             <div className={`stepper-step ${currentStep >= 1 ? 'active' : ''}`}>
               <div className="stepper-circle">1</div>
               <span>ข้อมูลเอกสาร & อัพโหลด</span>
@@ -1289,7 +1289,7 @@ export default function BudgetTransferPage() {
           {/* Step 3: Print Preview */}
           {currentStep === 3 && (
             <div style={{ animation: 'fadeIn 0.3s' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div className="no-print" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--pea-purple)' }}>
                   <Save size={20} />
                   <h2 style={{ fontSize: '1.1rem', fontWeight: '600' }}>ดูตัวอย่างและพิมพ์เอกสาร</h2>
@@ -1312,7 +1312,7 @@ export default function BudgetTransferPage() {
                 {renderExpenseApprovalForm()}
               </div>
 
-              <div className="wizard-footer">
+              <div className="wizard-footer no-print">
                 <button className="btn btn-outline" onClick={() => setCurrentStep(2)}>กลับไปแก้ไขรายการโอน</button>
               </div>
             </div>
