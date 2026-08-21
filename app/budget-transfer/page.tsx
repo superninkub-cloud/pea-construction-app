@@ -983,25 +983,7 @@ export default function BudgetTransferPage() {
           );
         })}
         
-        <p className="print-paragraph" style={{ marginTop: '30px' }}>
-          จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติ ค่าใช้จ่ายหน้างาน(เพิ่มเติม)เป็น {fmt(totalAmount)}.- บาท 
-          โดยให้ ผจก.กฟส. เป็นผู้เบิกและสั่งจ่ายจากเงินรายได้ของ ผจก.กฟส. ต่อไป
-        </p>
 
-        <div className="print-signatures" style={{ marginTop: '40px' }}>
-          <div className="signature-box" style={{ marginTop: 'auto' }}>
-            <div className="sig-line">..................................................</div>
-            <div className="sig-name">({signer1Name || 'นายอนันต์ กาญจนอุปถัมภ์'})</div>
-            <div className="sig-title">{signer1Title || 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)'}</div>
-          </div>
-          
-          <div className="signature-box right" style={{ textAlign: 'center' }}>
-            <div className="sig-status" style={{ fontWeight: 'bold', fontSize: '15pt', marginBottom: '40px' }}>อนุมัติ</div>
-            <div className="sig-line">..................................................</div>
-            <div className="sig-name">({signer2Name || 'นายเมธี สุกก่ำ'})</div>
-            <div className="sig-title">{signer2Title || 'อฝ.วบ.(ก3)'}</div>
-          </div>
-        </div>
       </div>
     );
   };
