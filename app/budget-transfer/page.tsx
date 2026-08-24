@@ -109,7 +109,12 @@ export default function BudgetTransferPage() {
         throw new Error('Invalid response from server. Expected JSON.');
       }
     } catch (err: any) {
-      setUploadError(err.message || 'เกิดข้อผิดพลาดในการประมวลผลไฟล์ PDF');
+      const errMsg = err.message || '';
+      if (errMsg.includes('503 Service Unavailable') || errMsg.includes('503')) {
+        setUploadError('ระบบ AI กำลังมีผู้ใช้งานจำนวนมาก (เซิร์ฟเวอร์ตอบสนอง 503 Service Unavailable) กรุณารอสักครู่แล้วลองอัปโหลดใหม่อีกครั้งครับ');
+      } else {
+        setUploadError(errMsg || 'เกิดข้อผิดพลาดในการประมวลผลไฟล์ PDF');
+      }
     } finally {
       setIsUploading(false);
       e.target.value = '';
