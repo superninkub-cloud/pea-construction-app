@@ -149,6 +149,10 @@ export default function BudgetTransferPage() {
       });
     });
 
+    fieldDeficits.sort((a, b) => b.amount - a.amount);
+    fieldSurpluses.sort((a, b) => b.amount - a.amount);
+    opsSurpluses.sort((a, b) => b.amount - a.amount);
+
     const newTransfers: TransferItem[] = [];
     
     // Phase 1: Transfer from Field Surpluses to Field Deficits
@@ -1301,7 +1305,7 @@ export default function BudgetTransferPage() {
               </div>
               
               {/* Document Preview Box */}
-              <div className="document-preview-container" id="printable-documents">
+              <div className="document-preview-container no-print" id="printable-documents">
                 {step3View === 'memo' && renderOfficialDocument()}
                 {step3View === 'approval' && renderExpenseApprovalForm()}
               </div>
