@@ -987,6 +987,59 @@ export default function BudgetTransferPage() {
           );
         })}
         
+        {(() => {
+          const getThaiBahtText = (amount: number) => {
+            if (!amount || amount === 0) return 'ศูนย์บาทถ้วน';
+            const numbers = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+            const positions = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+            let numStr = Math.floor(amount).toString();
+            let text = '';
+            for (let i = 0; i < numStr.length; i++) {
+                let n = parseInt(numStr[i]);
+                let p = numStr.length - i - 1;
+                if (n === 0) continue;
+                if (p === 0 && n === 1 && numStr.length > 1) {
+                    text += 'เอ็ด';
+                } else if (p === 1 && n === 1) {
+                    text += 'สิบ';
+                } else if (p === 1 && n === 2) {
+                    text += 'ยี่สิบ';
+                } else {
+                    text += numbers[n] + positions[p];
+                }
+            }
+            return text + 'บาทถ้วน';
+          };
+          return (
+            <div style={{ marginTop: '30px' }}>
+              <p className="print-paragraph" style={{ textIndent: '40px' }}>
+                จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติค่าใช้จ่ายหน้างานเป็นเงิน {fmt(totalAmount)}.- บาท ({getThaiBahtText(totalAmount)})
+              </p>
+              <p style={{ textIndent: '0px', marginBottom: '40px' }}>
+                โดยให้ ผจก.{peaOffice || '........................'} เป็นผู้เบิกและสั่งจ่ายจากเงินรายได้ของ ........................................ ต่อไป
+              </p>
+              
+              <div className="print-signatures vertical" style={{ marginTop: '50px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', padding: '0 40px' }}>
+                  
+                  <div className="signature-box" style={{ textAlign: 'center' }}>
+                    <div style={{ marginBottom: '50px' }}><br/></div>
+                    <div className="sig-name">({signer1Name || '...................................................'})</div>
+                    <div className="sig-title">{signer1Title || '...................................................'}</div>
+                  </div>
+
+                  <div className="signature-box right" style={{ textAlign: 'center' }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '30px', fontSize: '16pt' }}>อนุมัติ</div>
+                    <div style={{ marginBottom: '50px' }}><br/></div>
+                    <div className="sig-name">({signer2Name || '...................................................'})</div>
+                    <div className="sig-title">{signer2Title || '...................................................'}</div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
     );
