@@ -157,14 +157,12 @@ export default function BudgetTransferPage() {
     
     // Phase 1: Transfer from Field Surpluses to Field Deficits
     for (let d of fieldDeficits) {
-      // Round up to the next 100 to ensure remaining balance is > 0
-      let needed = (Math.floor(d.amount / 100) + 1) * 100;
+      let needed = Math.ceil(d.amount / 100) * 100;
       for (let s of fieldSurpluses) {
-        if (needed <= 0.001) break;
+        if (needed <= 0) break;
         
         let maxTake = Math.floor(s.amount / 100) * 100;
-        if (maxTake >= s.amount) maxTake -= 100;
-        if (maxTake <= 0.001) continue;
+        if (maxTake <= 0) continue;
 
         const transferAmount = Math.min(needed, maxTake);
         
@@ -185,16 +183,14 @@ export default function BudgetTransferPage() {
 
     // Phase 2: If there are still field deficits, use Operations Surpluses
     for (let d of fieldDeficits) {
-      // Round up to the next 100 to ensure remaining balance is > 0
-      let needed = (Math.floor(d.amount / 100) + 1) * 100;
-      if (needed <= 0.001) continue;
+      let needed = Math.ceil(d.amount / 100) * 100;
+      if (needed <= 0) continue;
       
       for (let s of opsSurpluses) {
-        if (needed <= 0.001) break;
+        if (needed <= 0) break;
 
         let maxTake = Math.floor(s.amount / 100) * 100;
-        if (maxTake >= s.amount) maxTake -= 100;
-        if (maxTake <= 0.001) continue;
+        if (maxTake <= 0) continue;
 
         const transferAmount = Math.min(needed, maxTake);
         
