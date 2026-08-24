@@ -742,26 +742,26 @@ body {
 .print-header {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   width: fit-content;
   margin-bottom: 20px;
 }
 .print-logo {
-  width: 60px;
-  height: 60px;
+  width: 55px;
+  height: 55px;
   object-fit: contain;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 .print-header-text {
-  font-size: 15pt;
+  font-size: 16pt;
   font-weight: bold;
-  text-align: center;
+  text-align: left;
   line-height: 1.2;
 }
 .print-header-text-eng {
-  font-size: 11pt;
+  font-size: 10pt;
   font-weight: bold;
-  text-align: center;
+  text-align: left;
 }
 .print-meta-table {
   width: 100%;
@@ -849,7 +849,7 @@ body {
 @media print {
   @page {
     size: A4;
-    margin: 20mm;
+    margin: 1.5cm 2cm 2cm 3cm;
   }
   
   .no-print {
