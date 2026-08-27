@@ -5,7 +5,7 @@ export const metadata = {
   title: "PEA Construction Update",
   description: "ระบบอัพเดทสถานะงานก่อสร้าง",
   icons: {
-    icon: '/favicon.png?v=3',
+    icon: '/favicon.png?v=4',
   }
 };
 
