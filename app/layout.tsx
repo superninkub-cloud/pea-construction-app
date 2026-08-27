@@ -4,6 +4,9 @@ import Sidebar from "./components/Sidebar";
 export const metadata = {
   title: "PEA Construction Update",
   description: "ระบบอัพเดทสถานะงานก่อสร้าง",
+  icons: {
+    icon: '/favicon.png',
+  }
 };
 
 import AuthWrapper from "./components/AuthWrapper";
