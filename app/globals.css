@@ -496,16 +496,59 @@ body {
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    height: 100vh;
-    left: 0;
-    top: 0;
-    transform: translateX(-100%);
-  }
+    .sidebar {
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      transform: translateX(-100%);
+    }
+    
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    
+    .stat-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 12px !important;
+    }
+    
+    .stat-card {
+      padding: 16px !important;
+    }
+    
+    .stat-title {
+      font-size: 0.9rem !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .stat-value {
+      font-size: 1.75rem !important;
+      margin: 4px 0 !important;
+    }
+    
+    .stat-subtitle {
+      font-size: 0.8rem !important;
+    }
+    
+    .stat-icon-wrapper {
+      padding: 10px !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .stat-icon-wrapper svg {
+      width: 24px;
+      height: 24px;
+    }
   
-  .sidebar.open {
-    transform: translateX(0);
+    .filter-grid {
+      grid-template-columns: 1fr !important;
+    }
+  
+  .topbar {
+    padding: 0 16px;
   }
 
   .sidebar-overlay.open {
@@ -516,10 +559,6 @@ body {
     display: block;
   }
   
-  .topbar {
-    padding: 0 16px;
-  }
-
   .user-info {
     display: none !important; /* Force hide name/role on mobile top bar */
   }
@@ -557,9 +596,6 @@ body {
     padding-bottom: 80px; /* Prevent bottom nav from covering content */
   }
   
-  .stat-grid {
-    grid-template-columns: 1fr !important;
-  }
 
   .filter-grid {
     grid-template-columns: 1fr !important;

@@ -13,6 +13,10 @@ function BottomNavContent() {
   if (pathname?.startsWith("/budget-transfer")) {
     return (
       <nav className="mobile-bottom-nav">
+        <Link href="/" className="mobile-nav-item">
+          <LayoutDashboard size={24} />
+          <span>หน้าหลัก</span>
+        </Link>
         <Link href="/budget-transfer?step=1" className={`mobile-nav-item ${currentStep === "1" ? "active" : ""}`}>
           <UploadCloud size={24} />
           <span>1. อัปโหลด</span>
@@ -32,6 +36,10 @@ function BottomNavContent() {
   if (pathname?.startsWith("/wire-return")) {
     return (
       <nav className="mobile-bottom-nav">
+        <Link href="/" className="mobile-nav-item">
+          <LayoutDashboard size={24} />
+          <span>หน้าหลัก</span>
+        </Link>
         <Link href="/wire-return?step=1" className={`mobile-nav-item ${currentStep === "1" ? "active" : ""}`}>
           <UploadCloud size={24} />
           <span>1. อัปโหลด</span>
@@ -50,17 +58,21 @@ function BottomNavContent() {
   if (pathname?.startsWith("/update")) {
     return (
       <nav className="mobile-bottom-nav">
+        <Link href="/" className="mobile-nav-item">
+          <LayoutDashboard size={24} />
+          <span>หน้าหลัก</span>
+        </Link>
         <Link href="/update?step=1" className={`mobile-nav-item ${currentStep === "1" ? "active" : ""}`}>
           <LayoutList size={24} />
           <span>งานทั้งหมด</span>
         </Link>
         <Link href="/update?step=2" className={`mobile-nav-item ${currentStep === "2" ? "active" : ""}`}>
           <Camera size={24} />
-          <span>อัปเดตงาน</span>
+          <span>อัปเดต</span>
         </Link>
         <Link href="/update?step=3" className={`mobile-nav-item ${currentStep === "3" ? "active" : ""}`}>
           <Calculator size={24} />
-          <span>คำนวณเศษสาย</span>
+          <span>คำนวณสาย</span>
         </Link>
       </nav>
     );
@@ -75,13 +87,13 @@ function BottomNavContent() {
         <FileEdit size={24} />
         <span>งานก่อสร้าง</span>
       </Link>
-      <Link href="#" className="mobile-nav-item">
-        <Bell size={24} />
-        <span>แจ้งเตือน</span>
+      <Link href="/wire-return" className={`mobile-nav-item ${pathname === "/wire-return" ? "active" : ""}`}>
+        <PackageSearch size={24} />
+        <span>คืนสายส่ง</span>
       </Link>
-      <Link href="#" className="mobile-nav-item">
-        <User size={24} />
-        <span>โปรไฟล์</span>
+      <Link href="/budget-transfer" className={`mobile-nav-item ${pathname === "/budget-transfer" ? "active" : ""}`}>
+        <FileText size={24} />
+        <span>โอนงบ</span>
       </Link>
     </nav>
   );
