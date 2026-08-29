@@ -496,6 +496,17 @@ body {
 }
 
 @media (max-width: 768px) {
+    body, .app-layout {
+      overflow: visible !important;
+      height: auto !important;
+      min-height: 100dvh !important;
+    }
+    
+    .main-content, .content-area {
+      overflow: visible !important;
+      height: auto !important;
+    }
+    
     .sidebar {
       position: fixed;
       height: 100vh;
