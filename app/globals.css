@@ -107,11 +107,12 @@ body {
 }
 
 /* Main Area Wrapper */
-.main-wrapper {
+.main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -520,7 +521,31 @@ body {
   }
 
   .user-info {
-    display: none; /* Hide name/role on mobile top bar */
+    display: none !important; /* Force hide name/role on mobile top bar */
+  }
+
+  .avatar {
+    display: none !important; /* Hide avatar on mobile to save space */
+  }
+
+  .logout-text {
+    display: none;
+  }
+
+  .btn-logout {
+    padding: 8px !important;
+    min-height: 40px !important;
+  }
+
+  .topbar-left {
+    max-width: 75%; /* allow title to truncate */
+  }
+
+  .topbar-title {
+    font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .mobile-bottom-nav {
@@ -529,6 +554,7 @@ body {
 
   .content-area {
     padding: 16px;
+    padding-bottom: 80px; /* Prevent bottom nav from covering content */
   }
   
   .stat-grid {

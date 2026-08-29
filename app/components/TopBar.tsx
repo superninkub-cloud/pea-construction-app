@@ -50,7 +50,7 @@ export default function TopBar({ title }: { title: string }) {
           className="btn-logout"
           title="ออกจากระบบ"
         >
-          <LogOut size={16} /> ออกจากระบบ
+          <LogOut size={16} /> <span className="logout-text">ออกจากระบบ</span>
         </button>
       </div>
     </div>
