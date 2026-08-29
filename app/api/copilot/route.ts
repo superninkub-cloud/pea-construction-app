@@ -58,6 +58,6 @@ ${JSON.stringify(projects)}
 
   } catch (error) {
     console.error("Error in copilot API:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }
