@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Plus, Trash2, Save, FileText, ArrowRight, ArrowRightLeft, UploadCloud, Loader2, HelpCircle, Lightbulb, ShieldCheck, FileType, Copy, Image as ImageIcon } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import dynamic from 'next/dynamic';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { Suspense, useEffect } from 'react';
 
 const Xarrow = dynamic(() => import('react-xarrows'), { ssr: false });
 
@@ -28,8 +30,28 @@ type TransferItem = {
   amount: number;
 };
 
-export default function BudgetTransferPage() {
-  const [currentStep, setCurrentStep] = useState(1);
+function BudgetTransferContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  
+  const [currentStep, setCurrentStepState] = useState(1);
+
+  // Sync state with URL parameter
+  useEffect(() => {
+    const stepParam = searchParams?.get('step');
+    if (stepParam) {
+      setCurrentStepState(Number(stepParam));
+    }
+  }, [searchParams]);
+
+  // Update URL when step changes internally
+  const setCurrentStep = (step: number) => {
+    setCurrentStepState(step);
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('step', step.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
   
   // Step 1 Form Data
   const [docNo, setDocNo] = useState('');
@@ -1399,3 +1421,5 @@ export default function BudgetTransferPage() {
     </div>
   );
 }
+e x p o r t   d e f a u l t   f u n c t i o n   B u d g e t T r a n s f e r P a g e ( )   {   r e t u r n   < S u s p e n s e   f a l l b a c k = { < d i v > L o a d i n g . . . < / d i v > } > < B u d g e t T r a n s f e r C o n t e n t   / > < / S u s p e n s e > ;   }  
+ 

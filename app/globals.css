@@ -585,6 +585,10 @@ body {
     min-height: 48px; /* minimum height for easy tapping */
   }
 
+  .wizard-stepper {
+    display: none;
+  }
+
   .form-control, .form-select {
     min-height: 48px; /* minimum height for easy tapping */
     font-size: 16px; /* 16px prevents iOS Safari auto-zoom on focus */
