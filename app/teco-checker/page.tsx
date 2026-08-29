@@ -312,8 +312,9 @@ export default function TecoChecker() {
                   <button 
                     className="btn btn-secondary" 
                     onClick={() => {
-                      const text = encodeURIComponent("แจ้งผลการตรวจสอบเอกสาร ZPSR018\n\n" + (result ? result.substring(0, 500) + "...\n(อ่านรายงานเต็มได้ในระบบ)" : ""));
-                      window.open(`https://line.me/R/msg/text/?${text}`, '_blank');
+                      const shareText = encodeURIComponent(`แจ้งผลการตรวจสอบเอกสาร ZPSR018 (WBS: ${selectedWbs})\nกรุณาเข้าระบบเพื่อดูรายงาน AI แบบเต็ม`);
+                      const currentUrl = encodeURIComponent(window.location.href);
+                      window.open(`https://social-plugins.line.me/lineit/share?url=${currentUrl}&text=${shareText}`, '_blank');
                     }}
                     style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#00B900', color: 'white', borderColor: '#00B900' }}
                   >
