@@ -20,6 +20,8 @@ import AuthWrapper from "./components/AuthWrapper";
 
 import ClientLayout from "./components/ClientLayout";
 
+import CopilotWidget from "./components/CopilotWidget";
+
 export default function RootLayout({
   children,
 }: {
@@ -31,6 +33,7 @@ export default function RootLayout({
         <AuthWrapper>
           <ClientLayout>
             {children}
+            <CopilotWidget />
           </ClientLayout>
         </AuthWrapper>
       </body>

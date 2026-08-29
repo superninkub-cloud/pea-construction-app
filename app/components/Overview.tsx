@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
-import { Home, CheckCircle2, CircleDashed, Layers, Users } from "lucide-react";
+import { Home, CheckCircle2, CircleDashed, Layers, Users, AlertTriangle } from "lucide-react";
 import { wireDataList } from "../../lib/wireData";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function Overview() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -179,104 +180,90 @@ export default function Overview() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
 
-            {/* Donut Chart Card */}
+            {/* Recharts Pie Chart */}
             <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '32px', alignSelf: 'center', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '48px', width: '100%' }}>
-                <div className="donut-chart-container" style={{ width: '220px', height: '220px' }}>
-                  <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
-                    {/* Background circle */}
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="#f1f5f9"
-                      strokeWidth="6"
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '16px', alignSelf: 'flex-start', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
+              
+              <div style={{ width: '100%', height: '300px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'F4 (ปิดงาน)', value: filteredProjects.filter(p => p.status === 'F4').length },
+                        { name: 'D1', value: filteredProjects.filter(p => p.status === 'D1').length },
+                        { name: 'อื่นๆ', value: filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                      label={({ name, percent }) => (percent && percent > 0) ? `${name} ${(percent * 100).toFixed(0)}%` : null}
+                    >
+                      <Cell fill="#10b981" />
+                      <Cell fill="#f59e0b" />
+                      <Cell fill="var(--pea-purple)" />
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      itemStyle={{ color: '#1e293b', fontWeight: '600' }}
                     />
-
-                    {/* Note: In a real app we'd calculate stroke-dasharray dynamically. 
-                        For now, we'll use a static placeholder that looks like the mockup */}
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="6"
-                      strokeDasharray="25, 100"
-                    />
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="#f59e0b"
-                      strokeWidth="6"
-                      strokeDasharray="20, 100"
-                      strokeDashoffset="-25"
-                    />
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="var(--pea-purple)"
-                      strokeWidth="6"
-                      strokeDasharray="55, 100"
-                      strokeDashoffset="-45"
-                    />
-                  </svg>
-                  <div className="donut-chart-text">
-                    <div className="value" style={{ fontSize: '3.5rem', fontWeight: '700', color: 'var(--text-dark)', lineHeight: '1.1' }}>{filteredProjects.length}</div>
-                    <div className="label" style={{ fontSize: '1.1rem', color: 'var(--text-light)' }}>โครงการ</div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontSize: '1.1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '80px' }}>F4 (ปิดงาน)</span>
-                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'F4').length}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '80px' }}>D1</span>
-                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'D1').length}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: 'var(--pea-purple)' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '80px' }}>อื่นๆ</span>
-                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length}</span>
-                  </div>
-                </div>
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Supervisor Comparison */}
+            {/* Supervisor Comparison Bar Chart */}
             {supervisorStats.length > 0 && (
-              <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
+              <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Users size={20} color="var(--pea-purple)" />
-                  เปรียบเทียบผลงานการปิดงาน (F4) ของช่างแต่ละคน
+                  เปรียบเทียบจำนวนงาน F4 และงานทั้งหมด แยกตามช่าง
                 </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-                  {supervisorStats.map(stat => (
-                    <div key={stat.name} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'flex-start' }}>
-                        <span style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.95rem' }}>{stat.name}</span>
-                        <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: stat.percentage >= 80 ? '#10b981' : (stat.percentage >= 40 ? '#f59e0b' : '#ef4444') }}>
-                            {stat.percentage.toFixed(1)}%
-                          </span>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', marginTop: '-2px' }}>(อัตราการปิดงานสำเร็จ)</div>
-                        </div>
-                      </div>
-                      <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '12px' }}>
-                        <div style={{ height: "100%", width: `${Math.min(stat.percentage, 100)}%`, backgroundColor: stat.percentage >= 80 ? "#10b981" : (stat.percentage >= 40 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-light)', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
-                        <span>จำนวนงานทั้งหมด: <span style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{stat.total}</span> โครงการ</span>
-                        <span>ปิดงาน F4 แล้ว: <span style={{ fontWeight: '600', color: '#10b981' }}>{stat.f4}</span> โครงการ</span>
-                      </div>
-                    </div>
-                  ))}
+                <div style={{ width: '100%', height: '350px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={supervisorStats} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} angle={-45} textAnchor="end" />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+                      <Tooltip 
+                        cursor={{ fill: '#f1f5f9' }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      />
+                      <Legend verticalAlign="top" height={36} />
+                      <Bar dataKey="total" name="งานทั้งหมด" fill="var(--pea-purple)" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="f4" name="ปิดงาน (F4)" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
             )}
+            
+            {/* KPI Alerts Section */}
+            {(() => {
+              const pendingTeco = filteredProjects.filter(p => 
+                p.check1 && p.check2 && p.check3 && p.check4 && p.check5 && !p.check6 && p.status !== 'F4'
+              ).length;
+              const missingWire = filteredProjects.filter(p => p.check1 && !p.check2).length;
+
+              if (pendingTeco === 0 && missingWire === 0) return null;
+
+              return (
+                <div className="card animation-fade-in" style={{ gridColumn: '1 / -1', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '16px', padding: '20px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <div style={{ padding: '12px', background: '#fef3c7', borderRadius: '50%', color: '#d97706' }}>
+                    <AlertTriangle size={28} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#b45309', margin: '0 0 8px 0' }}>แจ้งเตือนด่วน (Action Required)</h3>
+                    <ul style={{ margin: 0, paddingLeft: '20px', color: '#92400e', fontSize: '0.95rem' }}>
+                      {pendingTeco > 0 && <li>มี <strong style={{ fontSize: '1.1rem' }}>{pendingTeco}</strong> โครงการที่พร้อมเอกสารครบแล้ว แต่ยังไม่ได้ทำจ่าย/TECO (รอ Check 6)</li>}
+                      {missingWire > 0 && <li>มี <strong style={{ fontSize: '1.1rem' }}>{missingWire}</strong> โครงการที่ก่อสร้างเสร็จแล้ว (Check 1) แต่ยังไม่ได้ส่งคืนเศษสาย</li>}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
             {/* Filters Card */}
@@ -394,6 +381,18 @@ export default function Overview() {
                     <option value="ไม่เสร็จในปี 2569">ไม่เสร็จในปี 2569</option>
                   </select>
                 </div>
+                <button className="btn btn-secondary" onClick={async () => {
+                  try {
+                    const res = await fetch('/api/cron/daily-alerts');
+                    const data = await res.json();
+                    if (data.error) alert(`Error: ${data.error}`);
+                    else alert(data.message);
+                  } catch(e) {
+                    alert('Failed to send notification');
+                  }
+                }} style={{ width: '100%', background: '#00B900', color: 'white', border: 'none' }}>
+                  💬 ส่งแจ้งเตือน LINE
+                </button>
                 <button className="btn btn-primary" onClick={handlePrint} style={{ width: '100%' }}>
                   🖨️ พิมพ์
                 </button>
