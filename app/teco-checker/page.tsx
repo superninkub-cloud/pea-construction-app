@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import TopBar from "../components/TopBar";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { supabase } from "../../lib/supabaseClient";
+import { Project } from "../../lib/types";
 
 export default function TecoChecker() {
   const [file, setFile] = useState<File | null>(null);
@@ -11,6 +13,27 @@ export default function TecoChecker() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedWbs, setSelectedWbs] = useState<string>("");
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('wbs, name, scrap_wires_data')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      setProjects((data as unknown as Project[]) || []);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+    }
+  };
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -52,6 +75,7 @@ export default function TecoChecker() {
 
   const clearFile = () => {
     setFile(null);
+    setSelectedWbs("");
     setResult(null);
     setError(null);
     if (fileInputRef.current) {
@@ -60,6 +84,10 @@ export default function TecoChecker() {
   };
 
   const checkDocument = async () => {
+    if (!selectedWbs) {
+      setError("กรุณาเลือกโครงการก่อสร้างก่อน");
+      return;
+    }
     if (!file) {
       setError("กรุณาเลือกไฟล์เอกสาร ZPSR018 (PDF)");
       return;
@@ -69,8 +97,15 @@ export default function TecoChecker() {
     setError(null);
     setResult(null);
 
+    const selectedProject = projects.find(p => p.wbs === selectedWbs);
+    const projectName = selectedProject?.name || "";
+    const scrapData = selectedProject?.scrap_wires_data ? JSON.stringify(selectedProject.scrap_wires_data) : "";
+
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("wbs", selectedWbs);
+    formData.append("projectName", projectName);
+    formData.append("scrapData", scrapData);
 
     try {
       const response = await fetch("/api/check-teco", {
@@ -110,8 +145,32 @@ export default function TecoChecker() {
               ระบบ AI ตรวจสอบเอกสารก่อนปิดงาน
             </h2>
             <p style={{ color: 'var(--text-light)', marginBottom: '24px' }}>
-              อัปโหลดไฟล์เอกสาร ZPSR018 (PDF) ระบบจะใช้ AI วิเคราะห์ความครบถ้วนของการเบิก-คืนพัสดุ งบประมาณ และ PR/PO อัตโนมัติ
+              เลือกโครงการและอัปโหลดไฟล์เอกสาร ZPSR018 (PDF) ระบบจะใช้ AI วิเคราะห์ความครบถ้วนของการเบิก-คืนพัสดุ งบประมาณ และ PR/PO อัตโนมัติ
             </p>
+
+            {/* Project Selection */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+                1. เลือกโครงการ (WBS)
+              </label>
+              <select 
+                className="input-field" 
+                value={selectedWbs} 
+                onChange={(e) => setSelectedWbs(e.target.value)}
+                disabled={loading}
+              >
+                <option value="">-- เลือกโครงการ --</option>
+                {projects.map(p => (
+                  <option key={p.wbs} value={p.wbs}>
+                    {p.wbs} - {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+              2. อัปโหลดไฟล์ ZPSR018
+            </label>
 
             {/* Upload Area */}
             {!file ? (
@@ -238,15 +297,45 @@ export default function TecoChecker() {
           {/* Result Section */}
           {result && (
             <div className="card" style={{ marginTop: '24px', animation: 'fadeIn 0.5s ease' }}>
-              <h3 style={{ 
-                marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px',
-                color: 'var(--pea-purple)'
-              }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                </svg>
-                ผลการตรวจสอบจาก AI
-              </h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ 
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  color: 'var(--pea-purple)'
+                }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                  </svg>
+                  ผลการตรวจสอบจาก AI
+                </h3>
+                
+                <div style={{ display: 'flex', gap: '8px' }} className="no-print">
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={() => {
+                      const text = encodeURIComponent("แจ้งผลการตรวจสอบเอกสาร ZPSR018\n\n" + (result ? result.substring(0, 500) + "...\n(อ่านรายงานเต็มได้ในระบบ)" : ""));
+                      window.open(`https://line.me/R/msg/text/?${text}`, '_blank');
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#00B900', color: 'white', borderColor: '#00B900' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    แชร์ LINE
+                  </button>
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={() => window.print()}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                      <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
+                    พิมพ์รายงาน
+                  </button>
+                </div>
+              </div>
               
               <div 
                 style={{ 
