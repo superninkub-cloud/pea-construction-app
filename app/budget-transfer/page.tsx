@@ -1421,5 +1421,4 @@ function BudgetTransferContent() {
     </div>
   );
 }
-e x p o r t   d e f a u l t   f u n c t i o n   B u d g e t T r a n s f e r P a g e ( )   {   r e t u r n   < S u s p e n s e   f a l l b a c k = { < d i v > L o a d i n g . . . < / d i v > } > < B u d g e t T r a n s f e r C o n t e n t   / > < / S u s p e n s e > ;   }  
- 
+export default function BudgetTransferPage() { return <Suspense fallback={<div>Loading...</div>}><BudgetTransferContent /></Suspense>; }
