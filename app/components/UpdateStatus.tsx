@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
@@ -8,6 +9,10 @@ import { Plus, X } from "lucide-react";
 import { wireDataList } from "../../lib/wireData";
 
 export default function UpdateStatus() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const step = searchParams?.get("step");
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
@@ -16,6 +21,14 @@ export default function UpdateStatus() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [selectedWbs, setSelectedWbs] = useState("");
+  const [isScrapModalOpen, setIsScrapModalOpen] = useState(false);
+  
+  // Calculator State
+  const [calcWireId, setCalcWireId] = useState("");
+  const [calcLength, setCalcLength] = useState("");
+  const [calcPercentage, setCalcPercentage] = useState("100");
+  const [calcWeight, setCalcWeight] = useState("");
+  const [calcActiveInput, setCalcActiveInput] = useState<"length" | "weight" | "percentage" | null>(null);
 
   const [project, setProject] = useState<Project | null>(null);
 
@@ -101,6 +114,19 @@ export default function UpdateStatus() {
     const role = sessionStorage.getItem("pea_role");
     if (role) setUserRole(role);
   }, []);
+
+  // Handle URL step changes
+  useEffect(() => {
+    if (step === "1") {
+      setSelectedWbs("");
+      setIsScrapModalOpen(false);
+    } else if (step === "2") {
+      setIsScrapModalOpen(false);
+      // We don't alert here because it could be annoying, just let them be on the form if selected, or list if not
+    } else if (step === "3") {
+      setIsScrapModalOpen(true);
+    }
+  }, [step]);
 
   const fetchProjects = async () => {
     const { data, error } = await supabase
@@ -250,6 +276,71 @@ export default function UpdateStatus() {
       setProject(null);
     }
   }, [selectedWbs, projects]);
+
+  const selectedCalcWire = wireDataList.find(w => w.id === calcWireId);
+  
+  const handleCalcWireChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newId = e.target.value;
+    setCalcWireId(newId);
+    const wire = wireDataList.find(w => w.id === newId);
+    if (wire) {
+      if ((calcActiveInput === "length" || calcActiveInput === "percentage") && calcLength && !isNaN(Number(calcLength))) {
+        const p = Number(calcPercentage) || 0;
+        setCalcWeight((Number(calcLength) * (p / 100) * wire.weightPerMeter).toFixed(2));
+      } else if (calcActiveInput === "weight" && calcWeight && !isNaN(Number(calcWeight)) && wire.weightPerMeter > 0) {
+        if (calcLength && !isNaN(Number(calcLength)) && Number(calcLength) > 0) {
+           const newPercent = (Number(calcWeight) / (Number(calcLength) * wire.weightPerMeter)) * 100;
+           setCalcPercentage(newPercent.toFixed(1));
+        } else {
+           const p = Number(calcPercentage) || 100;
+           if (p > 0) {
+             setCalcLength((Number(calcWeight) / (wire.weightPerMeter * (p / 100))).toFixed(2));
+           }
+        }
+      }
+    }
+  };
+
+  const handleCalcLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcLength(val);
+    setCalcActiveInput("length");
+    if (selectedCalcWire && val && !isNaN(Number(val))) {
+      const p = Number(calcPercentage) || 0;
+      setCalcWeight((Number(val) * (p / 100) * selectedCalcWire.weightPerMeter).toFixed(2));
+    } else {
+      setCalcWeight("");
+    }
+  };
+
+  const handleCalcWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcWeight(val);
+    setCalcActiveInput("weight");
+    if (selectedCalcWire && val && !isNaN(Number(val)) && selectedCalcWire.weightPerMeter > 0) {
+      if (calcLength && !isNaN(Number(calcLength)) && Number(calcLength) > 0) {
+        const p = (Number(val) / (Number(calcLength) * selectedCalcWire.weightPerMeter)) * 100;
+        setCalcPercentage(p.toFixed(1));
+      } else {
+        const p = Number(calcPercentage) || 100;
+        if (p > 0) {
+          setCalcLength((Number(val) / (selectedCalcWire.weightPerMeter * (p / 100))).toFixed(2));
+        }
+      }
+    } else {
+      if (!calcLength) setCalcPercentage("100");
+    }
+  };
+
+  const handleCalcPercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcPercentage(val);
+    setCalcActiveInput("percentage");
+    if (selectedCalcWire && calcLength && !isNaN(Number(calcLength))) {
+      const p = Number(val) || 0;
+      setCalcWeight((Number(calcLength) * (p / 100) * selectedCalcWire.weightPerMeter).toFixed(2));
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -2384,6 +2475,114 @@ export default function UpdateStatus() {
               >
                 {addLoading ? "กำลังบันทึก..." : "💾 บันทึกงานใหม่"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isScrapModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="card animation-fade-in" style={{ width: '100%', maxWidth: '500px', margin: 0, position: 'relative', background: '#ffffff', borderRadius: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+            <button
+              onClick={() => router.push('/update?step=2')}
+              style={{ position: 'absolute', top: '24px', right: '24px', background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b' }}
+            >
+              <span style={{ fontSize: '18px', fontWeight: 'bold' }}>X</span>
+            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#f5eff5', color: '#7e22ce', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '24px' }}>🧮</span>
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>โปรแกรมคำนวณเศษสายไฟฟ้า</h3>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>คำนวณน้ำหนักและความยาวของเศษสายได้อย่างรวดเร็ว</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>เลือกประเภทสาย / รหัสพัสดุ</label>
+                <select 
+                  className="form-select"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#f8fafc', outline: 'none', fontSize: '0.95rem', color: '#1e293b', fontWeight: '500' }}
+                  value={calcWireId}
+                  onChange={handleCalcWireChange}
+                >
+                  <option value="">-- เลือกสายไฟฟ้า --</option>
+                  {wireDataList.map(w => (
+                    <option key={w.id} value={w.id}>[{w.id}] {w.name} ({w.category})</option>
+                  ))}
+                </select>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '8px', height: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                  {selectedCalcWire ? (
+                    <>
+                      <span>น้ำหนักต่อเมตร: <span style={{ fontWeight: '600', color: '#3b82f6' }}>{selectedCalcWire.weightPerMeter}</span> กก./เมตร</span>
+                      <span style={{ color: '#94a3b8' }}>{selectedCalcWire.category}</span>
+                    </>
+                  ) : ""}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f1f5f9', padding: '16px', borderRadius: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>ความยาว (เมตร)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="number"
+                      placeholder="0"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'length' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'length' && calcLength ? '700' : '500', fontSize: '1rem' }}
+                      value={calcLength}
+                      onChange={handleCalcLengthChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>ม.</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>น้ำหนัก (กิโลกรัม)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="number"
+                      placeholder="0"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'weight' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'weight' && calcWeight ? '700' : '500', fontSize: '1rem' }}
+                      value={calcWeight}
+                      onChange={handleCalcWeightChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>กก.</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>% ค่าเผื่อสาย (เพื่อความยืดหยุ่น)</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <input 
+                    type="range" 
+                    min="0" max="120" step="1" 
+                    style={{ flex: 1, accentColor: '#7e22ce' }}
+                    value={calcPercentage || "0"}
+                    onChange={(e) => handleCalcPercentageChange(e as any)}
+                    disabled={!selectedCalcWire}
+                  />
+                  <div style={{ position: 'relative', width: '80px' }}>
+                    <input 
+                      type="number"
+                      style={{ width: '100%', padding: '8px 12px', paddingRight: '24px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: '#0f172a', fontWeight: '600', fontSize: '0.95rem' }}
+                      value={calcPercentage}
+                      onChange={handleCalcPercentageChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>%</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '32px' }}>
+                <button onClick={() => router.push('/update?step=2')} style={{ width: '100%', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer' }}>ปิดหน้าต่างนี้</button>
+              </div>
             </div>
           </div>
         </div>

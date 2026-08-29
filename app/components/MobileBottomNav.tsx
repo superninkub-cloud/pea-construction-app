@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { LayoutDashboard, FileEdit, Bell, User, UploadCloud, FileText, Printer, PackageSearch } from "lucide-react";
+import { LayoutDashboard, FileEdit, Bell, User, UploadCloud, FileText, Printer, PackageSearch, LayoutList, Camera, Calculator } from "lucide-react";
 import { Suspense } from "react";
 
 function BottomNavContent() {
@@ -47,7 +47,24 @@ function BottomNavContent() {
       </nav>
     );
   }
-
+  if (pathname?.startsWith("/update")) {
+    return (
+      <nav className="mobile-bottom-nav">
+        <Link href="/update?step=1" className={`mobile-nav-item ${currentStep === "1" ? "active" : ""}`}>
+          <LayoutList size={24} />
+          <span>งานทั้งหมด</span>
+        </Link>
+        <Link href="/update?step=2" className={`mobile-nav-item ${currentStep === "2" ? "active" : ""}`}>
+          <Camera size={24} />
+          <span>อัปเดตงาน</span>
+        </Link>
+        <Link href="/update?step=3" className={`mobile-nav-item ${currentStep === "3" ? "active" : ""}`}>
+          <Calculator size={24} />
+          <span>คำนวณเศษสาย</span>
+        </Link>
+      </nav>
+    );
+  }
   return (
     <nav className="mobile-bottom-nav">
       <Link href="/" className={`mobile-nav-item ${pathname === "/" ? "active" : ""}`}>
