@@ -132,17 +132,19 @@ export default function TecoChecker() {
       <TopBar title="ตรวจสอบ TECO (ZPSR018)" />
       
       <div className="content-area">
-        <div className="budget-transfer-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div className="card">
-            <h2 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-              ระบบ AI ตรวจสอบเอกสารก่อนปิดงาน
+        <div className="budget-transfer-container" style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '40px' }}>
+          <div className="modern-card">
+            <h2 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ padding: '8px', background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)', borderRadius: '12px', color: 'var(--pea-purple)' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+              <span className="gradient-text">ระบบ AI ตรวจสอบเอกสารก่อนปิดงาน</span>
             </h2>
             <p style={{ color: 'var(--text-light)', marginBottom: '24px' }}>
               เลือกโครงการและอัปโหลดไฟล์เอกสาร ZPSR018 (PDF) ระบบจะใช้ AI วิเคราะห์ความครบถ้วนของการเบิก-คืนพัสดุ งบประมาณ และ PR/PO อัตโนมัติ
@@ -175,20 +177,11 @@ export default function TecoChecker() {
             {/* Upload Area */}
             {!file ? (
               <div 
-                className={`upload-dropzone ${isDragging ? 'dragging' : ''}`}
+                className={`modern-upload-zone ${isDragging ? 'dragging' : ''}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                style={{
-                  border: '2px dashed var(--border)',
-                  borderRadius: '16px',
-                  padding: '48px 24px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  backgroundColor: isDragging ? '#f8fafc' : 'white',
-                  transition: 'all 0.2s ease'
-                }}
               >
                 <input 
                   type="file" 
@@ -197,54 +190,55 @@ export default function TecoChecker() {
                   accept=".pdf" 
                   style={{ display: 'none' }} 
                 />
-                <div style={{ 
-                  width: '64px', height: '64px', 
-                  borderRadius: '50%', 
-                  backgroundColor: '#f1f5f9', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 16px auto',
-                  color: 'var(--pea-purple)'
-                }}>
+                <div className="icon-circle">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17 8 12 3 7 8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
                   </svg>
                 </div>
-                <h3 style={{ marginBottom: '8px' }}>ลากไฟล์ PDF มาวางที่นี่</h3>
-                <p style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>หรือคลิกเพื่อเลือกไฟล์เอกสาร ZPSR018</p>
+                <h3 style={{ marginBottom: '8px', color: '#1e293b' }}>ลากไฟล์ PDF มาวางที่นี่</h3>
+                <p style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>หรือคลิกเพื่อเลือกไฟล์เอกสาร ZPSR018 (ส่วนที่ 2)</p>
               </div>
             ) : (
               <div style={{
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '16px',
+                border: '1px solid var(--pea-purple)',
+                borderRadius: '16px',
+                padding: '20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                backgroundColor: '#f8fafc'
+                backgroundColor: '#f5f3ff',
+                boxShadow: '0 4px 12px rgba(116, 56, 163, 0.08)'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--pea-purple)" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                  </svg>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ padding: '10px', background: 'white', borderRadius: '12px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--pea-purple)" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                  </div>
                   <div>
-                    <div style={{ fontWeight: 500 }}>{file.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>
-                      {(file.size / 1024).toFixed(1)} KB
+                    <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '1.05rem', marginBottom: '2px' }}>{file.name}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>
+                      {(file.size / 1024).toFixed(1)} KB • เอกสารพร้อมตรวจสอบ
                     </div>
                   </div>
                 </div>
                 <button 
                   onClick={clearFile}
                   style={{ 
-                    background: 'none', border: 'none', color: 'var(--text-light)', 
-                    cursor: 'pointer', padding: '8px'
+                    background: 'white', border: '1px solid #e2e8f0', color: '#64748b', 
+                    cursor: 'pointer', padding: '10px', borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                   }}
+                  onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                  onMouseOut={(e) => e.currentTarget.style.color = '#64748b'}
                   disabled={loading}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
@@ -264,30 +258,33 @@ export default function TecoChecker() {
 
             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
               <button 
-                className="btn btn-primary" 
+                className="btn btn-primary modern-btn" 
                 onClick={checkDocument}
                 disabled={!file || loading}
                 style={{ 
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  opacity: (!file || loading) ? 0.7 : 1
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  opacity: (!file || loading) ? 0.7 : 1,
+                  padding: '12px 24px',
+                  fontSize: '1.05rem',
+                  background: 'linear-gradient(135deg, var(--pea-purple) 0%, #9f7aea 100%)',
+                  border: 'none',
+                  color: 'white'
                 }}
               >
                 {loading ? (
                   <>
-                    <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg className="animate-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25"></circle>
                       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
                     </svg>
-                    กำลังให้ AI วิเคราะห์เอกสาร...
+                    กำลังประมวลผลด้วย AI...
                   </>
                 ) : (
                   <>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                      <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                      <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                     </svg>
-                    เริ่มตรวจสอบ (TECO Check)
+                    เริ่มตรวจสอบเอกสาร
                   </>
                 )}
               </button>
@@ -296,27 +293,31 @@ export default function TecoChecker() {
 
           {/* Result Section */}
           {result && (
-            <div className="card" style={{ marginTop: '24px', animation: 'fadeIn 0.5s ease' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div className="result-card" style={{ marginTop: '32px', animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
                 <h3 style={{ 
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  color: 'var(--pea-purple)'
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  color: 'var(--pea-purple)',
+                  margin: 0,
+                  fontSize: '1.25rem'
                 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                  </svg>
-                  ผลการตรวจสอบจาก AI
+                  <div style={{ padding: '8px', background: '#f5f3ff', borderRadius: '10px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                    </svg>
+                  </div>
+                  ผลวิเคราะห์จาก AI
                 </h3>
                 
-                <div style={{ display: 'flex', gap: '8px' }} className="no-print">
+                <div style={{ display: 'flex', gap: '12px' }} className="no-print">
                   <button 
-                    className="btn btn-secondary" 
+                    className="modern-btn" 
                     onClick={() => {
                       const shareText = encodeURIComponent(`แจ้งผลการตรวจสอบเอกสาร ZPSR018 (WBS: ${selectedWbs})\nกรุณาเข้าระบบเพื่อดูรายงาน AI แบบเต็ม`);
                       const currentUrl = encodeURIComponent(window.location.href);
                       window.open(`https://social-plugins.line.me/lineit/share?url=${currentUrl}&text=${shareText}`, '_blank');
                     }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#00B900', color: 'white', borderColor: '#00B900' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#00B900', color: 'white', border: 'none' }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -324,9 +325,9 @@ export default function TecoChecker() {
                     แชร์ LINE
                   </button>
                   <button 
-                    className="btn btn-secondary" 
+                    className="modern-btn" 
                     onClick={() => window.print()}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'white', border: '1px solid #cbd5e1', color: '#334155' }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -340,11 +341,11 @@ export default function TecoChecker() {
               
               <div 
                 style={{ 
-                  backgroundColor: '#f8fafc', 
-                  padding: '24px', 
+                  backgroundColor: 'white', 
+                  padding: '32px', 
                   borderRadius: '12px',
                   border: '1px solid #e2e8f0',
-                  lineHeight: '1.6'
+                  boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)'
                 }}
                 className="markdown-content"
               >
