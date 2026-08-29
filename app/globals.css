@@ -148,7 +148,14 @@ body {
   border: none;
   cursor: pointer;
   color: var(--text-dark);
-  padding: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-btn:active {
+  background-color: rgba(0,0,0,0.05);
+  transform: scale(0.95);
 }
 
 .topbar-title {
@@ -317,6 +324,10 @@ body {
   border: none;
 }
 
+.btn:active {
+  transform: scale(0.97);
+}
+
 .btn-primary {
   background-color: var(--pea-purple);
   color: white;
@@ -324,6 +335,30 @@ body {
 
 .btn-primary:hover {
   background-color: var(--pea-purple-light);
+}
+
+.btn-logout {
+  margin-left: 12px;
+  padding: 6px 12px;
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background-color: #fecaca;
+}
+
+.btn-logout:active {
+  transform: scale(0.95);
 }
 
 /* Status Badges */
@@ -434,10 +469,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   color: var(--text-light);
   font-size: 0.7rem;
   text-decoration: none;
+  flex: 1;
+  height: 100%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.mobile-nav-item:active {
+  background-color: #f1f5f9;
 }
 
 .mobile-nav-item.active {
@@ -535,6 +578,24 @@ body {
   
   .table-custom td:not(:last-child) {
     border-bottom: 1px solid #f1f5f9;
+  }
+
+  /* Mobile Touch Target Optimizations */
+  .btn, .btn-logout {
+    min-height: 48px; /* minimum height for easy tapping */
+  }
+
+  .form-control, .form-select {
+    min-height: 48px; /* minimum height for easy tapping */
+    font-size: 16px; /* 16px prevents iOS Safari auto-zoom on focus */
+  }
+
+  .mobile-menu-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

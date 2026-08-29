@@ -47,23 +47,7 @@ export default function TopBar({ title }: { title: string }) {
         </div>
         <button 
           onClick={handleLogout}
-          style={{
-            marginLeft: '12px',
-            padding: '6px 12px',
-            backgroundColor: '#fee2e2',
-            color: '#ef4444',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fecaca'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
+          className="btn-logout"
           title="ออกจากระบบ"
         >
           <LogOut size={16} /> ออกจากระบบ
