@@ -75,7 +75,7 @@ export default function GuidePage() {
         </div>
 
         {/* Right Side: AI Chat Assistant */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", backgroundColor: "#fff", maxWidth: "50%" }}>
+        <div style={{ width: "380px", display: "flex", flexDirection: "column", backgroundColor: "#fff", borderLeft: "1px solid #e5e7eb" }}>
           <div style={{ padding: "10px 15px", backgroundColor: "#6366f1", color: "white", fontWeight: "bold", display: "flex", alignItems: "center" }}>
             <span style={{ marginRight: "10px", fontSize: "1.2rem" }}>🤖</span> 
             ผู้ช่วย AI กฟภ. (ถาม-ตอบ 115kV)
