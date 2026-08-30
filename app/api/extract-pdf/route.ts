@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
+const pdfParse = require("pdf-parse");
 
 // Specify edge or node runtime. Edge might have issues with some large files if limit is reached,
 // but for 1-10 page PDFs, it should be fine. We'll use nodejs runtime just to be safe.

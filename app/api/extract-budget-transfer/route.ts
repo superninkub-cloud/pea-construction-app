@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
+const pdfParse = require("pdf-parse");
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // Max allowed for Vercel Hobby plan
