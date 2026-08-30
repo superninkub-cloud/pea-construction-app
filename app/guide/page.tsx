@@ -17,7 +17,7 @@ export default function GuidePage() {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([
-    { role: "assistant", content: "สวัสดีครับ! ผมคือผู้ช่วย AI ประจำคู่มืองานก่อสร้างสายส่ง 115 kV ของ กฟภ. \n\nมีอะไรให้ผมช่วยค้นหา หรือมีข้อสงสัยเกี่ยวกับมาตรฐานการก่อสร้างตรงไหน พิมพ์ถามผมได้เลยครับ!" }
+    { role: "assistant", content: "สวัสดีครับ! ผมคือผู้ช่วย AI ประจำคู่มือเทคนิคงานก่อสร้างระบบ 115 kV ของ กฟภ. \n\nมีอะไรให้ผมช่วยค้นหา หรือมีข้อสงสัยเกี่ยวกับมาตรฐานการก่อสร้าง หลักเกณฑ์ระบบสายส่ง สถานีไฟฟ้า 115 kV หรือคำนวณระยะ Sag & Tension พิมพ์ถามผมได้เลยครับ!" }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -68,13 +68,13 @@ export default function GuidePage() {
   };
 
   const topics = [
-    { id: "sag", title: "การคำนวณแรงดึง/ระยะหย่อนยาน", desc: "Sag & Tension Calculator", icon: <Activity size={32} />, bg: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", color: "white" },
-    { id: "clearance", title: "ระยะห่างทางไฟฟ้า", desc: "Clearances", icon: <Ruler size={32} />, bg: "linear-gradient(135deg, #10b981 0%, #059669 100%)", color: "white" },
-    { id: "structure", title: "แบบมาตรฐานโครงสร้างเสา", desc: "115 kV Standard Structures", icon: <Cpu size={32} />, bg: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)", color: "white" },
-    { id: "conductor", title: "คุณสมบัติสายไฟฟ้า", desc: "Conductors & Thermal Limit", icon: <Zap size={32} />, bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", color: "white" },
-    { id: "insulator", title: "ลูกถ้วยและการประกอบชุด", desc: "Insulators Assemblies", icon: <Shield size={32} />, bg: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)", color: "white" },
-    { id: "pole", title: "เสาคอนกรีตและการต่อลงดิน", desc: "Poles & Grounding", icon: <MapPin size={32} />, bg: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)", color: "white" },
-    { id: "hardware", title: "อุปกรณ์ประกอบฮาร์ดแวร์", desc: "Hardware Accessories", icon: <Wrench size={32} />, bg: "linear-gradient(135deg, #64748b 0%, #475569 100%)", color: "white" },
+    { id: "sag", title: "การคำนวณแรงดึง/ระยะหย่อนยาน", desc: "Sag & Tension Calculator (AAC, ACSR, RTS)", icon: <Activity size={32} />, bg: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", color: "white" },
+    { id: "clearance", title: "ระยะห่างทางไฟฟ้า", desc: "Clearances (ผนังเปิด/ปิด, แนวดิ่ง, ข้ามถนน)", icon: <Ruler size={32} />, bg: "linear-gradient(135deg, #10b981 0%, #059669 100%)", color: "white" },
+    { id: "structure", title: "แบบมาตรฐานโครงสร้างเสา", desc: "115 kV Pole Heads (SS-TG, SS-SA, SS-AS, LA, DD)", icon: <Cpu size={32} />, bg: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)", color: "white" },
+    { id: "conductor", title: "คุณสมบัติสายไฟฟ้า & แรงดึง", desc: "Conductors, RTS Tensile & Thermal Limits", icon: <Zap size={32} />, bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", color: "white" },
+    { id: "insulator", title: "ลูกถ้วยและการประกอบชุด", desc: "Insulators & Assemblies (D-1 ถึง D-19)", icon: <Shield size={32} />, bg: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)", color: "white" },
+    { id: "pole", title: "เสาคอนกรีตและการต่อลงดิน", desc: "22m Pole Holes, Grounding (GR, GS, GC, GW)", icon: <MapPin size={32} />, bg: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)", color: "white" },
+    { id: "hardware", title: "อุปกรณ์ประกอบฮาร์ดแวร์", desc: "Hardware Accessories & Installation", icon: <Wrench size={32} />, bg: "linear-gradient(135deg, #64748b 0%, #475569 100%)", color: "white" },
   ];
 
   const renderContent = () => {
@@ -84,7 +84,7 @@ export default function GuidePage() {
           <iframe
             src="https://pea-foundation-guide-c4e3.vercel.app/"
             style={{ width: "100%", height: "100%", border: "none" }}
-            title="คู่มืองานก่อสร้าง 115kV"
+            title="คู่มือเทคนิคงานก่อสร้างระบบ 115 kV"
             allowFullScreen
           />
         );
@@ -107,14 +107,14 @@ export default function GuidePage() {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column", backgroundColor: "#f8fafc", position: "relative" }}>
-      <TopBar title="ศูนย์รวมความรู้ 115 kV (Knowledge Hub)" />
+      <TopBar title="ศูนย์รวมความรู้ระบบ 115 kV (Knowledge Hub)" />
       
       <div style={{ flex: 1, padding: "30px", overflowY: "auto" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           
           <div style={{ marginBottom: "30px", textAlign: "center" }}>
-            <h1 style={{ fontSize: "2.2rem", color: "#1e293b", marginBottom: "10px", fontWeight: "800" }}>คู่มือมาตรฐานการก่อสร้างสายส่ง 115 kV</h1>
-            <p style={{ color: "#64748b", fontSize: "1.1rem" }}>เลือกหัวข้อที่คุณต้องการศึกษา หรือสอบถามข้อมูลเพิ่มเติมผ่านผู้ช่วย AI ของเรา</p>
+            <h1 style={{ fontSize: "2.2rem", color: "#1e293b", marginBottom: "10px", fontWeight: "800" }}>คู่มือเทคนิคงานก่อสร้างระบบ 115 kV</h1>
+            <p style={{ color: "#64748b", fontSize: "1.1rem" }}>หลักเกณฑ์ทางวิศวกรรม มาตรฐานการก่อสร้างสายส่งและอุปกรณ์ 115 kV กฟภ. (ตามเกณฑ์วางแผนระบบไฟฟ้า 2565)</p>
           </div>
 
           {!selectedTopic ? (
@@ -130,7 +130,7 @@ export default function GuidePage() {
                   <BookOpen size={40} />
                 </div>
                 <h3 style={{ fontSize: "1.3rem", fontWeight: "bold", textAlign: "center", marginBottom: "5px" }}>เปิดอ่านคู่มือฉบับเต็ม</h3>
-                <p style={{ color: "#cbd5e1", textAlign: "center", fontSize: "0.9rem", margin: 0 }}>(PDF 313 หน้า)</p>
+                <p style={{ color: "#cbd5e1", textAlign: "center", fontSize: "0.9rem", margin: 0 }}>(PDF 313 หน้า / หลักเกณฑ์ กฟภ. ปี 2565)</p>
               </div>
 
               {topics.map((topic) => (
