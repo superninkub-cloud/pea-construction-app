@@ -54,7 +54,7 @@ export default function Overview() {
     return (num || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const filteredProjects = projects.filter((p) => {
+  const baseFilteredProjects = projects.filter((p) => {
     if (
       (p.wbs && (p.wbs.includes("IMPORTANT_TASKS") || p.wbs.includes("SAFETY_PLAN"))) ||
       (p.name && (p.name.includes("Important Tasks") || p.name.includes("Safety Training")))
@@ -62,7 +62,6 @@ export default function Overview() {
       return false;
     }
     const s = p.status || "ไม่มีข้อมูล";
-    const sup = p.supervisor || "ไม่ระบุ";
 
     const matchYear = true; // year is handled in loop below
     let yearMatched = true;
@@ -75,7 +74,6 @@ export default function Overview() {
 
     const matchStatus = statusFilters.length === 0 || statusFilters.includes(s);
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
-    const matchSupervisor = supervisorFilter === "ALL" || sup === supervisorFilter;
     const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม");
     const currentActionPlan = p.action_plan || "";
     const matchActionPlan = actionPlanFilter === "ALL" || (currentActionPlan === "" && actionPlanFilter === "ไม่ได้กำหนด") || currentActionPlan === actionPlanFilter;
@@ -84,12 +82,14 @@ export default function Overview() {
     const matchSearch = Object.values(p).some((val) =>
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
-    return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
+    return matchStatus && matchMonth && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
   });
+
+  const filteredProjects = baseFilteredProjects.filter(p => supervisorFilter === "ALL" || (p.supervisor || "ไม่ระบุ") === supervisorFilter);
   const totalF4OfAll = filteredProjects.filter(p => p.status === 'F4').length;
   
   const supervisorStats = supervisors.map(sup => {
-    const supProjects = filteredProjects.filter(p => (p.supervisor || "ไม่ระบุ") === sup);
+    const supProjects = baseFilteredProjects.filter(p => (p.supervisor || "ไม่ระบุ") === sup);
     const total = supProjects.length;
     const f4 = supProjects.filter(p => p.status === 'F4').length;
     const percentage = total > 0 ? (f4 / total) * 100 : 0;
@@ -223,9 +223,21 @@ export default function Overview() {
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '8px' }}>
                   {supervisorStats.map(stat => (
-                    <div key={stat.name} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', background: '#f8fafc' }}>
+                    <div 
+                      key={stat.name} 
+                      onClick={() => supervisorFilter === stat.name ? setSupervisorFilter("ALL") : setSupervisorFilter(stat.name)}
+                      style={{ 
+                        border: supervisorFilter === stat.name ? '2px solid var(--pea-purple)' : '1px solid #e2e8f0', 
+                        borderRadius: '8px', 
+                        padding: '16px', 
+                        background: supervisorFilter === stat.name ? '#f5f3ff' : '#f8fafc',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: supervisorFilter === stat.name ? '0 4px 12px rgba(116, 56, 163, 0.1)' : 'none'
+                      }}
+                    >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontWeight: '600', color: '#1e293b' }}>{stat.name}</span>
+                        <span style={{ fontWeight: '600', color: supervisorFilter === stat.name ? 'var(--pea-purple)' : '#1e293b' }}>{stat.name}</span>
                         <div style={{ textAlign: 'right' }}>
                           <span style={{ fontWeight: '700', color: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') }}>
                             {stat.percentage.toFixed(1)}%
