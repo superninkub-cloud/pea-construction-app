@@ -277,6 +277,86 @@ const PEA_HARDWARE_DATA: PEAHardwareItem[] = [
     storageType: "คลังในร่ม (โปร่ง/ทึบ)",
     caution: "ระวังรัศมีการดัดโค้งของสายไฟเบอร์ออปติก (Bending Radius) ต้องไม่น้อยกว่า 20 เท่าของเส้นผ่านศูนย์กลางสาย",
     svgType: "opgw_joint_box"
+  },
+  {
+    id: "insulator_d1",
+    name: "ชุดลูกถ้วยแขวนแนวดิ่ง 115 kV (พวง D-1 / D-11)",
+    englishName: "Vertical Suspension Insulator Assembly (D-1/D-11)",
+    peaCode: "1030010001",
+    standardNo: "PEA Standard 115 kV",
+    category: "insulator_fittings",
+    categoryName: "4. หมวดลูกถ้วยฉนวนและอุปกรณ์ประกอบ",
+    functionDesc: "ชุดพวงลูกถ้วยแขวน (Suspension String) จำนวน 7-8 ลูก ห้อยในแนวดิ่งอิสระ สำหรับเสาทางตรง (Tangent Pole 0°-2°) หรือคอนท้าวแขน (Alley Arm) เพื่อรองรับน้ำหนักและเป็นฉนวนสาย 115 kV",
+    installationGuide: [
+      "ประกอบ Ball-Eye หรือ Socket-Clevis เข้าที่ก้านลูกถ้วยลูกแรกเพื่อยึดกับคอนเหล็ก",
+      "ประกอบลูกถ้วยแบบ Socket & Ball เรียงต่อกัน 7-8 ลูก พร้อมใส่ Cotter Pin ล็อกกันหลุด",
+      "ปลายพวงลูกถ้วยประกอบ Socket-Eye และ Suspension Clamp หรือ AGS สำหรับจับสายตัวนำ"
+    ],
+    specs: "ลูกถ้วยพอร์ซเลนเคลือบสีน้ำตาล (Brown Glaze) ขนาด 254x146 มม. (10 นิ้ว) พิกัดแรงดึง (M&E) > 120 kN / 27,000 lbs",
+    toolsRequired: "รอกสลิงยกพวงลูกถ้วย (Hand Winch), คีมบีบ Cotter Pin",
+    storageType: "ลานกลางแจ้ง",
+    caution: "ห้ามโยนหรือกระแทกลูกถ้วยขณะขนย้าย และต้องตรวจสอบรอยบิ่น/ร้าว ก่อนนำขึ้นติดตั้งบนยอดเสา",
+    svgType: "insulator_d1"
+  },
+  {
+    id: "insulator_d3",
+    name: "ชุดลูกถ้วยเข้าปลายสาย 115 kV (พวง D-3 / D-13)",
+    englishName: "Dead-End Tension Insulator Assembly (D-3/D-13)",
+    peaCode: "1030010003",
+    standardNo: "PEA Standard 115 kV",
+    category: "insulator_fittings",
+    categoryName: "4. หมวดลูกถ้วยฉนวนและอุปกรณ์ประกอบ",
+    functionDesc: "ชุดพวงลูกถ้วยรับแรงดึงแนวนอน (Tension String) จำนวน 7-8 ลูก สำหรับเสาดึงตรึงสาย (Anchor/Section) หรือเสาหัวมุม (Large Angle) รับแรงดึงสูงมาก",
+    installationGuide: [
+      "ใช้เหล็กยื่นสองปลาย (Double Arming Plate) ยึดก้าน Strain Clevis เข้ากับคอนเหล็กคู่",
+      "ประกอบลูกถ้วยแรงดึงสูงต่อเรียงกันในแนวนอน",
+      "ประกอบเข้ากับแคล้มป์เข้าปลายสายแบบบีบ (Compression Dead-End Clamp) ย้ำติดสายตัวนำ"
+    ],
+    specs: "ลูกถ้วยพอร์ซเลน ทนแรงดึงประลัย (M&E) > 160 kN / 36,000 lbs (ขนาดสาย 400 ตร.มม.)",
+    toolsRequired: "รอกดึงสาย (Come-along), เครื่องบีบไฮดรอลิกย้ำปลายสาย",
+    storageType: "ลานกลางแจ้ง",
+    caution: "ห้ามใช้ลูกถ้วยแบบแขวนแนวดิ่ง (D-1) มาประกอบเป็นพวงแนวนอนรับแรงดึง (D-3) เด็ดขาด เนื่องจากพิกัดรับแรงกลต่างกัน",
+    svgType: "insulator_d3"
+  },
+  {
+    id: "line_post_insulator",
+    name: "ลูกถ้วยโพสท์ 115 kV แนวนอน (Horizontal Line Post)",
+    englishName: "Line Post Insulator, Horizontal Mounting 115 kV",
+    peaCode: "1030040012",
+    standardNo: "ANSI C29.7 / PEA Standard",
+    category: "insulator_fittings",
+    categoryName: "4. หมวดลูกถ้วยฉนวนและอุปกรณ์ประกอบ",
+    functionDesc: "ลูกถ้วยฉนวนชนิดก้านทึบ (Solid Core) ติดตั้งยื่นแนวนอนออกจากต้นเสา ใช้สำหรับประคองสายจัมเปอร์ (Jumper) ที่เสาเข้าปลายสายและเสาหัวมุม (SS-LA, DD-LA) เพื่อรักษาระยะ Clearance",
+    installationGuide: [
+      "ยึดฐานหน้าแปลนของลูกถ้วย (Gain Base) เข้ากับรูน็อตที่เจาะบนเสา คอร. 22 ม.",
+      "ปลายลูกถ้วยมีหัวจับสาย (Trunnion Clamp) สำหรับล็อกสายจัมเปอร์",
+      "ตรวจสอบการดัดสายจัมเปอร์ไม่ให้ตึงหรือรั้งหัวลูกถ้วยเกินไป"
+    ],
+    specs: "แกนไฟเบอร์กลาสหุ้มซิลิโคน (Polymer) หรือแกนพอร์ซเลนเคลือบ ทนแรงดัดโค้ง (Cantilever Load) > 6 kN",
+    toolsRequired: "ประแจขันสลักเกลียวยึดหน้าแปลนลูกถ้วย",
+    storageType: "คลังในร่ม (โปร่ง/ทึบ)",
+    caution: "รับน้ำหนักแรงดัดโค้งได้จำกัด ห้ามนำไปใช้รับแรงดึงหรือแขวนสายไฟโดยตรงเด็ดขาด",
+    svgType: "line_post"
+  },
+  {
+    id: "pg_clamp",
+    name: "แคล้มป์จับสายขนาน (Parallel Groove Clamp / PG Clamp)",
+    englishName: "Connector, Parallel Groove Clamp (PG) / T-Clamp",
+    peaCode: "1020460010",
+    standardNo: "PEA Connector Spec",
+    category: "conductor_acc",
+    categoryName: "5. หมวดสายไฟฟ้าและอุปกรณ์ประกอบ",
+    functionDesc: "แคล้มป์จับสายอะลูมิเนียมประกบกัน 2 เส้นแบบขนาน (ร่องคู่) ใช้สำหรับรวบสายจัมเปอร์ลูป (Jumper Loop) หรือแยกแทปสายไฟ โดยไม่ต้องตัดสายเมน",
+    installationGuide: [
+      "ขัดผิวสายตัวนำด้วยแปรงลวดสแตนเลส (Wire Brush) ให้สะอาด",
+      "ทาครีมกันออกไซด์ (Oxide Inhibitor Compound) ทั้งสายไฟและร่องแคล้มป์",
+      "ประกบแคล้มป์รัดสายไฟทั้ง 2 เส้น และขันสลักเกลียวด้วยประแจปอนด์ (Torque Wrench) จนแน่นตามพิกัด"
+    ],
+    specs: "อลูมิเนียมอัลลอยด์ชนิดแข็ง ทนกระแสสูง สลักเกลียวชุบกัลวาไนซ์พร้อมแหวนสปริง Belleville",
+    toolsRequired: "ประแจปอนด์, แปรงขัดลวดสแตนเลส",
+    storageType: "คลังในร่ม (โปร่ง/ทึบ)",
+    caution: "สลักเกลียวต้องขันให้แน่นตามพิกัด Torque หากหลวมจะเกิดความร้อนสะสมจนสายไหม้ขาด (Hot Spot)",
+    svgType: "pg_clamp"
   }
 ];
 
@@ -912,6 +992,152 @@ function RealisticHardwareSVG({ type }: { type: string }) {
 
           <text x="160" y="280" fill="#38bdf8" fontSize="10" textAnchor="middle">เพิ่มระยะห่างจากคอน ป้องกันลูกถ้วยแกว่งชน</text>
           <text x="160" y="315" fill="#fed7aa" fontSize="11" textAnchor="middle" fontWeight="bold">ที่แขวนลูกถ้วยทางโค้งรูปตัวยู (1030140012)</text>
+        </svg>
+      );
+
+    case "insulator_d1":
+      // Vertical Suspension Insulator D-1 String (7 Discs + Suspension Clamp)
+      return (
+        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Top Crossarm Channel Bracket */}
+          <rect x="120" y="20" width="80" height="20" fill="#64748b" stroke="#334155" strokeWidth="2" />
+          <circle cx="160" cy="30" r="4" fill="#090d16" />
+
+          {/* U-Shackle & Ball Eye connecting to Crossarm */}
+          <path d="M 152,40 L 152,55 Q 160,65 168,55 L 168,40" stroke="#cbd5e1" strokeWidth="4" fill="none" />
+          <circle cx="160" cy="62" r="5" fill="#94a3b8" />
+          
+          {/* Suspension String 7-Disc Sequence */}
+          <g>
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+              const yBase = 70 + i * 26;
+              return (
+                <g key={i}>
+                  {/* Socket Cap (Galvanized Iron) */}
+                  <rect x="153" y={yBase} width="14" height="12" rx="2" fill="#94a3b8" />
+                  {/* Porcelain Disc (Brown Glaze) */}
+                  <path d={`M 115,${yBase+12} Q 160,${yBase+5} 205,${yBase+12} L 195,${yBase+20} Q 160,${yBase+14} 125,${yBase+20} Z`} fill="#9a3412" stroke="#7c2d12" strokeWidth="1.5" />
+                  {/* Ball Pin (Galvanized Steel sticking down) */}
+                  <rect x="156" y={yBase+20} width="8" height="6" fill="#cbd5e1" />
+                </g>
+              );
+            })}
+          </g>
+
+          {/* Socket Clevis at Bottom */}
+          <rect x="152" y="252" width="16" height="14" rx="2" fill="#94a3b8" />
+          <path d="M 154,266 L 154,280 M 166,266 L 166,280" stroke="#cbd5e1" strokeWidth="3" />
+          <circle cx="160" cy="278" r="3" fill="#090d16" />
+
+          {/* Suspension Clamp (Aluminum) & Conductor */}
+          <rect x="135" y="275" width="50" height="20" rx="4" fill="#cbd5e1" stroke="#64748b" strokeWidth="2" />
+          <line x1="20" y1="285" x2="300" y2="285" stroke="#f59e0b" strokeWidth="8" strokeLinecap="round" />
+          
+          <text x="160" y="325" fill="#fed7aa" fontSize="11" textAnchor="middle" fontWeight="bold">พวงลูกถ้วยแขวนแนวดิ่ง 115 kV (D-1 / D-11)</text>
+          <text x="240" y="160" fill="#38bdf8" fontSize="10">ลูกถ้วยพอร์ซเลน 7 ลูก</text>
+          <text x="235" y="290" fill="#f59e0b" fontSize="10">ACSR 400 mm²</text>
+        </svg>
+      );
+
+    case "insulator_d3":
+      // Dead-End Tension Insulator D-3 String (Horizontal)
+      return (
+        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Pole & Double Arming Plates */}
+          <rect x="10" y="140" width="30" height="60" fill="#64748b" stroke="#334155" strokeWidth="2" />
+          <rect x="30" y="150" width="20" height="40" fill="#94a3b8" />
+          <circle cx="40" cy="170" r="4" fill="#090d16" />
+
+          {/* Tension String Horizontal Sequence */}
+          <g>
+            <path d="M 50,165 L 70,165 Q 75,170 70,175 L 50,175" stroke="#cbd5e1" strokeWidth="3" fill="none" />
+            <circle cx="75" cy="170" r="5" fill="#94a3b8" />
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+              const xBase = 85 + i * 22;
+              return (
+                <g key={i} transform={`translate(${xBase}, 170) rotate(-90)`}>
+                  <rect x="-7" y="0" width="14" height="12" rx="2" fill="#94a3b8" />
+                  <path d="M -45,12 Q 0,5 45,12 L 35,20 Q 0,14 -35,20 Z" fill="#9a3412" stroke="#7c2d12" strokeWidth="1.5" />
+                  <rect x="-4" y="20" width="8" height="6" fill="#cbd5e1" />
+                </g>
+              );
+            })}
+          </g>
+
+          {/* Socket-Eye and Compression Dead-End Clamp */}
+          <rect x="238" y="163" width="14" height="14" rx="2" fill="#94a3b8" />
+          <path d="M 252,168 L 265,168 M 252,172 L 265,172" stroke="#cbd5e1" strokeWidth="3" />
+          <circle cx="265" cy="170" r="3" fill="#090d16" />
+
+          {/* Hex Crimp Body of Dead End */}
+          <rect x="270" y="162" width="50" height="16" rx="2" fill="#cbd5e1" stroke="#64748b" strokeWidth="2" />
+          <polygon points="275,162 275,140 295,140 295,162" fill="#94a3b8" stroke="#475569" strokeWidth="2" />
+          <circle cx="285" cy="150" r="4" fill="#090d16" />
+
+          <text x="160" y="230" fill="#38bdf8" fontSize="10" textAnchor="middle">พวงลูกถ้วยแรงดึงแนวนอน 7-8 ลูก (Dead-End Tension)</text>
+          <text x="160" y="325" fill="#fed7aa" fontSize="11" textAnchor="middle" fontWeight="bold">ลูกถ้วยเข้าปลายสาย 115 kV (พวง D-3 / D-13)</text>
+        </svg>
+      );
+
+    case "line_post":
+      // Horizontal Line Post Insulator
+      return (
+        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Concrete Pole Trunk */}
+          <rect x="20" y="60" width="60" height="240" fill="#64748b" stroke="#475569" strokeWidth="2" />
+          <line x1="50" y1="60" x2="50" y2="300" stroke="#cbd5e1" strokeDasharray="6 4" />
+
+          {/* Line Post Base & Insulator Body */}
+          <rect x="80" y="150" width="15" height="60" rx="3" fill="#94a3b8" stroke="#334155" strokeWidth="2" />
+          <circle cx="85" cy="160" r="4" fill="#090d16" />
+          <circle cx="85" cy="200" r="4" fill="#090d16" />
+
+          {/* Solid Core Polymer/Porcelain Sheds */}
+          <rect x="95" y="172" width="160" height="16" fill="#9a3412" />
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+            <ellipse key={i} cx={105 + i * 18} cy="180" rx="6" ry="30" fill="#ea580c" stroke="#9a3412" strokeWidth="2" />
+          ))}
+
+          {/* Trunnion Clamp at End holding Jumper loop */}
+          <rect x="255" y="165" width="25" height="30" rx="4" fill="#cbd5e1" stroke="#475569" strokeWidth="2" />
+          <path d="M 280,180 Q 295,210 260,250 L 230,250" stroke="#f59e0b" strokeWidth="8" fill="none" strokeLinecap="round" />
+          <path d="M 280,180 Q 295,150 260,110 L 230,110" stroke="#f59e0b" strokeWidth="8" fill="none" strokeLinecap="round" />
+
+          <text x="175" y="240" fill="#38bdf8" fontSize="10" textAnchor="middle">ป้องกันสายจัมเปอร์แกว่งช็อตเสา</text>
+          <text x="160" y="325" fill="#fed7aa" fontSize="11" textAnchor="middle" fontWeight="bold">ลูกถ้วยโพสท์แนวนอน (Line Post Insulator)</text>
+        </svg>
+      );
+
+    case "pg_clamp":
+      // Parallel Groove Clamp joining 2 thick conductors
+      return (
+        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Main Conductor & Jumper Branching */}
+          <line x1="20" y1="120" x2="300" y2="120" stroke="#f59e0b" strokeWidth="14" strokeLinecap="round" />
+          <path d="M 160,135 Q 160,240 250,260" stroke="#f59e0b" strokeWidth="14" fill="none" strokeLinecap="round" />
+
+          {/* 3-Bolt PG Clamp Body (Aluminum Extruded) */}
+          <rect x="110" y="105" width="100" height="45" rx="6" fill="#cbd5e1" stroke="#475569" strokeWidth="3" />
+          <line x1="110" y1="128" x2="210" y2="128" stroke="#64748b" strokeWidth="4" />
+
+          {/* Bolts & Washers */}
+          {[0, 1, 2].map(i => (
+            <g key={i}>
+              <rect x={125 + i * 30} y="95" width="12" height="10" rx="2" fill="#94a3b8" />
+              <rect x={123 + i * 30} y="150" width="16" height="5" fill="#64748b" />
+              <rect x={126 + i * 30} y="155" width="10" height="8" rx="1" fill="#334155" />
+            </g>
+          ))}
+
+          {/* Sparkle Clean connection indicator */}
+          <circle cx="160" cy="120" r="15" fill="#ffffff" fillOpacity="0.4" />
+          <path d="M 160,95 L 160,105 M 160,135 L 160,145 M 140,120 L 150,120 M 170,120 L 180,120" stroke="#fbbf24" strokeWidth="2" />
+
+          <text x="160" y="80" fill="#fbbf24" fontSize="10" textAnchor="middle" fontWeight="bold">สายเมน 115 kV</text>
+          <text x="250" y="245" fill="#fbbf24" fontSize="10" textAnchor="middle" fontWeight="bold">สายแยก / จัมเปอร์ลูป</text>
+          
+          <text x="160" y="195" fill="#38bdf8" fontSize="10" textAnchor="middle">ขันสลักเกลียวด้วยประแจปอนด์</text>
+          <text x="160" y="325" fill="#fed7aa" fontSize="11" textAnchor="middle" fontWeight="bold">แคล้มป์จับสายขนาน (PG Clamp / T-Clamp)</text>
         </svg>
       );
 
