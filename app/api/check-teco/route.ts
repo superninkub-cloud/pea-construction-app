@@ -33,9 +33,6 @@ export async function POST(req: NextRequest) {
     const pdf = await getDocumentProxy(pdfBuffer);
     const { text: extractedText } = await extractText(pdf, { mergePages: true });
 
-    // Use gemini-3.7-flash
-    const model = genAI.getGenerativeModel({ model: "gemini-3.7-flash" });
-
     let scrapContext = "";
     if (scrapData && scrapData !== "[]" && scrapData !== "") {
       scrapContext = `
@@ -69,10 +66,32 @@ ${scrapContext}
 
     const prompt = promptOverride || defaultPrompt;
 
-    const result = await model.generateContent([
-      `ข้อมูลจากเอกสาร PDF:\n${extractedText}\n\n`,
-      prompt,
-    ]);
+    const modelsToTry = ["gemini-3.7-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"];
+    let result;
+    let lastError;
+
+    for (const modelName of modelsToTry) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        result = await model.generateContent([
+          `ข้อมูลจากเอกสาร PDF:\n${extractedText}\n\n`,
+          prompt,
+        ]);
+        console.log(`Successfully used model: ${modelName}`);
+        break; // Success!
+      } catch (err: any) {
+        console.warn(`Model ${modelName} failed:`, err.message);
+        lastError = err;
+        // If it's not a 503 Service Unavailable or 429 Too Many Requests, stop trying
+        if (!err.message?.includes("503") && !err.message?.includes("429") && err.status !== 503 && err.status !== 429) {
+          break;
+        }
+      }
+    }
+
+    if (!result) {
+      throw lastError || new Error("All AI models are currently overloaded. Please try again later.");
+    }
 
     const responseText = result.response.text();
 
