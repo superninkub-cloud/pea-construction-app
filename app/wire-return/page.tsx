@@ -474,7 +474,7 @@ export default function WireReturnPage() {
                   </div>
                   
                   {/* Donut Chart SVG */}
-                  <div style={{ width: '80px', height: '80px', position: 'relative' }}>
+                  <div style={{ width: '80px', height: '80px', position: 'relative', flexShrink: 0 }}>
                     <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
                       <path
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"

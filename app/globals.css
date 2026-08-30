@@ -1250,16 +1250,11 @@ body {
 
   /* 2. Responsive Recharts (Bar/Pie Charts) */
   .recharts-wrapper {
-    width: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
-    min-height: 250px;
   }
   
   .recharts-surface {
-    width: 100% !important;
     max-width: 100% !important;
-    height: 100% !important;
   }
 
   .recharts-legend-wrapper {
