@@ -249,31 +249,6 @@ export default function Overview() {
                 </div>
               </div>
             )}
-            
-            {/* KPI Alerts Section */}
-            {(() => {
-              const pendingTeco = filteredProjects.filter(p => 
-                p.check1 && p.check2 && p.check3 && p.check4 && p.check5 && !p.check6 && p.status !== 'F4'
-              ).length;
-              const missingWire = filteredProjects.filter(p => p.check1 && !p.check2).length;
-
-              if (pendingTeco === 0 && missingWire === 0) return null;
-
-              return (
-                <div className="card animation-fade-in" style={{ gridColumn: '1 / -1', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '16px', padding: '20px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                  <div style={{ padding: '12px', background: '#fef3c7', borderRadius: '50%', color: '#d97706' }}>
-                    <AlertTriangle size={28} />
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#b45309', margin: '0 0 8px 0' }}>แจ้งเตือนด่วน (Action Required)</h3>
-                    <ul style={{ margin: 0, paddingLeft: '20px', color: '#92400e', fontSize: '0.95rem' }}>
-                      {pendingTeco > 0 && <li>มี <strong style={{ fontSize: '1.1rem' }}>{pendingTeco}</strong> โครงการที่พร้อมเอกสารครบแล้ว แต่ยังไม่ได้ทำจ่าย/TECO (รอ Check 6)</li>}
-                      {missingWire > 0 && <li>มี <strong style={{ fontSize: '1.1rem' }}>{missingWire}</strong> โครงการที่ก่อสร้างเสร็จแล้ว (Check 1) แต่ยังไม่ได้ส่งคืนเศษสาย</li>}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })()}
           </div>
 
             {/* Filters Card */}
@@ -391,18 +366,6 @@ export default function Overview() {
                     <option value="ไม่เสร็จในปี 2569">ไม่เสร็จในปี 2569</option>
                   </select>
                 </div>
-                <button className="btn btn-secondary" onClick={async () => {
-                  try {
-                    const res = await fetch('/api/cron/daily-alerts');
-                    const data = await res.json();
-                    if (data.error) alert(`Error: ${data.error}`);
-                    else alert(data.message);
-                  } catch(e) {
-                    alert('Failed to send notification');
-                  }
-                }} style={{ width: '100%', background: '#00B900', color: 'white', border: 'none' }}>
-                  💬 ส่งแจ้งเตือน LINE
-                </button>
                 <button className="btn btn-primary" onClick={handlePrint} style={{ width: '100%' }}>
                   🖨️ พิมพ์
                 </button>
