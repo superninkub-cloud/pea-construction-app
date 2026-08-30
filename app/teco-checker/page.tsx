@@ -155,19 +155,50 @@ export default function TecoChecker() {
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
                 1. เลือกโครงการ (WBS)
               </label>
-              <select 
-                className="input-field" 
-                value={selectedWbs} 
-                onChange={(e) => setSelectedWbs(e.target.value)}
-                disabled={loading}
-              >
-                <option value="">-- เลือกโครงการ --</option>
-                {projects.map(p => (
-                  <option key={p.wbs} value={p.wbs}>
-                    {p.wbs} - {p.name}
-                  </option>
-                ))}
-              </select>
+              <div style={{ position: 'relative' }}>
+                <select 
+                  className="input-field" 
+                  value={selectedWbs} 
+                  onChange={(e) => setSelectedWbs(e.target.value)}
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#fff',
+                    fontSize: '1rem',
+                    color: '#1e293b',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    outline: 'none',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = 'var(--pea-purple)'}
+                  onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}
+                >
+                  <option value="">-- เลือกโครงการ --</option>
+                  {projects.filter(p => p.wbs && !p.wbs.includes('SAFETY_PLAN')).map(p => (
+                    <option key={p.wbs} value={p.wbs}>
+                      {p.wbs} - {p.name}
+                    </option>
+                  ))}
+                </select>
+                <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#64748b' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                เลือกหมายเลขงานเพื่อนำข้อมูลในโปรแกรมมาเปรียบเทียบให้ถูกต้องมากขึ้น
+              </div>
             </div>
 
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
