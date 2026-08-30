@@ -80,6 +80,7 @@ export default function UpdateStatus() {
   const [userRole, setUserRole] = useState("user");
   const [viewMode, setViewMode] = useState("grid");
   const [expandedWbs, setExpandedWbs] = useState(new Set<string>());
+  const [showAllProgress, setShowAllProgress] = useState(false);
 
   // Add New Project State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -1953,6 +1954,25 @@ export default function UpdateStatus() {
                 >
                   📄 แบบรายการ
                 </button>
+                <button
+                  onClick={() => setShowAllProgress(!showAllProgress)}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: showAllProgress ? "#fff" : "transparent",
+                    color: showAllProgress ? "var(--pea-purple)" : "#64748b",
+                    fontWeight: showAllProgress ? "600" : "500",
+                    cursor: "pointer",
+                    boxShadow: showAllProgress
+                      ? "0 1px 3px rgba(0,0,0,0.1)"
+                      : "none",
+                    transition: "all 0.2s",
+                    marginLeft: "4px"
+                  }}
+                >
+                  {showAllProgress ? "ซ่อนความคืบหน้า" : "แสดงความคืบหน้า"}
+                </button>
               </div>
             </div>
 
@@ -2271,7 +2291,7 @@ export default function UpdateStatus() {
                           style={{
                             color: "var(--text-light)",
                             fontSize: "0.8rem",
-                            marginBottom: isExpanded ? "16px" : "0",
+                            marginBottom: isExpanded || showAllProgress ? "16px" : "0",
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center"
@@ -2290,12 +2310,12 @@ export default function UpdateStatus() {
                               justifyContent: "center",
                               color: "#64748b",
                             }}
-                            title={isExpanded ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
+                            title={isExpanded || showAllProgress ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
                           >
-                            {isExpanded ? "▲" : "▼"}
+                            {isExpanded || showAllProgress ? "▲" : "▼"}
                           </button>
                         </div>
-                        {isExpanded && detailsContent}
+                        {(isExpanded || showAllProgress) && detailsContent}
                       </>
                     ) : (
                       <>
@@ -2355,11 +2375,12 @@ export default function UpdateStatus() {
                               justifyContent: "center",
                               color: "#64748b",
                             }}
+                            title={isExpanded || showAllProgress ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
                           >
-                            {isExpanded ? "▲" : "▼"}
+                            {isExpanded || showAllProgress ? "▲" : "▼"}
                           </button>
                         </div>
-                        {isExpanded && detailsContent}
+                        {(isExpanded || showAllProgress) && detailsContent}
                       </>
                     )}
                   </div>
