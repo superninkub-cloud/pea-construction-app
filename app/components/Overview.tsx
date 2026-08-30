@@ -54,15 +54,13 @@ export default function Overview() {
     return (num || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const baseFilteredProjects = projects.filter((p) => {
+  const projectsWithNonStatusFilters = projects.filter((p) => {
     if (
       (p.wbs && (p.wbs.includes("IMPORTANT_TASKS") || p.wbs.includes("SAFETY_PLAN"))) ||
       (p.name && (p.name.includes("Important Tasks") || p.name.includes("Safety Training")))
     ) {
       return false;
     }
-    const s = p.status || "ไม่มีข้อมูล";
-
     const matchYear = true; // year is handled in loop below
     let yearMatched = true;
     if (yearFilter !== "ALL") {
@@ -72,7 +70,6 @@ export default function Overview() {
       else if (yearFilter === "2569") yearMatched = year === 2569;
     }
 
-    const matchStatus = statusFilters.length === 0 || statusFilters.includes(s);
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
     const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม");
     const currentActionPlan = p.action_plan || "";
@@ -82,8 +79,27 @@ export default function Overview() {
     const matchSearch = Object.values(p).some((val) =>
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
-    return matchStatus && matchMonth && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
+    return matchMonth && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
   });
+
+  const baseFilteredProjects = projectsWithNonStatusFilters.filter((p) => {
+    const s = p.status || "ไม่มีข้อมูล";
+    return statusFilters.length === 0 || statusFilters.includes(s);
+  });
+
+  const handleStatusClick = (type: 'ALL' | 'F4' | 'OTHER' | 'D1') => {
+    if (type === 'ALL') {
+      setStatusFilters([]);
+    } else if (type === 'F4') {
+      setStatusFilters(statusFilters.includes('F4') && statusFilters.length === 1 ? [] : ['F4']);
+    } else if (type === 'D1') {
+      setStatusFilters(statusFilters.includes('D1') && statusFilters.length === 1 ? [] : ['D1']);
+    } else if (type === 'OTHER') {
+      const nonF4 = statuses.filter(s => s !== 'F4');
+      const isCurrentlyNonF4 = nonF4.every(o => statusFilters.includes(o)) && statusFilters.length === nonF4.length;
+      setStatusFilters(isCurrentlyNonF4 ? [] : nonF4);
+    }
+  };
 
   const filteredProjects = baseFilteredProjects.filter(p => supervisorFilter === "ALL" || (p.supervisor || "ไม่ระบุ") === supervisorFilter);
   const totalF4OfAll = filteredProjects.filter(p => p.status === 'F4').length;
@@ -126,54 +142,63 @@ export default function Overview() {
 
 
           <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-            <div className="stat-card" style={{ borderTop: '4px solid var(--pea-purple)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+            <div 
+              className="stat-card" 
+              onClick={() => handleStatusClick('ALL')}
+              style={{ borderTop: '4px solid var(--pea-purple)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: statusFilters.length === 0 ? '0 4px 12px rgba(116, 56, 163, 0.2)' : 'none', outline: statusFilters.length === 0 ? '2px solid var(--pea-purple)' : 'none' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                 <div className="stat-icon-wrapper" style={{ background: 'var(--pea-purple-soft)', color: 'var(--pea-purple)', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
                   <Home size={36} />
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>โครงการทั้งหมด</div>
-                  <div className="stat-value" style={{ color: 'var(--pea-purple)', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.length}</div>
+                  <div className="stat-value" style={{ color: 'var(--pea-purple)', fontSize: '3rem', margin: '8px 0' }}>{projectsWithNonStatusFilters.length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: 'var(--pea-purple)', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: 'var(--pea-purple)', fontSize: '1.1rem' }}>฿ {formatNumber(projectsWithNonStatusFilters.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
-            <div className="stat-card" style={{ borderTop: '4px solid #10b981', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+            <div 
+              className="stat-card" 
+              onClick={() => handleStatusClick('F4')}
+              style={{ borderTop: '4px solid #10b981', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: (statusFilters.includes('F4') && statusFilters.length === 1) ? '0 4px 12px rgba(16, 185, 129, 0.2)' : 'none', outline: (statusFilters.includes('F4') && statusFilters.length === 1) ? '2px solid #10b981' : 'none' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                 <div className="stat-icon-wrapper" style={{ background: '#d1fae5', color: '#10b981', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
                   <CheckCircle2 size={36} />
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>สถานะ F4 (ปิดงาน)</div>
-                  <div className="stat-value" style={{ color: '#059669', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.filter(p => p.status === 'F4').length}</div>
+                  <div className="stat-value" style={{ color: '#059669', fontSize: '3rem', margin: '8px 0' }}>{projectsWithNonStatusFilters.filter(p => p.status === 'F4').length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: '#059669', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: '#059669', fontSize: '1.1rem' }}>฿ {formatNumber(projectsWithNonStatusFilters.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
-            <div className="stat-card" style={{ borderTop: '4px solid #f59e0b', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+            <div 
+              className="stat-card" 
+              onClick={() => handleStatusClick('OTHER')}
+              style={{ borderTop: '4px solid #f59e0b', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: (statusFilters.length > 0 && !statusFilters.includes('F4')) ? '0 4px 12px rgba(245, 158, 11, 0.2)' : 'none', outline: (statusFilters.length > 0 && !statusFilters.includes('F4')) ? '2px solid #f59e0b' : 'none' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                 <div className="stat-icon-wrapper" style={{ background: '#fef3c7', color: '#d97706', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
                   <CircleDashed size={36} />
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>สถานะอื่นๆ</div>
-                  <div className="stat-value" style={{ color: '#d97706', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.filter(p => p.status !== 'F4').length}</div>
+                  <div className="stat-value" style={{ color: '#d97706', fontSize: '3rem', margin: '8px 0' }}>{projectsWithNonStatusFilters.filter(p => p.status !== 'F4').length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: '#d97706', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: '#d97706', fontSize: '1.1rem' }}>฿ {formatNumber(projectsWithNonStatusFilters.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
           </div>
@@ -189,9 +214,9 @@ export default function Overview() {
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'F4 (ปิดงาน)', value: filteredProjects.filter(p => p.status === 'F4').length },
-                        { name: 'D1', value: filteredProjects.filter(p => p.status === 'D1').length },
-                        { name: 'อื่นๆ', value: filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length }
+                        { name: 'F4 (ปิดงาน)', value: projectsWithNonStatusFilters.filter(p => p.status === 'F4').length },
+                        { name: 'D1', value: projectsWithNonStatusFilters.filter(p => p.status === 'D1').length },
+                        { name: 'อื่นๆ', value: projectsWithNonStatusFilters.filter(p => p.status !== 'F4' && p.status !== 'D1').length }
                       ]}
                       cx="50%"
                       cy="50%"
@@ -200,6 +225,19 @@ export default function Overview() {
                       paddingAngle={5}
                       dataKey="value"
                       label={({ name, percent }) => (percent && percent > 0) ? `${name} ${(percent * 100).toFixed(0)}%` : null}
+                      onClick={(entry) => {
+                        if (entry.name === 'F4 (ปิดงาน)') {
+                          handleStatusClick('F4');
+                        } else if (entry.name === 'D1') {
+                          handleStatusClick('D1');
+                        } else {
+                          // For 'อื่นๆ' in pie chart
+                          const nonF4D1 = statuses.filter(s => s !== 'F4' && s !== 'D1');
+                          const isCurrentlyOthers = nonF4D1.every(o => statusFilters.includes(o)) && statusFilters.length === nonF4D1.length;
+                          setStatusFilters(isCurrentlyOthers ? [] : nonF4D1);
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
                     >
                       <Cell fill="#10b981" />
                       <Cell fill="#f59e0b" />
