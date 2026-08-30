@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const pdf = await getDocumentProxy(pdfBuffer);
     const { text: extractedText } = await extractText(pdf, { mergePages: true });
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `
 You are a financial data extractor. I am providing you with a construction project report PDF.

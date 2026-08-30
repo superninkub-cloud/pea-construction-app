@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
     const pdf = await getDocumentProxy(pdfBuffer);
     const { text: extractedText } = await extractText(pdf, { mergePages: true });
 
-    // Use gemini-pro (free tier, no document understanding)
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Use gemini-1.5-flash
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     let scrapContext = "";
     if (scrapData && scrapData !== "[]" && scrapData !== "") {
