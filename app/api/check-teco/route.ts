@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
     const pdf = await getDocumentProxy(pdfBuffer);
     const { text: extractedText } = await extractText(pdf, { mergePages: true });
 
-    // Use gemini-1.5-flash
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Use gemini-flash-latest
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     let scrapContext = "";
     if (scrapData && scrapData !== "[]" && scrapData !== "") {
