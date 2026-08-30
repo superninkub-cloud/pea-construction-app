@@ -82,6 +82,8 @@ export default function Overview() {
     return matchMonth && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
   });
 
+  const projectsForTopCards = projectsWithNonStatusFilters.filter(p => supervisorFilter === "ALL" || (p.supervisor || "ไม่ระบุ") === supervisorFilter);
+
   const baseFilteredProjects = projectsWithNonStatusFilters.filter((p) => {
     const s = p.status || "ไม่มีข้อมูล";
     return statusFilters.length === 0 || statusFilters.includes(s);
@@ -152,13 +154,13 @@ export default function Overview() {
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>โครงการทั้งหมด</div>
-                  <div className="stat-value" style={{ color: 'var(--pea-purple)', fontSize: '3rem', margin: '8px 0' }}>{projectsWithNonStatusFilters.length}</div>
+                  <div className="stat-value" style={{ color: 'var(--pea-purple)', fontSize: '3rem', margin: '8px 0' }}>{projectsForTopCards.length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: 'var(--pea-purple)', fontSize: '1.1rem' }}>฿ {formatNumber(projectsWithNonStatusFilters.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: 'var(--pea-purple)', fontSize: '1.1rem' }}>฿ {formatNumber(projectsForTopCards.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
@@ -172,13 +174,13 @@ export default function Overview() {
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>สถานะ F4 (ปิดงาน)</div>
-                  <div className="stat-value" style={{ color: '#059669', fontSize: '3rem', margin: '8px 0' }}>{projectsWithNonStatusFilters.filter(p => p.status === 'F4').length}</div>
+                  <div className="stat-value" style={{ color: '#059669', fontSize: '3rem', margin: '8px 0' }}>{projectsForTopCards.filter(p => p.status === 'F4').length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: '#059669', fontSize: '1.1rem' }}>฿ {formatNumber(projectsWithNonStatusFilters.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: '#059669', fontSize: '1.1rem' }}>฿ {formatNumber(projectsForTopCards.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
@@ -192,13 +194,13 @@ export default function Overview() {
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>สถานะอื่นๆ</div>
-                  <div className="stat-value" style={{ color: '#d97706', fontSize: '3rem', margin: '8px 0' }}>{projectsWithNonStatusFilters.filter(p => p.status !== 'F4').length}</div>
+                  <div className="stat-value" style={{ color: '#d97706', fontSize: '3rem', margin: '8px 0' }}>{projectsForTopCards.filter(p => p.status !== 'F4').length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: '#d97706', fontSize: '1.1rem' }}>฿ {formatNumber(projectsWithNonStatusFilters.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: '#d97706', fontSize: '1.1rem' }}>฿ {formatNumber(projectsForTopCards.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
           </div>
@@ -214,9 +216,9 @@ export default function Overview() {
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'F4 (ปิดงาน)', value: projectsWithNonStatusFilters.filter(p => p.status === 'F4').length },
-                        { name: 'D1', value: projectsWithNonStatusFilters.filter(p => p.status === 'D1').length },
-                        { name: 'อื่นๆ', value: projectsWithNonStatusFilters.filter(p => p.status !== 'F4' && p.status !== 'D1').length }
+                        { name: 'F4 (ปิดงาน)', value: filteredProjects.filter(p => p.status === 'F4').length },
+                        { name: 'D1', value: filteredProjects.filter(p => p.status === 'D1').length },
+                        { name: 'อื่นๆ', value: filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length }
                       ]}
                       cx="50%"
                       cy="50%"
