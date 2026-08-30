@@ -421,7 +421,7 @@ export default function Hardware() {
       </div>
 
       {/* Interactive Detail Stage */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 440px) 1fr", gap: "24px", alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "24px", alignItems: "start" }}>
         
         {/* Left: Realistic Vector Diagram Card */}
         <div style={{ backgroundColor: "white", borderRadius: "16px", border: "2px solid #cbd5e1", boxShadow: "0 6px 18px rgba(0,0,0,0.06)", overflow: "hidden" }}>
@@ -521,7 +521,7 @@ export default function Hardware() {
           รายการอุปกรณ์มาตรฐาน กฟภ. (คลิกเพื่อดูรูปจำลองและรหัสพัสดุ):
         </h3>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: "16px" }}>
           {filteredHardware.map((item) => {
             const isSelected = item.id === selectedHardwareId;
             return (
@@ -576,7 +576,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "alley_arm":
       // Alley Arm Crossarm 3m with Brace & Insulator assembly
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Concrete Pole on Left */}
           <polygon points="40,20 80,20 90,320 30,320" fill="#94a3b8" stroke="#475569" strokeWidth="2" />
           <line x1="60" y1="20" x2="60" y2="320" stroke="#cbd5e1" strokeDasharray="6 4" />
@@ -616,7 +616,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "double_arming_plate":
       // Double Arming Plate 12x100x650 mm with bolts
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Background Crossarms (Twin Channels) */}
           <rect x="60" y="80" width="200" height="40" rx="3" fill="#64748b" stroke="#334155" strokeWidth="2" />
           <rect x="60" y="160" width="200" height="40" rx="3" fill="#64748b" stroke="#334155" strokeWidth="2" />
@@ -648,7 +648,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "preformed_guy_grip":
       // Preformed Guy Grip Dead-End helically looped through Thimble
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Thimble Eye Metal Spool */}
           <ellipse cx="80" cy="150" rx="25" ry="38" fill="#94a3b8" stroke="#475569" strokeWidth="3" />
           <ellipse cx="80" cy="150" rx="14" ry="22" fill="#090d16" />
@@ -686,7 +686,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "anchor_rod":
       // Anchor Rod Double Eye M24 x 2500 mm with buried concrete
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Ground Line */}
           <line x1="20" y1="110" x2="300" y2="110" stroke="#10b981" strokeWidth="2" strokeDasharray="6 3" />
           <text x="40" y="100" fill="#10b981" fontSize="10" fontWeight="bold">ระดับผิวดิน (Ground Level)</text>
@@ -721,7 +721,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "exothermic_welding":
       // Exothermic Welding Graphite Mold & Spark Reaction
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Steel Ground Plate Base */}
           <rect x="40" y="230" width="240" height="24" rx="3" fill="#94a3b8" stroke="#475569" strokeWidth="2" />
           <text x="160" y="246" fill="#1e293b" fontSize="10" textAnchor="middle" fontWeight="bold">แผ่นกราวด์เพลท (Ground Plate โคนเสา)</text>
@@ -759,7 +759,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "ground_flat_steel":
       // Ground Strip Flat Steel 30x3.5 mm in trench
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Ground Line */}
           <line x1="20" y1="80" x2="300" y2="80" stroke="#10b981" strokeWidth="2" strokeDasharray="6 3" />
           <text x="40" y="70" fill="#10b981" fontSize="10" fontWeight="bold">ผิวดิน (Ground Line)</text>
@@ -789,7 +789,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "compression_dead_end":
       // Compression Dead End with 15-degree NEMA Pad
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Eye Fitting on Left for Insulator Link */}
           <circle cx="45" cy="160" r="22" fill="#94a3b8" stroke="#475569" strokeWidth="3" />
           <circle cx="45" cy="160" r="10" fill="#090d16" />
@@ -823,7 +823,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "stockbridge_damper":
       // Stockbridge Damper
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Conductor */}
           <line x1="20" y1="90" x2="300" y2="90" stroke="#f59e0b" strokeWidth="8" strokeLinecap="round" />
           <text x="160" y="70" fill="#fbbf24" fontSize="10" textAnchor="middle">สายตัวนำ 115 kV (AAC/ACSR 400)</text>
@@ -857,7 +857,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "air_break_switch":
       // Air Break Switch 115 kV 3-Pole
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Steel Support Base Frame */}
           <rect x="30" y="220" width="260" height="18" fill="#64748b" stroke="#334155" strokeWidth="2" />
           <rect x="150" y="238" width="20" height="60" fill="#475569" />
@@ -906,7 +906,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "opgw_joint_box":
       // OPGW Joint Box & Fiber Splice Tray Dome
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Concrete Pole Behind */}
           <polygon points="120,20 160,20 165,330 115,330" fill="#334155" />
 
@@ -934,7 +934,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "armor_grip_suspension":
       // AGS Armor-Grip Suspension with Neoprene insert
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Top Hanging Eye Clevis */}
           <circle cx="160" cy="40" r="16" fill="#94a3b8" stroke="#475569" strokeWidth="3" />
           <circle cx="160" cy="40" r="8" fill="#090d16" />
@@ -967,7 +967,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "corner_suspension_bracket":
       // Corner Suspension Bracket
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Steel Crossarm Beam */}
           <rect x="40" y="40" width="240" height="24" rx="3" fill="#64748b" stroke="#334155" strokeWidth="2" />
           <text x="160" y="56" fill="#cbd5e1" fontSize="10" textAnchor="middle">คอนเหล็กรางน้ำ</text>
@@ -998,7 +998,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "insulator_d1":
       // Vertical Suspension Insulator D-1 String (7 Discs + Suspension Clamp)
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Top Crossarm Channel Bracket */}
           <rect x="120" y="20" width="80" height="20" fill="#64748b" stroke="#334155" strokeWidth="2" />
           <circle cx="160" cy="30" r="4" fill="#090d16" />
@@ -1042,7 +1042,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "insulator_d3":
       // Dead-End Tension Insulator D-3 String (Horizontal)
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Pole & Double Arming Plates */}
           <rect x="10" y="140" width="30" height="60" fill="#64748b" stroke="#334155" strokeWidth="2" />
           <rect x="30" y="150" width="20" height="40" fill="#94a3b8" />
@@ -1082,7 +1082,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "line_post":
       // Horizontal Line Post Insulator
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Concrete Pole Trunk */}
           <rect x="20" y="60" width="60" height="240" fill="#64748b" stroke="#475569" strokeWidth="2" />
           <line x1="50" y1="60" x2="50" y2="300" stroke="#cbd5e1" strokeDasharray="6 4" />
@@ -1111,7 +1111,7 @@ function RealisticHardwareSVG({ type }: { type: string }) {
     case "pg_clamp":
       // Parallel Groove Clamp joining 2 thick conductors
       return (
-        <svg width="320" height="340" viewBox="0 0 320 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 340" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Main Conductor & Jumper Branching */}
           <line x1="20" y1="120" x2="300" y2="120" stroke="#f59e0b" strokeWidth="14" strokeLinecap="round" />
           <path d="M 160,135 Q 160,240 250,260" stroke="#f59e0b" strokeWidth="14" fill="none" strokeLinecap="round" />

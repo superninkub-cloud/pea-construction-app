@@ -239,7 +239,7 @@ export default function Insulators() {
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           
           {/* Top Interactive Stage */}
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(300px, 380px) 1fr", gap: "24px", alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: "24px", alignItems: "start" }}>
             
             {/* SVG Diagram Card */}
             <div style={{ backgroundColor: "white", borderRadius: "16px", border: "2px solid #fecdd3", boxShadow: "0 4px 16px rgba(244, 63, 94, 0.08)", overflow: "hidden" }}>
@@ -367,7 +367,7 @@ export default function Insulators() {
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           
           {/* Top Interactive Stage for Assembly */}
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 420px) 1fr", gap: "24px", alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "24px", alignItems: "start" }}>
             
             {/* SVG Diagram Card */}
             <div style={{ backgroundColor: "white", borderRadius: "16px", border: "2px solid #cbd5e1", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", overflow: "hidden" }}>
@@ -500,7 +500,7 @@ function InsulatorSVG({ type }: { type: "porcelain" | "glass" | "composite" | "p
     case "porcelain":
       // Porcelain Disc String (Brown/Dark glazed discs stacked)
       return (
-        <svg width="260" height="300" viewBox="0 0 260 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 260 300" style={{ width: "100%", height: "auto", maxWidth: "260px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Top Pin Connection */}
           <rect x="122" y="15" width="16" height="18" rx="3" fill="#cbd5e1" stroke="#94a3b8" />
           <circle cx="130" cy="24" r="4" fill="#475569" />
@@ -531,7 +531,7 @@ function InsulatorSVG({ type }: { type: "porcelain" | "glass" | "composite" | "p
     case "glass":
       // Toughened Glass Discs (Emerald Green translucent glass)
       return (
-        <svg width="260" height="300" viewBox="0 0 260 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 260 300" style={{ width: "100%", height: "auto", maxWidth: "260px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Top Pin Connection */}
           <rect x="122" y="15" width="16" height="18" rx="3" fill="#cbd5e1" stroke="#94a3b8" />
           <circle cx="130" cy="24" r="4" fill="#475569" />
@@ -561,7 +561,7 @@ function InsulatorSVG({ type }: { type: "porcelain" | "glass" | "composite" | "p
     case "composite":
       // Composite Silicone Long Rod with Corona Ring
       return (
-        <svg width="260" height="300" viewBox="0 0 260 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 260 300" style={{ width: "100%", height: "auto", maxWidth: "260px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Top Metal Fitting */}
           <rect x="120" y="15" width="20" height="25" rx="3" fill="#94a3b8" stroke="#64748b" />
           <circle cx="130" cy="26" r="4" fill="#334155" />
@@ -607,7 +607,7 @@ function InsulatorSVG({ type }: { type: "porcelain" | "glass" | "composite" | "p
     case "post":
       // Line Post Insulator (Rigid upright cylinder)
       return (
-        <svg width="260" height="300" viewBox="0 0 260 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 260 300" style={{ width: "100%", height: "auto", maxWidth: "260px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Base Flange Mounting */}
           <rect x="95" y="250" width="70" height="16" rx="3" fill="#64748b" />
           <circle cx="108" cy="258" r="3" fill="#cbd5e1" />
@@ -645,7 +645,7 @@ function AssemblySVG({ type }: { type: "D1_suspension" | "D2_angle" | "D3_tensio
     case "D1_suspension":
       // Single Suspension Assembly with Arcing Horns and Clamp
       return (
-        <svg width="300" height="340" viewBox="0 0 300 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 300 340" style={{ width: "100%", height: "auto", maxWidth: "300px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Steel Crossarm Top Beam */}
           <rect x="40" y="10" width="220" height="16" fill="#cbd5e1" stroke="#94a3b8" rx="2" />
           <circle cx="150" cy="18" r="4" fill="#475569" />
@@ -696,7 +696,7 @@ function AssemblySVG({ type }: { type: "D1_suspension" | "D2_angle" | "D3_tensio
     case "D2_angle":
       // Angle Suspension Assembly tilted by angle
       return (
-        <svg width="300" height="340" viewBox="0 0 300 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 300 340" style={{ width: "100%", height: "auto", maxWidth: "300px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Crossarm */}
           <rect x="40" y="10" width="220" height="16" fill="#cbd5e1" stroke="#94a3b8" rx="2" />
 
@@ -732,7 +732,7 @@ function AssemblySVG({ type }: { type: "D1_suspension" | "D2_angle" | "D3_tensio
     case "D3_tension":
       // Horizontal Tension / Dead-End Assembly with Jumper
       return (
-        <svg width="300" height="340" viewBox="0 0 300 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 300 340" style={{ width: "100%", height: "auto", maxWidth: "300px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Vertical Pole Crossarm Post */}
           <rect x="142" y="30" width="16" height="260" fill="#94a3b8" rx="2" />
           <rect x="125" y="110" width="50" height="30" fill="#64748b" rx="3" />
@@ -780,7 +780,7 @@ function AssemblySVG({ type }: { type: "D1_suspension" | "D2_angle" | "D3_tensio
     case "D19_composite":
       // Composite Long Rod with Corona Ring
       return (
-        <svg width="300" height="340" viewBox="0 0 300 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 300 340" style={{ width: "100%", height: "auto", maxWidth: "300px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Crossarm */}
           <rect x="40" y="10" width="220" height="16" fill="#cbd5e1" stroke="#94a3b8" rx="2" />
 

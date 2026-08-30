@@ -456,7 +456,7 @@ export default function Structures() {
       </div>
 
       {/* Main Interactive Stage: Left Diagram + Right Details */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(340px, 460px) 1fr", gap: "24px", alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))", gap: "24px", alignItems: "start" }}>
         
         {/* Left: Realistic Vector Diagram Card */}
         <div style={{ backgroundColor: "white", borderRadius: "16px", border: "2px solid #cbd5e1", boxShadow: "0 6px 20px rgba(0,0,0,0.06)", overflow: "hidden" }}>
@@ -575,7 +575,7 @@ export default function Structures() {
           เลือกดูโครงสร้างหัวเสาแบบอื่นๆ (คลิกเพื่อแสดงรูปจำลองสมจริง):
         </h3>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: "16px" }}>
           {filteredStructures.map((struct) => {
             const isSelected = struct.id === activeStructureId;
             const isDouble = struct.circuitType.includes("double");
@@ -633,7 +633,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     // ---- SS SERIES (Single Circuit) ----
     case "SS-TG":
       return (
-        <svg width="320" height="400" viewBox="0 0 320 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 400" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="152,40 168,40 176,380 144,380" fill="#64748b" />
           <polygon points="152,40 160,40 156,380 144,380" fill="#94a3b8" />
           <polygon points="160,40 168,40 176,380 156,380" fill="#475569" />
@@ -692,7 +692,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     case "SS-AS-4":
     case "SS-TL":
       return (
-        <svg width="320" height="400" viewBox="0 0 320 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 400" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="152,40 168,40 176,380 144,380" fill="#64748b" />
           <polygon points="152,40 160,40 156,380 144,380" fill="#94a3b8" />
           <polygon points="160,40 168,40 176,380 156,380" fill="#475569" />
@@ -703,7 +703,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     // ---- DS SERIES (Double Circuit, Single Conductor) ----
     case "DS-TG":
       return (
-        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 420" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="152,30 168,30 178,390 142,390" fill="#64748b" />
           <polygon points="152,30 160,30 156,390 142,390" fill="#94a3b8" />
           <polygon points="160,30 168,30 178,390 156,390" fill="#475569" />
@@ -740,7 +740,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
 
     case "DS-SA":
       return (
-        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 420" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <line x1="145" y1="180" x2="10" y2="400" stroke="#f43f5e" strokeWidth="4" strokeDasharray="6 3" />
           <polygon points="152,30 168,30 178,390 142,390" fill="#64748b" />
           <polygon points="152,30 160,30 156,390 142,390" fill="#94a3b8" />
@@ -767,7 +767,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     case "DS-AS":
     case "DS-LA":
       return (
-        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 420" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="152,30 168,30 178,390 142,390" fill="#64748b" />
           <polygon points="152,30 160,30 156,390 142,390" fill="#94a3b8" />
           <text x="160" y="210" fill="#60a5fa" fontSize="12" textAnchor="middle" fontWeight="bold">รูปแบบ DS-AS / DS-LA (สายเดี่ยว)</text>
@@ -778,7 +778,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     // ---- DD SERIES (Double Circuit, Double Conductor / Twin Bundle) ----
     case "DD-SA-2":
       return (
-        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 420" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <line x1="145" y1="180" x2="10" y2="400" stroke="#f43f5e" strokeWidth="6" strokeDasharray="8 4" />
           <polygon points="150,20 170,20 182,390 138,390" fill="#64748b" />
           
@@ -813,7 +813,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     case "DD-AS-2":
       // Twin bundle anchor with Slack Span
       return (
-        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 420" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="150,20 170,20 182,390 138,390" fill="#64748b" />
           
           {[70, 170, 270].map((y, level) => (
@@ -852,7 +852,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     case "DD-DD-1":
       // DOUBLE POLE (H-FRAME) Double Deadend
       return (
-        <svg width="460" height="420" viewBox="0 0 460 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 460 420" style={{ width: "100%", height: "auto", maxWidth: "460px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           {/* Left Pole */}
           <polygon points="120,30 140,30 152,400 108,400" fill="#64748b" />
           <polygon points="120,30 130,30 126,400 108,400" fill="#94a3b8" />
@@ -899,7 +899,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     case "DD-DD-2":
       // Single Pole Double Deadend
       return (
-        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 420" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="150,20 170,20 182,390 138,390" fill="#64748b" />
           {[70, 170, 270].map((y, level) => (
             <g key={y}>
@@ -929,7 +929,7 @@ function RealisticPoleHeadSVG({ type }: { type: string }) {
     case "DD-LS-1":
       // Line Spacer / Line Post 
       return (
-        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 320 420" style={{ width: "100%", height: "auto", maxWidth: "320px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="150,20 170,20 182,390 138,390" fill="#64748b" />
           {[70, 170, 270].map((y, level) => (
             <g key={y}>

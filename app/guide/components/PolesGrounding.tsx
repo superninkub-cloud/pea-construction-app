@@ -277,7 +277,7 @@ export default function PolesGrounding() {
 
       {/* TAB 1: INTERACTIVE POLE DIAGRAM */}
       {activeTab === "diagram" && (
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 400px) 1fr", gap: "24px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "24px", alignItems: "start" }}>
           
           {/* Left: Interactive SVG Pole Vector */}
           <div style={{ backgroundColor: "white", borderRadius: "16px", border: "2px solid #99f6e4", boxShadow: "0 4px 16px rgba(13, 148, 136, 0.08)", overflow: "hidden" }}>
@@ -724,7 +724,7 @@ function Pole22mSVG({ selectedId, onSelectHole }: { selectedId: number; onSelect
   ];
 
   return (
-    <svg width="340" height="490" viewBox="0 0 340 490" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 340 490" style={{ width: "100%", height: "auto", maxWidth: "340px" }} fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Ground Line representation */}
       <rect x="0" y="390" width="340" height="100" fill="#1e293b" fillOpacity="0.8" />
       <line x1="0" y1="390" x2="340" y2="390" stroke="#10b981" strokeWidth="2" strokeDasharray="6 4" />

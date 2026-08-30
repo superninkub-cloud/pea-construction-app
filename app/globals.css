@@ -1201,7 +1201,7 @@ body {
 }
 
 .markdown-content ul li::before {
-  content: '•';
+  content: 'ï¿½';
   position: absolute;
   left: 8px;
   color: var(--pea-purple);
@@ -1237,3 +1237,69 @@ body {
   transform: translateY(0);
 }
 
+
+
+/* =========================================
+   Mobile Responsiveness Overrides
+   ========================================= */
+@media (max-width: 768px) {
+  /* 1. Scale down font sizes globally to make text fit better */
+  html {
+    font-size: 13px !important; 
+  }
+
+  /* 2. Responsive Recharts (Bar/Pie Charts) */
+  .recharts-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 250px;
+  }
+  
+  .recharts-surface {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+  }
+
+  .recharts-legend-wrapper {
+    width: 100% !important;
+    position: relative !important;
+    margin-top: 10px;
+  }
+
+  /* 3. Reduce padding and margins on info boxes/cards */
+  div[style*="padding: 24px"], 
+  div[style*="padding: '24px'"],
+  div[style*='padding: "24px"'] {
+    padding: 16px !important;
+  }
+  
+  div[style*="padding: 32px"] {
+    padding: 20px !important;
+  }
+
+  /* 4. Fix rigid widths in info boxes and modals */
+  div[style*="width: 400px"],
+  div[style*="width: 500px"],
+  div[style*="width: 600px"],
+  div[style*="width: '400px'"],
+  div[style*="width: '500px'"],
+  div[style*="width: '600px'"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 5. SVG charts and structural SVGs */
+  svg[width="320"], svg[width="460"], svg[width="600"] {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  html {
+    font-size: 12px !important;
+  }
+}

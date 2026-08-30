@@ -417,7 +417,7 @@ export default function WireReturnPage() {
               <div className="card animation-fade-in" style={{ position: 'relative', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'linear-gradient(145deg, #ffffff, #fdfbfe)', border: '1px solid #f3e8f3', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(107, 33, 105, 0.05), 0 4px 6px -2px rgba(107, 33, 105, 0.02)' }}>
                 <div style={{ display: 'flex', gap: '16px', zIndex: 2 }}>
                   <div style={{ width: '56px', height: '56px', flexShrink: 0, background: '#f5eff5', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7e22ce' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 18v-7"/><path d="M12 21a9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9 9 9 0 0 1-9 9Z"/><path d="M15 11h-6"/><path d="M15 14h-6"/></svg>
+                    <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "32px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 18v-7"/><path d="M12 21a9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9 9 9 0 0 1-9 9Z"/><path d="M15 11h-6"/><path d="M15 14h-6"/></svg>
                   </div>
                   <div>
                     <div style={{ color: '#7e22ce', fontSize: '0.9rem', fontWeight: '600', marginBottom: '2px' }}>ประมาณการเศษสายทั้งหมด</div>
@@ -443,7 +443,7 @@ export default function WireReturnPage() {
               <div className="card animation-fade-in" style={{ position: 'relative', overflow: 'hidden', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', background: 'linear-gradient(145deg, #ffffff, #f9fdfa)', border: '1px solid #ecfdf5', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.05), 0 4px 6px -2px rgba(16, 185, 129, 0.02)' }}>
                 <div style={{ display: 'flex', gap: '16px', zIndex: 2 }}>
                   <div style={{ width: '56px', height: '56px', flexShrink: 0, background: '#ecfdf5', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-9h-4V5H14v12h3"/><path d="M7 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/><path d="M17 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/></svg>
+                    <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "32px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-9h-4V5H14v12h3"/><path d="M7 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/><path d="M17 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/></svg>
                   </div>
                   <div>
                     <div style={{ color: '#10b981', fontSize: '0.9rem', fontWeight: '600', marginBottom: '2px' }}>ส่งคืนแล้วทั้งหมด</div>
@@ -636,7 +636,7 @@ export default function WireReturnPage() {
                     <label style={{ fontSize: '0.75rem', fontWeight: '600', color: '#ffffff', userSelect: 'none' }}>ค้นหา</label>
                     <div style={{ position: 'relative' }}>
                       <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "16px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                       </div>
                       <input
                         type="text"
@@ -652,7 +652,7 @@ export default function WireReturnPage() {
                 {/* Right Actions */}
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', height: '100%', paddingTop: '22px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f5eff5', padding: '6px 12px', borderRadius: '10px', color: '#7e22ce' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 16H3"/><path d="M16 16h5"/><path d="M16 20h5"/><path d="M11 20H3"/><path d="M11 12H3"/><path d="M16 12h5"/><path d="M16 8h5"/><path d="M11 8H3"/><path d="M16 4h5"/><path d="M11 4H3"/></svg>
+                    <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "16px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 16H3"/><path d="M16 16h5"/><path d="M16 20h5"/><path d="M11 20H3"/><path d="M11 12H3"/><path d="M16 12h5"/><path d="M16 8h5"/><path d="M11 8H3"/><path d="M16 4h5"/><path d="M11 4H3"/></svg>
                     <select 
                       style={{ background: 'transparent', border: 'none', outline: 'none', color: '#7e22ce', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer' }}
                       value={sortBy}
@@ -669,7 +669,7 @@ export default function WireReturnPage() {
               </div>
             </div>
             
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))", gap: "24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))", gap: "24px" }}>
               {filteredProjectStats.map(p => {
                 const isEditing = editingId === p.id;
                 const isNoReturn = p.scrap_wires_data?.some((w: any) => w.type === 'ไม่ต้องส่งคืน');
@@ -795,7 +795,7 @@ export default function WireReturnPage() {
                         <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9', marginBottom: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                             <div style={{ fontSize: '0.85rem', fontWeight: '600', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                              <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "14px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                               ข้อมูลการส่งคืนสายไฟ
                             </div>
                             <span style={{ fontSize: '1.1rem', fontWeight: '700', color: isNoReturn ? '#10b981' : (p.percentage >= 90 ? '#10b981' : '#1e293b') }}>
@@ -822,7 +822,7 @@ export default function WireReturnPage() {
                                 style={{ background: 'none', border: 'none', padding: 0, color: '#3b82f6', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                               >
                                 {isExpanded ? 'ซ่อนรายละเอียด' : `แสดงรายละเอียด ${p.combinedWires.length} รายการ`}
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                                <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "14px", transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                               </button>
                               
                               {isExpanded && (
@@ -856,11 +856,11 @@ export default function WireReturnPage() {
                           {userRole === "admin" && (
                             <>
                               <button style={{ background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "14px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                                 ล้างข้อมูล
                               </button>
                               <button onClick={() => startEdit(p)} style={{ background: '#7e22ce', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 6px -1px rgba(126, 34, 206, 0.2)' }}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "14px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 อัพเดทสถานะการส่งคืน
                               </button>
                             </>
