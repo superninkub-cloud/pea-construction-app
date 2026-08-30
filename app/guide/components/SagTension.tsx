@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Calculator, ArrowRight, BookOpen } from "lucide-react";
+import { Calculator, ArrowRight, BookOpen, Activity } from "lucide-react";
 
 export default function SagTension() {
   const [w, setW] = useState<number | "">("");
