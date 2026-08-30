@@ -173,7 +173,7 @@ const POLE_HOLES_DATA: PoleHoleItem[] = [
 
 export default function PolesGrounding() {
   const [selectedHoleId, setSelectedHoleId] = useState<number>(1);
-  const [activeTab, setActiveTab] = useState<"diagram" | "grounding_system" | "table">("diagram");
+  const [activeTab, setActiveTab] = useState<"diagram" | "pole_types" | "grounding_system" | "table">("diagram");
 
   const activeHole = POLE_HOLES_DATA.find((h) => h.id === selectedHoleId) || POLE_HOLES_DATA[0];
 
@@ -196,16 +196,16 @@ export default function PolesGrounding() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: "12px", borderBottom: "2px solid #e2e8f0", paddingBottom: "12px" }}>
+      <div style={{ display: "flex", gap: "10px", borderBottom: "2px solid #e2e8f0", paddingBottom: "12px", flexWrap: "wrap" }}>
         <button
           onClick={() => setActiveTab("diagram")}
           style={{
-            padding: "10px 20px",
+            padding: "10px 18px",
             borderRadius: "10px",
             border: "none",
             cursor: "pointer",
             fontWeight: "bold",
-            fontSize: "0.95rem",
+            fontSize: "0.9rem",
             display: "flex",
             alignItems: "center",
             gap: "8px",
@@ -214,17 +214,36 @@ export default function PolesGrounding() {
             transition: "all 0.2s"
           }}
         >
-          <Crosshair size={18} /> 1. รูปจำลองเสา 22 ม. &amp; รูเจาะเสา (Interactive Diagram)
+          <Crosshair size={18} /> 1. รูปจำลองเสา 22 ม. &amp; รูเจาะเสา
         </button>
         <button
-          onClick={() => setActiveTab("grounding_system")}
+          onClick={() => setActiveTab("pole_types")}
           style={{
-            padding: "10px 20px",
+            padding: "10px 18px",
             borderRadius: "10px",
             border: "none",
             cursor: "pointer",
             fontWeight: "bold",
-            fontSize: "0.95rem",
+            fontSize: "0.9rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            backgroundColor: activeTab === "pole_types" ? "#0d9488" : "#f1f5f9",
+            color: activeTab === "pole_types" ? "white" : "#475569",
+            transition: "all 0.2s"
+          }}
+        >
+          <Shield size={18} /> 2. ชนิดเสาไฟฟ้า &amp; เสาเข็มฐานราก (2562)
+        </button>
+        <button
+          onClick={() => setActiveTab("grounding_system")}
+          style={{
+            padding: "10px 18px",
+            borderRadius: "10px",
+            border: "none",
+            cursor: "pointer",
+            fontWeight: "bold",
+            fontSize: "0.9rem",
             display: "flex",
             alignItems: "center",
             gap: "8px",
@@ -233,17 +252,17 @@ export default function PolesGrounding() {
             transition: "all 0.2s"
           }}
         >
-          <ArrowDown size={18} /> 2. ระบบกราวด์ GR / GS / GC / GW
+          <ArrowDown size={18} /> 3. ระบบกราวด์ GR / GS / GC / GW / Cadweld
         </button>
         <button
           onClick={() => setActiveTab("table")}
           style={{
-            padding: "10px 20px",
+            padding: "10px 18px",
             borderRadius: "10px",
             border: "none",
             cursor: "pointer",
             fontWeight: "bold",
-            fontSize: "0.95rem",
+            fontSize: "0.9rem",
             display: "flex",
             alignItems: "center",
             gap: "8px",
@@ -252,7 +271,7 @@ export default function PolesGrounding() {
             transition: "all 0.2s"
           }}
         >
-          <Layers size={18} /> 3. ตารางสรุประยะรูเสาทั้งหมด (Hole Schedule)
+          <Layers size={18} /> 4. ตารางสรุประยะรูเสาทั้งหมด
         </button>
       </div>
 
@@ -377,7 +396,181 @@ export default function PolesGrounding() {
         </div>
       )}
 
-      {/* TAB 2: GROUNDING SYSTEM (GR / GS / GC / GW) */}
+      {/* TAB 2: POLE TYPES, STEEL TOWERS & PILE FOUNDATIONS */}
+      {activeTab === "pole_types" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          
+          {/* 1. เสาคอนกรีตอัดแรง (คอร. Prestressed Concrete Poles) */}
+          <div style={{ backgroundColor: "white", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", overflow: "hidden" }}>
+            <div style={{ padding: "16px 20px", backgroundColor: "#f0fdfa", borderBottom: "1px solid #ccfbf1", fontWeight: "bold", color: "#0f766e", fontSize: "1.1rem" }}>
+              🏛️ 1. เสาคอนกรีตอัดแรง (คอร. Prestressed Concrete Poles 115 kV)
+            </div>
+            <div style={{ padding: "20px", overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.9rem" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#f8fafc", borderBottom: "2px solid #cbd5e1", color: "#334155" }}>
+                    <th style={{ padding: "10px 14px" }}>ขนาดความยาว</th>
+                    <th style={{ padding: "10px 14px" }}>น้ำหนัก (กก.)</th>
+                    <th style={{ padding: "10px 14px" }}>โมเมนต์ใช้งาน (กก.-ม.)</th>
+                    <th style={{ padding: "10px 14px" }}>รหัสพัสดุ กฟภ.</th>
+                    <th style={{ padding: "10px 14px" }}>ลักษณะการใช้งานทางวิศวกรรม</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: "1px solid #e2e8f0" }}>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold", color: "#0f766e" }}>14.00 ม.</td>
+                    <td style={{ padding: "12px 14px" }}>1,950</td>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold" }}>3,590</td>
+                    <td style={{ padding: "12px 14px", color: "#dc2626", fontWeight: "bold" }}>1000010006</td>
+                    <td style={{ padding: "12px 14px", color: "#475569" }}>ใช้งานกรณีก่อสร้างบนภูเขา และจุดพาดสายข้ามหุบเหว</td>
+                  </tr>
+                  <tr style={{ borderBottom: "1px solid #e2e8f0" }}>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold", color: "#0f766e" }}>14.30 ม.</td>
+                    <td style={{ padding: "12px 14px" }}>2,015</td>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold" }}>9,000</td>
+                    <td style={{ padding: "12px 14px", color: "#dc2626", fontWeight: "bold" }}>1000010013</td>
+                    <td style={{ padding: "12px 14px", color: "#475569" }}>ใช้งานกรณีต้องการโมเมนต์ดัดสูงบนพื้นที่เขาสูงชัน</td>
+                  </tr>
+                  <tr style={{ borderBottom: "1px solid #e2e8f0" }}>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold", color: "#0f766e" }}>16.00 ม.</td>
+                    <td style={{ padding: "12px 14px" }}>2,590</td>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold" }}>5,300</td>
+                    <td style={{ padding: "12px 14px", color: "#dc2626", fontWeight: "bold" }}>1000010008</td>
+                    <td style={{ padding: "12px 14px", color: "#475569" }}>ใช้งานเป็นไลน์ชั่วคราว เพื่อรอปรับปรุงเป็นโครงสร้างมาตรฐาน</td>
+                  </tr>
+                  <tr style={{ backgroundColor: "#f0fdfa" }}>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold", color: "#0f766e", fontSize: "1rem" }}>22.00 ม. (มาตรฐานหลัก)</td>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold" }}>6,450</td>
+                    <td style={{ padding: "12px 14px", fontWeight: "bold", color: "#0f766e", fontSize: "1rem" }}>18,000</td>
+                    <td style={{ padding: "12px 14px", color: "#dc2626", fontWeight: "bold", fontSize: "1rem" }}>1000010016</td>
+                    <td style={{ padding: "12px 14px", color: "#0f766e", fontWeight: "bold" }}>เสามาตรฐานหลัก กฟภ. ชนิดมีกราวด์เพลทในเสา 2 ด้าน / 7 จุด ใช้งานกรณีทั่วไป</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 2. เสาเหล็ก 8 เหลี่ยม (Octagonal Steel Pole) & เสาโครงเหล็ก (Steel Tower) */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
+            
+            {/* เสาเหล็ก 8 เหลี่ยม */}
+            <div style={{ backgroundColor: "white", borderRadius: "16px", border: "2px solid #bfdbfe", padding: "20px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+                <div style={{ backgroundColor: "#dbeafe", color: "#1d4ed8", padding: "10px", borderRadius: "10px", fontWeight: "bold" }}>
+                  🔩
+                </div>
+                <div>
+                  <h4 style={{ fontSize: "1.15rem", fontWeight: "bold", color: "#1e293b", margin: 0 }}>เสาเหล็ก 8 เหลี่ยม (Octagonal Steel Pole)</h4>
+                  <span style={{ fontSize: "0.8rem", color: "#2563eb" }}>ความแข็งแรงและโมเมนต์ดัดสูงพิเศษ</span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "0.85rem", color: "#334155" }}>
+                <div style={{ padding: "12px", backgroundColor: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", marginBottom: "4px" }}>
+                    <span>ยาว 20.00 ม. (โมเมนต์ 40,000 กก.-ม.)</span>
+                    <span style={{ color: "#dc2626" }}>รหัส: 1000060001</span>
+                  </div>
+                  <p style={{ margin: 0, color: "#64748b", lineHeight: "1.5" }}>
+                    <b>แบบเลขที่:</b> SA1-015/60001<br />
+                    <b>การใช้งาน:</b> ป้องกันเสาล้มจากพายุ ช่วงร่องลม พื้นที่ที่ไม่สามารถก่อสร้างฐานรากและเสา คอร. ได้ และใช้ทดแทนเสา คอร. แบบคู่
+                  </p>
+                </div>
+
+                <div style={{ padding: "12px", backgroundColor: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", marginBottom: "4px" }}>
+                    <span>ยาว 24.00 ม. (โมเมนต์ 50,000 กก.-ม.)</span>
+                    <span style={{ color: "#dc2626" }}>รหัส: 1000060000</span>
+                  </div>
+                  <p style={{ margin: 0, color: "#64748b", lineHeight: "1.5" }}>
+                    <b>แบบเลขที่:</b> SA1-015/55001<br />
+                    <b>การใช้งาน:</b> ขยายช่วงเสาได้สูงสุด 120 เมตร, ป้องกันรถชนเสา, เพิ่มระยะ Clearance แนวดิ่งข้ามถนน/สิ่งกีดขวาง
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* เสาโครงเหล็ก (Steel Tower) */}
+            <div style={{ backgroundColor: "white", borderRadius: "16px", border: "2px solid #ddd6fe", padding: "20px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+                <div style={{ backgroundColor: "#ede9fe", color: "#6d28d9", padding: "10px", borderRadius: "10px", fontWeight: "bold" }}>
+                  🗼
+                </div>
+                <div>
+                  <h4 style={{ fontSize: "1.15rem", fontWeight: "bold", color: "#1e293b", margin: 0 }}>เสาโครงเหล็กทาวเวอร์ (Steel Tower)</h4>
+                  <span style={{ fontSize: "0.8rem", color: "#7c3aed" }}>รองรับช่วงเสายาวข้ามแม่น้ำและมุมเลี้ยวใหญ่</span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "0.85rem", color: "#334155" }}>
+                <div style={{ padding: "12px", backgroundColor: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <div style={{ fontWeight: "bold", marginBottom: "4px", color: "#6d28d9" }}>
+                    1. เสาโครงเหล็กสำหรับทางตรง (Straight Tower)
+                  </div>
+                  <p style={{ margin: 0, color: "#64748b", lineHeight: "1.5" }}>
+                    <b>แบบเลขที่:</b> SA1-015/45006 (ประกอบ 5702)<br />
+                    <b>เกณฑ์ใช้งาน:</b> ระยะช่วงเสา (Span) สูงสุดไม่เกิน <b>360 เมตร</b> มุมเบี่ยงเบนแนวสายไม่เกิน 1° รองรับระบบจำหน่าย 22/33 kV ใต้ไลน์ 2 วงจร
+                  </p>
+                </div>
+
+                <div style={{ padding: "12px", backgroundColor: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <div style={{ fontWeight: "bold", marginBottom: "4px", color: "#6d28d9" }}>
+                    2. เสาโครงเหล็กสำหรับทางโค้ง 90° (Corner Tower)
+                  </div>
+                  <p style={{ margin: 0, color: "#64748b", lineHeight: "1.5" }}>
+                    <b>แบบเลขที่:</b> SA1-015/45007 (ประกอบ 5703)<br />
+                    <b>เกณฑ์ใช้งาน:</b> ระยะช่วงเสาสูงสุดไม่เกิน <b>150 เมตร</b> รองรับมุมเลี้ยวหักฉาก 90° และรับแรงดึง Tension เต็มพิกัด
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* 3. เสาเข็ม คอร. และฐานรากตอม่อ */}
+          <div style={{ backgroundColor: "white", borderRadius: "16px", border: "1px solid #e2e8f0", padding: "20px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+            <h4 style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#1e293b", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <CheckCircle2 size={20} className="text-teal-600" />
+              มาตรฐานเสาเข็ม คอร. และอุปกรณ์ฐานรากตอม่อ (Piles & Foundation Stub Bolts)
+            </h4>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px", fontSize: "0.85rem" }}>
+              <div style={{ padding: "14px", backgroundColor: "#f0fdfa", borderRadius: "12px", border: "1px solid #ccfbf1" }}>
+                <span style={{ fontWeight: "bold", color: "#0f766e", display: "block", marginBottom: "6px" }}>
+                  เสาเข็ม คอร. 0.44x0.44x8.50 ม. (โมเมนต์ 10,000 กก.-ม.)
+                </span>
+                <span style={{ color: "#64748b" }}>
+                  รหัสพัสดุ: <b>1000030000 - 1000030003</b><br />
+                  ใช้ในกรณีดินสามารถรับน้ำหนักปลอดภัยได้น้อยกว่า 12 ตัน/ตร.ม. (แบบที่ 19 ชนิดสำเร็จรูป 2 ต้น)
+                </span>
+              </div>
+
+              <div style={{ padding: "14px", backgroundColor: "#f0fdfa", borderRadius: "12px", border: "1px solid #ccfbf1" }}>
+                <span style={{ fontWeight: "bold", color: "#0f766e", display: "block", marginBottom: "6px" }}>
+                  เสาเข็ม คอร. 0.44x0.44x8.50 ม. (โมเมนต์ 14,000 กก.-ม.)
+                </span>
+                <span style={{ color: "#64748b" }}>
+                  รหัสพัสดุ: <b>1000030008 - 1000030011</b><br />
+                  พร้อมเหล็กเสริมหัวเสา สายดิน และหลักสายดินในตัว (แบบที่ 20 ชนิดสำเร็จรูป 2 ต้น)
+                </span>
+              </div>
+
+              <div style={{ padding: "14px", backgroundColor: "#fffbeb", borderRadius: "12px", border: "1px solid #fde68a" }}>
+                <span style={{ fontWeight: "bold", color: "#b45309", display: "block", marginBottom: "6px" }}>
+                  สตับโบลท์ M24 ยาว 1,600 มม. (Stub Bolt M24 x 1,600 mm)
+                </span>
+                <span style={{ color: "#92400e" }}>
+                  รหัสพัสดุ: <b>1010160004</b><br />
+                  ใช้ประกอบติดตั้งฐานรากเสา แบบใช้เสาตอม่อระบบสายส่ง 115 kV (ตามแบบ D-10B, D-10C)
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* TAB 3: GROUNDING SYSTEM (GR / GS / GC / GW / Cadweld) */}
       {activeTab === "grounding_system" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           
