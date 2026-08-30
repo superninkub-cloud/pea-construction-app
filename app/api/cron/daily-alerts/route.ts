@@ -52,24 +52,31 @@ export async function GET(req: Request) {
 
     message += `\nกรุณาเข้าสู่ระบบเพื่อตรวจสอบรายละเอียดเพิ่มเติม`;
 
-    // 4. Send to LINE Notify
-    const lineToken = process.env.LINE_NOTIFY_TOKEN;
-    if (!lineToken) {
-      return NextResponse.json({ error: "LINE_NOTIFY_TOKEN is not configured in environment variables" }, { status: 500 });
+    // 4. Send to LINE Messaging API (Broadcast)
+    const channelToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    if (!channelToken) {
+      return NextResponse.json({ error: "LINE_CHANNEL_ACCESS_TOKEN is not configured in environment variables" }, { status: 500 });
     }
 
-    const lineResponse = await fetch("https://notify-api.line.me/api/notify", {
+    const lineResponse = await fetch("https://api.line.me/v2/bot/message/broadcast", {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": `Bearer ${lineToken}`
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${channelToken}`
       },
-      body: new URLSearchParams({ message: message })
+      body: JSON.stringify({
+        messages: [
+          {
+            type: "text",
+            text: message
+          }
+        ]
+      })
     });
 
     if (!lineResponse.ok) {
       const errorText = await lineResponse.text();
-      console.error("LINE Notify failed:", errorText);
+      console.error("LINE Messaging API failed:", errorText);
       return NextResponse.json({ error: "Failed to send LINE notification", details: errorText }, { status: 500 });
     }
 
