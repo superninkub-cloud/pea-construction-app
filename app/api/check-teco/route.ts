@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 
 export const runtime = "nodejs";
 
@@ -27,9 +28,13 @@ export async function POST(req: NextRequest) {
 
     // Read the file into an ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
-    const base64Data = Buffer.from(arrayBuffer).toString("base64");
+    // Parse PDF text using pdf-parse
+    const pdfBuffer = Buffer.from(arrayBuffer);
+    const pdfData = await pdfParse(pdfBuffer);
+    const extractedText = pdfData.text;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Use gemini-pro (free tier, no document understanding)
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     let scrapContext = "";
     if (scrapData && scrapData !== "[]" && scrapData !== "") {
@@ -65,12 +70,7 @@ ${scrapContext}
     const prompt = promptOverride || defaultPrompt;
 
     const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: file.type || "application/pdf",
-        },
-      },
+      `ข้อมูลจากเอกสาร PDF:\n${extractedText}\n\n`,
       prompt,
     ]);
 

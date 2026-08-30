@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // Max allowed for Vercel Hobby plan
@@ -24,9 +25,12 @@ export async function POST(req: NextRequest) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const base64Data = Buffer.from(arrayBuffer).toString("base64");
+    // Parse PDF text using pdf-parse
+    const pdfBuffer = Buffer.from(arrayBuffer);
+    const pdfData = await pdfParse(pdfBuffer);
+    const extractedText = pdfData.text;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const prompt = `
 You are a financial data extractor. I am providing you with a construction project report PDF.
@@ -76,12 +80,7 @@ Rules:
     `;
 
     const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: file.type || "application/pdf",
-        },
-      },
+      `ข้อมูลจากเอกสาร PDF:\n${extractedText}\n\n`,
       prompt,
     ]);
 
