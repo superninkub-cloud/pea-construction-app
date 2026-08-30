@@ -2271,12 +2271,31 @@ export default function UpdateStatus() {
                           style={{
                             color: "var(--text-light)",
                             fontSize: "0.8rem",
-                            marginBottom: "16px",
+                            marginBottom: isExpanded ? "16px" : "0",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center"
                           }}
                         >
-                          ผู้ควบคุมงาน: {p.supervisor}
+                          <span>ผู้ควบคุมงาน: {p.supervisor}</span>
+                          <button
+                            onClick={toggleExpand}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              padding: "4px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#64748b",
+                            }}
+                            title={isExpanded ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
+                          >
+                            {isExpanded ? "▲" : "▼"}
+                          </button>
                         </div>
-                        {detailsContent}
+                        {isExpanded && detailsContent}
                       </>
                     ) : (
                       <>

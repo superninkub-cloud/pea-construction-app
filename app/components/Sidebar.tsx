@@ -30,7 +30,7 @@ export default function Sidebar() {
         </Link>
         <Link href="/update" className={`nav-item ${pathname === "/update" ? "active" : ""}`}>
           <FileEdit size={20} />
-          <span>อัพเดทสถานะงาน (Table)</span>
+          <span>อัพเดทสถานะงาน</span>
         </Link>
 
         <Link href="/wire-return" className={`nav-item ${pathname === "/wire-return" ? "active" : ""}`}>
