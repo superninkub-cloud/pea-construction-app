@@ -214,28 +214,38 @@ export default function Overview() {
               </div>
             </div>
 
-            {/* Supervisor Comparison Bar Chart */}
+            {/* Supervisor Comparison Progress Bar Cards */}
             {supervisorStats.length > 0 && (
               <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Users size={20} color="var(--pea-purple)" />
-                  เปรียบเทียบจำนวนงาน F4 และงานทั้งหมด แยกตามช่าง
+                  เปรียบเทียบผลงานการปิดงาน (F4) ของช่างแต่ละคน
                 </h3>
-                <div style={{ width: '100%', height: '350px' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={supervisorStats} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} angle={-45} textAnchor="end" />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-                      <Tooltip 
-                        cursor={{ fill: '#f1f5f9' }}
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                      />
-                      <Legend verticalAlign="top" height={36} />
-                      <Bar dataKey="total" name="งานทั้งหมด" fill="var(--pea-purple)" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="f4" name="ปิดงาน (F4)" fill="#10b981" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '8px' }}>
+                  {supervisorStats.map(stat => (
+                    <div key={stat.name} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', background: '#f8fafc' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontWeight: '600', color: '#1e293b' }}>{stat.name}</span>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ fontWeight: '700', color: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') }}>
+                            {stat.percentage.toFixed(1)}%
+                          </span>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>(อัตราการปิดงานสำเร็จ)</div>
+                        </div>
+                      </div>
+                      <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '3px', marginBottom: '12px', overflow: 'hidden' }}>
+                        <div style={{ 
+                          height: '100%', 
+                          width: `${stat.percentage}%`, 
+                          background: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') 
+                        }}></div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
+                        <span>จำนวนงานทั้งหมด: <strong style={{ color: '#1e293b' }}>{stat.total}</strong> โครงการ</span>
+                        <span>ปิดงาน F4 แล้ว: <strong style={{ color: '#10b981' }}>{stat.f4}</strong> โครงการ</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
