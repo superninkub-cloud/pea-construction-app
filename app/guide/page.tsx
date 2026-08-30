@@ -4,6 +4,14 @@ import TopBar from "../components/TopBar";
 import ReactMarkdown from "react-markdown";
 import { MessageCircle, X, Activity, Ruler, Cpu, Zap, Shield, MapPin, Wrench, BookOpen } from "lucide-react";
 
+import SagTension from "./components/SagTension";
+import Clearances from "./components/Clearances";
+import Structures from "./components/Structures";
+import Conductors from "./components/Conductors";
+import Insulators from "./components/Insulators";
+import PolesGrounding from "./components/PolesGrounding";
+import Hardware from "./components/Hardware";
+
 export default function GuidePage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
@@ -60,14 +68,42 @@ export default function GuidePage() {
   };
 
   const topics = [
-    { id: "sag", title: "ทฤษฎีและการคำนวณแรงดึง/ระยะหย่อนยาน", icon: <Activity size={24} />, color: "bg-blue-100 text-blue-700" },
-    { id: "clearance", title: "ระยะห่างทางไฟฟ้า (Clearances)", icon: <Ruler size={24} />, color: "bg-emerald-100 text-emerald-700" },
-    { id: "structure", title: "แบบมาตรฐานโครงสร้างสายส่ง 115 kV", icon: <Cpu size={24} />, color: "bg-purple-100 text-purple-700" },
-    { id: "conductor", title: "คุณสมบัติสายไฟฟ้าและ Thermal Limit", icon: <Zap size={24} />, color: "bg-amber-100 text-amber-700" },
-    { id: "insulator", title: "ลูกถ้วยฉนวนไฟฟ้าและการประกอบชุดลูกถ้วย", icon: <Shield size={24} />, color: "bg-rose-100 text-rose-700" },
-    { id: "pole", title: "เสาคอนกรีตอัดแรง 22 ม. และระบบต่อลงดิน", icon: <MapPin size={24} />, color: "bg-teal-100 text-teal-700" },
-    { id: "hardware", title: "อุปกรณ์ประกอบฮาร์ดแวร์", icon: <Wrench size={24} />, color: "bg-slate-100 text-slate-700" },
+    { id: "sag", title: "การคำนวณแรงดึง/ระยะหย่อนยาน", desc: "Sag & Tension Calculator", icon: <Activity size={32} />, bg: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)", color: "white" },
+    { id: "clearance", title: "ระยะห่างทางไฟฟ้า", desc: "Clearances", icon: <Ruler size={32} />, bg: "linear-gradient(135deg, #10b981 0%, #059669 100%)", color: "white" },
+    { id: "structure", title: "แบบมาตรฐานโครงสร้างเสา", desc: "115 kV Standard Structures", icon: <Cpu size={32} />, bg: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)", color: "white" },
+    { id: "conductor", title: "คุณสมบัติสายไฟฟ้า", desc: "Conductors & Thermal Limit", icon: <Zap size={32} />, bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", color: "white" },
+    { id: "insulator", title: "ลูกถ้วยและการประกอบชุด", desc: "Insulators Assemblies", icon: <Shield size={32} />, bg: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)", color: "white" },
+    { id: "pole", title: "เสาคอนกรีตและการต่อลงดิน", desc: "Poles & Grounding", icon: <MapPin size={32} />, bg: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)", color: "white" },
+    { id: "hardware", title: "อุปกรณ์ประกอบฮาร์ดแวร์", desc: "Hardware Accessories", icon: <Wrench size={32} />, bg: "linear-gradient(135deg, #64748b 0%, #475569 100%)", color: "white" },
   ];
+
+  const renderContent = () => {
+    switch (selectedTopic) {
+      case "full-pdf":
+        return (
+          <iframe
+            src="https://pea-foundation-guide-c4e3.vercel.app/"
+            style={{ width: "100%", height: "100%", border: "none" }}
+            title="คู่มืองานก่อสร้าง 115kV"
+            allowFullScreen
+          />
+        );
+      case "sag": return <SagTension />;
+      case "clearance": return <Clearances />;
+      case "structure": return <Structures />;
+      case "conductor": return <Conductors />;
+      case "insulator": return <Insulators />;
+      case "pole": return <PolesGrounding />;
+      case "hardware": return <Hardware />;
+      default: return null;
+    }
+  };
+
+  const getTopicTitle = () => {
+    if (selectedTopic === "full-pdf") return "คู่มือฉบับเต็ม";
+    const topic = topics.find(t => t.id === selectedTopic);
+    return topic ? topic.title : "";
+  };
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column", backgroundColor: "#f8fafc", position: "relative" }}>
@@ -77,61 +113,60 @@ export default function GuidePage() {
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           
           <div style={{ marginBottom: "30px", textAlign: "center" }}>
-            <h1 style={{ fontSize: "2rem", color: "#1e293b", marginBottom: "10px", fontWeight: "bold" }}>คู่มือมาตรฐานการก่อสร้างสายส่ง 115 kV</h1>
+            <h1 style={{ fontSize: "2.2rem", color: "#1e293b", marginBottom: "10px", fontWeight: "800" }}>คู่มือมาตรฐานการก่อสร้างสายส่ง 115 kV</h1>
             <p style={{ color: "#64748b", fontSize: "1.1rem" }}>เลือกหัวข้อที่คุณต้องการศึกษา หรือสอบถามข้อมูลเพิ่มเติมผ่านผู้ช่วย AI ของเรา</p>
           </div>
 
           {!selectedTopic ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
               {/* PDF Full Guide Card */}
               <div 
                 onClick={() => setSelectedTopic("full-pdf")}
-                style={{ backgroundColor: "white", borderRadius: "12px", padding: "24px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", transition: "transform 0.2s, box-shadow 0.2s", border: "1px solid #e2e8f0" }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1)"; }}
+                style={{ background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", color: "white", borderRadius: "16px", padding: "24px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", transition: "transform 0.2s, box-shadow 0.2s", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px) scale(1.02)"; e.currentTarget.style.boxShadow = "0 20px 25px -5px rgba(0,0,0,0.2)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0) scale(1)"; e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0,0,0,0.1)"; }}
               >
-                <div style={{ width: "60px", height: "60px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px", backgroundColor: "#fef2f2", color: "#ef4444" }}>
-                  <BookOpen size={32} />
+                <div style={{ padding: "15px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "50%", marginBottom: "16px" }}>
+                  <BookOpen size={40} />
                 </div>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#334155", textAlign: "center" }}>เปิดอ่านคู่มือฉบับเต็ม</h3>
-                <p style={{ color: "#64748b", textAlign: "center", marginTop: "8px", fontSize: "0.9rem" }}>(เอกสาร PDF ความยาว 313 หน้า)</p>
+                <h3 style={{ fontSize: "1.3rem", fontWeight: "bold", textAlign: "center", marginBottom: "5px" }}>เปิดอ่านคู่มือฉบับเต็ม</h3>
+                <p style={{ color: "#cbd5e1", textAlign: "center", fontSize: "0.9rem", margin: 0 }}>(PDF 313 หน้า)</p>
               </div>
 
               {topics.map((topic) => (
                 <div 
                   key={topic.id}
-                  onClick={() => alert("กำลังพัฒนาฟีเจอร์สำหรับหัวข้อ: " + topic.title)}
-                  style={{ backgroundColor: "white", borderRadius: "12px", padding: "24px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", cursor: "pointer", display: "flex", alignItems: "flex-start", gap: "16px", transition: "transform 0.2s, box-shadow 0.2s", border: "1px solid #e2e8f0" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1)"; }}
+                  onClick={() => setSelectedTopic(topic.id)}
+                  style={{ background: topic.bg, color: topic.color, borderRadius: "16px", padding: "24px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "space-between", minHeight: "160px", transition: "transform 0.2s, box-shadow 0.2s", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px) scale(1.02)"; e.currentTarget.style.boxShadow = "0 20px 25px -5px rgba(0,0,0,0.2)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0) scale(1)"; e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0,0,0,0.1)"; }}
                 >
-                  <div className={topic.color} style={{ width: "48px", height: "48px", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <div style={{ padding: "12px", backgroundColor: "rgba(255,255,255,0.2)", borderRadius: "12px", marginBottom: "16px" }}>
                     {topic.icon}
                   </div>
                   <div>
-                    <h3 style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#334155", marginBottom: "6px" }}>{topic.title}</h3>
-                    <p style={{ color: "#94a3b8", fontSize: "0.85rem" }}>คลิกเพื่อดูสรุปข้อมูลและเครื่องมือคำนวณที่เกี่ยวข้อง</p>
+                    <h3 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "4px", lineHeight: "1.3" }}>{topic.title}</h3>
+                    <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9rem", margin: 0 }}>{topic.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ height: "calc(100vh - 180px)", display: "flex", flexDirection: "column", backgroundColor: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", border: "1px solid #e2e8f0" }}>
-              <div style={{ padding: "15px 20px", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#f8fafc" }}>
-                <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#334155", margin: 0 }}>คู่มือฉบับเต็ม</h2>
-                <button 
-                  onClick={() => setSelectedTopic(null)}
-                  style={{ padding: "6px 12px", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", fontSize: "0.9rem" }}
-                >
-                  ย้อนกลับ
-                </button>
+            <div style={{ display: "flex", flexDirection: "column", backgroundColor: "white", borderRadius: "16px", overflow: "hidden", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", border: "1px solid #e2e8f0" }}>
+              <div style={{ padding: "15px 24px", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#f8fafc" }}>
+                <h2 style={{ fontSize: "1.3rem", fontWeight: "bold", color: "#1e293b", margin: 0, display: "flex", alignItems: "center", gap: "10px" }}>
+                  <button 
+                    onClick={() => setSelectedTopic(null)}
+                    style={{ background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", color: "#64748b", padding: "5px" }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  {getTopicTitle()}
+                </h2>
               </div>
-              <iframe
-                src="https://pea-foundation-guide-c4e3.vercel.app/"
-                style={{ width: "100%", height: "100%", border: "none" }}
-                title="คู่มืองานก่อสร้าง 115kV"
-                allowFullScreen
-              />
+              <div style={{ height: "calc(100vh - 220px)", overflowY: "auto" }}>
+                {renderContent()}
+              </div>
             </div>
           )}
 
