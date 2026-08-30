@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-const pdfParse = require("pdf-parse");
+import { extractText, getDocumentProxy } from "unpdf";
 
 export const runtime = "nodejs";
 
@@ -28,10 +28,10 @@ export async function POST(req: NextRequest) {
 
     // Read the file into an ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
-    // Parse PDF text using pdf-parse
-    const pdfBuffer = Buffer.from(arrayBuffer);
-    const pdfData = await pdfParse(pdfBuffer);
-    const extractedText = pdfData.text;
+    // Parse PDF text using unpdf (Vercel edge friendly)
+    const pdfBuffer = new Uint8Array(arrayBuffer);
+    const pdf = await getDocumentProxy(pdfBuffer);
+    const { text: extractedText } = await extractText(pdf, { mergePages: true });
 
     // Use gemini-pro (free tier, no document understanding)
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
