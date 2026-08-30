@@ -5,7 +5,7 @@ interface PoleStructure {
   id: string;
   code: string;
   name: string;
-  circuitType: "single_conductor" | "double_circuit" | "special";
+  circuitType: "single_conductor" | "double_circuit_single" | "double_circuit";
   circuitTypeName: string;
   angleRange: string;
   insulatorAssembly: string;
@@ -19,16 +19,17 @@ interface PoleStructure {
     spanMax: string;
     drawingNo: string;
   };
-  svgType: "SS-TG" | "SS-SA" | "SS-AS" | "SS-LA" | "SS-AS-4" | "SS-TL" | "DD-TG" | "DD-SA" | "DD-AS" | "DD-LA";
+  svgType: "SS-TG" | "SS-SA" | "SS-AS" | "SS-LA" | "SS-AS-4" | "SS-TL" | "DS-TG" | "DS-SA" | "DS-AS" | "DS-LA" | "DD-SA-2" | "DD-AS-2" | "DD-DD-1" | "DD-DD-2" | "DD-LS-1";
 }
 
 const STRUCTURE_DATA: PoleStructure[] = [
+  // ─── SINGLE CIRCUIT ───────────────────────────────────────────────────────
   {
     id: "ss-tg",
     code: "SS-TG-2 / SS-TG-6",
     name: "เสาทางตรงวงจรเดี่ยว สายเดี่ยว (Single Circuit Tangent Single Conductor)",
     circuitType: "single_conductor",
-    circuitTypeName: "วงจรเดี่ยว ชนิดสายเดี่ยว (SS Series)",
+    circuitTypeName: "วงจรเดี่ยว สายเดี่ยว (SS Series)",
     angleRange: "0° - 2° (ทางตรง)",
     insulatorAssembly: "ลูกถ้วยแขวนแนวดิ่ง 3 พวง (แบบ D-1 / D-11 พวงละ 7-8 ลูก)",
     crossarmType: "คอนเหล็กบนเดี่ยว + คอนเหล็กคู่ล่าง (Wishbone / Delta)",
@@ -41,10 +42,10 @@ const STRUCTURE_DATA: PoleStructure[] = [
       "ระยะห่างระหว่างเฟส (Phase Separation) มากกว่า 3.00 - 3.80 เมตร ป้องกันสายแกว่งแตะกัน"
     ],
     specs: {
-      crossarmMaterial: "เหล็กรูปรางน้ำชุบสังกะสี มอก. 1227 (Hot-Dip Galvanized Steel)",
-      shieldWire: "สายดินล่อฟ้า OHGW / OPGW 1 เส้นบนยอดเสา",
+      crossarmMaterial: "เหล็กรูปรางน้ำชุบสังกะสี มอก. 1227",
+      shieldWire: "สายดินล่อฟ้า OHGW / OPGW 1 เส้นยอดเสา",
       spanMax: "100 - 120 เมตร",
-      drawingNo: "SA1-015/5701 (ประกอบ 7101)"
+      drawingNo: "SA1-015/5701"
     },
     svgType: "SS-TG"
   },
@@ -53,23 +54,22 @@ const STRUCTURE_DATA: PoleStructure[] = [
     code: "SS-SA-2",
     name: "เสาทางโค้งมุมเล็ก สายเดี่ยว (Single Circuit Small Angle 2° - 30°)",
     circuitType: "single_conductor",
-    circuitTypeName: "วงจรเดี่ยว ชนิดสายเดี่ยว (SS Series)",
+    circuitTypeName: "วงจรเดี่ยว สายเดี่ยว (SS Series)",
     angleRange: "2° - 30° (ทางโค้งมุมเล็ก)",
-    insulatorAssembly: "ลูกถ้วยแขวนเอียงตามแรงดึงลัพธ์ (แบบ D-2 / D-12 พร้อมที่แขวนรูปตัวยู)",
+    insulatorAssembly: "ลูกถ้วยแขวนเอียงตามแรงดึงลัพธ์ (แบบ D-2 / D-12)",
     crossarmType: "คอนเหล็กขวางเสริมแผ่นประกับรับแรงเฉือนด้านข้าง",
-    guyWireSpec: "สายยึดโยงสลิงเหล็ก 1 ชุด (ติดตั้งฝั่งตรงข้ามมุมดึงของสายไฟ)",
-    description: "ใช้สำหรับจุดเลี้ยวโค้งของแนวสายส่งมุมไม่เกิน 30 องศา พวงลูกถ้วยจะเอียงตามแนวแรงดึงลัพธ์ (Resultant Force Angle) โดยใช้ที่แขวนลูกถ้วยทางโค้งรูปตัวยู (Corner Bracket) เพื่อรักษาระยะห่างจากคอนเหล็ก",
+    guyWireSpec: "สายยึดโยงสลิงเหล็ก 1 ชุด (ฝั่งตรงข้ามมุมดึง)",
+    description: "ใช้สำหรับจุดเลี้ยวโค้งของแนวสายส่งมุมไม่เกิน 30 องศา พวงลูกถ้วยเอียงตามแนวแรงดึงลัพธ์ (Resultant Force Angle) มีการติดตั้ง Corner Bracket ใต้คอน",
     engineeringFeatures: [
-      "ใช้ที่แขวนรูปตัวยู (Corner Suspension Bracket 1030140012) ใต้คอนเพื่อกันลูกถ้วยแกว่งชนคอน",
-      "พวงลูกถ้วยเอียงทำมุมอย่างอิสระตามแรงดึงสายและแรงลมปะทะ",
-      "ติดตั้งสายยึดโยง (Guy Wire 50-95 mm²) รั้งเสาที่ระดับความสูง 4.00 ม. ถ่ายแรงลงสมอบก",
-      "มีแคล้มป์ประคองสายกราวด์ล่อฟ้ายอดเสาทำมุมตามแนวเลี้ยว"
+      "ใช้ที่แขวนรูปตัวยู (Corner Suspension Bracket) กันลูกถ้วยชนคอน",
+      "พวงลูกถ้วยเอียงทำมุมอย่างอิสระตามแรงดึง",
+      "ติดตั้งสายยึดโยง รั้งเสาถ่ายแรงลงสมอบก"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็กรางน้ำ 100x50x5 มม. เสริม Brace รับแรงเฉือน",
+      crossarmMaterial: "คอนเหล็ก 100x50x5 มม. เสริม Brace",
       shieldWire: "สายกราวด์ OHGW พาดผ่านแคล้มป์มุม",
       spanMax: "80 - 100 เมตร",
-      drawingNo: "SA1-015/5701 (ประกอบ 7102)"
+      drawingNo: "SA1-015/5701"
     },
     svgType: "SS-SA"
   },
@@ -78,23 +78,22 @@ const STRUCTURE_DATA: PoleStructure[] = [
     code: "SS-AS-2 / SS-AS-4",
     name: "เสายึดดึงตรงสองข้าง สายเดี่ยว (Anchor / Strain Section Structure)",
     circuitType: "single_conductor",
-    circuitTypeName: "วงจรเดี่ยว ชนิดสายเดี่ยว (SS Series)",
+    circuitTypeName: "วงจรเดี่ยว สายเดี่ยว (SS Series)",
     angleRange: "0° - 5° (ทางตรงรับแรงดึงเต็มพิกัด)",
-    insulatorAssembly: "ลูกถ้วยเข้าปลายสายแนวนอน 2 ฝั่ง (แบบ D-3 / D-13 รวม 6 พวง) + สายจัมเปอร์",
-    crossarmType: "คอนเหล็กคู่หนาพิเศษ 150x75x9 มม. พร้อมแผ่นเหล็กยื่นสองปลาย (Double Arming)",
-    guyWireSpec: "สายยึดโยง 2 ทิศทาง (หัว-ท้ายเสา) กรณีเป็นจุดตัดช่วงดึงสาย",
-    description: "เสาดึงตรึงสายไฟเป็นช่วงๆ (Section Pole ทุก 1.5 - 2.0 กม.) เพื่อกักแรงดึงไม่ให้ส่งต่อสะสมยาวเกินไป และป้องกันเสาล้มลามเป็นโดมิโนกรณีสายไฟขาด เชื่อมต่อวงจรด้วยสายจัมเปอร์ (Jumper Loop)",
+    insulatorAssembly: "ลูกถ้วยเข้าปลายสายแนวนอน 2 ฝั่ง (D-3 รวม 6 พวง) + สายจัมเปอร์",
+    crossarmType: "คอนเหล็กคู่หนาพิเศษ 150x75x9 มม. พร้อมแผ่นเหล็กยื่นสองปลาย",
+    guyWireSpec: "สายยึดโยง 2 ทิศทาง (หัว-ท้ายเสา) กรณีเป็นจุดตัดช่วง",
+    description: "เสาดึงตรึงสายไฟเป็นช่วงๆ (Section Pole ทุก 1.5 - 2.0 กม.) เพื่อกักแรงดึงไม่ให้ส่งต่อสะสมยาวเกินไป และป้องกันเสาล้มลามเป็นโดมิโน",
     engineeringFeatures: [
-      "ลูกถ้วยรับแรงดึงแนวนอน 6 พวง (2 พวงต่อเฟส หันหน้าชนกัน)",
-      "แคล้มป์เข้าปลายสายแบบบีบ (Compression Dead-End) รับแรงดึงได้ถึง 12,000 - 14,000 kgf",
-      "สายจัมเปอร์ (Jumper Loop) ดัดโค้งรอดใต้หัวเสา ทา Joint Compound แน่นหนา",
-      "แผ่นเหล็กยื่นสองปลาย (Double Arming Plate 12x100x650 มม.) รัดคอนคู่ขนานกันอย่างมั่นคง"
+      "ลูกถ้วยรับแรงดึงแนวนอน 6 พวง",
+      "แคล้มป์เข้าปลายสายแบบบีบ รับแรงดึงสูงสุด",
+      "สายจัมเปอร์ (Jumper Loop) ดัดโค้งรอดใต้หัวเสา"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็กรางน้ำคู่ 150x75x9 มม. พร้อม Double Arming Plates",
-      shieldWire: "สายกราวด์ OHGW เข้าปลายสายสองข้างพร้อมจัมเปอร์สายดิน",
+      crossarmMaterial: "คอนเหล็กคู่พร้อม Double Arming Plates",
+      shieldWire: "สายกราวด์ OHGW เข้าปลายสายสองข้าง",
       spanMax: "100 - 150 เมตร",
-      drawingNo: "SA1-015/5701 (ประกอบ 7103)"
+      drawingNo: "SA1-015/5701"
     },
     svgType: "SS-AS"
   },
@@ -103,20 +102,19 @@ const STRUCTURE_DATA: PoleStructure[] = [
     code: "SS-LA-1 / SS-LA-2",
     name: "เสาหัวมุมใหญ่และจบสาย (Large Angle 30° - 90° & Dead-End)",
     circuitType: "single_conductor",
-    circuitTypeName: "วงจรเดี่ยว ชนิดสายเดี่ยว (SS Series)",
-    angleRange: "30° - 90° (มุมหักศอก / ทางแยก)",
-    insulatorAssembly: "ลูกถ้วยเข้าปลายสายแรงดึงสูง (D-3, D-13 / D-19) + ลูกถ้วยโพสท์ประคองจัมเปอร์",
+    circuitTypeName: "วงจรเดี่ยว สายเดี่ยว (SS Series)",
+    angleRange: "30° - 90° (มุมหักศอก)",
+    insulatorAssembly: "ลูกถ้วยเข้าปลายสายแรงดึงสูง + ลูกถ้วยโพสท์ประคองจัมเปอร์",
     crossarmType: "คอนเหล็กคู่ทำมุมเฉียง พร้อมแผ่นประกับหนาพิเศษ",
-    guyWireSpec: "สายยึดโยงหนัก 2-4 ชุด (Heavy Guy Assembly รั้งสมอบกคอนกรีต)",
-    description: "โครงสร้างหัวเสาสำหรับจุดหักมุมเลี้ยว 90 องศา หัวมุมถนน หรือเสาจบสายหน้าสถานีไฟฟ้า รับแรงดึงสูงสุดในแนวระนาบ สายจัมเปอร์จะถูกประคองด้วยลูกถ้วยโพสท์แนวนอน (Horizontal Post Insulator) เพื่อรักษาระยะ Clearance",
+    guyWireSpec: "สายยึดโยงหนัก 2-4 ชุด (Heavy Guy Assembly)",
+    description: "โครงสร้างหัวเสาสำหรับจุดหักมุมเลี้ยว 90 องศา หรือเสาจบสาย สายจัมเปอร์จะถูกประคองด้วยลูกถ้วยโพสท์แนวนอน (Line Post)",
     engineeringFeatures: [
-      "คอนเหล็กคู่ติดตั้งทำมุมเฉียงตามแนวเส้นแบ่งครึ่งมุมเลี้ยว (Bisector)",
-      "ติดตั้งลูกถ้วยโพสท์ 115 kV (Line Post) ประคองสายจัมเปอร์ไม่ให้แกว่งเข้าใกล้ลำต้นเสา",
-      "แคล้มป์ย้ำไฮดรอลิกพร้อมแป้นหางปลา 15° NEMA Pad สำหรับยึดสายจัมเปอร์",
-      "สายยึดโยงสลิงเหล็ก 95 mm² จำนวน 2-4 ชุด ดึงเฉียง 45 องศาลงสู่สมอบกคู่ใต้ดิน"
+      "คอนเหล็กคู่ติดตั้งทำมุมเฉียงตามแนวเส้นแบ่งครึ่งมุม",
+      "ติดตั้งลูกถ้วยโพสท์แนวนอนช่วยรักษาระยะ Clearance",
+      "สายยึดโยง 2-4 ชุด ดึงเฉียง 45 องศา"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็กคู่หนาพิเศษ 150x75x9 มม. ชุบกัลวาไนซ์หนา 85 ไมครอน",
+      crossarmMaterial: "คอนเหล็กคู่หนาพิเศษ 150x75x9 มม.",
       shieldWire: "สายกราวด์ OHGW เข้าปลายสาย 2 ทิศทาง",
       spanMax: "120 - 200 เมตร",
       drawingNo: "SA1-015/5704"
@@ -126,156 +124,270 @@ const STRUCTURE_DATA: PoleStructure[] = [
   {
     id: "ss-as-4",
     code: "SS-AS-4 / SD-AS-3",
-    name: "เสาคอนท้าวแขนเรียงแนวดิ่ง (Single Circuit Alley Arm Structure)",
+    name: "เสาคอนท้าวแขนเรียงแนวดิ่ง (Single Circuit Alley Arm)",
     circuitType: "single_conductor",
-    circuitTypeName: "วงจรเดี่ยว ชนิดสายเดี่ยว (SS Series)",
+    circuitTypeName: "วงจรเดี่ยว สายเดี่ยว (SS Series)",
     angleRange: "0° - 5° (พื้นที่จำกัดเขตทาง)",
-    insulatorAssembly: "ลูกถ้วยแขวนแนวดิ่ง 3 ชุด เรียงลดหลั่นบนคอนท้าวแขนฝั่งเดียว",
-    crossarmType: "คอนเหล็กท้าวแขน 150x75x9 มม. ยาว 3.00 ม. (Alley Arm 1000120004)",
+    insulatorAssembly: "ลูกถ้วยแขวนแนวดิ่ง 3 ชุด เรียงบนคอนท้าวแขนฝั่งเดียว",
+    crossarmType: "คอนเหล็กท้าวแขน 150x75x9 มม. ยาว 3.00 ม. (Alley Arm)",
     guyWireSpec: "สายยึดโยงรั้งด้านตรงข้ามคอนท้าวแขน",
-    description: "ออกแบบพิเศษสำหรับพื้นที่เขตทางแคบ (Narrow Right-of-Way) ริมถนนชิดรั้ว หรือใกล้ตัวอาคาร โดยคอนเหล็กจะยื่นออกไปเพียงด้านเดียว และจัดสาย 3 เฟสเรียงในแนวดิ่ง (Vertical Arrangement)",
+    description: "ออกแบบพิเศษสำหรับพื้นที่เขตทางแคบริมถนนชิดรั้ว คอนยื่นออกด้านเดียว จัดสาย 3 เฟสเรียงในแนวดิ่ง",
     engineeringFeatures: [
-      "ใช้คอนเหล็กรางน้ำท้าวแขนขนาดใหญ่ 150x75x9 มม. ยาว 3.00 ม. ยื่นออกไปด้านเดียว",
-      "ค้ำยันด้วยเหล็กประกับคอนท้าวแขน (Alley Arm Brace 50x50x6 มม.) มั่นคงสูง",
-      "สายทั้ง 3 เฟส แขวนในแนวดิ่ง ช่วยประหยัดระยะปลอดภัยในแนวราบชิดอาคารได้ดีเยี่ยม",
-      "ยอดเสายื่นก้านรับสายกราวด์ล่อฟ้าเอียงตามแนวคอน"
+      "คอนท้าวแขนขนาดใหญ่ยาว 3.00 ม. ยื่นฝั่งเดียว",
+      "ค้ำยันด้วยเหล็กประกับ Alley Arm Brace",
+      "ประหยัดระยะปลอดภัยในแนวราบ"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็กท้าวแขน Alley Arm (รหัสพัสดุ 1000120004) มอก. 1227",
-      shieldWire: "สายกราวด์ OHGW ยึดบนก้านฉากยอดเสา",
+      crossarmMaterial: "คอนท้าวแขน Alley Arm (1000120004)",
+      shieldWire: "สายกราวด์ OHGW บนก้านฉากยอดเสา",
       spanMax: "80 - 100 เมตร",
-      drawingNo: "SA1-015/58004 (ประกอบ 7108)"
+      drawingNo: "SA1-015/58004"
     },
     svgType: "SS-AS-4"
   },
   {
     id: "ss-tl",
     code: "SS-TL-1 / SD-TL-1",
-    name: "เสาแยกสาย 3 ทาง (Tap-Line Structure with Air Break Switch)",
+    name: "เสาแยกสาย 3 ทาง (Tap-Line Structure with Switch)",
     circuitType: "single_conductor",
-    circuitTypeName: "วงจรเดี่ยว ชนิดสายเดี่ยว (SS Series)",
-    angleRange: "แยกสายฉาก 90° สู่สถานีย่อย/โรงงาน",
-    insulatorAssembly: "ลูกถ้วยผสม (แขวนทางตรง + เข้าปลายสายแทป) + สวิตช์ 115 kV",
+    circuitTypeName: "วงจรเดี่ยว สายเดี่ยว (SS Series)",
+    angleRange: "แยกสายฉาก 90°",
+    insulatorAssembly: "ลูกถ้วยผสม (แขวน + ปลายสาย) + สวิตช์ 115 kV",
     crossarmType: "คอนทางตรงขวาง + คอนยื่นดึงแยกแนวฉาก 90 องศา",
-    guyWireSpec: "สายยึดโยงรั้งต้านแรงดึงของสายแยก Tap-Line",
-    description: "โครงสร้างหัวเสาสำหรับแยกวงจรสายส่ง (T-Branch) ไปจ่ายไฟให้แก่สถานีไฟฟ้าย่อยแห่งใหม่ หรือลูกค้ารายใหญ่ 115 kV พร้อมติดตั้งแอร์เบรกสวิตช์ 3 ขา (Air Break Switch 1,200 A) สำหรับตัดตอน",
+    guyWireSpec: "สายยึดโยงรั้งต้านแรงดึงของสายแยก",
+    description: "หัวเสาแยกวงจรสายส่ง (T-Branch) ไปสถานีไฟฟ้าย่อย พร้อมติดตั้งแอร์เบรกสวิตช์ 115 kV (Air Break Switch 1,200 A)",
     engineeringFeatures: [
-      "คอนเหล็กเสริมยื่น 90 องศาสำหรับดึงสายแยก Tap Line",
-      "มีแอร์เบรกสวิตช์ 115 kV 1,200 A สั่งการด้วยคันโยกตัดตอนขณะไม่มีโหลด",
-      "สายจัมเปอร์เชื่อมต่อจากสายเมนหลักเข้าสู่ขั้วสวิตช์และสายแยก",
-      "ระบบต่อลงดินโครงสร้างสวิตช์และคันโยกด้วยสายทองแดง 95 mm² เข้า Ground Grid"
+      "แอร์เบรกสวิตช์ 115 kV ตัดตอนขณะไม่มีโหลด",
+      "ก้านโยกควบคุมทอดลงสู่พื้นดิน พร้อมต่อกราวด์"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็กรางน้ำผสม + ฐานรองรับสวิตช์ 115 kV",
+      crossarmMaterial: "คอนเหล็กผสม + ฐานสวิตช์",
       shieldWire: "สายกราวด์ OHGW แยก 3 ทาง",
-      spanMax: "60 - 80 เมตร (แนวแทป)",
-      drawingNo: "SA1-015/5705 (ประกอบ 7109)"
+      spanMax: "60 - 80 เมตร",
+      drawingNo: "SA1-015/5705"
     },
     svgType: "SS-TL"
   },
-  // ─── NEW: DOUBLE CIRCUIT (วงจรคู่) ──────────────────────────────────────────
+
+  // ─── DS SERIES: DOUBLE CIRCUIT SINGLE CONDUCTOR (วงจรคู่ สายเดี่ยว) ───────
   {
-    id: "dd-tg",
-    code: "DD-TG-3 / DD-TG-7",
-    name: "เสาทางตรงวงจรคู่ (Double Circuit Tangent)",
-    circuitType: "double_circuit",
-    circuitTypeName: "วงจรคู่ (DD Series)",
+    id: "ds-tg",
+    code: "DS-TG-3 / DS-TG-7",
+    name: "เสาทางตรงวงจรคู่ สายเดี่ยว (Double Circuit Tangent - Single Conductor)",
+    circuitType: "double_circuit_single",
+    circuitTypeName: "วงจรคู่ สายเดี่ยว (DS Series)",
     angleRange: "0° - 2° (ทางตรง)",
-    insulatorAssembly: "ลูกถ้วยแขวนแนวดิ่ง 6 พวง (ฝั่งละ 3 พวง ชั้นละ 1 พวง)",
+    insulatorAssembly: "ลูกถ้วยแขวนแนวดิ่ง 6 พวง (ฝั่งละ 3 พวง)",
     crossarmType: "คอนเหล็กยื่นสองฝั่ง 3 ชั้น (3-Level Horizontal Crossarms)",
-    guyWireSpec: "ไม่ต้องใช้สายยึดโยง (เสาตั้งตรงสมดุลซ้าย-ขวา)",
-    description: "โครงสร้างมาตรฐานสำหรับสายส่ง 115 kV วงจรคู่ (Double Circuits 2 วงจร) จัดสายเรียงในแนวดิ่ง 3 ชั้น (Vertical Configuration) ซ้าย-ขวา ประหยัดพื้นที่เขตทาง (Right of Way) ได้ดีเยี่ยม",
+    guyWireSpec: "ไม่ต้องใช้สายยึดโยง",
+    description: "โครงสร้างมาตรฐานสำหรับสายส่ง 115 kV วงจรคู่ สายเดี่ยว (1 เส้น/เฟส รวม 6 เฟส) จัดสายเรียงแนวดิ่งซ้าย-ขวา เหมาะสำหรับพื้นที่เขตทางจำกัด ที่โหลดกระแสของแต่ละวงจรไม่เกินพิกัดสายเดี่ยว",
     engineeringFeatures: [
-      "ใช้คอนเหล็กชุบสังกะสีขวาง 3 ชั้น ชั้นละ 2 ฝั่งเพื่อรองรับวงจรที่ 1 (ซ้าย) และวงจรที่ 2 (ขวา)",
-      "ยอดเสาติดตั้งแคล้มป์รับสายกราวด์ล่อฟ้า (OHGW / OPGW) 1-2 เส้น",
-      "รักษาระยะห่างแนวดิ่งระหว่างเฟสอย่างน้อย 1.80 - 2.40 เมตร ตามมาตรฐาน clearances",
-      "ลูกถ้วยแขวนห้อยอิสระ 7-8 ลูกในแนวดิ่งทั้ง 6 จุด"
+      "คอนเหล็กชุบสังกะสี 3 ชั้น รองรับวงจร 1 (ซ้าย) และวงจร 2 (ขวา)",
+      "ใช้สายตัวนำเพียง 1 เส้นต่อเฟส ประหยัดโครงสร้าง",
+      "มีแคล้มป์แขวน (Suspension Clamp) และลูกตุ้มซับแรงสั่นสะเทือนเฟสละ 1 ตัว"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็กรางน้ำ 3 ชั้น 100x50x5 มม. ยึดด้วย V-Brace ทุกชั้น",
-      shieldWire: "สายกราวด์ OHGW บนยอดเสาตรงกลาง",
+      crossarmMaterial: "คอนเหล็กรางน้ำ 3 ชั้น ยึดด้วย V-Brace ทุกชั้น",
+      shieldWire: "สายกราวด์ OHGW 1-2 เส้น บนยอดเสา",
       spanMax: "100 - 120 เมตร",
-      drawingNo: "SA1-015/5707"
+      drawingNo: "SA1-015/5707 (DS)"
     },
-    svgType: "DD-TG"
+    svgType: "DS-TG"
   },
   {
-    id: "dd-sa",
-    code: "DD-SA-3 / DD-SA-7",
-    name: "เสาทางโค้งมุมเล็ก วงจรคู่ (Double Circuit Small Angle 2° - 30°)",
-    circuitType: "double_circuit",
-    circuitTypeName: "วงจรคู่ (DD Series)",
+    id: "ds-sa",
+    code: "DS-SA-3 / DS-SA-7",
+    name: "เสาทางโค้งมุมเล็ก วงจรคู่ สายเดี่ยว (Small Angle 2° - 30°)",
+    circuitType: "double_circuit_single",
+    circuitTypeName: "วงจรคู่ สายเดี่ยว (DS Series)",
     angleRange: "2° - 30° (ทางโค้งมุมเล็ก)",
     insulatorAssembly: "ลูกถ้วยแขวนเอียงตามแรงดึงลัพธ์ 6 พวง พร้อม U-Bracket",
-    crossarmType: "คอนเหล็กยื่นสองฝั่ง 3 ชั้น พร้อมแผ่นประกับรับแรงเฉือน",
+    crossarmType: "คอนเหล็กยื่นสองฝั่ง 3 ชั้น พร้อมแผ่นประกับ",
     guyWireSpec: "สายยึดโยง 1-2 ชุด ด้านนอกของมุมเลี้ยว",
-    description: "จุดเลี้ยวโค้งมุมเล็กสำหรับสายส่งวงจรคู่ พวงลูกถ้วยจะเอียงตามแนวแรงดึงลัพธ์ (Resultant Force) ใช้ที่แขวนรูปตัวยู (Corner Bracket) ใต้คอนเหล็กทั้ง 6 จุดเพื่อป้องกันลูกถ้วยชนคอน",
+    description: "จุดเลี้ยวโค้งมุมเล็กสำหรับสายส่งวงจรคู่ชนิดสายเดี่ยว พวงลูกถ้วยจะเอียงตามแนวแรงดึง ใช้ที่แขวนรูปตัวยู (Corner Bracket) กันลูกถ้วยชนคอน",
     engineeringFeatures: [
-      "มีที่แขวนรูปตัวยูกันลูกถ้วยแกว่งชนคอนทั้ง 6 พวง (Corner Suspension Bracket)",
-      "โครงสร้างคอนเหล็กทั้ง 3 ชั้นเสริม Brace ประกับคู่เพื่อต้านทานแรงบิดจากการดึงเอียง",
-      "ติดตั้งสายยึดโยงสลิงเหล็ก (Guy Wire) ต้านแรงดึงสายตัวนำ 6 เส้น ลงสู่สมอบก"
+      "ที่แขวนรูปตัวยู (U-Bracket) 6 จุด เพื่อระยะ Clearance จากคอน",
+      "สายยึดโยงสลิงเหล็กต้านแรงดึงสายตัวนำ 6 เส้น"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็ก 3 ชั้น หนาพิเศษเสริมเหล็กค้ำยันด้านข้าง",
-      shieldWire: "สายกราวด์ OHGW ผ่านแคล้มป์จับมุมโค้ง",
+      crossarmMaterial: "คอนเหล็ก 3 ชั้น เสริมเหล็กประกับค้ำยันด้านข้าง",
+      shieldWire: "สายกราวด์ OHGW ผ่านแคล้มป์มุม",
       spanMax: "80 - 100 เมตร",
-      drawingNo: "SA1-015/5708"
+      drawingNo: "SA1-015/5708 (DS)"
     },
-    svgType: "DD-SA"
+    svgType: "DS-SA"
   },
   {
-    id: "dd-as",
-    code: "DD-AS-3 / DD-AS-5",
-    name: "เสายึดดึงตรงสองข้าง วงจรคู่ (Double Circuit Anchor / Section)",
-    circuitType: "double_circuit",
-    circuitTypeName: "วงจรคู่ (DD Series)",
+    id: "ds-as",
+    code: "DS-AS-3 / DS-AS-5",
+    name: "เสายึดดึงตรงสองข้าง วงจรคู่ สายเดี่ยว (Anchor / Section)",
+    circuitType: "double_circuit_single",
+    circuitTypeName: "วงจรคู่ สายเดี่ยว (DS Series)",
     angleRange: "0° - 5° (ทางตรงรับแรงดึงเต็มพิกัด)",
-    insulatorAssembly: "ลูกถ้วยเข้าปลายสาย 12 พวง (หน้า-หลัง 6 เฟส) + สายจัมเปอร์ 6 ชุด",
-    crossarmType: "คอนเหล็กคู่หนาพิเศษ 3 ชั้น (Double Arming 3 Levels)",
-    guyWireSpec: "สายยึดโยง 2 ทิศทาง (หัว-ท้ายเสา) ต้านแรงดึงช่วงสาย",
-    description: "เสาดึงตรึงสายไฟวงจรคู่เพื่อกักแรงดึงไม่ให้สะสมยาวเป็นโดมิโน (Section Pole) ลูกถ้วยรับแรงดึงในแนวนอนรวม 12 พวง (รับสายเข้า 6 สายออก 6) และเชื่อมกระแสด้วยจัมเปอร์ 6 ชุด ดัดลอดคอนเหล็ก",
+    insulatorAssembly: "ลูกถ้วยเข้าปลายสายแนวนอน 12 พวง + สายจัมเปอร์เดี่ยว 6 ชุด",
+    crossarmType: "คอนเหล็กคู่หนาพิเศษ 3 ชั้น (Double Arming)",
+    guyWireSpec: "สายยึดโยง 2 ทิศทาง (หัว-ท้ายเสา)",
+    description: "เสาดึงตรึงสายไฟวงจรคู่ชนิดสายเดี่ยว ลูกถ้วยรับแรงดึงแนวนอนรวม 12 พวง (รับเข้า 6 ออก 6) พร้อมสายจัมเปอร์เดี่ยวดัดลอดใต้คอน 6 ชุด",
     engineeringFeatures: [
-      "ติดตั้งคอนคู่ (Double Channel 150x75x9 มม.) 3 ชั้น ยึดด้วย Double Arming Plates",
-      "ลูกถ้วยแรงดึงแนวนอน 12 พวง (Dead-End Tension String)",
-      "สายจัมเปอร์ 6 ชุด ดัดโค้งรอดใต้หัวเสาแต่ละเฟสอย่างเป็นระเบียบ ทา Joint Compound แน่นหนา"
+      "ใช้สายจัมเปอร์ 1 เส้นต่อ 1 เฟส ทา Joint compound",
+      "คอนเหล็กคู่ 150x75x9 มม. 3 ชั้น ติดตั้ง Double Arming Plate"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็กคู่ 150x75x9 มม. 3 ชั้น (รวมใช้เหล็ก 6 ท่อน)",
-      shieldWire: "สายกราวด์ OHGW เข้าปลายสายแนวนอน 2 ฝั่ง",
+      crossarmMaterial: "คอนเหล็กคู่ 3 ชั้น",
+      shieldWire: "สายกราวด์ OHGW เข้าปลายสาย 2 ฝั่ง",
       spanMax: "100 - 150 เมตร",
-      drawingNo: "SA1-015/5709"
+      drawingNo: "SA1-015/5709 (DS)"
     },
-    svgType: "DD-AS"
+    svgType: "DS-AS"
   },
   {
-    id: "dd-la",
-    code: "DD-LA-3 / DD-LA-5",
-    name: "เสาหัวมุมใหญ่และจบสาย วงจรคู่ (Double Circuit Large Angle 30° - 90°)",
-    circuitType: "double_circuit",
-    circuitTypeName: "วงจรคู่ (DD Series)",
+    id: "ds-la",
+    code: "DS-LA-3 / DS-LA-5",
+    name: "เสาหัวมุมใหญ่และจบสาย วงจรคู่ สายเดี่ยว (Large Angle 30° - 90°)",
+    circuitType: "double_circuit_single",
+    circuitTypeName: "วงจรคู่ สายเดี่ยว (DS Series)",
     angleRange: "30° - 90° (มุมหักศอก / จบสาย)",
     insulatorAssembly: "ลูกถ้วยเข้าปลายสาย 12 พวง + ลูกถ้วยโพสท์แนวนอน 6 ชุด",
-    crossarmType: "คอนเหล็กคู่ทำมุมเฉียง 3 ชั้น (Heavy Angled Double Arms)",
-    guyWireSpec: "สายยึดโยงหนัก 4-8 ชุด (Heavy Guy Assembly 2 ทิศทาง)",
-    description: "เสาหักมุมเลี้ยวศอกสำหรับวงจรคู่หรือใช้เป็นเสาจบสาย (Dead-End) หน้าสถานีไฟฟ้า รับแรงดึงสูงสุด ใช้ลูกถ้วยโพสท์ 115 kV แนวนอนถึง 6 ชุดในการประคองสายจัมเปอร์ไม่ให้ช็อตลงดิน",
+    crossarmType: "คอนเหล็กคู่ทำมุมเฉียง 3 ชั้น",
+    guyWireSpec: "สายยึดโยงหนัก 4-8 ชุด (Heavy Guy Assembly)",
+    description: "เสาหักมุมเลี้ยวศอกวงจรคู่สายเดี่ยว ใช้ลูกถ้วยโพสท์ 115 kV แนวนอนถึง 6 ชุดในการประคองสายจัมเปอร์เดี่ยวไม่ให้ตกท้องช้างช็อตเสา",
     engineeringFeatures: [
-      "โครงสร้างคอนเหล็กคู่ทำมุมเฉียงรับเส้นแบ่งครึ่งมุม 3 ชั้น",
-      "ลูกถ้วย Dead-End 12 พวง ทนแรงดึงกว่า 12,000 kgf ต่อพวง",
-      "สายยึดโยงแบบหนัก 4-8 เส้น ดึงต้านตรงข้ามทิศทางของแต่ละวงจร",
-      "มีลูกถ้วย Line Post 6 ลูก ช่วยรักษาระยะ Clearance ของสายจัมเปอร์วงจร 1 และ 2"
+      "ลูกถ้วย Dead-End 12 พวง รับพิกัดสายเดี่ยว",
+      "มี Line Post Insulator ประคองจัมเปอร์ 6 เส้น",
+      "สมอบกคู่รองรับ Heavy Guy"
     ],
     specs: {
-      crossarmMaterial: "คอนเหล็กคู่ 150x75x9 มม. เสริมแผ่นเหล็กหนา 12 มม.",
+      crossarmMaterial: "คอนเหล็กคู่ทำมุมเฉียง 3 ชั้น",
       shieldWire: "สายกราวด์ OHGW เข้าปลายสาย 2 ชุด",
       spanMax: "120 - 200 เมตร",
-      drawingNo: "SA1-015/5710"
+      drawingNo: "SA1-015/5710 (DS)"
     },
-    svgType: "DD-LA"
+    svgType: "DS-LA"
+  },
+
+  // ─── DD SERIES: DOUBLE CIRCUIT TWIN BUNDLE (วงจรคู่ สายคู่) ───────────────
+  {
+    id: "dd-sa-2",
+    code: "DD-SA-2 (Twin Bundle)",
+    name: "เสาทางโค้งมุมเล็ก วงจรคู่ สายคู่ (Small Angle Structure 2° - 30°)",
+    circuitType: "double_circuit",
+    circuitTypeName: "วงจรคู่ สายคู่ (DD Series)",
+    angleRange: "2° - 30° (ทางโค้งมุมเล็ก)",
+    insulatorAssembly: "ลูกถ้วยแขวนเอียง 6 พวงใหญ่ (พร้อม Yoke Plate) ยึดกับแคล้มป์รูปตัวยู",
+    crossarmType: "คอนเหล็ก 3 ชั้น โครงสร้างหนักพิเศษ (Heavy Duty)",
+    guyWireSpec: "สายยึดโยง 1-2 ชุด ด้านนอกของมุมเลี้ยว",
+    description: "จุดเลี้ยวโค้งมุมเล็กสำหรับสายส่ง Twin Bundle พวงลูกถ้วยเอียงตามแนวแรงดึงลัพธ์สูงสุด 45° ใช้แคล้มป์แขวนรูปตัวยู (Corner Suspension Bracket) เพื่อรักษาระยะ Clearance ไม่ให้ลูกถ้วยชนคอนเหล็ก",
+    engineeringFeatures: [
+      "รองรับแรงดึงลัพธ์ของสาย Twin Bundle ทั้ง 12 เส้น (เฟสละ 2 เส้น)",
+      "แผ่นเหล็ก Yoke Plate ช่วยรักษาระยะห่าง 2 สายตัวนำในเฟสเดียวกัน",
+      "มีแคล้มป์แขวนรูปตัวยูยาวพิเศษกันลูกถ้วยกระแทกคอน"
+    ],
+    specs: {
+      crossarmMaterial: "คอนเหล็ก 3 ชั้น หนาพิเศษ",
+      shieldWire: "สายกราวด์มุมโค้ง 1-2 เส้น",
+      spanMax: "80 - 100 เมตร",
+      drawingNo: "SA1-015/36005 (ประกอบ 5359)"
+    },
+    svgType: "DD-SA-2"
+  },
+  {
+    id: "dd-as-2",
+    code: "DD-AS-2 (Twin Bundle)",
+    name: "เสายึดดึงตรงและลดระดับความตึง (Double Deadend Adjacent Pole to Angle)",
+    circuitType: "double_circuit",
+    circuitTypeName: "วงจรคู่ สายคู่ (DD Series)",
+    angleRange: "0° - 5° (จุดเข้าปลายสายลดแรงดึง)",
+    insulatorAssembly: "ลูกถ้วยเข้าปลายสาย 24 พวง (โยงเข้า 12 โยงออก 12) + จัมเปอร์ Slack Span",
+    crossarmType: "คอนเหล็กคู่หนา 3 ชั้น รับน้ำหนักสูงสุด",
+    guyWireSpec: "สายยึดโยง 2 ทิศทาง (ต้านแรงสแปนหลักและสแปนหย่อน)",
+    description: "เสาดึงตรึงสาย Twin Bundle ที่ออกแบบมาเพื่อตั้งอยู่ใกล้เสาต้นมุม (Adjacent Pole) ฝั่งหนึ่งดึงตึงปกติ ส่วนอีกฝั่งทำมุมดึงหย่อน (Slack Span) เข้าสู่เสาต้นมุม",
+    engineeringFeatures: [
+      "พวงลูกถ้วย Dead-End 24 พวง ยึดกับ Yoke Plate สี่เหลี่ยม",
+      "ฝั่งสแปนหย่อน (Slack Span) ไม่ต้องรับแรงดึงสูงมาก",
+      "สายจัมเปอร์คู่ (Twin Jumpers) มี Spacer กั้นระยะ"
+    ],
+    specs: {
+      crossarmMaterial: "คอนคู่ 3 ชั้น โครงสร้างแข็งแกร่ง",
+      shieldWire: "สายกราวด์โยง Slack Span",
+      spanMax: "100 - 150 เมตร",
+      drawingNo: "SA1-015/35024 (ประกอบ 5356)"
+    },
+    svgType: "DD-AS-2"
+  },
+  {
+    id: "dd-dd-1",
+    code: "DD-DD-1 (H-Frame Twin Bundle)",
+    name: "เสาคู่ดึงตรึงสายเข้าปลายสาย (Double Pole, Double Dead End Structure)",
+    circuitType: "double_circuit",
+    circuitTypeName: "วงจรคู่ สายคู่ (DD Series)",
+    angleRange: "0° - 5° (ทางตรงรับแรงดึงเต็มพิกัด)",
+    insulatorAssembly: "ลูกถ้วยเข้าปลายสาย Twin Bundle 24 พวงใหญ่",
+    crossarmType: "คานขวางยาว 5.00 ม. เชื่อมเสา 2 ต้น (H-Frame 3 ระดับ)",
+    guyWireSpec: "สายยึดโยง 4 ทิศทาง (ดึงหัว-ท้ายเสาทั้งสองต้น)",
+    description: "โครงสร้างแบบเสาคู่ (H-Frame) ใช้เสาคอนกรีต 22 ม. ตั้งคู่กันระยะห่าง 3.00 ม. ใช้รับแรงดึงมหาศาลที่สุดของสาย Twin Bundle เป็นเสา Section/Dead-End ที่แข็งแกร่งที่สุด",
+    engineeringFeatures: [
+      "ตั้งเสาคู่ขนานระยะ 3.00 ม. เป็นรูปตัว H ทนแรงดึงมหาศาล",
+      "ใช้คานเหล็ก (Crossarm) ขนาดยาว 5.00 ม. พาดเชื่อมเสาทั้งสองต้น",
+      "ลูกถ้วยดึงแนวนอน 24 พวง พร้อม Twin Jumpers"
+    ],
+    specs: {
+      crossarmMaterial: "เหล็กฉาก 150x100x12 มม. ยาว 5.00 ม.",
+      shieldWire: "สายกราวด์ OHGW ดึงตึง 2 เส้น",
+      spanMax: "150 - 200 เมตร",
+      drawingNo: "SA1-015/25005 (ประกอบ 5354)"
+    },
+    svgType: "DD-DD-1"
+  },
+  {
+    id: "dd-dd-2",
+    code: "DD-DD-2 (Single Pole Twin Bundle)",
+    name: "เสาต้นเดียวดึงตรึงสายเข้าปลายสาย (Single Pole, Double Dead End)",
+    circuitType: "double_circuit",
+    circuitTypeName: "วงจรคู่ สายคู่ (DD Series)",
+    angleRange: "0° - 5° (ทางตรงรับแรงดึง)",
+    insulatorAssembly: "ลูกถ้วยเข้าปลายสาย 24 พวง + สายจัมเปอร์คู่ดัดโค้งอิสระ",
+    crossarmType: "คอนเหล็กคู่หนาพิเศษ 3 ชั้น",
+    guyWireSpec: "สายยึดโยงหัว-ท้าย 2 ชุด",
+    description: "เสาดึงตรึงสายแบบต้นเดียว (Single Pole) สำหรับสาย Twin Bundle ที่ช่วงสแปนไม่ยาวมาก ลูกถ้วยแรงดึงแนวนอน 24 พวง ยึดกับ Yoke Plate รูปสี่เหลี่ยมผืนผ้า",
+    engineeringFeatures: [
+      "ประหยัดพื้นที่กว่าเสา H-Frame แต่ต้องใช้สายยึดโยงดึงค้ำหนัก",
+      "รักษาระยะ Clearance ของสายจัมเปอร์คู่ให้ปลอดภัย"
+    ],
+    specs: {
+      crossarmMaterial: "เหล็กคู่ 150x100x12 มม. 3 ชั้น",
+      shieldWire: "สายกราวด์ OHGW ดึงแนวนอน",
+      spanMax: "100 - 150 เมตร",
+      drawingNo: "SA1-015/25022 (ประกอบ 5355)"
+    },
+    svgType: "DD-DD-2"
+  },
+  {
+    id: "dd-ls-1",
+    code: "DD-LS-1 (Line Spacer)",
+    name: "เสาช่วงระยะไม่เกิน 150 ม. ประคองสายคู่ (Span < 150m Structure)",
+    circuitType: "double_circuit",
+    circuitTypeName: "วงจรคู่ สายคู่ (DD Series)",
+    angleRange: "0° - 2° (ประคองสายตรง)",
+    insulatorAssembly: "ลูกถ้วยแขวน 6 พวง + ลูกถ้วยโพสท์แนวนอน (Line Post Insulator) 6 ชุด",
+    crossarmType: "คอนเหล็ก 3 ชั้นปกติ",
+    guyWireSpec: "สายยึดโยง 1 ชุด (เสริมความมั่นคง)",
+    description: "โครงสร้างเสาทางตรง มีการติดตั้งลูกถ้วยโพสท์ยื่นออกจากเสาเพื่อประคองสาย Twin Bundle ไม่ให้ลมพัดแกว่งเข้าใกล้เสาในสแปนที่ยาว",
+    engineeringFeatures: [
+      "ใช้ลูกถ้วย Line Post 115 kV ยื่นในแนวนอนเพื่อรักษาระยะ Clearance",
+      "ช่วยลดปัญหาการเกิด Flashover จากสายแกว่งข้ามเฟสเมื่อลมแรง"
+    ],
+    specs: {
+      crossarmMaterial: "คอนเหล็ก 150x100x12 มม. 3 ชั้น",
+      shieldWire: "สายกราวด์บนยอดเสา",
+      spanMax: "ระยะสแปน < 150 เมตร",
+      drawingNo: "SA1-015/44014 (ประกอบ 5360)"
+    },
+    svgType: "DD-LS-1"
   }
 ];
 
 export default function Structures() {
-  const [activeStructureId, setActiveStructureId] = useState<string>("dd-tg");
+  const [activeStructureId, setActiveStructureId] = useState<string>("ds-tg");
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
 
   const filteredStructures = selectedFilter === "all"
@@ -288,50 +400,50 @@ export default function Structures() {
     <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "28px", animation: "fadeIn 0.3s ease-in-out" }}>
       
       {/* Header Banner */}
-      <div style={{ background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", borderRadius: "16px", padding: "24px 28px", color: "white", boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.35)" }}>
+      <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)", borderRadius: "16px", padding: "24px 28px", color: "white", boxShadow: "0 10px 25px -5px rgba(30, 58, 138, 0.35)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "8px" }}>
           <div style={{ backgroundColor: "rgba(255,255,255,0.2)", padding: "10px", borderRadius: "12px" }}>
             <Cpu size={28} />
           </div>
           <div>
-            <h2 style={{ fontSize: "1.6rem", fontWeight: "bold", margin: 0 }}>แบบมาตรฐานโครงสร้างหัวเสาสายส่ง 115 kV (สายเดี่ยว & วงจรคู่)</h2>
-            <p style={{ color: "#dbeafe", fontSize: "0.95rem", margin: "4px 0 0 0" }}>
-              รูปจำลองเสาคอนกรีต 22 ม. วงจรเดี่ยวและวงจรคู่ (Double Circuit) ชุบกัลวาไนซ์ ลูกถ้วย 7-8 ลูก แสดงรายละเอียดเสมือนจริงตามแบบมาตรฐานวิศวกรรม กฟภ.
+            <h2 style={{ fontSize: "1.6rem", fontWeight: "bold", margin: 0 }}>แบบมาตรฐานโครงสร้างหัวเสาสายส่ง 115 kV (สายเดี่ยว & สายคู่ Twin Bundle)</h2>
+            <p style={{ color: "#bfdbfe", fontSize: "0.95rem", margin: "4px 0 0 0" }}>
+              รูปจำลองเสาคอนกรีต 22 ม. วงจรเดี่ยวและวงจรคู่ ทั้งชนิดสายเดี่ยว (Single Conductor) และสายคู่แฝด (Twin Bundle) อ้างอิงแบบวิศวกรรม กฟภ.
             </p>
           </div>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
         {[
           { id: "all", label: "รายการทั้งหมด", icon: <Layers size={16} /> },
-          { id: "single_conductor", label: "⚡ วงจรเดี่ยว (SS Series)", icon: <Info size={16} /> },
-          { id: "double_circuit", label: "⚡⚡ วงจรคู่ (DD Series)", icon: <Sparkles size={16} /> }
+          { id: "single_conductor", label: "⚡ วงจรเดี่ยว สายเดี่ยว (SS Series)", icon: <Info size={16} /> },
+          { id: "double_circuit_single", label: "⚡⚡ วงจรคู่ สายเดี่ยว (DS Series)", icon: <Shield size={16} /> },
+          { id: "double_circuit", label: "⚡⚡ วงจรคู่ สายคู่ (DD Twin Bundle)", icon: <Sparkles size={16} /> }
         ].map((f) => (
           <button
             key={f.id}
             onClick={() => {
               setSelectedFilter(f.id);
-              // Auto select the first structure of that type
               if (f.id !== "all") {
                 const firstMatch = STRUCTURE_DATA.find(s => s.circuitType === f.id);
                 if (firstMatch) setActiveStructureId(firstMatch.id);
               } else {
-                setActiveStructureId("ss-tg");
+                setActiveStructureId("ds-tg");
               }
             }}
             style={{
-              padding: "10px 18px",
+              padding: "10px 16px",
               borderRadius: "20px",
               border: "none",
               cursor: "pointer",
-              fontSize: "0.9rem",
+              fontSize: "0.85rem",
               fontWeight: "bold",
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              backgroundColor: selectedFilter === f.id ? (f.id === "double_circuit" ? "#2563eb" : "#5b21b6") : "#f1f5f9",
+              backgroundColor: selectedFilter === f.id ? (f.id.includes("double_circuit") ? "#2563eb" : "#7c3aed") : "#f1f5f9",
               color: selectedFilter === f.id ? "white" : "#475569",
               transition: "all 0.2s ease",
               boxShadow: selectedFilter === f.id ? "0 4px 10px rgba(0,0,0,0.15)" : "none"
@@ -350,10 +462,10 @@ export default function Structures() {
         <div style={{ backgroundColor: "white", borderRadius: "16px", border: "2px solid #cbd5e1", boxShadow: "0 6px 20px rgba(0,0,0,0.06)", overflow: "hidden" }}>
           <div style={{ padding: "16px 20px", backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <span style={{ fontSize: "0.75rem", fontWeight: "bold", color: activeStructure.circuitType === "double_circuit" ? "#2563eb" : "#6d28d9", textTransform: "uppercase" }}>รูปจำลองทางวิศวกรรม 115 kV</span>
+              <span style={{ fontSize: "0.75rem", fontWeight: "bold", color: activeStructure.circuitType.includes("double") ? "#2563eb" : "#7c3aed", textTransform: "uppercase" }}>รูปจำลองทางวิศวกรรม 115 kV</span>
               <h3 style={{ fontSize: "1.15rem", fontWeight: "bold", color: "#0f172a", margin: 0 }}>{activeStructure.code}</h3>
             </div>
-            <span style={{ fontSize: "0.75rem", backgroundColor: activeStructure.circuitType === "double_circuit" ? "#dbeafe" : "#ede9fe", color: activeStructure.circuitType === "double_circuit" ? "#1d4ed8" : "#5b21b6", padding: "4px 12px", borderRadius: "14px", fontWeight: "bold" }}>
+            <span style={{ fontSize: "0.75rem", backgroundColor: activeStructure.circuitType.includes("double") ? "#dbeafe" : "#ede9fe", color: activeStructure.circuitType.includes("double") ? "#1d4ed8" : "#6d28d9", padding: "4px 12px", borderRadius: "14px", fontWeight: "bold" }}>
               มุมเลี้ยว {activeStructure.angleRange.split(' ')[0]}
             </span>
           </div>
@@ -377,7 +489,7 @@ export default function Structures() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{ width: "10px", height: "10px", backgroundColor: "#f59e0b", borderRadius: "50%" }}></span>
-              <span>สายตัวนำ 115 kV (AAC / ACSR 400)</span>
+              <span>สายตัวนำ 115 kV (AAC/ACSR)</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{ width: "12px", height: "8px", backgroundColor: "#cbd5e1", borderRadius: "2px", border: "1px solid #64748b" }}></span>
@@ -385,7 +497,7 @@ export default function Structures() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{ width: "10px", height: "10px", backgroundColor: "#9a3412", borderRadius: "50%" }}></span>
-              <span>พวงลูกถ้วยปอร์ซเลน (7-8 ลูก)</span>
+              <span>พวงลูกถ้วยปอร์ซเลน / แผ่นโยค</span>
             </div>
           </div>
         </div>
@@ -403,7 +515,7 @@ export default function Structures() {
                   {activeStructure.specs.drawingNo}
                 </span>
               </div>
-              <span style={{ fontSize: "0.9rem", color: activeStructure.circuitType === "double_circuit" ? "#2563eb" : "#7c3aed", fontWeight: "bold" }}>
+              <span style={{ fontSize: "0.9rem", color: activeStructure.circuitType.includes("double") ? "#2563eb" : "#7c3aed", fontWeight: "bold" }}>
                 รหัสแบบมาตรฐาน: {activeStructure.code}
               </span>
             </div>
@@ -415,9 +527,9 @@ export default function Structures() {
             {/* Spec Highlights Grid */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
               
-              <div style={{ backgroundColor: activeStructure.circuitType === "double_circuit" ? "#eff6ff" : "#f5f3ff", padding: "12px 14px", borderRadius: "10px", border: activeStructure.circuitType === "double_circuit" ? "1px solid #bfdbfe" : "1px solid #ddd6fe" }}>
-                <span style={{ fontSize: "0.75rem", color: activeStructure.circuitType === "double_circuit" ? "#1d4ed8" : "#6d28d9", fontWeight: "bold", display: "block" }}>มุมเบี่ยงเบนแนวสาย (Line Angle)</span>
-                <span style={{ fontSize: "0.95rem", fontWeight: "bold", color: activeStructure.circuitType === "double_circuit" ? "#1e3a8a" : "#4c1d95" }}>{activeStructure.angleRange}</span>
+              <div style={{ backgroundColor: activeStructure.circuitType.includes("double") ? "#eff6ff" : "#f5f3ff", padding: "12px 14px", borderRadius: "10px", border: activeStructure.circuitType.includes("double") ? "1px solid #bfdbfe" : "1px solid #ddd6fe" }}>
+                <span style={{ fontSize: "0.75rem", color: activeStructure.circuitType.includes("double") ? "#1d4ed8" : "#6d28d9", fontWeight: "bold", display: "block" }}>มุมเบี่ยงเบนแนวสาย (Line Angle)</span>
+                <span style={{ fontSize: "0.95rem", fontWeight: "bold", color: activeStructure.circuitType.includes("double") ? "#1e3a8a" : "#4c1d95" }}>{activeStructure.angleRange}</span>
               </div>
 
               <div style={{ backgroundColor: "#fdf2f8", padding: "12px 14px", borderRadius: "10px", border: "1px solid #fbcfe8" }}>
@@ -459,14 +571,14 @@ export default function Structures() {
       {/* Grid of Structure Cards to Select From */}
       <div>
         <h3 style={{ fontSize: "1.15rem", fontWeight: "bold", color: "#0f172a", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-          <Layers size={20} className={activeStructure.circuitType === "double_circuit" ? "text-blue-600" : "text-purple-600"} />
+          <Layers size={20} className={activeStructure.circuitType.includes("double") ? "text-blue-600" : "text-purple-600"} />
           เลือกดูโครงสร้างหัวเสาแบบอื่นๆ (คลิกเพื่อแสดงรูปจำลองสมจริง):
         </h3>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
           {filteredStructures.map((struct) => {
             const isSelected = struct.id === activeStructureId;
-            const isDouble = struct.circuitType === "double_circuit";
+            const isDouble = struct.circuitType.includes("double");
             return (
               <div
                 key={struct.id}
@@ -474,10 +586,10 @@ export default function Structures() {
                 style={{
                   backgroundColor: "white",
                   borderRadius: "14px",
-                  border: isSelected ? `2px solid ${isDouble ? '#2563eb' : '#5b21b6'}` : "1px solid #e2e8f0",
+                  border: isSelected ? `2px solid ${isDouble ? '#2563eb' : '#7c3aed'}` : "1px solid #e2e8f0",
                   padding: "16px 18px",
                   cursor: "pointer",
-                  boxShadow: isSelected ? `0 8px 20px -4px ${isDouble ? 'rgba(37, 99, 235, 0.3)' : 'rgba(91, 33, 182, 0.3)'}` : "0 2px 6px rgba(0,0,0,0.04)",
+                  boxShadow: isSelected ? `0 8px 20px -4px ${isDouble ? 'rgba(37, 99, 235, 0.3)' : 'rgba(124, 58, 237, 0.3)'}` : "0 2px 6px rgba(0,0,0,0.04)",
                   transition: "all 0.2s",
                   display: "flex",
                   flexDirection: "column",
@@ -486,7 +598,7 @@ export default function Structures() {
               >
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                    <span style={{ fontWeight: "800", color: isSelected ? (isDouble ? '#2563eb' : '#5b21b6') : "#1e293b", fontSize: "1.05rem" }}>
+                    <span style={{ fontWeight: "800", color: isSelected ? (isDouble ? '#2563eb' : '#7c3aed') : "#1e293b", fontSize: "1.05rem" }}>
                       {struct.code}
                     </span>
                     <span style={{ fontSize: "0.75rem", backgroundColor: isSelected ? (isDouble ? '#dbeafe' : '#ede9fe') : "#f1f5f9", color: isSelected ? (isDouble ? '#1d4ed8' : '#6d28d9') : "#64748b", padding: "2px 8px", borderRadius: "12px", fontWeight: "bold" }}>
@@ -498,7 +610,7 @@ export default function Structures() {
                   </p>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.75rem", color: isSelected ? (isDouble ? '#2563eb' : '#5b21b6') : "#94a3b8", fontWeight: "bold", borderTop: "1px dashed #e2e8f0", paddingTop: "8px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.75rem", color: isSelected ? (isDouble ? '#2563eb' : '#7c3aed') : "#94a3b8", fontWeight: "bold", borderTop: "1px dashed #e2e8f0", paddingTop: "8px" }}>
                   <span>{struct.specs.drawingNo}</span>
                   <span style={{ display: "flex", alignItems: "center", gap: "2px" }}>
                     ดูรูปจำลอง <ArrowRight size={12} />
@@ -516,8 +628,9 @@ export default function Structures() {
 
 // ─── High-Realism Vector SVG Illustrations of Pole Heads ───────────────────
 
-function RealisticPoleHeadSVG({ type }: { type: "SS-TG" | "SS-SA" | "SS-AS" | "SS-LA" | "SS-AS-4" | "SS-TL" | "DD-TG" | "DD-SA" | "DD-AS" | "DD-LA" }) {
+function RealisticPoleHeadSVG({ type }: { type: string }) {
   switch (type) {
+    // ---- SS SERIES (Single Circuit) ----
     case "SS-TG":
       return (
         <svg width="320" height="400" viewBox="0 0 320 400" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -528,15 +641,14 @@ function RealisticPoleHeadSVG({ type }: { type: "SS-TG" | "SS-SA" | "SS-AS" | "S
           <rect x="156" y="15" width="8" height="30" rx="2" fill="#cbd5e1" stroke="#475569" strokeWidth="1.5" />
           <circle cx="160" cy="18" r="6" fill="#38bdf8" stroke="#0284c7" strokeWidth="2" />
           <line x1="10" y1="18" x2="310" y2="18" stroke="#38bdf8" strokeWidth="3" />
-          <text x="175" y="22" fill="#38bdf8" fontSize="10" fontWeight="bold">OHGW 3/8 นิ้ว</text>
+          <text x="175" y="22" fill="#38bdf8" fontSize="10" fontWeight="bold">OHGW</text>
           <rect x="145" y="70" width="30" height="14" rx="2" fill="#cbd5e1" stroke="#475569" strokeWidth="1.5" />
           <circle cx="160" cy="77" r="4" fill="#1e293b" />
           <g>
             {[0, 1, 2, 3, 4, 5, 6].map((i) => (
               <g key={i}>
                 <rect x="157" y={84 + i * 11} width="6" height="4" fill="#475569" />
-                <ellipse cx="160" cy={88 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" strokeWidth="1" />
-                <ellipse cx="160" cy={87 + i * 11} rx="8" ry="2" fill="#ea580c" opacity="0.6" />
+                <ellipse cx="160" cy={88 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
               </g>
             ))}
             <path d="M 160,84 L 140,88 L 138,125" stroke="#cbd5e1" strokeWidth="2" fill="none" />
@@ -553,9 +665,7 @@ function RealisticPoleHeadSVG({ type }: { type: "SS-TG" | "SS-SA" | "SS-AS" | "S
           <g>
             {[0, 1, 2, 3, 4, 5, 6].map((i) => (
               <g key={i}>
-                <rect x="62" y={211 + i * 11} width="6" height="4" fill="#475569" />
-                <ellipse cx="65" cy={215 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" strokeWidth="1" />
-                <ellipse cx="65" cy={214 + i * 11} rx="8" ry="2" fill="#ea580c" opacity="0.6" />
+                <ellipse cx="65" cy={215 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
               </g>
             ))}
             <rect x="55" y={289} width="20" height="10" rx="3" fill="#cbd5e1" stroke="#475569" />
@@ -565,242 +675,299 @@ function RealisticPoleHeadSVG({ type }: { type: "SS-TG" | "SS-SA" | "SS-AS" | "S
           <g>
             {[0, 1, 2, 3, 4, 5, 6].map((i) => (
               <g key={i}>
-                <rect x="252" y={211 + i * 11} width="6" height="4" fill="#475569" />
-                <ellipse cx="255" cy={215 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" strokeWidth="1" />
-                <ellipse cx="255" cy={214 + i * 11} rx="8" ry="2" fill="#ea580c" opacity="0.6" />
+                <ellipse cx="255" cy={215 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
               </g>
             ))}
             <rect x="245" y={289} width="20" height="10" rx="3" fill="#cbd5e1" stroke="#475569" />
             <line x1="10" y1="294" x2="310" y2="294" stroke="#f59e0b" strokeWidth="5" />
             <text x="270" y="298" fill="#fbbf24" fontSize="11" fontWeight="bold">เฟส C</text>
           </g>
-          <text x="160" y="385" fill="#94a3b8" fontSize="11" textAnchor="middle">โครงสร้างเสาทางตรง SS-TG (Delta Wishbone 115 kV)</text>
+          <text x="160" y="385" fill="#94a3b8" fontSize="11" textAnchor="middle">โครงสร้างวงจรเดี่ยว SS-TG (Delta Configuration)</text>
         </svg>
       );
 
     case "SS-SA":
-      return (
-        <svg width="320" height="400" viewBox="0 0 320 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="150" y1="180" x2="15" y2="390" stroke="#f43f5e" strokeWidth="4" strokeDasharray="6 3" />
-          <ellipse cx="60" cy="325" rx="8" ry="12" fill="#9a3412" stroke="#7c2d12" transform="rotate(-35, 60, 325)" />
-          <text x="25" y="280" fill="#f43f5e" fontSize="10" fontWeight="bold">สายยึดโยง (Guy Wire)</text>
-          <polygon points="152,40 168,40 176,380 144,380" fill="#64748b" />
-          <polygon points="152,40 160,40 156,380 144,380" fill="#94a3b8" />
-          <polygon points="160,40 168,40 176,380 156,380" fill="#475569" />
-          <rect x="156" y="15" width="8" height="30" rx="2" fill="#cbd5e1" stroke="#475569" />
-          <circle cx="160" cy="18" r="6" fill="#38bdf8" />
-          <path d="M 10,28 Q 160,18 310,8" stroke="#38bdf8" strokeWidth="3" fill="none" />
-          <g transform="rotate(18, 160, 70)">
-            <rect x="145" y="70" width="30" height="14" rx="2" fill="#cbd5e1" />
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <ellipse key={i} cx="160" cy={90 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
-            ))}
-            <circle cx="160" cy="168" r="6" fill="#f59e0b" stroke="#fbbf24" strokeWidth="2" />
-          </g>
-          <rect x="35" y="195" width="250" height="16" rx="2" fill="#cbd5e1" stroke="#475569" strokeWidth="2" />
-          <path d="M 55,211 L 55,225 Q 70,240 85,225 L 85,211" stroke="#cbd5e1" strokeWidth="4" fill="none" />
-          <path d="M 235,211 L 235,225 Q 250,240 265,225 L 265,211" stroke="#cbd5e1" strokeWidth="4" fill="none" />
-          <g transform="rotate(18, 70, 225)">
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <ellipse key={i} cx="70" cy={235 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
-            ))}
-            <circle cx="70" cy="313" r="6" fill="#f59e0b" stroke="#fbbf24" strokeWidth="2" />
-          </g>
-          <g transform="rotate(18, 250, 225)">
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <ellipse key={i} cx="250" cy={235 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
-            ))}
-            <circle cx="250" cy="313" r="6" fill="#f59e0b" stroke="#fbbf24" strokeWidth="2" />
-          </g>
-          <text x="160" y="385" fill="#a78bfa" fontSize="11" textAnchor="middle" fontWeight="bold">เสาทางโค้งมุมเล็ก SS-SA (เอียง 2° - 30° พร้อม Corner Bracket)</text>
-        </svg>
-      );
-
     case "SS-AS":
     case "SS-LA":
     case "SS-AS-4":
     case "SS-TL":
-      // Reusing previous basic implementations for brevity, since they are single circuit.
-      // (Simplified for this file generation, keeping focus on the new Double Circuit SVG drawings)
       return (
         <svg width="320" height="400" viewBox="0 0 320 400" fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="152,40 168,40 176,380 144,380" fill="#64748b" />
           <polygon points="152,40 160,40 156,380 144,380" fill="#94a3b8" />
           <polygon points="160,40 168,40 176,380 156,380" fill="#475569" />
-          <text x="160" y="200" fill="#38bdf8" fontSize="12" textAnchor="middle" fontWeight="bold">See {type} configuration</text>
+          <text x="160" y="200" fill="#38bdf8" fontSize="12" textAnchor="middle" fontWeight="bold">ดูรายละเอียด {type}</text>
         </svg>
       );
 
-    case "DD-TG":
-      // Double Circuit Tangent (DD-TG 3-Level Horizontal Crossarms)
+    // ---- DS SERIES (Double Circuit, Single Conductor) ----
+    case "DS-TG":
       return (
         <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Concrete Pole Trunk */}
           <polygon points="152,30 168,30 178,390 142,390" fill="#64748b" />
           <polygon points="152,30 160,30 156,390 142,390" fill="#94a3b8" />
           <polygon points="160,30 168,30 178,390 156,390" fill="#475569" />
-          <line x1="160" y1="30" x2="160" y2="390" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="6 4" />
-
-          {/* Peak Shield Wire */}
-          <rect x="156" y="5" width="8" height="30" rx="2" fill="#cbd5e1" stroke="#475569" />
+          
           <circle cx="160" cy="10" r="5" fill="#38bdf8" />
           <line x1="10" y1="10" x2="310" y2="10" stroke="#38bdf8" strokeWidth="3" />
-          <text x="170" y="15" fill="#38bdf8" fontSize="9" fontWeight="bold">OHGW</text>
-
-          {/* 3 Levels of Crossarms */}
+          
           {[60, 160, 260].map((y, level) => (
             <g key={y}>
-              {/* Main Crossarm */}
               <rect x="50" y={y} width="220" height="16" rx="2" fill="#cbd5e1" stroke="#475569" strokeWidth="2" />
-              <line x1="50" y1={y + 3} x2="270" y2={y + 3} stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.8" />
-              {/* V-Braces */}
-              <line x1="160" y1={y + 35} x2="110" y2={y + 16} stroke="#94a3b8" strokeWidth="4" />
-              <line x1="160" y1={y + 35} x2="210" y2={y + 16} stroke="#94a3b8" strokeWidth="4" />
-              
-              {/* Left Circuit (Circuit 1) */}
+              {/* Single Conductor Left */}
               <g>
                 {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                   <ellipse key={`L${i}`} cx="70" cy={y + 20 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
                 ))}
                 <circle cx="70" cy={y + 97} r="6" fill="#f59e0b" stroke="#fbbf24" strokeWidth="2" />
                 <line x1="10" y1={y + 97} x2="140" y2={y + 97} stroke="#f59e0b" strokeWidth="5" />
-                <text x="70" y={y + 115} fill="#fbbf24" fontSize="10" textAnchor="middle" fontWeight="bold">C1 - Ph {level+1}</text>
+                <text x="70" y={y + 115} fill="#fbbf24" fontSize="10" textAnchor="middle">สายเดี่ยว (1)</text>
               </g>
-
-              {/* Right Circuit (Circuit 2) */}
+              {/* Single Conductor Right */}
               <g>
                 {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                   <ellipse key={`R${i}`} cx="250" cy={y + 20 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
                 ))}
                 <circle cx="250" cy={y + 97} r="6" fill="#f59e0b" stroke="#fbbf24" strokeWidth="2" />
                 <line x1="180" y1={y + 97} x2="310" y2={y + 97} stroke="#f59e0b" strokeWidth="5" />
-                <text x="250" y={y + 115} fill="#fbbf24" fontSize="10" textAnchor="middle" fontWeight="bold">C2 - Ph {level+1}</text>
+                <text x="250" y={y + 115} fill="#fbbf24" fontSize="10" textAnchor="middle">สายเดี่ยว (1)</text>
               </g>
             </g>
           ))}
-          <text x="160" y="410" fill="#60a5fa" fontSize="12" textAnchor="middle" fontWeight="bold">เสาทางตรงวงจรคู่ DD-TG (3 ชั้น 6 เฟส)</text>
+          <text x="160" y="410" fill="#60a5fa" fontSize="12" textAnchor="middle" fontWeight="bold">เสาวงจรคู่ชนิดสายเดี่ยว DS-TG (1 เส้น/เฟส)</text>
         </svg>
       );
 
-    case "DD-SA":
-      // Double Circuit Small Angle (DD-SA with Swinging strings & Corner Brackets)
+    case "DS-SA":
       return (
         <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Guy wire on Left */}
           <line x1="145" y1="180" x2="10" y2="400" stroke="#f43f5e" strokeWidth="4" strokeDasharray="6 3" />
-          <text x="15" y="300" fill="#f43f5e" fontSize="10" fontWeight="bold">Guy Wire</text>
-
-          {/* Pole Trunk */}
           <polygon points="152,30 168,30 178,390 142,390" fill="#64748b" />
           <polygon points="152,30 160,30 156,390 142,390" fill="#94a3b8" />
-          <polygon points="160,30 168,30 178,390 156,390" fill="#475569" />
-
-          {/* OHGW Peak */}
-          <circle cx="160" cy="15" r="5" fill="#38bdf8" />
-          <path d="M 10,25 Q 160,15 310,5" stroke="#38bdf8" strokeWidth="3" fill="none" />
-
+          
           {[60, 160, 260].map((y, level) => (
             <g key={y}>
               <rect x="50" y={y} width="220" height="16" rx="2" fill="#cbd5e1" stroke="#475569" strokeWidth="2" />
-              {/* U Brackets */}
-              <path d="M 70,y+16 L 70,y+25 Q 80,y+35 90,y+25 L 90,y+16" stroke="#cbd5e1" strokeWidth="4" fill="none" transform={`translate(0, ${y})`} />
-              <path d="M 230,y+16 L 230,y+25 Q 240,y+35 250,y+25 L 250,y+16" stroke="#cbd5e1" strokeWidth="4" fill="none" transform={`translate(0, ${y})`} />
-              
-              {/* Swinging Insulators Left Circuit */}
+              {/* Left Swing Single Conductor */}
               <g transform={`translate(75, ${y+16}) rotate(20)`}>
-                {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-                  <ellipse key={i} cx="0" cy={10 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
-                ))}
+                {[0, 1, 2, 3, 4, 5, 6].map((i) => <ellipse key={i} cx="0" cy={10 + i * 11} rx="14" ry="4" fill="#9a3412" />)}
                 <circle cx="0" cy="87" r="6" fill="#f59e0b" stroke="#fbbf24" strokeWidth="2" />
               </g>
-
-              {/* Swinging Insulators Right Circuit */}
+              {/* Right Swing Single Conductor */}
               <g transform={`translate(245, ${y+16}) rotate(20)`}>
-                {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-                  <ellipse key={i} cx="0" cy={10 + i * 11} rx="14" ry="4" fill="#9a3412" stroke="#7c2d12" />
-                ))}
+                {[0, 1, 2, 3, 4, 5, 6].map((i) => <ellipse key={i} cx="0" cy={10 + i * 11} rx="14" ry="4" fill="#9a3412" />)}
                 <circle cx="0" cy="87" r="6" fill="#f59e0b" stroke="#fbbf24" strokeWidth="2" />
               </g>
             </g>
           ))}
-          <text x="160" y="410" fill="#60a5fa" fontSize="12" textAnchor="middle" fontWeight="bold">เสาทางโค้งมุมเล็กวงจรคู่ DD-SA (พวงลูกถ้วยเอียง 20°)</text>
+          <text x="160" y="410" fill="#60a5fa" fontSize="12" textAnchor="middle" fontWeight="bold">เสาวงจรคู่ชนิดสายเดี่ยว ทางโค้ง DS-SA</text>
+        </svg>
+      );
+    
+    case "DS-AS":
+    case "DS-LA":
+      return (
+        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="152,30 168,30 178,390 142,390" fill="#64748b" />
+          <polygon points="152,30 160,30 156,390 142,390" fill="#94a3b8" />
+          <text x="160" y="210" fill="#60a5fa" fontSize="12" textAnchor="middle" fontWeight="bold">รูปแบบ DS-AS / DS-LA (สายเดี่ยว)</text>
         </svg>
       );
 
-    case "DD-AS":
-      // Double Circuit Anchor (Dead End both sides, jumpers looping)
+
+    // ---- DD SERIES (Double Circuit, Double Conductor / Twin Bundle) ----
+    case "DD-SA-2":
       return (
         <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Pole Trunk */}
-          <polygon points="152,30 168,30 178,390 142,390" fill="#64748b" />
-          <polygon points="152,30 160,30 156,390 142,390" fill="#94a3b8" />
-          <polygon points="160,30 168,30 178,390 156,390" fill="#475569" />
+          <line x1="145" y1="180" x2="10" y2="400" stroke="#f43f5e" strokeWidth="6" strokeDasharray="8 4" />
+          <polygon points="150,20 170,20 182,390 138,390" fill="#64748b" />
+          
+          {[60, 160, 260].map((y, level) => (
+            <g key={y}>
+              <rect x="40" y={y} width="240" height="20" rx="2" fill="#cbd5e1" stroke="#334155" strokeWidth="3" />
+              {/* U-Bracket Left */}
+              <path d={`M 75,${y+20} L 75,${y+35} L 85,${y+35} L 85,${y+20}`} stroke="#475569" strokeWidth="3" fill="none" />
+              {/* Twin Bundle Swing Left (Max 45 deg) */}
+              <g transform={`translate(80, ${y+35}) rotate(40)`}>
+                {[0, 1, 2, 3, 4, 5, 6].map((i) => <ellipse key={i} cx="0" cy={10 + i * 11} rx="16" ry="5" fill="#9a3412" />)}
+                <polygon points="0,85 -15,95 15,95" fill="#94a3b8" />
+                <line x1="-15" y1="95" x2="-15" y2="105" stroke="#f59e0b" strokeWidth="4" />
+                <line x1="15" y1="95" x2="15" y2="105" stroke="#f59e0b" strokeWidth="4" />
+              </g>
 
-          {/* OHGW Peak */}
-          <circle cx="160" cy="15" r="5" fill="#38bdf8" />
-          <line x1="10" y1="15" x2="140" y2="15" stroke="#38bdf8" strokeWidth="3" />
-          <line x1="180" y1="15" x2="310" y2="15" stroke="#38bdf8" strokeWidth="3" />
-
+              {/* U-Bracket Right */}
+              <path d={`M 235,${y+20} L 235,${y+35} L 245,${y+35} L 245,${y+20}`} stroke="#475569" strokeWidth="3" fill="none" />
+              {/* Twin Bundle Swing Right */}
+              <g transform={`translate(240, ${y+35}) rotate(40)`}>
+                {[0, 1, 2, 3, 4, 5, 6].map((i) => <ellipse key={i} cx="0" cy={10 + i * 11} rx="16" ry="5" fill="#9a3412" />)}
+                <polygon points="0,85 -15,95 15,95" fill="#94a3b8" />
+                <line x1="-15" y1="95" x2="-15" y2="105" stroke="#f59e0b" strokeWidth="4" />
+                <line x1="15" y1="95" x2="15" y2="105" stroke="#f59e0b" strokeWidth="4" />
+              </g>
+            </g>
+          ))}
+          <text x="160" y="410" fill="#34d399" fontSize="12" textAnchor="middle" fontWeight="bold">เสาวงจรคู่ชนิดสายคู่แฝด ทางโค้ง DD-SA-2 (U-Bracket)</text>
+        </svg>
+      );
+      
+    case "DD-AS-2":
+      // Twin bundle anchor with Slack Span
+      return (
+        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="150,20 170,20 182,390 138,390" fill="#64748b" />
+          
           {[70, 170, 270].map((y, level) => (
             <g key={y}>
-              <rect x="40" y={y} width="240" height="22" rx="3" fill="#cbd5e1" stroke="#334155" strokeWidth="2" />
-              <rect x="55" y={y-10} width="12" height="42" fill="#475569" rx="2" />
-              <rect x="253" y={y-10} width="12" height="42" fill="#475569" rx="2" />
-
-              {/* Left Circuit Dead Ends & Jumper */}
+              <rect x="30" y={y} width="260" height="26" rx="3" fill="#cbd5e1" stroke="#1e293b" strokeWidth="3" />
+              
+              {/* Left Circuit Dead Ends (Twin) - Tension Side */}
               <g>
-                {[0, 1, 2, 3, 4].map(i => <ellipse key={`L1_${i}`} cx={45 - i * 9} cy={y+11} rx="3" ry="10" fill="#9a3412" /> )}
-                {[0, 1, 2, 3, 4].map(i => <ellipse key={`L2_${i}`} cx={75 + i * 9} cy={y+11} rx="3" ry="10" fill="#9a3412" /> )}
-                <path d={`M 15,${y+11} Q 60,${y+55} 105,${y+11}`} stroke="#fbbf24" strokeWidth="3" fill="none" />
-                <line x1="10" y1={y+11} x2="15" y2={y+11} stroke="#f59e0b" strokeWidth="4" />
+                <polygon points="75,y+4 75,y+22 55,y+13" fill="#94a3b8" transform={`translate(0, ${y})`} />
+                {[0, 1, 2, 3, 4].map(i => <ellipse key={`L1_${i}`} cx={45 - i * 8} cy={y+4} rx="3" ry="10" fill="#9a3412" /> )}
+                {[0, 1, 2, 3, 4].map(i => <ellipse key={`L2_${i}`} cx={45 - i * 8} cy={y+22} rx="3" ry="10" fill="#9a3412" /> )}
+                <path d={`M 10,${y+4} Q 60,${y+55} 110,${y+4}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+                <path d={`M 10,${y+22} Q 60,${y+75} 110,${y+22}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
               </g>
 
-              {/* Right Circuit Dead Ends & Jumper */}
+              {/* Right Circuit Dead Ends (Twin) - Slack Span Side */}
               <g>
-                {[0, 1, 2, 3, 4].map(i => <ellipse key={`R1_${i}`} cx={245 - i * 9} cy={y+11} rx="3" ry="10" fill="#9a3412" /> )}
-                {[0, 1, 2, 3, 4].map(i => <ellipse key={`R2_${i}`} cx={275 + i * 9} cy={y+11} rx="3" ry="10" fill="#9a3412" /> )}
-                <path d={`M 215,${y+11} Q 260,${y+55} 305,${y+11}`} stroke="#fbbf24" strokeWidth="3" fill="none" />
-                <line x1="305" y1={y+11} x2="310" y2={y+11} stroke="#f59e0b" strokeWidth="4" />
+                <polygon points="245,y+4 245,y+22 265,y+13" fill="#94a3b8" transform={`translate(0, ${y})`} />
+                {/* Slack span drops downwards at a steeper angle */}
+                <g transform={`translate(265, ${y+13}) rotate(30)`}>
+                  {[0, 1, 2, 3].map(i => <ellipse key={`R1_${i}`} cx={10 + i * 8} cy="-9" rx="3" ry="10" fill="#9a3412" /> )}
+                  {[0, 1, 2, 3].map(i => <ellipse key={`R2_${i}`} cx={10 + i * 8} cy="9" rx="3" ry="10" fill="#9a3412" /> )}
+                  <line x1="45" y1="-9" x2="70" y2="-9" stroke="#f59e0b" strokeWidth="3" />
+                  <line x1="45" y1="9" x2="70" y2="9" stroke="#f59e0b" strokeWidth="3" />
+                </g>
+                <path d={`M 210,${y+4} Q 260,${y+55} 280,${y+35}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+                <path d={`M 210,${y+22} Q 260,${y+75} 290,${y+50}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+                <text x="280" y={y-5} fill="#f87171" fontSize="9" fontWeight="bold">Slack Span</text>
               </g>
             </g>
           ))}
-          <text x="160" y="410" fill="#60a5fa" fontSize="12" textAnchor="middle" fontWeight="bold">เสายึดดึงตรงวงจรคู่ DD-AS (Dead-End 12 พวง จัมเปอร์ 6 ชุด)</text>
+          <text x="160" y="410" fill="#34d399" fontSize="12" textAnchor="middle" fontWeight="bold">เสายึดดึงตรง Twin Bundle DD-AS-2 (Slack Span)</text>
         </svg>
       );
 
-    case "DD-LA":
-      // Double Circuit Large Angle
+    case "DD-DD-1":
+      // DOUBLE POLE (H-FRAME) Double Deadend
       return (
-        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Heavy Guy Wires Left */}
-          <line x1="145" y1="100" x2="10" y2="390" stroke="#f43f5e" strokeWidth="4" />
-          <line x1="145" y1="200" x2="30" y2="390" stroke="#f43f5e" strokeWidth="4" />
-          <line x1="145" y1="300" x2="50" y2="390" stroke="#f43f5e" strokeWidth="4" />
-          <text x="25" y="320" fill="#f43f5e" fontSize="10" fontWeight="bold">สมอบกคู่ Heavy Guy</text>
+        <svg width="460" height="420" viewBox="0 0 460 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Left Pole */}
+          <polygon points="120,30 140,30 152,400 108,400" fill="#64748b" />
+          <polygon points="120,30 130,30 126,400 108,400" fill="#94a3b8" />
+          
+          {/* Right Pole */}
+          <polygon points="320,30 340,30 352,400 308,400" fill="#64748b" />
+          <polygon points="320,30 330,30 326,400 308,400" fill="#94a3b8" />
 
-          {/* Pole Trunk */}
-          <polygon points="152,30 168,30 178,390 142,390" fill="#64748b" />
-          <polygon points="152,30 160,30 156,390 142,390" fill="#94a3b8" />
-          <polygon points="160,30 168,30 178,390 156,390" fill="#475569" />
-
-          {[80, 180, 280].map((y, level) => (
+          {/* Long Crossarms across both poles */}
+          {[80, 180, 280].map((y) => (
             <g key={y}>
-              <polygon points={`40,${y} 280,${y-30} 280,${y-12} 40,${y+18}`} fill="#cbd5e1" stroke="#334155" strokeWidth="2.5" />
+              <rect x="60" y={y} width="340" height="26" rx="2" fill="#cbd5e1" stroke="#1e293b" strokeWidth="3" />
+              {/* X-Braces between poles for stability */}
+              <line x1="130" y1={y+26} x2="330" y2={y+100} stroke="#475569" strokeWidth="4" />
+              <line x1="330" y1={y+26} x2="130" y2={y+100} stroke="#475569" strokeWidth="4" />
               
-              <g transform={`translate(160, ${y-10}) rotate(-12)`}>
-                {[0, 1, 2, 3, 4, 5].map(i => <ellipse key={`L_${i}`} cx={i * 12} cy="0" rx="4" ry="12" fill="#9a3412" />)}
-                <line x1="72" y1="0" x2="150" y2="0" stroke="#f59e0b" strokeWidth="5" />
+              {/* Insulators and Twin Bundles Left */}
+              <g>
+                <polygon points="85,y+4 85,y+22 65,y+13" fill="#94a3b8" transform={`translate(0, ${y})`} />
+                {[0, 1, 2, 3, 4, 5].map(i => <ellipse key={`L_${i}`} cx={55 - i * 8} cy={y+4} rx="4" ry="12" fill="#9a3412" /> )}
+                {[0, 1, 2, 3, 4, 5].map(i => <ellipse key={`L2_${i}`} cx={55 - i * 8} cy={y+22} rx="4" ry="12" fill="#9a3412" /> )}
+                <line x1="10" y1={y+4} x2="15" y2={y+4} stroke="#f59e0b" strokeWidth="4" />
+                <line x1="10" y1={y+22} x2="15" y2={y+22} stroke="#f59e0b" strokeWidth="4" />
               </g>
 
-              {/* Line Post Insulator for Jumper */}
-              <g transform={`translate(145, ${y+15})`}>
-                <rect x="0" y="0" width="30" height="10" rx="2" fill="#9a3412" />
-                {[0, 1, 2].map(i => <ellipse key={`P_${i}`} cx={5 + i*10} cy="5" rx="3" ry="8" fill="#9a3412" />)}
-                <path d="M -50,-20 Q 15,5 40,-40" stroke="#fbbf24" strokeWidth="3" fill="none" />
+              {/* Jumper across H-Frame */}
+              <path d={`M 90,${y+26} Q 230,${y+120} 370,${y+26}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+              <path d={`M 90,${y+10} Q 230,${y+100} 370,${y+10}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+
+              {/* Insulators and Twin Bundles Right */}
+              <g>
+                <polygon points="375,y+4 375,y+22 395,y+13" fill="#94a3b8" transform={`translate(0, ${y})`} />
+                {[0, 1, 2, 3, 4, 5].map(i => <ellipse key={`R_${i}`} cx={405 + i * 8} cy={y+4} rx="4" ry="12" fill="#9a3412" /> )}
+                {[0, 1, 2, 3, 4, 5].map(i => <ellipse key={`R2_${i}`} cx={405 + i * 8} cy={y+22} rx="4" ry="12" fill="#9a3412" /> )}
+                <line x1="445" y1={y+4} x2="450" y2={y+4} stroke="#f59e0b" strokeWidth="4" />
+                <line x1="445" y1={y+22} x2="450" y2={y+22} stroke="#f59e0b" strokeWidth="4" />
               </g>
             </g>
           ))}
-          <text x="160" y="410" fill="#60a5fa" fontSize="12" textAnchor="middle" fontWeight="bold">เสาหัวมุมหักศอกวงจรคู่ DD-LA (พร้อม Line Post ประคองจัมเปอร์)</text>
+          <text x="230" y="415" fill="#facc15" fontSize="14" textAnchor="middle" fontWeight="bold">เสาคู่โครงสร้าง H-Frame DD-DD-1 (Double Pole Dead End)</text>
+        </svg>
+      );
+
+    case "DD-DD-2":
+      // Single Pole Double Deadend
+      return (
+        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="150,20 170,20 182,390 138,390" fill="#64748b" />
+          {[70, 170, 270].map((y, level) => (
+            <g key={y}>
+              <rect x="30" y={y} width="260" height="26" rx="3" fill="#cbd5e1" stroke="#1e293b" strokeWidth="3" />
+              {/* Left Circuit Dead Ends (Twin) */}
+              <g>
+                <polygon points="75,y+4 75,y+22 55,y+13" fill="#94a3b8" transform={`translate(0, ${y})`} />
+                {[0, 1, 2, 3, 4].map(i => <ellipse key={`L1_${i}`} cx={45 - i * 8} cy={y+4} rx="3" ry="10" fill="#9a3412" /> )}
+                {[0, 1, 2, 3, 4].map(i => <ellipse key={`L2_${i}`} cx={45 - i * 8} cy={y+22} rx="3" ry="10" fill="#9a3412" /> )}
+                <path d={`M 10,${y+4} Q 60,${y+55} 110,${y+4}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+                <path d={`M 10,${y+22} Q 60,${y+75} 110,${y+22}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+              </g>
+              {/* Right Circuit Dead Ends (Twin) */}
+              <g>
+                <polygon points="245,y+4 245,y+22 265,y+13" fill="#94a3b8" transform={`translate(0, ${y})`} />
+                {[0, 1, 2, 3, 4].map(i => <ellipse key={`R1_${i}`} cx={275 + i * 8} cy={y+4} rx="3" ry="10" fill="#9a3412" /> )}
+                {[0, 1, 2, 3, 4].map(i => <ellipse key={`R2_${i}`} cx={275 + i * 8} cy={y+22} rx="3" ry="10" fill="#9a3412" /> )}
+                <path d={`M 210,${y+4} Q 260,${y+55} 310,${y+4}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+                <path d={`M 210,${y+22} Q 260,${y+75} 310,${y+22}`} stroke="#f59e0b" strokeWidth="3" fill="none" />
+              </g>
+            </g>
+          ))}
+          <text x="160" y="410" fill="#34d399" fontSize="12" textAnchor="middle" fontWeight="bold">เสายึดดึงตรงต้นเดียว Twin Bundle DD-DD-2</text>
+        </svg>
+      );
+
+    case "DD-LS-1":
+      // Line Spacer / Line Post 
+      return (
+        <svg width="320" height="420" viewBox="0 0 320 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="150,20 170,20 182,390 138,390" fill="#64748b" />
+          {[70, 170, 270].map((y, level) => (
+            <g key={y}>
+              <rect x="40" y={y} width="240" height="20" rx="2" fill="#cbd5e1" stroke="#334155" strokeWidth="3" />
+              
+              {/* TWIN BUNDLE LEFT */}
+              <g>
+                {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                  <ellipse key={`L${i}`} cx="70" cy={y + 24 + i * 11} rx="16" ry="5" fill="#9a3412" stroke="#7c2d12" />
+                ))}
+                {/* Horizontal Line Post Insulator projecting from Pole to support jumper! */}
+                <rect x="90" y={y + 105} width="60" height="8" rx="2" fill="#f87171" stroke="#b91c1c" />
+                {[0,1,2,3,4].map(i => <ellipse key={`LP_${i}`} cx={100 + i*10} cy={y+109} rx="4" ry="12" fill="#9a3412" /> )}
+                
+                {/* Yoke Plate (Triangle) */}
+                <polygon points="70,98 55,108 85,108" fill="#94a3b8" stroke="#475569" transform={`translate(0, ${y})`} />
+                {/* Twin Wires Left */}
+                <line x1="10" y1={y + 110} x2="140" y2={y + 110} stroke="#f59e0b" strokeWidth="4" />
+                <line x1="10" y1={y + 118} x2="140" y2={y + 118} stroke="#f59e0b" strokeWidth="4" />
+              </g>
+
+              {/* TWIN BUNDLE RIGHT */}
+              <g>
+                {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                  <ellipse key={`R${i}`} cx="250" cy={y + 24 + i * 11} rx="16" ry="5" fill="#9a3412" stroke="#7c2d12" />
+                ))}
+                {/* Horizontal Line Post Right */}
+                <rect x="170" y={y + 105} width="60" height="8" rx="2" fill="#f87171" stroke="#b91c1c" />
+                {[0,1,2,3,4].map(i => <ellipse key={`RP_${i}`} cx={180 + i*10} cy={y+109} rx="4" ry="12" fill="#9a3412" /> )}
+                
+                <polygon points="250,98 235,108 265,108" fill="#94a3b8" stroke="#475569" transform={`translate(0, ${y})`} />
+                {/* Twin Wires Right */}
+                <line x1="180" y1={y + 110} x2="310" y2={y + 110} stroke="#f59e0b" strokeWidth="4" />
+                <line x1="180" y1={y + 118} x2="310" y2={y + 118} stroke="#f59e0b" strokeWidth="4" />
+              </g>
+            </g>
+          ))}
+          <text x="160" y="410" fill="#34d399" fontSize="12" textAnchor="middle" fontWeight="bold">เสาประคองสายมีลูกถ้วยแนวนอน DD-LS-1 (Line Post)</text>
         </svg>
       );
 
