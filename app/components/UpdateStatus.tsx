@@ -465,6 +465,17 @@ export default function UpdateStatus() {
 
       if (updateError) throw updateError;
 
+      // Trigger LINE Notify API route
+      try {
+        fetch("/api/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wbs: editWbs, name: editName })
+        }).catch(err => console.error("Failed to trigger LINE Notify:", err));
+      } catch (notifyErr) {
+        console.error("Failed to trigger LINE Notify:", notifyErr);
+      }
+
       setMessage({
         text: "บันทึกสถานะงานและเช็คลิสท์เรียบร้อยแล้ว",
         type: "success",
