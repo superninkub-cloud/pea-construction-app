@@ -2339,6 +2339,27 @@ export default function UpdateStatus() {
                             {isExpanded || showAllProgress ? "▲" : "▼"}
                           </button>
                         </div>
+                        {p.remarks && p.remarks.trim() !== "" && (
+                          <div style={{
+                            fontSize: "0.75rem",
+                            color: "#64748b",
+                            background: "#f8fafc",
+                            padding: "6px 10px",
+                            borderRadius: "6px",
+                            marginTop: "8px",
+                            marginBottom: isExpanded || showAllProgress ? "16px" : "0",
+                            borderLeft: "3px solid var(--pea-purple)",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px"
+                          }}>
+                            <span style={{ color: "var(--pea-purple)" }}>💬</span> 
+                            {p.remarks.split('\n').find(line => line.trim() !== '') || "-"}
+                          </div>
+                        )}
                         {(isExpanded || showAllProgress) && detailsContent}
                       </>
                     ) : (
@@ -2404,6 +2425,27 @@ export default function UpdateStatus() {
                             {isExpanded || showAllProgress ? "▲" : "▼"}
                           </button>
                         </div>
+                        {p.remarks && p.remarks.trim() !== "" && (
+                          <div style={{
+                            fontSize: "0.75rem",
+                            color: "#64748b",
+                            background: "#f8fafc",
+                            padding: "6px 10px",
+                            borderRadius: "6px",
+                            marginTop: "12px",
+                            marginBottom: isExpanded || showAllProgress ? "16px" : "0",
+                            borderLeft: "3px solid var(--pea-purple)",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px"
+                          }}>
+                            <span style={{ color: "var(--pea-purple)" }}>💬</span> 
+                            {p.remarks.split('\n').find(line => line.trim() !== '') || "-"}
+                          </div>
+                        )}
                         {(isExpanded || showAllProgress) && detailsContent}
                       </>
                     )}
