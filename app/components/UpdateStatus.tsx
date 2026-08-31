@@ -650,7 +650,7 @@ export default function UpdateStatus() {
             </div>
 
             {/* New Style: Bar Chart */}
-            <div className="card animation-fade-in" style={{ margin: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+            <div className="card animation-fade-in" style={{ minWidth: 0, margin: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Users size={20} color="var(--pea-purple)" />
                 เปรียบเทียบจำนวนงาน F4 และงานทั้งหมด แยกตามช่าง

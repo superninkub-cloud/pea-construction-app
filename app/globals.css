@@ -497,16 +497,7 @@ body {
 }
 
 @media (max-width: 768px) {
-    body, .app-layout {
-      overflow: visible !important;
-      height: auto !important;
-      min-height: 100dvh !important;
-    }
-    
-    .main-content, .content-area {
-      overflow: visible !important;
-      height: auto !important;
-    }
+
     
     .sidebar {
       position: fixed;
@@ -1248,20 +1239,7 @@ body {
     font-size: 13px !important; 
   }
 
-  /* 2. Responsive Recharts (Bar/Pie Charts) */
-  .recharts-wrapper {
-    max-width: 100% !important;
-  }
-  
-  .recharts-surface {
-    max-width: 100% !important;
-  }
 
-  .recharts-legend-wrapper {
-    width: 100% !important;
-    position: relative !important;
-    margin-top: 10px;
-  }
 
   /* 3. Reduce padding and margins on info boxes/cards */
   div[style*="padding: 24px"], 

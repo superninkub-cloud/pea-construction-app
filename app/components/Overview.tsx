@@ -208,7 +208,7 @@ export default function Overview() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '20px' }}>
 
             {/* Recharts Pie Chart */}
-            <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
+            <div className="card" style={{ minWidth: 0, marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '16px', alignSelf: 'flex-start', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
               
               <div style={{ width: '100%', height: '300px' }}>
