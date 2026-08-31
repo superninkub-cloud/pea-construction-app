@@ -9,6 +9,22 @@ import { Plus, X, Users } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { wireDataList } from "../../lib/wireData";
 
+const getLatestRemarkDetail = (remarks?: string) => {
+  if (!remarks) return null;
+  const lines = remarks.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (trimmed.includes(' | ')) {
+      return trimmed.split(' | ').slice(1).join(' | ').trim();
+    }
+    if (!trimmed.includes('📍')) {
+      return trimmed;
+    }
+  }
+  return null;
+};
+
 export default function UpdateStatus() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -2339,7 +2355,7 @@ export default function UpdateStatus() {
                             {isExpanded || showAllProgress ? "▲" : "▼"}
                           </button>
                         </div>
-                        {p.remarks && p.remarks.trim() !== "" && (
+                        {getLatestRemarkDetail(p.remarks) && (
                           <div style={{
                             fontSize: "0.75rem",
                             color: "#64748b",
@@ -2357,7 +2373,7 @@ export default function UpdateStatus() {
                             gap: "6px"
                           }}>
                             <span style={{ color: "var(--pea-purple)" }}>💬</span> 
-                            {p.remarks.split('\n').find(line => line.trim() !== '') || "-"}
+                            {getLatestRemarkDetail(p.remarks)}
                           </div>
                         )}
                         {(isExpanded || showAllProgress) && detailsContent}
@@ -2425,7 +2441,7 @@ export default function UpdateStatus() {
                             {isExpanded || showAllProgress ? "▲" : "▼"}
                           </button>
                         </div>
-                        {p.remarks && p.remarks.trim() !== "" && (
+                        {getLatestRemarkDetail(p.remarks) && (
                           <div style={{
                             fontSize: "0.75rem",
                             color: "#64748b",
@@ -2443,7 +2459,7 @@ export default function UpdateStatus() {
                             gap: "6px"
                           }}>
                             <span style={{ color: "var(--pea-purple)" }}>💬</span> 
-                            {p.remarks.split('\n').find(line => line.trim() !== '') || "-"}
+                            {getLatestRemarkDetail(p.remarks)}
                           </div>
                         )}
                         {(isExpanded || showAllProgress) && detailsContent}
