@@ -594,7 +594,7 @@ export default function UpdateStatus() {
 
         {/* Supervisor Comparison Section */}
         {supervisorStats.length > 0 && !project && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '20px', marginBottom: '24px' }}>
             {/* Original Style: Progress Bar Cards */}
             <div className="card animation-fade-in" style={{ margin: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
