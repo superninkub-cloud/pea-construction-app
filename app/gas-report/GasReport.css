@@ -205,7 +205,7 @@
   
   /* Enforce black text for printing */
   .official-form {
-  transform: scale(0.95);
+  transform: scale(0.92);
   transform-origin: top center;
     color: #000 !important;
   }

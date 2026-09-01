@@ -341,10 +341,10 @@ export default function GasReportPage() {
 
               {reports.length > 0 ? (
                 <div id="printable-report">
-                  {Array.from({ length: Math.ceil(reports.length / 5) || 1 }).map((_, pageIndex) => {
-                    const chunk = reports.slice(pageIndex * 5, (pageIndex + 1) * 5);
+                  {Array.from({ length: Math.ceil(reports.length / 7) || 1 }).map((_, pageIndex) => {
+                    const chunk = reports.slice(pageIndex * 7, (pageIndex + 1) * 7);
                     return (
-                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: pageIndex < Math.ceil(reports.length / 5) - 1 ? 'always' : 'auto', position: 'relative', height: 'auto', minHeight: '190mm', display: 'flex', flexDirection: 'column' }}>
+                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid', position: 'relative', height: '185mm', maxHeight: '185mm', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
                           <img src="/PEA-Logo.png" alt="PEA" style={{ width: '80px' }} onError={(e) => (e.currentTarget as any).style.display = 'none'} />
                         </div>
@@ -452,8 +452,8 @@ export default function GasReportPage() {
                                 <td className="text-left" style={{ fontSize: '12px' }}>{r.notes || ""}</td>
                               </tr>
                             ))}
-                            {/* Fill up to exactly 5 rows per page */}
-                            {Array.from({ length: 5 - chunk.length }).map((_, i) => (
+                            {/* Fill up to exactly 7 rows per page */}
+                            {Array.from({ length: 7 - chunk.length }).map((_, i) => (
                               <tr key={`empty-${i}`}>
                                 <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                               </tr>
