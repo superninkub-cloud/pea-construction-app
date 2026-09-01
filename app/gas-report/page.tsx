@@ -297,36 +297,36 @@ export default function GasReportPage() {
 
               {reports.length > 0 ? (
                 <div id="printable-report" className="official-form">
-                  <div className="form-header">
-                    <div className="text-center font-bold" style={{ fontSize: '24px' }}>การไฟฟ้าส่วนภูมิภาค</div>
-                    <div className="text-center font-bold" style={{ fontSize: '20px', marginBottom: '20px' }}>แบบฟอร์มรายงานการใช้ยานพาหนะหรือเครื่องจักร</div>
+                  <div className="form-header text-center" style={{ marginBottom: '24px' }}>
+                    <div style={{ fontSize: '28px', marginBottom: '8px' }}>การไฟฟ้าส่วนภูมิภาค</div>
+                    <div style={{ fontSize: '24px' }}>แบบฟอร์มรายงานการใช้ยานพาหนะหรือเครื่องจักร</div>
                   </div>
 
                   <div className="form-body">
                     <div className="form-row flex-between">
-                      <div className="flex-1">
-                        <span>จาก</span>
-                        <span className="dotted-blank text-center" style={{ width: '250px' }}>ผกร.กรย.(ก3)</span>
+                      <div className="flex-1 flex-start">
+                        <span style={{ width: '40px' }}>จาก</span>
+                        <span className="dotted-blank text-center" style={{ flex: 1, maxWidth: '250px' }}>ผกร.กรย.(ก3)</span>
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 flex-start" style={{ marginLeft: '40px' }}>
                         <span>ถึง (หัวหน้าหน่วยงาน)</span>
-                        <span className="dotted-blank text-center" style={{ width: '250px' }}>กรย.(ก3)</span>
+                        <span className="dotted-blank text-center" style={{ flex: 1, maxWidth: '250px' }}>กรย.(ก3)</span>
                       </div>
                     </div>
 
                     <div className="form-row flex-start">
-                      <span>เรื่อง รายงานการใช้ยานพาหนะหรือเครื่องจักร</span>
+                      <span style={{ minWidth: '320px' }}>เรื่อง รายงานการใช้ยานพาหนะหรือเครื่องจักร</span>
                       <span className="ml-4">วันที่</span>
-                      <span className="dotted-blank" style={{ width: '60px' }}></span>
+                      <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
                       <span className="ml-2">เดือน</span>
-                      <span className="dotted-blank" style={{ width: '150px' }}></span>
+                      <span className="dotted-blank text-center" style={{ width: '150px' }}></span>
                       <span className="ml-2">ปี</span>
-                      <span className="dotted-blank" style={{ width: '100px' }}></span>
+                      <span className="dotted-blank text-center" style={{ width: '120px' }}></span>
                     </div>
 
                     <div className="form-row flex-start">
-                      <span>เรียน</span>
-                      <span className="dotted-blank text-center" style={{ width: '350px' }}>อก.รย.(ก3)</span>
+                      <span style={{ width: '40px' }}>เรียน</span>
+                      <span className="dotted-blank text-center" style={{ width: '400px' }}>อก.รย.(ก3)</span>
                     </div>
 
                     <div className="form-row flex-start flex-wrap">
@@ -337,32 +337,32 @@ export default function GasReportPage() {
                       <span className="ml-2">หมายเลขทะเบียน</span>
                       <span className="dotted-blank text-center" style={{ width: '120px' }}>{reportPlate}</span>
                       <span className="ml-2">รหัส</span>
-                      <span className="dotted-blank text-center" style={{ width: '100px' }}></span>
+                      <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
                       <span className="ml-2">ประเภท</span>
-                      <span className="dotted-blank text-center" style={{ width: '100px' }}></span>
+                      <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
                       <span className="ml-2">ชนิด</span>
-                      <span className="dotted-blank text-center" style={{ width: '100px' }}></span>
+                      <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
                     </div>
                     
                     <div className="form-row dotted-line-full"></div>
 
-                    <div className="form-row flex-start flex-wrap fuel-checkboxes">
-                      <span>ชนิดของเชื้อเพลิง</span>
+                    <div className="form-row flex-start flex-wrap fuel-checkboxes" style={{ marginTop: '16px' }}>
+                      <span style={{ marginRight: '8px' }}>ชนิดของเชื้อเพลิง</span>
                       <label><input type="checkbox" /> แก๊สโซฮอล์ 95</label>
                       <label><input type="checkbox" /> แก๊สโซฮอล์ 91</label>
                       <label><input type="checkbox" /> แก๊สโซฮอล์ E20</label>
                       <label><input type="checkbox" /> แก๊สโซฮอล์ E85</label>
                       <label><input type="checkbox" /> ดีเซล</label>
                       <label><input type="checkbox" /> น้ำมันหล่อลื่น จำนวน</label>
-                      <span className="dotted-blank" style={{ width: '80px' }}></span>
+                      <span className="dotted-blank" style={{ width: '100px' }}></span>
                       <span>ลิตร</span>
                     </div>
 
                     <div className="form-row flex-start">
                       <span>อัตราการสิ้นเปลืองเชื้อเพลิงยานพาหนะ</span>
-                      <span className="dotted-blank" style={{ width: '150px' }}></span>
+                      <span className="dotted-blank" style={{ width: '200px' }}></span>
                       <span>กิโลเมตร/ลิตร, เครื่องจักร</span>
-                      <span className="dotted-blank" style={{ width: '150px' }}></span>
+                      <span className="dotted-blank" style={{ width: '200px' }}></span>
                       <span>ลิตร/ชั่วโมง</span>
                     </div>
                   </div>
@@ -370,10 +370,10 @@ export default function GasReportPage() {
                   <table className="official-table">
                     <thead>
                       <tr>
-                        <th rowSpan={2} style={{ width: '60px' }}>วันที่</th>
-                        <th rowSpan={2} style={{ width: '150px' }}>ชื่อผู้ขับ<br/>(ผู้ควบคุม)</th>
+                        <th rowSpan={2} style={{ width: '50px' }}>วันที่</th>
+                        <th rowSpan={2} style={{ width: '120px' }}>ชื่อผู้ขับ<br/>(ผู้ควบคุม)</th>
                         <th rowSpan={2}>สถานที่ปฏิบัติงาน</th>
-                        <th colSpan={2} style={{ width: '140px' }}>เลขระยะทาง</th>
+                        <th colSpan={2} style={{ width: '120px' }}>เลขระยะทาง</th>
                         <th rowSpan={2} style={{ width: '90px' }}>ชั่วโมงการทำงาน<br/>ของเครื่องจักร</th>
                         <th rowSpan={2} style={{ width: '90px' }}>จำนวนเชื้อเพลิง<br/>ที่เติม (ลิตร)</th>
                         <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
@@ -381,8 +381,8 @@ export default function GasReportPage() {
                         <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
                       </tr>
                       <tr>
-                        <th style={{ width: '70px' }}>ไป</th>
-                        <th style={{ width: '70px' }}>กลับ</th>
+                        <th style={{ width: '60px' }}>ไป</th>
+                        <th style={{ width: '60px' }}>กลับ</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -411,16 +411,16 @@ export default function GasReportPage() {
 
                   <div className="form-footer">
                     <div className="signature-section flex-between">
-                      <div className="signature-box">
+                      <div className="signature-box" style={{ flex: 1 }}>
                         <div>(.......................................................................................)</div>
                         <div className="font-bold mt-2">ผู้ขับยานพาหนะ</div>
                       </div>
-                      <div className="signature-box">
+                      <div className="signature-box" style={{ flex: 1 }}>
                         <div>(.......................................................................................)</div>
                         <div className="font-bold mt-2">ผู้ควบคุม</div>
                       </div>
                     </div>
-                    <div className="form-code">ยพ.6-ป.46</div>
+                    <div className="form-code" style={{ marginTop: '40px' }}>ยพ.6-ป.46</div>
                   </div>
                 </div>
               ) : (
