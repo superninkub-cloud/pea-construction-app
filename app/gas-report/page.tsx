@@ -146,7 +146,7 @@ export default function GasReportPage() {
   };
 
   return (
-    <div className="app-container">
+    <>
       <TopBar title="รายงานน้ำมัน (ยพ.6)" />
       <div className="content-area" style={{ padding: "20px" }}>
         <div className="gas-report-container">
@@ -438,11 +438,11 @@ export default function GasReportPage() {
                         <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '20px' }}>
                           <div className="signature-section flex-between">
                             <div className="signature-box" style={{ flex: 1 }}>
-                              <div>(.......................................................................................)</div>
+                              <div>({reports[0]?.driver_name ? ` ${reports[0].driver_name} ` : "......................................................................................."})</div>
                               <div className="font-bold mt-2">ผู้ขับยานพาหนะ</div>
                             </div>
                             <div className="signature-box" style={{ flex: 1 }}>
-                              <div>(.......................................................................................)</div>
+                              <div>({reports[0]?.supervisor_name ? ` ${reports[0].supervisor_name} ` : "......................................................................................."})</div>
                               <div className="font-bold mt-2">ผู้ควบคุม</div>
                             </div>
                           </div>
@@ -462,6 +462,6 @@ export default function GasReportPage() {
 
         </div>
       </div>
-    </div>
+    </>
   );
 }
