@@ -217,6 +217,12 @@ export default function GasReportPage() {
             >
               รายงาน (ยพ.6)
             </div>
+            <div 
+              className={`gas-tab ${activeTab === "history" ? "active" : ""}`}
+              onClick={() => setActiveTab("history")}
+            >
+              ประวัติการรายงานน้ำมัน
+            </div>
           </div>
 
           
