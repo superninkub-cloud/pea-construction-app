@@ -47,6 +47,8 @@ body {
   padding: 24px 16px;
   z-index: 50;
   transition: transform 0.3s ease;
+  overflow-y: auto;
+  height: 100vh;
 }
 
 .sidebar-logo-container {
@@ -152,6 +154,24 @@ body {
   padding: 8px;
   border-radius: 8px;
   transition: all 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: block; }
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background-color: var(--sidebar-bg);
+    width: 260px;
+    padding: 24px 16px;
+    z-index: 100;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+  .sidebar-overlay { display: block; }
 }
 
 .mobile-menu-btn:active {
