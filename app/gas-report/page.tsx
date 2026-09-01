@@ -344,7 +344,7 @@ export default function GasReportPage() {
                   {Array.from({ length: Math.ceil(reports.length / 7) || 1 }).map((_, pageIndex) => {
                     const chunk = reports.slice(pageIndex * 7, (pageIndex + 1) * 7);
                     return (
-                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid', position: 'relative', height: '185mm', maxHeight: '185mm', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid', position: 'relative', height: '185mm', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
                           <img src="/PEA-Logo.png" alt="PEA" style={{ width: '80px' }} onError={(e) => (e.currentTarget as any).style.display = 'none'} />
                         </div>
@@ -491,7 +491,7 @@ export default function GasReportPage() {
                               <div className="font-bold mt-2">ผู้ควบคุม</div>
                             </div>
                           </div>
-                          <div className="form-code" style={{ position: 'absolute', bottom: '0', left: '0' }}>ยพ.6-ป.46</div>
+                          <div className="form-code" style={{ position: 'absolute', bottom: '0px', left: '0' }}>ยพ.6-ป.46</div>
                         </div>
                       </div>
                     );
