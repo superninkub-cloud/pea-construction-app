@@ -39,7 +39,7 @@ export default function UpdateStatus() {
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [selectedWbs, setSelectedWbs] = useState("");
   const [isScrapModalOpen, setIsScrapModalOpen] = useState(false);
-  
+
   // Calculator State
   const [calcWireId, setCalcWireId] = useState("");
   const [calcLength, setCalcLength] = useState("");
@@ -296,7 +296,7 @@ export default function UpdateStatus() {
   }, [selectedWbs, projects]);
 
   const selectedCalcWire = wireDataList.find(w => w.id === calcWireId);
-  
+
   const handleCalcWireChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newId = e.target.value;
     setCalcWireId(newId);
@@ -307,13 +307,13 @@ export default function UpdateStatus() {
         setCalcWeight((Number(calcLength) * (p / 100) * wire.weightPerMeter).toFixed(2));
       } else if (calcActiveInput === "weight" && calcWeight && !isNaN(Number(calcWeight)) && wire.weightPerMeter > 0) {
         if (calcLength && !isNaN(Number(calcLength)) && Number(calcLength) > 0) {
-           const newPercent = (Number(calcWeight) / (Number(calcLength) * wire.weightPerMeter)) * 100;
-           setCalcPercentage(newPercent.toFixed(1));
+          const newPercent = (Number(calcWeight) / (Number(calcLength) * wire.weightPerMeter)) * 100;
+          setCalcPercentage(newPercent.toFixed(1));
         } else {
-           const p = Number(calcPercentage) || 100;
-           if (p > 0) {
-             setCalcLength((Number(calcWeight) / (wire.weightPerMeter * (p / 100))).toFixed(2));
-           }
+          const p = Number(calcPercentage) || 100;
+          if (p > 0) {
+            setCalcLength((Number(calcWeight) / (wire.weightPerMeter * (p / 100))).toFixed(2));
+          }
         }
       }
     }
@@ -464,17 +464,6 @@ export default function UpdateStatus() {
         .eq("id", project.id);
 
       if (updateError) throw updateError;
-
-      // Trigger LINE Notify API route
-      try {
-        fetch("/api/notify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ wbs: editWbs, name: editName })
-        }).catch(err => console.error("Failed to trigger LINE Notify:", err));
-      } catch (notifyErr) {
-        console.error("Failed to trigger LINE Notify:", notifyErr);
-      }
 
       setMessage({
         text: "บันทึกสถานะงานและเช็คลิสท์เรียบร้อยแล้ว",
@@ -630,13 +619,13 @@ export default function UpdateStatus() {
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '8px' }}>
                 {supervisorStats.map(stat => (
-                  <div 
-                    key={stat.name} 
+                  <div
+                    key={stat.name}
                     onClick={() => selectedSupervisor === stat.name ? setSelectedSupervisor("ALL") : setSelectedSupervisor(stat.name)}
-                    style={{ 
-                      border: selectedSupervisor === stat.name ? '2px solid var(--pea-purple)' : '1px solid #e2e8f0', 
-                      borderRadius: '8px', 
-                      padding: '16px', 
+                    style={{
+                      border: selectedSupervisor === stat.name ? '2px solid var(--pea-purple)' : '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '16px',
                       background: selectedSupervisor === stat.name ? '#f5f3ff' : '#f8fafc',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
@@ -653,10 +642,10 @@ export default function UpdateStatus() {
                       </div>
                     </div>
                     <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '3px', marginBottom: '12px', overflow: 'hidden' }}>
-                      <div style={{ 
-                        height: '100%', 
-                        width: `${stat.percentage}%`, 
-                        background: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') 
+                      <div style={{
+                        height: '100%',
+                        width: `${stat.percentage}%`,
+                        background: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444')
                       }}></div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
@@ -688,7 +677,7 @@ export default function UpdateStatus() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} angle={-45} textAnchor="end" />
                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-                    <Tooltip 
+                    <Tooltip
                       cursor={{ fill: '#f1f5f9' }}
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                     />
@@ -1032,8 +1021,8 @@ export default function UpdateStatus() {
                     value={
                       projectValue
                         ? projectValue
-                            .toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          .toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         : ""
                     }
                     onChange={(e) => {
@@ -1162,8 +1151,8 @@ export default function UpdateStatus() {
                     value={
                       estSiteExpense
                         ? estSiteExpense
-                            .toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          .toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         : ""
                     }
                     onChange={(e) => {
@@ -1192,8 +1181,8 @@ export default function UpdateStatus() {
                       value={
                         allocatedSiteBudget
                           ? allocatedSiteBudget
-                              .toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            .toString()
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           : ""
                       }
                       onChange={(e) => {
@@ -1233,8 +1222,8 @@ export default function UpdateStatus() {
                     value={
                       disbursedSiteExpense
                         ? disbursedSiteExpense
-                            .toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          .toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         : ""
                     }
                     onChange={(e) => {
@@ -1275,7 +1264,7 @@ export default function UpdateStatus() {
                       color:
                         Number(allocatedSiteBudget) -
                           Number(disbursedSiteExpense) >=
-                        0
+                          0
                           ? "#10b981"
                           : "#ef4444",
                     }}
@@ -1599,7 +1588,7 @@ export default function UpdateStatus() {
                             className="form-control"
                             value={
                               progDone[step.idx] === 0 &&
-                              progTargets[step.idx] === 0
+                                progTargets[step.idx] === 0
                                 ? ""
                                 : progDone[step.idx]
                             }
@@ -1621,7 +1610,7 @@ export default function UpdateStatus() {
                             className="form-control"
                             value={
                               progTargets[step.idx] === 0 &&
-                              progDone[step.idx] === 0
+                                progDone[step.idx] === 0
                                 ? ""
                                 : progTargets[step.idx]
                             }
@@ -2383,7 +2372,7 @@ export default function UpdateStatus() {
                             alignItems: "center",
                             gap: "6px"
                           }}>
-                            <span style={{ color: "var(--pea-purple)" }}>💬</span> 
+                            <span style={{ color: "var(--pea-purple)" }}>💬</span>
                             {getLatestRemarkDetail(p.remarks)}
                           </div>
                         )}
@@ -2469,7 +2458,7 @@ export default function UpdateStatus() {
                             alignItems: "center",
                             gap: "6px"
                           }}>
-                            <span style={{ color: "var(--pea-purple)" }}>💬</span> 
+                            <span style={{ color: "var(--pea-purple)" }}>💬</span>
                             {getLatestRemarkDetail(p.remarks)}
                           </div>
                         )}
@@ -2698,7 +2687,7 @@ export default function UpdateStatus() {
             >
               <span style={{ fontSize: '18px', fontWeight: 'bold' }}>X</span>
             </button>
-            
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
               <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#f5eff5', color: '#7e22ce', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ fontSize: '24px' }}>🧮</span>
@@ -2712,7 +2701,7 @@ export default function UpdateStatus() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>เลือกประเภทสาย / รหัสพัสดุ</label>
-                <select 
+                <select
                   className="form-select"
                   style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#f8fafc', outline: 'none', fontSize: '0.95rem', color: '#1e293b', fontWeight: '500' }}
                   value={calcWireId}
@@ -2737,7 +2726,7 @@ export default function UpdateStatus() {
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>ความยาว (เมตร)</label>
                   <div style={{ position: 'relative' }}>
-                    <input 
+                    <input
                       type="number"
                       placeholder="0"
                       style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'length' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'length' && calcLength ? '700' : '500', fontSize: '1rem' }}
@@ -2752,7 +2741,7 @@ export default function UpdateStatus() {
                 <div>
                   <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>น้ำหนัก (กิโลกรัม)</label>
                   <div style={{ position: 'relative' }}>
-                    <input 
+                    <input
                       type="number"
                       placeholder="0"
                       style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'weight' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'weight' && calcWeight ? '700' : '500', fontSize: '1rem' }}
@@ -2764,20 +2753,20 @@ export default function UpdateStatus() {
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>% ค่าเผื่อสาย (เพื่อความยืดหยุ่น)</label>
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <input 
-                    type="range" 
-                    min="0" max="120" step="1" 
+                  <input
+                    type="range"
+                    min="0" max="120" step="1"
                     style={{ flex: 1, accentColor: '#7e22ce' }}
                     value={calcPercentage || "0"}
                     onChange={(e) => handleCalcPercentageChange(e as any)}
                     disabled={!selectedCalcWire}
                   />
                   <div style={{ position: 'relative', width: '80px' }}>
-                    <input 
+                    <input
                       type="number"
                       style={{ width: '100%', padding: '8px 12px', paddingRight: '24px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: '#0f172a', fontWeight: '600', fontSize: '0.95rem' }}
                       value={calcPercentage}
@@ -2788,7 +2777,7 @@ export default function UpdateStatus() {
                   </div>
                 </div>
               </div>
-              
+
               <div style={{ marginTop: '32px' }}>
                 <button onClick={() => router.push('/update?step=2')} style={{ width: '100%', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer' }}>ปิดหน้าต่างนี้</button>
               </div>

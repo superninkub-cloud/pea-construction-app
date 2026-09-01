@@ -73,6 +73,10 @@ export default function Sidebar() {
           <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <span>คำนวณ OT พขร.</span>
         </Link>
+        <Link href="/gas-report" className={`nav-item ${pathname === "/gas-report" ? "active" : ""}`}>
+          <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22h20"/><path d="M4 22V11c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4v11"/><path d="M14 22v-6c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v6"/><path d="M18 5V3c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2"/></svg>
+          <span>รายงานน้ำมัน (ยพ.6)</span>
+        </Link>
         <Link href="/team-ot" className={`nav-item ${pathname === "/team-ot" ? "active" : ""}`}>
           <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>คำนวณ OT พนักงาน บ.</span>
