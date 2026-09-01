@@ -31,6 +31,7 @@ export default function GasReportPage() {
   const [repairDetails, setRepairDetails] = useState("");
   const [repairCost, setRepairCost] = useState("");
   const [notes, setNotes] = useState("");
+  const [personnelList, setPersonnelList] = useState<any[]>([]);
 
   // Report State
   const [reportMonth, setReportMonth] = useState(thaiMonths[new Date().getMonth()]);
@@ -246,7 +247,7 @@ export default function GasReportPage() {
               </div>
 
               <div className="gas-form-group" style={{ gridColumn: "1 / -1" }}>
-                <label>หมายเหตุ</label>
+                <label>หมายเหตุ (ใส่หมายเลขงาน WBS)</label>
                 <textarea rows={2} value={notes} onChange={e => setNotes(e.target.value)}></textarea>
               </div>
 
@@ -410,7 +411,7 @@ export default function GasReportPage() {
                             {/* Fill up to exactly 10 rows per page */}
                             {Array.from({ length: 10 - chunk.length }).map((_, i) => (
                               <tr key={`empty-${i}`}>
-                                <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                               </tr>
                             ))}
                             {/* Total Row */}

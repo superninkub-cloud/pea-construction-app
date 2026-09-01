@@ -205,6 +205,8 @@
   
   /* Enforce black text for printing */
   .official-form {
+  transform: scale(0.95);
+  transform-origin: top center;
     color: #000 !important;
   }
 }
