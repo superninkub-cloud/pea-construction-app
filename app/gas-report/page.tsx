@@ -341,8 +341,8 @@ export default function GasReportPage() {
 
               {reports.length > 0 ? (
                 <div id="printable-report">
-                  {Array.from({ length: Math.ceil(reports.length / 11) || 1 }).map((_, pageIndex) => {
-                    const chunk = reports.slice(pageIndex * 11, (pageIndex + 1) * 11);
+                  {Array.from({ length: Math.ceil(reports.length / 10) || 1 }).map((_, pageIndex) => {
+                    const chunk = reports.slice(pageIndex * 10, (pageIndex + 1) * 10);
                     return (
                       <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid', position: 'relative', height: '185mm', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
@@ -454,8 +454,8 @@ export default function GasReportPage() {
                                 <td className="text-left" style={{ fontSize: '12px' }}>{r.notes || ""}</td>
                               </tr>
                             ))}
-                            {/* Fill up to exactly 11 rows per page */}
-                            {Array.from({ length: 11 - chunk.length }).map((_, i) => (
+                            {/* Fill up to exactly 10 rows per page */}
+                            {Array.from({ length: 10 - chunk.length }).map((_, i) => (
                               <tr key={`empty-${i}`}>
                                 <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                               </tr>
