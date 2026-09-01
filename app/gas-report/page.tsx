@@ -148,7 +148,7 @@ export default function GasReportPage() {
   return (
     <div className="app-container">
       <TopBar title="รายงานน้ำมัน (ยพ.6)" />
-      <div className="main-content" style={{ padding: "20px", overflowY: "auto" }}>
+      <div className="content-area" style={{ padding: "20px" }}>
         <div className="gas-report-container">
           <h2 className="no-print" style={{ marginBottom: "20px", color: "#1e293b" }}>รายงานการใช้น้ำมัน (ยพ.6)</h2>
 
