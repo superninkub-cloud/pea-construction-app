@@ -199,7 +199,7 @@ export default function GasReportPage() {
                 <label>ผู้ขับขี่ *</label>
                 <select value={driverName} onChange={e => setDriverName(e.target.value)} required>
                   <option value="">-- เลือกผู้ขับขี่ --</option>
-                  {personnelList.map(p => (
+                  {personnelList.filter(p => !p.position || !p.position.includes("พนักงาน บ")).map(p => (
                     <option key={p.id} value={p.full_name}>{p.full_name}</option>
                   ))}
                   {/* Fallback to driversList if not in personnel */}
@@ -213,7 +213,7 @@ export default function GasReportPage() {
                 <label>ผู้ควบคุมรถ *</label>
                 <select value={supervisorName} onChange={e => setSupervisorName(e.target.value)} required>
                   <option value="">-- เลือกผู้ควบคุมรถ --</option>
-                  {personnelList.map(p => (
+                  {personnelList.filter(p => !p.position || !p.position.includes("พนักงาน บ")).map(p => (
                     <option key={p.id} value={p.full_name}>{p.full_name}</option>
                   ))}
                 </select>
