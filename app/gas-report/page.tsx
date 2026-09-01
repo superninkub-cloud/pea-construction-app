@@ -149,7 +149,7 @@ export default function GasReportPage() {
       <TopBar title="รายงานน้ำมัน (ยพ.6)" />
       <div className="main-content" style={{ padding: "20px" }}>
         <div className="gas-report-container">
-          <h2 style={{ marginBottom: "20px", color: "#1e293b" }}>รายงานการใช้น้ำมัน (ยพ.6)</h2>
+          <h2 className="no-print" style={{ marginBottom: "20px", color: "#1e293b" }}>รายงานการใช้น้ำมัน (ยพ.6)</h2>
 
           <div className="gas-tabs no-print">
             <div 

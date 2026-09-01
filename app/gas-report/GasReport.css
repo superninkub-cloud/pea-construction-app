@@ -175,7 +175,8 @@
   .gas-report-header,
   .mobile-bottom-nav,
   nav,
-  header {
+  header,
+  .no-print {
     display: none !important;
   }
 
