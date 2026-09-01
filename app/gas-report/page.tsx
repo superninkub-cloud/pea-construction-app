@@ -394,8 +394,7 @@ export default function GasReportPage() {
                             <span className="ml-2">ชนิด</span>
                             <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
                           </div>
-                          
-                          <div className="form-row dotted-line-full"></div>
+
 
                           <div className="form-row flex-start flex-wrap fuel-checkboxes" style={{ marginTop: '16px' }}>
                             <span style={{ marginRight: '8px' }}>ชนิดของเชื้อเพลิง</span>
