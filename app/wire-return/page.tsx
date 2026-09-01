@@ -45,6 +45,8 @@ export default function WireReturnPage() {
   const [sortBy, setSortBy] = useState("latest");
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
   const [isCalcModalOpen, setIsCalcModalOpen] = useState(false);
+  const [isExtractingPDF, setIsExtractingPDF] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchProjects();
