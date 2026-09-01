@@ -250,13 +250,13 @@
 }
 
 .form-body {
-  margin-bottom: 20px;
-  font-size: 16px; /* Increased for better readability / match official form */
+  margin-bottom: 12px;
+  font-size: 15px; /* Tightened for print fit */
 }
 
 .form-row {
-  margin-bottom: 12px;
-  line-height: 1.5;
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .dotted-blank {
@@ -289,13 +289,13 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .official-table th,
 .official-table td {
   border: 1px solid #000;
-  padding: 6px 4px;
+  padding: 4px;
   text-align: center;
   vertical-align: middle;
 }
@@ -307,7 +307,7 @@
 
 .form-footer {
   position: relative;
-  margin-top: 50px;
+  margin-top: 20px;
 }
 
 .signature-section {
