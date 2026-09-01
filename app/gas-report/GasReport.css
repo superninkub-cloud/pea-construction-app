@@ -160,34 +160,50 @@
 .text-right { text-align: right !important; }
 
 /* Print Styles */
+/* Print Styles */
 @media print {
   @page {
     size: A4 landscape;
     margin: 1cm;
   }
   
-  body * {
-    visibility: hidden;
+  /* Hide all UI elements */
+  .sidebar, 
+  .top-bar-wrapper, 
+  .gas-tabs, 
+  .gas-report-header,
+  .mobile-bottom-nav,
+  nav,
+  header {
+    display: none !important;
   }
-  
-  #printable-report, #printable-report * {
-    visibility: visible;
+
+  /* Reset layout constraints so the table can render fully */
+  html, body, #__next, .app-container, .main-content, .gas-report-container {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    position: static !important;
   }
   
   #printable-report {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-
-  .gas-report-header, .gas-tabs, .top-bar-wrapper, .sidebar {
-    display: none !important;
+    display: block !important;
+    width: 100% !important;
+    position: static !important;
   }
 
   /* Make sure background colors (if any) and borders print clearly */
   .official-table th, .official-table td {
     border: 1px solid #000 !important;
+    color: #000 !important;
+  }
+  
+  /* Enforce black text for printing */
+  .official-form {
+    color: #000 !important;
   }
 }
 
