@@ -107,6 +107,67 @@ export default function WireReturnPage() {
     setCategoryReturnedWeights(initialCatWeights);
   };
 
+  const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      alert("กรุณาอัปโหลดไฟล์ PDF เท่านั้น");
+      return;
+    }
+
+    setIsExtractingPDF(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/extract-wire-pdf", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "เกิดข้อผิดพลาดในการดึงข้อมูลจาก AI");
+      }
+
+      if (data.wires && Array.isArray(data.wires)) {
+        const aiWires = data.wires.map((w: any) => {
+          let matchedType = w.type;
+          const found = wireDataList.find(wd => wd.id.toLowerCase() === w.type.toLowerCase() || wd.name.toLowerCase() === w.type.toLowerCase());
+          if (found) {
+            matchedType = found.id;
+          } else {
+            const partial = wireDataList.find(wd => w.type.toUpperCase().includes(wd.id.toUpperCase()) || wd.id.toUpperCase().includes(w.type.toUpperCase()));
+            if (partial) matchedType = partial.id;
+          }
+
+          return {
+            id: Date.now().toString() + Math.random(),
+            type: matchedType,
+            length: w.length,
+            returned_weight: ""
+          };
+        });
+
+        if (aiWires.length > 0) {
+          setEditWires(aiWires);
+          alert("AI ดึงข้อมูลเศษสายจาก ZPSR018 สำเร็จ!");
+        } else {
+          alert("AI ไม่พบข้อมูลเศษสายที่ต้องคืน (หรือยอดส่งคืนหักลบแล้วเท่ากับ 0)");
+        }
+      }
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      setIsExtractingPDF(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   const handleSave = async (id: string) => {
     setIsSaving(true);
     try {
@@ -707,7 +768,43 @@ export default function WireReturnPage() {
                     
                     {isEditing ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-                        <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>1. ระบุความยาวเศษสายที่รื้อถอน</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1e293b' }}>1. ระบุความยาวเศษสายที่รื้อถอน</div>
+                          <div style={{ display: "flex", gap: "10px" }}>
+                            <input 
+                              type="file" 
+                              accept=".pdf" 
+                              ref={fileInputRef} 
+                              style={{ display: "none" }} 
+                              onChange={handlePDFUpload} 
+                            />
+                            <button 
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isExtractingPDF}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                padding: "6px 10px",
+                                background: "linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                boxShadow: "0 2px 4px rgba(126, 34, 206, 0.2)"
+                              }}
+                            >
+                              {isExtractingPDF ? (
+                                <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+                              ) : (
+                                <Layers size={14} />
+                              )}
+                              {isExtractingPDF ? "กำลังอ่าน ZPSR018..." : "ใช้ AI อ่านไฟล์ ZPSR018"}
+                            </button>
+                          </div>
+                        </div>
                         {editWires.map((wire, idx) => (
                           <div key={wire.id} style={{ padding: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', position: 'relative', background: '#fff' }}>
                             {editWires.length > 1 && (
