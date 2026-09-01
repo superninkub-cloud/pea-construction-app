@@ -50,6 +50,17 @@ export default function GasReportPage() {
     }
   }, [selectedPlate]);
 
+  useEffect(() => {
+    const fetchPersonnel = async () => {
+      const { data, error } = await supabase.from("personnel").select("*").order("full_name", { ascending: true });
+      if (!error && data) {
+        setPersonnelList(data);
+      }
+    };
+    fetchPersonnel();
+  }, []);
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!usageDate || !selectedPlate || !driverName) {
@@ -186,7 +197,26 @@ export default function GasReportPage() {
 
               <div className="gas-form-group">
                 <label>ผู้ขับขี่ *</label>
-                <input type="text" value={driverName} onChange={e => setDriverName(e.target.value)} required />
+                <select value={driverName} onChange={e => setDriverName(e.target.value)} required>
+                  <option value="">-- เลือกผู้ขับขี่ --</option>
+                  {personnelList.map(p => (
+                    <option key={p.id} value={p.full_name}>{p.full_name}</option>
+                  ))}
+                  {/* Fallback to driversList if not in personnel */}
+                  {driversList.map(v => v.driver).filter((v, i, a) => v && a.indexOf(v) === i && !personnelList.find(p => p.full_name === v)).map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="gas-form-group">
+                <label>ผู้ควบคุมรถ *</label>
+                <select value={supervisorName} onChange={e => setSupervisorName(e.target.value)} required>
+                  <option value="">-- เลือกผู้ควบคุมรถ --</option>
+                  {personnelList.map(p => (
+                    <option key={p.id} value={p.full_name}>{p.full_name}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="gas-form-group">
@@ -387,6 +417,7 @@ export default function GasReportPage() {
                               <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
                               <th rowSpan={2} style={{ width: '120px' }}>รายการซ่อม</th>
                               <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
+                              <th rowSpan={2} style={{ width: '120px' }}>หมายเหตุ</th>
                             </tr>
                             <tr>
                               <th style={{ width: '60px' }}>ไป</th>
@@ -406,6 +437,7 @@ export default function GasReportPage() {
                                 <td className="text-right">{r.fuel_cost ? r.fuel_cost.toFixed(2) : ""}</td>
                                 <td className="text-left">{r.repair_details || ""}</td>
                                 <td className="text-right">{r.repair_cost ? r.repair_cost.toFixed(2) : ""}</td>
+                                <td className="text-left" style={{ fontSize: '12px' }}>{r.notes || ""}</td>
                               </tr>
                             ))}
                             {/* Fill up to exactly 10 rows per page */}
@@ -427,6 +459,7 @@ export default function GasReportPage() {
                               <td className="text-right font-bold">
                                 {chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0).toFixed(2) : ""}
                               </td>
+                              <td></td>
                             </tr>
                           </tbody>
                         </table>
