@@ -199,11 +199,11 @@ export default function GasReportPage() {
                 <label>ผู้ขับขี่ *</label>
                 <select value={driverName} onChange={e => setDriverName(e.target.value)} required>
                   <option value="">-- เลือกผู้ขับขี่ --</option>
-                  {personnelList.filter(p => !p.position || !p.position.includes("พนักงาน บ")).map(p => (
+                  {personnelList.filter(p => (!p.position || !p.position.includes("พนักงาน บ")) && !["ธวัชชัย โต๊ะศรีสุข", "ณัฐพล พืชพันธ์", "ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(p.full_name)).map(p => (
                     <option key={p.id} value={p.full_name}>{p.full_name}</option>
                   ))}
                   {/* Fallback to driversList if not in personnel */}
-                  {driversList.map(v => v.driver).filter((v, i, a) => v && a.indexOf(v) === i && !personnelList.find(p => p.full_name === v)).map(d => (
+                  {driversList.map(v => v.driver).filter((v, i, a) => v && a.indexOf(v) === i && !personnelList.find(p => p.full_name === v) && !["ธวัชชัย โต๊ะศรีสุข", "ณัฐพล พืชพันธ์", "ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(v)).map(d => (
                     <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
@@ -213,7 +213,7 @@ export default function GasReportPage() {
                 <label>ผู้ควบคุมรถ *</label>
                 <select value={supervisorName} onChange={e => setSupervisorName(e.target.value)} required>
                   <option value="">-- เลือกผู้ควบคุมรถ --</option>
-                  {personnelList.filter(p => !p.position || !p.position.includes("พนักงาน บ")).map(p => (
+                  {personnelList.filter(p => (!p.position || !p.position.includes("พนักงาน บ")) && !["ธวัชชัย โต๊ะศรีสุข", "ณัฐพล พืชพันธ์", "ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(p.full_name)).map(p => (
                     <option key={p.id} value={p.full_name}>{p.full_name}</option>
                   ))}
                 </select>
