@@ -147,7 +147,7 @@ export default function GasReportPage() {
   return (
     <div className="app-container">
       <TopBar title="รายงานน้ำมัน (ยพ.6)" />
-      <div className="main-content" style={{ padding: "20px" }}>
+      <div className="main-content" style={{ padding: "20px", overflowY: "auto" }}>
         <div className="gas-report-container">
           <h2 className="no-print" style={{ marginBottom: "20px", color: "#1e293b" }}>รายงานการใช้น้ำมัน (ยพ.6)</h2>
 
@@ -300,7 +300,7 @@ export default function GasReportPage() {
                   {Array.from({ length: Math.ceil(reports.length / 10) || 1 }).map((_, pageIndex) => {
                     const chunk = reports.slice(pageIndex * 10, (pageIndex + 1) * 10);
                     return (
-                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: pageIndex < Math.ceil(reports.length / 10) - 1 ? 'always' : 'auto', position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: pageIndex < Math.ceil(reports.length / 10) - 1 ? 'always' : 'auto', position: 'relative', height: '190mm', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
                           <img src="/PEA-Logo.png" alt="PEA" style={{ width: '80px' }} onError={(e) => (e.currentTarget as any).style.display = 'none'} />
                         </div>
