@@ -56,3 +56,34 @@ CREATE POLICY "Allow anonymous select outage" ON public.outage_plans FOR SELECT 
 CREATE POLICY "Allow anonymous insert outage" ON public.outage_plans FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow anonymous update outage" ON public.outage_plans FOR UPDATE USING (true);
 CREATE POLICY "Allow anonymous delete outage" ON public.outage_plans FOR DELETE USING (true);
+
+-- Create the gas_reports table
+CREATE TABLE public.gas_reports (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  usage_date date NOT NULL,
+  month_name text NOT NULL,
+  year_th text NOT NULL,
+  license_plate text NOT NULL,
+  vehicle_code text,
+  driver_name text NOT NULL,
+  supervisor_name text,
+  work_location text,
+  odo_start numeric,
+  odo_end numeric,
+  machine_hours numeric,
+  fuel_type text,
+  fuel_liters numeric,
+  fuel_cost numeric,
+  repair_details text,
+  repair_cost numeric,
+  notes text,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.gas_reports ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow anonymous select gas_reports" ON public.gas_reports FOR SELECT USING (true);
+CREATE POLICY "Allow anonymous insert gas_reports" ON public.gas_reports FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous update gas_reports" ON public.gas_reports FOR UPDATE USING (true);
+CREATE POLICY "Allow anonymous delete gas_reports" ON public.gas_reports FOR DELETE USING (true);

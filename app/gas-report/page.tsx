@@ -296,84 +296,131 @@ export default function GasReportPage() {
               </div>
 
               {reports.length > 0 ? (
-                <div id="printable-report" className="report-table-wrapper">
-                  <div style={{ textAlign: "center", marginBottom: "16px", fontWeight: "bold" }}>
-                    แบบรายงานการใช้น้ำมันเชื้อเพลิงและหล่อลื่น (ยพ.6-ป.46)<br/>
-                    ประจำเดือน {reportMonth} ปี {reportYear} รถทะเบียน {reportPlate}
+                <div id="printable-report" className="official-form">
+                  <div className="form-header">
+                    <div className="text-center font-bold" style={{ fontSize: '18px' }}>การไฟฟ้าส่วนภูมิภาค</div>
+                    <div className="text-center font-bold" style={{ fontSize: '16px', marginBottom: '20px' }}>แบบฟอร์มรายงานการใช้ยานพาหนะหรือเครื่องจักร</div>
                   </div>
-                  <table className="gas-table">
+
+                  <div className="form-body">
+                    <div className="form-row flex-between">
+                      <div className="flex-1">
+                        <span>จาก</span>
+                        <span className="dotted-blank text-center" style={{ width: '250px' }}>ผกร.กรย.(ก3)</span>
+                      </div>
+                      <div className="flex-1">
+                        <span>ถึง (หัวหน้าหน่วยงาน)</span>
+                        <span className="dotted-blank text-center" style={{ width: '250px' }}>กรย.(ก3)</span>
+                      </div>
+                    </div>
+
+                    <div className="form-row flex-start">
+                      <span>เรื่อง รายงานการใช้ยานพาหนะหรือเครื่องจักร</span>
+                      <span className="ml-4">วันที่</span>
+                      <span className="dotted-blank" style={{ width: '60px' }}></span>
+                      <span className="ml-2">เดือน</span>
+                      <span className="dotted-blank" style={{ width: '150px' }}></span>
+                      <span className="ml-2">ปี</span>
+                      <span className="dotted-blank" style={{ width: '100px' }}></span>
+                    </div>
+
+                    <div className="form-row flex-start">
+                      <span>เรียน</span>
+                      <span className="dotted-blank text-center" style={{ width: '350px' }}>อก.รย.(ก3)</span>
+                    </div>
+
+                    <div className="form-row flex-start flex-wrap">
+                      <span>รายงานการใช้ยานพาหนะหรือเครื่องจักร ประจำเดือน</span>
+                      <span className="dotted-blank text-center" style={{ width: '120px' }}>{reportMonth}</span>
+                      <span className="ml-2">พ.ศ.</span>
+                      <span className="dotted-blank text-center" style={{ width: '80px' }}>{reportYear}</span>
+                      <span className="ml-2">หมายเลขทะเบียน</span>
+                      <span className="dotted-blank text-center" style={{ width: '120px' }}>{reportPlate}</span>
+                      <span className="ml-2">รหัส</span>
+                      <span className="dotted-blank text-center" style={{ width: '100px' }}></span>
+                      <span className="ml-2">ประเภท</span>
+                      <span className="dotted-blank text-center" style={{ width: '100px' }}></span>
+                      <span className="ml-2">ชนิด</span>
+                      <span className="dotted-blank text-center" style={{ width: '100px' }}></span>
+                    </div>
+                    
+                    <div className="form-row dotted-line-full"></div>
+
+                    <div className="form-row flex-start flex-wrap fuel-checkboxes">
+                      <span>ชนิดของเชื้อเพลิง</span>
+                      <label><input type="checkbox" /> แก๊สโซฮอล์ 95</label>
+                      <label><input type="checkbox" /> แก๊สโซฮอล์ 91</label>
+                      <label><input type="checkbox" /> แก๊สโซฮอล์ E20</label>
+                      <label><input type="checkbox" /> แก๊สโซฮอล์ E85</label>
+                      <label><input type="checkbox" /> ดีเซล</label>
+                      <label><input type="checkbox" /> น้ำมันหล่อลื่น จำนวน</label>
+                      <span className="dotted-blank" style={{ width: '80px' }}></span>
+                      <span>ลิตร</span>
+                    </div>
+
+                    <div className="form-row flex-start">
+                      <span>อัตราการสิ้นเปลืองเชื้อเพลิงยานพาหนะ</span>
+                      <span className="dotted-blank" style={{ width: '150px' }}></span>
+                      <span>กิโลเมตร/ลิตร, เครื่องจักร</span>
+                      <span className="dotted-blank" style={{ width: '150px' }}></span>
+                      <span>ลิตร/ชั่วโมง</span>
+                    </div>
+                  </div>
+
+                  <table className="official-table">
                     <thead>
                       <tr>
-                        <th rowSpan={2}>วันที่</th>
-                        <th rowSpan={2}>สถานที่ไปปฏิบัติงาน/เหตุผล</th>
-                        <th colSpan={3}>มิเตอร์/กม. (ชม.)</th>
-                        <th colSpan={4}>รับเชื้อเพลิง/ลิตร (บาท)</th>
-                        <th colSpan={2}>ค่าซ่อมบำรุง</th>
-                        <th rowSpan={2}>พนักงานขับรถ</th>
-                        <th rowSpan={2}>หมายเหตุ</th>
+                        <th rowSpan={2} style={{ width: '60px' }}>วันที่</th>
+                        <th rowSpan={2} style={{ width: '150px' }}>ชื่อผู้ขับ<br/>(ผู้ควบคุม)</th>
+                        <th rowSpan={2}>สถานที่ปฏิบัติงาน</th>
+                        <th colSpan={2} style={{ width: '140px' }}>เลขระยะทาง</th>
+                        <th rowSpan={2} style={{ width: '90px' }}>ชั่วโมงการทำงาน<br/>ของเครื่องจักร</th>
+                        <th rowSpan={2} style={{ width: '90px' }}>จำนวนเชื้อเพลิง<br/>ที่เติม (ลิตร)</th>
+                        <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
+                        <th rowSpan={2} style={{ width: '120px' }}>รายการซ่อม</th>
+                        <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
                       </tr>
                       <tr>
-                        <th>ก่อนเดินทาง</th>
-                        <th>หลังเดินทาง</th>
-                        <th>ระยะทาง</th>
-                        <th>ชนิด</th>
-                        <th>ลิตร</th>
-                        <th>ราคา/ลิตร</th>
-                        <th>จำนวนเงิน</th>
-                        <th>รายการซ่อม</th>
-                        <th>จำนวนเงิน</th>
+                        <th style={{ width: '70px' }}>ไป</th>
+                        <th style={{ width: '70px' }}>กลับ</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {reports.map((r, i) => {
-                        const distance = (r.odo_start && r.odo_end) ? (r.odo_end - r.odo_start).toFixed(1) : "";
-                        const pricePerLiter = (r.fuel_cost && r.fuel_liters && r.fuel_liters > 0) ? (r.fuel_cost / r.fuel_liters).toFixed(2) : "";
-                        return (
-                          <tr key={r.id}>
-                            <td>{getDayOnly(r.usage_date)}</td>
-                            <td className="text-left">{r.work_location || "-"}</td>
-                            <td>{r.odo_start || "-"}</td>
-                            <td>{r.odo_end || "-"}</td>
-                            <td>{distance || "-"}</td>
-                            <td>{r.fuel_type || "-"}</td>
-                            <td>{r.fuel_liters || "-"}</td>
-                            <td>{pricePerLiter || "-"}</td>
-                            <td>{r.fuel_cost || "-"}</td>
-                            <td>{r.repair_details || "-"}</td>
-                            <td>{r.repair_cost || "-"}</td>
-                            <td>{r.driver_name}</td>
-                            <td>{r.notes || "-"}</td>
-                          </tr>
-                        );
-                      })}
+                      {reports.map((r, i) => (
+                        <tr key={r.id}>
+                          <td className="text-center">{getDayOnly(r.usage_date)}</td>
+                          <td className="text-center">{r.driver_name}</td>
+                          <td className="text-left">{r.work_location || ""}</td>
+                          <td className="text-center">{r.odo_start || ""}</td>
+                          <td className="text-center">{r.odo_end || ""}</td>
+                          <td className="text-center">{r.machine_hours || ""}</td>
+                          <td className="text-center">{r.fuel_liters || ""}</td>
+                          <td className="text-right">{r.fuel_cost ? r.fuel_cost.toFixed(2) : ""}</td>
+                          <td className="text-left">{r.repair_details || ""}</td>
+                          <td className="text-right">{r.repair_cost ? r.repair_cost.toFixed(2) : ""}</td>
+                        </tr>
+                      ))}
+                      {/* Empty rows to fill the table if needed, optional but good for printed forms */}
+                      {reports.length < 5 && Array.from({ length: 5 - reports.length }).map((_, i) => (
+                        <tr key={`empty-${i}`}>
+                          <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                      ))}
                     </tbody>
-                    <tfoot>
-                      <tr>
-                        <th colSpan={2} style={{ textAlign: "right" }}>รวมทั้งสิ้น</th>
-                        <th></th>
-                        <th></th>
-                        <th>{reports.reduce((sum, r) => sum + ((r.odo_end && r.odo_start) ? (r.odo_end - r.odo_start) : 0), 0).toFixed(1) || "0.0"}</th>
-                        <th></th>
-                        <th>{reports.reduce((sum, r) => sum + (r.fuel_liters || 0), 0).toFixed(2) || "0.00"}</th>
-                        <th></th>
-                        <th>{reports.reduce((sum, r) => sum + (r.fuel_cost || 0), 0).toFixed(2) || "0.00"}</th>
-                        <th></th>
-                        <th>{reports.reduce((sum, r) => sum + (r.repair_cost || 0), 0).toFixed(2) || "0.00"}</th>
-                        <th colSpan={2}></th>
-                      </tr>
-                    </tfoot>
                   </table>
-                  <div style={{ display: "flex", justifyContent: "space-around", marginTop: "40px" }}>
-                    <div style={{ textAlign: "center" }}>
-                      ลงชื่อ......................................................<br/><br/>
-                      (......................................................)<br/>
-                      ผู้ควบคุมรถ
+
+                  <div className="form-footer">
+                    <div className="signature-section flex-between">
+                      <div className="signature-box">
+                        <div>(.......................................................................................)</div>
+                        <div className="font-bold mt-2">ผู้ขับยานพาหนะ</div>
+                      </div>
+                      <div className="signature-box">
+                        <div>(.......................................................................................)</div>
+                        <div className="font-bold mt-2">ผู้ควบคุม</div>
+                      </div>
                     </div>
-                    <div style={{ textAlign: "center" }}>
-                      ลงชื่อ......................................................<br/><br/>
-                      (......................................................)<br/>
-                      พนักงานขับรถ
-                    </div>
+                    <div className="form-code">ยพ.6-ป.46</div>
                   </div>
                 </div>
               ) : (
