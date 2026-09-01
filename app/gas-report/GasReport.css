@@ -247,7 +247,7 @@
 
 .form-body {
   margin-bottom: 20px;
-  font-size: 14px;
+  font-size: 16px; /* Increased for better readability / match official form */
 }
 
 .form-row {
@@ -274,7 +274,7 @@
   display: flex;
   align-items: center;
   margin-left: 12px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .fuel-checkboxes input[type="checkbox"] {
@@ -284,7 +284,7 @@
 .official-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 40px;
 }
 

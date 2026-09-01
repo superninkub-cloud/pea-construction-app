@@ -298,8 +298,8 @@ export default function GasReportPage() {
               {reports.length > 0 ? (
                 <div id="printable-report" className="official-form">
                   <div className="form-header">
-                    <div className="text-center font-bold" style={{ fontSize: '18px' }}>การไฟฟ้าส่วนภูมิภาค</div>
-                    <div className="text-center font-bold" style={{ fontSize: '16px', marginBottom: '20px' }}>แบบฟอร์มรายงานการใช้ยานพาหนะหรือเครื่องจักร</div>
+                    <div className="text-center font-bold" style={{ fontSize: '24px' }}>การไฟฟ้าส่วนภูมิภาค</div>
+                    <div className="text-center font-bold" style={{ fontSize: '20px', marginBottom: '20px' }}>แบบฟอร์มรายงานการใช้ยานพาหนะหรือเครื่องจักร</div>
                   </div>
 
                   <div className="form-body">
