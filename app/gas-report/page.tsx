@@ -199,13 +199,20 @@ export default function GasReportPage() {
                 <label>ผู้ขับขี่ *</label>
                 <select value={driverName} onChange={e => setDriverName(e.target.value)} required>
                   <option value="">-- เลือกผู้ขับขี่ --</option>
-                  {personnelList.filter(p => (!p.position || !p.position.includes("พนักงาน บ")) && !["ธวัชชัย โต๊ะศรีสุข", "ณัฐพล พืชพันธ์", "ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(p.full_name)).map(p => (
+                  {personnelList.filter(p => (!p.position || !p.position.includes("พนักงาน บ")) && !["ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(p.full_name)).map(p => (
                     <option key={p.id} value={p.full_name}>{p.full_name}</option>
                   ))}
                   {/* Fallback to driversList if not in personnel */}
-                  {driversList.map(v => v.driver).filter((v, i, a) => v && a.indexOf(v) === i && !personnelList.find(p => p.full_name === v) && !["ธวัชชัย โต๊ะศรีสุข", "ณัฐพล พืชพันธ์", "ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(v)).map(d => (
+                  {driversList.map(v => v.driver).filter((v, i, a) => v && a.indexOf(v) === i && !personnelList.find(p => p.full_name === v) && !["ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(v)).map(d => (
                     <option key={d} value={d}>{d}</option>
                   ))}
+                  {/* Inject specific names if completely missing */}
+                  {!personnelList.find(p => p.full_name === "ธวัชชัย โต๊ะศรีสุข") && !driversList.find(v => v.driver === "ธวัชชัย โต๊ะศรีสุข") && (
+                    <option value="ธวัชชัย โต๊ะศรีสุข">ธวัชชัย โต๊ะศรีสุข</option>
+                  )}
+                  {!personnelList.find(p => p.full_name === "ณัฐพล พืชพันธ์") && !driversList.find(v => v.driver === "ณัฐพล พืชพันธ์") && (
+                    <option value="ณัฐพล พืชพันธ์">ณัฐพล พืชพันธ์</option>
+                  )}
                 </select>
               </div>
 
@@ -213,9 +220,15 @@ export default function GasReportPage() {
                 <label>ผู้ควบคุมรถ *</label>
                 <select value={supervisorName} onChange={e => setSupervisorName(e.target.value)} required>
                   <option value="">-- เลือกผู้ควบคุมรถ --</option>
-                  {personnelList.filter(p => (!p.position || !p.position.includes("พนักงาน บ")) && !["ธวัชชัย โต๊ะศรีสุข", "ณัฐพล พืชพันธ์", "ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(p.full_name)).map(p => (
+                  {personnelList.filter(p => (!p.position || !p.position.includes("พนักงาน บ")) && !["ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(p.full_name)).map(p => (
                     <option key={p.id} value={p.full_name}>{p.full_name}</option>
                   ))}
+                  {!personnelList.find(p => p.full_name === "ธวัชชัย โต๊ะศรีสุข") && (
+                    <option value="ธวัชชัย โต๊ะศรีสุข">ธวัชชัย โต๊ะศรีสุข</option>
+                  )}
+                  {!personnelList.find(p => p.full_name === "ณัฐพล พืชพันธ์") && (
+                    <option value="ณัฐพล พืชพันธ์">ณัฐพล พืชพันธ์</option>
+                  )}
                 </select>
               </div>
 
