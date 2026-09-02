@@ -81,6 +81,7 @@ export default function UpdateStatus() {
   );
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [estSiteExpense, setEstSiteExpense] = useState("");
   const [allocatedSiteBudget, setAllocatedSiteBudget] = useState("");
   const [disbursedSiteExpense, setDisbursedSiteExpense] = useState("");
@@ -1872,14 +1873,31 @@ export default function UpdateStatus() {
                   <img
                     src={previewUrl}
                     alt="Preview"
+                    onClick={() => setIsLightboxOpen(true)}
                     style={{
                       maxWidth: "100%",
                       maxHeight: "250px",
                       borderRadius: "12px",
                       border: "4px solid white",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      cursor: "pointer",
+                      transition: "transform 0.2s ease"
                     }}
+                    onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
+                    onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   />
+                  {project?.image_url === previewUrl && project?.updated_at && (
+                    <div style={{ marginTop: "12px", fontSize: "14px", color: "#64748b", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      อัพโหลดเมื่อวันที่ {new Date(project.updated_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.
+                    </div>
+                  )}
+                  {file && previewUrl && previewUrl !== project?.image_url && (
+                    <div style={{ marginTop: "12px", fontSize: "14px", color: "#f59e0b", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                      รูปภาพใหม่ยังไม่ได้บันทึก
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -2783,6 +2801,68 @@ export default function UpdateStatus() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Lightbox for full screen image view */}
+      {isLightboxOpen && previewUrl && (
+        <div
+          onClick={() => setIsLightboxOpen(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "zoom-out",
+          }}
+        >
+          <img
+            src={previewUrl}
+            alt="Fullscreen Preview"
+            style={{
+              maxWidth: "90%",
+              maxHeight: "85%",
+              objectFit: "contain",
+              borderRadius: "8px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)"
+            }}
+          />
+          {project?.image_url === previewUrl && project?.updated_at && (
+            <div style={{ color: "white", marginTop: "16px", fontSize: "16px", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+              อัพโหลดเมื่อวันที่ {new Date(project.updated_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.
+            </div>
+          )}
+          <button
+            onClick={() => setIsLightboxOpen(false)}
+            style={{
+              position: "absolute",
+              top: "30px",
+              right: "40px",
+              background: "rgba(255,255,255,0.2)",
+              border: "none",
+              color: "white",
+              fontSize: "30px",
+              width: "50px",
+              height: "50px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "background 0.2s ease"
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.4)")}
+            onMouseOut={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.2)")}
+          >
+            ×
+          </button>
         </div>
       )}
     </>
