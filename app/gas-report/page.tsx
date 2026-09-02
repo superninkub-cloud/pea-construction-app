@@ -14,6 +14,8 @@ const thaiMonths = [
 export default function GasReportPage() {
   const [activeTab, setActiveTab] = useState("form");
   const [loading, setLoading] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
 
   // Form State
   const [usageDate, setUsageDate] = useState("");
@@ -74,6 +76,26 @@ export default function GasReportPage() {
     }
   };
 
+  const handleEditClick = (item: any) => {
+    setEditId(item.id);
+    setUsageDate(item.usage_date || "");
+    setSelectedPlate(item.license_plate || "");
+    setVehicleCode(item.vehicle_code || "");
+    setDriverName(item.driver_name || "");
+    setSupervisorName(item.supervisor_name || "");
+    setWorkLocation(item.work_location || "");
+    setOdoStart(item.odo_start !== null ? item.odo_start.toString() : "");
+    setOdoEnd(item.odo_end !== null ? item.odo_end.toString() : "");
+    setMachineHours(item.machine_hours !== null ? item.machine_hours.toString() : "");
+    setFuelType(item.fuel_type || "");
+    setFuelLiters(item.fuel_liters !== null ? item.fuel_liters.toString() : "");
+    setFuelCost(item.fuel_cost !== null ? item.fuel_cost.toString() : "");
+    setRepairDetails(item.repair_details || "");
+    setRepairCost(item.repair_cost !== null ? item.repair_cost.toString() : "");
+    setNotes(item.notes || "");
+    setActiveTab("form");
+  };
+
   useEffect(() => {
     if (activeTab === "history") {
       fetchHistory();
@@ -92,6 +114,7 @@ export default function GasReportPage() {
   }, [selectedPlate]);
 
   useEffect(() => {
+    setUserRole(sessionStorage.getItem("pea_role"));
     const fetchPersonnel = async () => {
       const { data, error } = await supabase.from("personnel").select("*").order("full_name", { ascending: true });
       if (!error && data) {
@@ -115,7 +138,7 @@ export default function GasReportPage() {
       const monthName = thaiMonths[d.getMonth()];
       const yearTh = (d.getFullYear() + 543).toString();
 
-      const { error } = await supabase.from("gas_reports").insert({
+      const payload = {
         usage_date: usageDate,
         month_name: monthName,
         year_th: yearTh,
@@ -133,13 +156,23 @@ export default function GasReportPage() {
         repair_details: repairDetails,
         repair_cost: repairCost ? parseFloat(repairCost) : null,
         notes: notes
-      });
+      };
+
+      let error;
+      if (editId) {
+        const { error: updateError } = await supabase.from("gas_reports").update(payload).eq("id", editId);
+        error = updateError;
+      } else {
+        const { error: insertError } = await supabase.from("gas_reports").insert(payload);
+        error = insertError;
+      }
 
       if (error) {
         console.error(error);
         alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message);
       } else {
-        alert("บันทึกข้อมูลเรียบร้อย");
+        alert(editId ? "อัปเดตข้อมูลเรียบร้อย" : "บันทึกข้อมูลเรียบร้อย");
+        setEditId(null);
         // Reset some fields
         setWorkLocation("");
         setOdoStart("");
@@ -261,12 +294,24 @@ export default function GasReportPage() {
                           <td style={{ padding: "12px", textAlign: "center" }}>{item.odo_start && item.odo_end ? (item.odo_end - item.odo_start).toLocaleString() : "-"}</td>
                           <td style={{ padding: "12px", textAlign: "center" }}>{item.fuel_liters ? item.fuel_liters : "-"}</td>
                           <td style={{ padding: "12px", textAlign: "center" }}>
-                            <button 
-                              onClick={() => handleDeleteHistory(item.id)}
-                              style={{ padding: "6px 12px", background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "bold" }}
-                            >
-                              ลบข้อมูล
-                            </button>
+                            {userRole === "admin" ? (
+                              <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                                <button
+                                  onClick={() => handleEditClick(item)}
+                                  style={{ padding: "6px 12px", background: "#e0f2fe", color: "#0284c7", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "bold" }}
+                                >
+                                  แก้ไข
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteHistory(item.id)}
+                                  style={{ padding: "6px 12px", background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "bold" }}
+                                >
+                                  ลบ
+                                </button>
+                              </div>
+                            ) : (
+                              <span style={{ color: "#94a3b8", fontSize: "12px" }}>(เฉพาะ Admin)</span>
+                            )}
                           </td>
                         </tr>
                       ))
@@ -397,10 +442,29 @@ export default function GasReportPage() {
                 <textarea rows={2} value={notes} onChange={e => setNotes(e.target.value)}></textarea>
               </div>
 
-              <div style={{ gridColumn: "1 / -1" }}>
-                <button type="submit" className="gas-submit-btn" disabled={loading}>
-                  {loading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              <div style={{ gridColumn: "1 / -1", display: "flex", gap: "10px" }}>
+                <button type="submit" className="gas-submit-btn" disabled={loading} style={{ flex: 1 }}>
+                  {loading ? "กำลังบันทึก..." : (editId ? "อัปเดตข้อมูล" : "บันทึกข้อมูล")}
                 </button>
+                {editId && (
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setEditId(null);
+                      setWorkLocation("");
+                      setOdoStart("");
+                      setOdoEnd("");
+                      setMachineHours("");
+                      setFuelLiters("");
+                      setFuelCost("");
+                      setRepairDetails("");
+                      setRepairCost("");
+                      setNotes("");
+                    }} 
+                    style={{ flex: 1, background: "#94a3b8", color: "white", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "16px" }}>
+                    ยกเลิกการแก้ไข
+                  </button>
+                )}
               </div>
             </form>
           )}
