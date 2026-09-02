@@ -294,7 +294,7 @@ export default function GasReportPage() {
                           <td style={{ padding: "12px", textAlign: "center" }}>{item.odo_start && item.odo_end ? (item.odo_end - item.odo_start).toLocaleString() : "-"}</td>
                           <td style={{ padding: "12px", textAlign: "center" }}>{item.fuel_liters ? item.fuel_liters : "-"}</td>
                           <td style={{ padding: "12px", textAlign: "center" }}>
-                            {userRole === "admin" ? (
+                            {(userRole === "admin" || userRole === "user") ? (
                               <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
                                 <button
                                   onClick={() => handleEditClick(item)}
@@ -310,7 +310,7 @@ export default function GasReportPage() {
                                 </button>
                               </div>
                             ) : (
-                              <span style={{ color: "#94a3b8", fontSize: "12px" }}>(เฉพาะ Admin)</span>
+                              <span style={{ color: "#94a3b8", fontSize: "12px" }}>(เฉพาะผู้มีสิทธิ์)</span>
                             )}
                           </td>
                         </tr>
