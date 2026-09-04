@@ -244,28 +244,8 @@ export default function PlanningDashboard() {
   const totalW = calculateTotalWeight();
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-sm text-gray-800 font-sans">
-      {/* Top Navbar */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-purple-800">
-            <Zap className="w-6 h-6 fill-current" />
-            <div>
-              <h1 className="font-extrabold text-lg leading-none tracking-tight">PCTS</h1>
-              <p className="text-[10px] uppercase font-bold text-gray-500">PEA Construction</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-gray-700 hover:text-purple-700 cursor-pointer font-bold ml-4 border-l pl-4 border-gray-200 h-8">
-            <Home className="w-4 h-4" /> ภาพรวม
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-gray-600 font-medium text-xs">Viewer (บุคคลทั่วไป)</span>
-          <button className="bg-purple-800 hover:bg-purple-900 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-sm transition-colors">เข้าสู่ระบบ</button>
-        </div>
-      </div>
-
-      <div className="max-w-[1600px] mx-auto p-6 space-y-6">
+    <div className="w-full text-sm text-gray-800 font-sans">
+      <div className="w-full mx-auto space-y-6">
         
         {/* Project Selector (Since we need a way to pick project) */}
         {!selectedWbs && (
