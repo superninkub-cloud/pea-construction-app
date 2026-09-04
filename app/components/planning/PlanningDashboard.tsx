@@ -529,7 +529,12 @@ export default function PlanningDashboard() {
               {/* TAB 4: PHOTOS */}
               {activeTab === "photos" && (
                 <div className="p-6 animate-in fade-in duration-300">
-                  <h3 className="text-xl font-extrabold text-gray-900 mb-6">รูปภาพความก้าวหน้าล่าสุด</h3>
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-extrabold text-gray-900">รูปภาพความก้าวหน้าล่าสุด</h3>
+                    <button className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95 flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4" /> อัพโหลดภาพ
+                    </button>
+                  </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5">
                     {[1,2,3,4,5,6,7,8,9,10].map(i => (
                       <div key={i} className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all bg-white shadow-sm group cursor-pointer hover:-translate-y-1">
@@ -577,10 +582,57 @@ export default function PlanningDashboard() {
                     </div>
                   </div>
 
-                  <div className="h-[400px] bg-gray-50 border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-inner">
+                  <div className="h-[400px] bg-gray-50 border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-inner mb-10">
                     <BarChart2 className="w-16 h-16 text-gray-300 mb-4" />
                     <p className="text-gray-500 font-bold text-lg">กราฟเปรียบเทียบแผนเบิกจ่าย vs จ่ายจริง</p>
                     <p className="text-gray-400 text-sm mt-2">พื้นที่สำหรับแสดงกราฟแท่งเปรียบเทียบงบประมาณรายเดือน (Mockup)</p>
+                  </div>
+
+                  {/* Budget Details Table */}
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-4">รายละเอียดข้อมูลเบิกจ่าย</h4>
+                    <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                      <table className="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                          <tr className="bg-gray-50/80 text-gray-500 text-[10px] uppercase tracking-wider border-b border-gray-200">
+                            <th className="font-bold p-4">ลำดับ</th>
+                            <th className="font-bold p-4">รายการ</th>
+                            <th className="font-bold p-4">WBS</th>
+                            <th className="font-bold p-4 text-right">วงเงินงบประมาณ</th>
+                            <th className="font-bold p-4 text-right">จ่ายจริงสะสม</th>
+                            <th className="font-bold p-4 text-right">วงเงินคงเหลือ</th>
+                            <th className="font-bold p-4 text-right">ภาระผูกพันรวม</th>
+                            <th className="font-bold p-4 text-right">PR</th>
+                            <th className="font-bold p-4 text-right">PO</th>
+                            <th className="font-bold p-4 text-right">GR</th>
+                            <th className="font-bold p-4 text-right">IR</th>
+                            <th className="font-bold p-4 text-right">งบคงเหลือ</th>
+                            <th className="font-bold p-4 text-center">% เบิกจ่าย</th>
+                            <th className="font-bold p-4">สถานะ</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 text-xs">
+                          <tr className="hover:bg-purple-50/40 transition-colors">
+                            <td className="p-4 font-bold text-gray-800">1</td>
+                            <td className="p-4 font-bold text-gray-800">{currentProject?.name || "งานก่อสร้างสถานีไฟฟ้า"}</td>
+                            <td className="p-4 text-gray-500 font-medium">{currentProject?.wbs || "I-69-I-BNCXX.19.3904"}</td>
+                            <td className="p-4 text-right font-semibold text-gray-700">10,008,111.96</td>
+                            <td className="p-4 text-right font-bold text-emerald-600">745,961.75</td>
+                            <td className="p-4 text-right font-semibold text-gray-700">9,262,150.21</td>
+                            <td className="p-4 text-right font-semibold text-red-500">1,265,226.38</td>
+                            <td className="p-4 text-right text-gray-500">0.00</td>
+                            <td className="p-4 text-right text-gray-500">1,265,226.38</td>
+                            <td className="p-4 text-right text-gray-500">0.00</td>
+                            <td className="p-4 text-right text-gray-500">0.00</td>
+                            <td className="p-4 text-right font-bold text-amber-600">7,996,923.83</td>
+                            <td className="p-4 text-center font-bold text-gray-800">7.45%</td>
+                            <td className="p-4">
+                              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold">PREL BUDG AVAC</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}
