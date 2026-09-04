@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Printer, Home, List, BarChart2, TrendingUp, Image as ImageIcon, DollarSign, Zap } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -27,7 +28,7 @@ export default function PlanningDashboard() {
   const [selectedWbs, setSelectedWbs] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"gantt" | "scurve">("gantt");
+  const [activeTab, setActiveTab] = useState<"overview"|"gantt"|"scurve"|"photos"|"budget">("overview");
 
   // Form states
   const [isEditing, setIsEditing] = useState(false);
@@ -174,13 +175,11 @@ export default function PlanningDashboard() {
     const sCurveData = [];
     if (tasks.length === 0) return [];
     
-    // Use unpadded min/max for tighter curve bounds if desired, or stick to getMinMaxDates
     const starts = tasks.map(t => new Date(t.start_date).getTime());
     const ends = tasks.map(t => new Date(t.end_date).getTime());
     const pMin = new Date(Math.min(...starts));
     const pMax = new Date(Math.max(...ends));
     
-    // Extend actual max if delayed
     tasks.forEach(t => {
       if (t.actual_end_date) {
         const aEnd = new Date(t.actual_end_date).getTime();
@@ -194,7 +193,6 @@ export default function PlanningDashboard() {
 
     const today = new Date().setHours(0,0,0,0);
 
-    // Generate daily points
     for (let d = new Date(pMin); d <= pMax; d.setDate(d.getDate() + 1)) {
       const dTime = d.getTime();
       let totalPlan = 0;
@@ -203,7 +201,6 @@ export default function PlanningDashboard() {
       tasks.forEach(t => {
         const weight = Math.max(1, new Date(t.end_date).getTime() - new Date(t.start_date).getTime());
         
-        // Plan
         let plan = 0;
         const pStart = new Date(t.start_date).getTime();
         const pEnd = new Date(t.end_date).getTime();
@@ -211,7 +208,6 @@ export default function PlanningDashboard() {
         else if (dTime > pStart) plan = ((dTime - pStart) / (pEnd - pStart)) * 100;
         totalPlan += (plan * weight);
         
-        // Actual
         if (dTime <= today) {
           let actual = 0;
           if (t.actual_start_date) {
@@ -232,265 +228,387 @@ export default function PlanningDashboard() {
 
       sCurveData.push({
         date: d.toISOString().split('T')[0],
-        "Plan (%)": Number((totalPlan / totalWeight).toFixed(2)),
-        "Actual (%)": dTime <= today ? Number((totalActual / totalWeight).toFixed(2)) : null
+        "แผนงาน (Plan) %": Number((totalPlan / totalWeight).toFixed(2)),
+        "ผลงานจริง (Actual) %": dTime <= today ? Number((totalActual / totalWeight).toFixed(2)) : null
       });
     }
     return sCurveData;
   };
 
   const sCurveData = generateSCurveData();
+  const currentProject = projects.find(p => p.wbs === selectedWbs);
+
+  const calculateTotalWeight = () => {
+    return tasks.reduce((acc, t) => acc + Math.max(1, new Date(t.end_date).getTime() - new Date(t.start_date).getTime()), 0);
+  };
+  const totalW = calculateTotalWeight();
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">วางแผนงานก่อสร้าง</h1>
-          <p className="text-gray-500 mt-1">Gantt Chart & Task Management</p>
+    <div className="min-h-screen bg-[#f8fafc] text-sm text-gray-800 font-sans">
+      {/* Top Navbar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 text-purple-800">
+            <Zap className="w-6 h-6 fill-current" />
+            <div>
+              <h1 className="font-extrabold text-lg leading-none tracking-tight">PCTS</h1>
+              <p className="text-[10px] uppercase font-bold text-gray-500">PEA Construction</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-gray-700 hover:text-purple-700 cursor-pointer font-bold ml-4 border-l pl-4 border-gray-200 h-8">
+            <Home className="w-4 h-4" /> ภาพรวม
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-gray-600 font-medium text-xs">Viewer (บุคคลทั่วไป)</span>
+          <button className="bg-purple-800 hover:bg-purple-900 text-white px-5 py-2 rounded-lg text-xs font-bold shadow-sm transition-colors">เข้าสู่ระบบ</button>
         </div>
       </div>
 
-      <div className="bg-white/70 backdrop-blur-xl p-5 rounded-3xl shadow-sm border border-white/50 mb-6 transition-all">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">เลือกโครงการ (WBS)</label>
-        <select
-          value={selectedWbs}
-          onChange={(e) => setSelectedWbs(e.target.value)}
-          className="w-full p-3 bg-white/80 border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all outline-none backdrop-blur-md"
-        >
-          <option value="">-- กรุณาเลือกโครงการ --</option>
-          {projects.map((p) => (
-            <option key={p.id} value={p.wbs}>
-              {p.wbs} - {p.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <div className="max-w-[1600px] mx-auto p-6 space-y-6">
+        
+        {/* Project Selector (Since we need a way to pick project) */}
+        {!selectedWbs && (
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center mt-10">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">เลือกระบบงานก่อสร้าง</h2>
+            <select
+              value={selectedWbs}
+              onChange={(e) => setSelectedWbs(e.target.value)}
+              className="w-full max-w-md mx-auto p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none font-medium text-base shadow-inner"
+            >
+              <option value="">-- กรุณาเลือกโครงการ --</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.wbs}>{p.wbs} - {p.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
-      {selectedWbs && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Task List Section */}
-          <div className="lg:col-span-1 bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 p-6 overflow-hidden flex flex-col h-[700px]">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900 tracking-tight">รายการงาน (Tasks)</h2>
-              <button
-                onClick={() => { resetForm(); setShowForm(true); }}
-                className="bg-[#007AFF] hover:bg-[#005bb5] text-white px-4 py-2 rounded-full text-sm font-semibold transition-all shadow-md shadow-blue-500/30"
-              >
-                + เพิ่มงาน
-              </button>
+        {selectedWbs && (
+          <>
+            {/* Project Header Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-2 h-full bg-purple-700"></div>
+              <div className="flex items-center gap-5 ml-2">
+                <div className="w-14 h-14 bg-purple-50 text-purple-700 flex items-center justify-center rounded-2xl border border-purple-100 shadow-sm">
+                  <Home className="w-7 h-7" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-gray-900">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h2>
+                  <p className="text-gray-500 text-xs mt-1.5 font-medium">ผู้รับเหมา: - | ผู้ควบคุมงาน: นายจักรพันธ์ นรเหรียญ | กรรมการตรวจรับ: - | ระยะเวลา: - | สถานะ: อยู่ระหว่างก่อสร้าง</p>
+                </div>
+              </div>
+              <div className="flex gap-3 w-full md:w-auto">
+                <button onClick={() => setSelectedWbs("")} className="flex-1 md:flex-none px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl text-xs font-bold border border-gray-200 transition-colors">
+                  เปลี่ยนโครงการ
+                </button>
+                <button className="flex-1 md:flex-none bg-[#334155] hover:bg-[#1e293b] text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-colors">
+                  <Printer className="w-4 h-4" /> พิมพ์รายงาน (PDF)
+                </button>
+              </div>
             </div>
 
-            {showForm && (
-              <form onSubmit={handleSubmit} className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">ชื่องาน</label>
-                    <input required type="text" value={taskName} onChange={e => setTaskName(e.target.value)} className="w-full p-2 text-sm border rounded" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">เริ่ม (แผน)</label>
-                      <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 text-sm border rounded bg-white" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">เสร็จ (แผน)</label>
-                      <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 text-sm border rounded bg-white" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 mt-3">
-                    <div>
-                      <label className="block text-xs font-medium text-blue-600 mb-1">เริ่ม (จริง)</label>
-                      <input type="date" value={actualStartDate} onChange={e => setActualStartDate(e.target.value)} className="w-full p-2 text-sm border border-blue-200 rounded bg-blue-50" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-blue-600 mb-1">เสร็จ (จริง)</label>
-                      <input type="date" value={actualEndDate} onChange={e => setActualEndDate(e.target.value)} className="w-full p-2 text-sm border border-blue-200 rounded bg-blue-50" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">ความก้าวหน้า (%)</label>
-                      <input type="number" min="0" max="100" value={progress} onChange={e => setProgress(Number(e.target.value))} className="w-full p-2 text-sm border rounded" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">ผู้รับผิดชอบ</label>
-                      <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} className="w-full p-2 text-sm border rounded" />
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-2 mt-4">
-                    <button type="button" onClick={() => setShowForm(false)} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-200 rounded">ยกเลิก</button>
-                    <button type="submit" className="px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded">บันทึก</button>
-                  </div>
-                </div>
-              </form>
-            )}
+            {/* Tabs */}
+            <div className="bg-white/90 backdrop-blur-md border border-gray-200 sticky top-[68px] z-40 rounded-xl px-2 shadow-sm">
+              <div className="flex gap-2 px-4 overflow-x-auto custom-scrollbar">
+                <button onClick={() => setActiveTab("overview")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "overview" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                  <List className="w-4 h-4" /> แผนงาน/ผลงานก่อสร้าง
+                </button>
+                <button onClick={() => setActiveTab("gantt")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "gantt" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                  <BarChart2 className="w-4 h-4" /> Gantt Chart
+                </button>
+                <button onClick={() => setActiveTab("scurve")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "scurve" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                  <TrendingUp className="w-4 h-4" /> S-Curve
+                </button>
+                <button onClick={() => setActiveTab("photos")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "photos" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                  <ImageIcon className="w-4 h-4" /> รูปภาพความก้าวหน้า
+                </button>
+                <button onClick={() => setActiveTab("budget")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "budget" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                  <DollarSign className="w-4 h-4" /> เบิกจ่ายงบประมาณ
+                </button>
+              </div>
+            </div>
 
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-              {tasks.length === 0 ? (
-                <p className="text-gray-500 text-center py-10">ยังไม่มีงานในโครงการนี้</p>
-              ) : (
-                <div className="space-y-3">
-                  {tasks.map(task => (
-                    <div key={task.id} className="p-3 border border-gray-100 rounded-lg hover:border-[#851a70] transition-colors group cursor-default">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-semibold text-gray-800 text-sm">{task.task_name}</h3>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEdit(task)} className="text-blue-500 hover:text-blue-700 text-xs">แก้ไข</button>
-                          <button onClick={() => handleDelete(task.id)} className="text-red-500 hover:text-red-700 text-xs">ลบ</button>
+            {/* Content Area */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[600px]">
+              
+              {/* TAB 1: OVERVIEW */}
+              {activeTab === "overview" && (
+                <div className="animate-in fade-in duration-300">
+                  <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                    <h3 className="text-xl font-extrabold text-gray-900 tracking-tight">แผนงาน/ผลงานก่อสร้าง</h3>
+                    <button onClick={() => { resetForm(); setShowForm(true); }} className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95">
+                      + เพิ่มงาน
+                    </button>
+                  </div>
+
+                  {showForm && (
+                    <form onSubmit={handleSubmit} className="m-6 bg-purple-50/50 p-6 rounded-2xl border border-purple-100 shadow-inner">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1.5">ชื่องาน</label>
+                          <input required type="text" value={taskName} onChange={e => setTaskName(e.target.value)} className="w-full p-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1.5">เริ่ม (แผน)</label>
+                            <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-3 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-purple-500 outline-none" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1.5">เสร็จ (แผน)</label>
+                            <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-3 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-purple-500 outline-none" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 mt-2">
+                          <div>
+                            <label className="block text-xs font-bold text-purple-800 mb-1.5">เริ่ม (จริง)</label>
+                            <input type="date" value={actualStartDate} onChange={e => setActualStartDate(e.target.value)} className="w-full p-3 text-sm border border-purple-200 rounded-xl bg-purple-50 focus:ring-2 focus:ring-purple-500 outline-none" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-purple-800 mb-1.5">เสร็จ (จริง)</label>
+                            <input type="date" value={actualEndDate} onChange={e => setActualEndDate(e.target.value)} className="w-full p-3 text-sm border border-purple-200 rounded-xl bg-purple-50 focus:ring-2 focus:ring-purple-500 outline-none" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1.5">ความก้าวหน้า (%)</label>
+                            <input type="number" min="0" max="100" value={progress} onChange={e => setProgress(Number(e.target.value))} className="w-full p-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1.5">ผู้รับผิดชอบ</label>
+                            <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} className="w-full p-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" />
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-purple-100">
+                          <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-sm text-gray-600 hover:bg-gray-200 rounded-xl font-bold transition-colors">ยกเลิก</button>
+                          <button type="submit" className="px-5 py-2.5 text-sm bg-purple-700 hover:bg-purple-800 text-white rounded-xl font-bold shadow-md transition-colors">บันทึกข้อมูล</button>
                         </div>
                       </div>
-                      <p className="text-xs text-gray-500 mb-1">
-                        แผน: {new Date(task.start_date).toLocaleDateString('th-TH')} - {new Date(task.end_date).toLocaleDateString('th-TH')}
-                        {task.assignee && ` • 👨‍🔧 ${task.assignee}`}
-                      </p>
-                      {(task.actual_start_date || task.actual_end_date) && (
-                        <p className="text-xs text-blue-600 mb-2">
-                          จริง: {task.actual_start_date ? new Date(task.actual_start_date).toLocaleDateString('th-TH') : '-'} - {task.actual_end_date ? new Date(task.actual_end_date).toLocaleDateString('th-TH') : 'ยังไม่ระบุ'}
-                        </p>
-                      )}
-                      {(!task.actual_start_date && !task.actual_end_date) && <div className="mb-2"></div>}
-                      <div className="w-full bg-gray-200 rounded-full h-1.5">
-                        <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${task.progress}%` }}></div>
-                      </div>
-                    </div>
-                  ))}
+                    </form>
+                  )}
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-gray-50/80 text-gray-500 text-xs tracking-wider border-b border-gray-100">
+                          <th className="font-bold p-5 w-1/3">ชื่องาน (Task)</th>
+                          <th className="font-bold p-5">วันที่เริ่ม - สิ้นสุด</th>
+                          <th className="font-bold p-5">น้ำหนัก (%)</th>
+                          <th className="font-bold p-5 w-1/4">ความก้าวหน้าจริง (%)</th>
+                          <th className="font-bold p-5 text-right">จัดการ</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {tasks.map(task => {
+                          const tWeight = Math.max(1, new Date(task.end_date).getTime() - new Date(task.start_date).getTime());
+                          const pctWeight = totalW > 0 ? ((tWeight / totalW) * 100).toFixed(0) : "0";
+                          return (
+                            <tr key={task.id} className="hover:bg-purple-50/40 transition-colors group">
+                              <td className="p-5 font-bold text-gray-800">{task.task_name}</td>
+                              <td className="p-5 text-gray-600 text-xs font-medium">
+                                {new Date(task.start_date).toISOString().split('T')[0]} ถึง {new Date(task.end_date).toISOString().split('T')[0]}
+                              </td>
+                              <td className="p-5 text-gray-600 font-semibold">{pctWeight}%</td>
+                              <td className="p-5">
+                                <div className="flex flex-col gap-1.5">
+                                  <span className="text-gray-900 font-bold text-xs">{task.progress}%</span>
+                                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden shadow-inner">
+                                    <div className="bg-purple-800 h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${task.progress}%` }}></div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="p-5 text-right">
+                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => handleEdit(task)} className="text-purple-700 hover:bg-purple-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">แก้ไข</button>
+                                  <button onClick={() => handleDelete(task.id)} className="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">ลบ</button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {tasks.length === 0 && (
+                          <tr><td colSpan={5} className="text-center p-12 text-gray-400 font-medium">ยังไม่มีข้อมูลงานก่อสร้างในระบบ</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
-            </div>
-          </div>
 
-          {/* Chart Section */}
-          <div className="lg:col-span-2 bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 p-6 h-[700px] flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900 tracking-tight">ไทม์ไลน์โครงการ</h2>
-              <div className="flex bg-gray-100 p-1 rounded-xl">
-                <button 
-                  onClick={() => setViewMode("gantt")}
-                  className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${viewMode === 'gantt' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  Gantt Chart
-                </button>
-                <button 
-                  onClick={() => setViewMode("scurve")}
-                  className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${viewMode === 'scurve' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  S-Curve
-                </button>
-              </div>
-            </div>
-            
-            {tasks.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center text-gray-400">
-                เพิ่มงานเพื่อดูแผนภูมิ
-              </div>
-            ) : viewMode === "gantt" ? (
-              <div className="flex-1 overflow-auto border border-gray-100 rounded-2xl bg-gray-50/50 relative">
-                <div className="min-w-[800px] h-full p-4 relative">
-                  {/* Grid Lines */}
-                  <div className="absolute inset-0 flex justify-between px-4 pointer-events-none opacity-10">
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <div key={i} className="h-full border-l border-gray-400 border-dashed"></div>
-                    ))}
+              {/* TAB 2: GANTT CHART */}
+              {activeTab === "gantt" && (
+                <div className="p-6 h-[700px] flex flex-col animate-in fade-in duration-300">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-extrabold text-gray-900">Gantt Chart แผนงานย่อย</h3>
+                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                      <button className="px-4 py-1.5 text-xs font-bold rounded bg-white shadow-sm text-gray-800">สัปดาห์</button>
+                      <button className="px-4 py-1.5 text-xs font-bold rounded text-gray-500 hover:text-gray-800">เดือน</button>
+                    </div>
                   </div>
+                  <div className="flex-1 overflow-auto border border-gray-200 rounded-xl bg-white relative">
+                    <div className="min-w-[1000px] h-full p-4 relative">
+                      {/* Grid Lines */}
+                      <div className="absolute inset-0 flex justify-between px-4 pointer-events-none opacity-10">
+                        {Array.from({ length: 12 }).map((_, i) => (
+                          <div key={i} className="h-full border-l border-gray-400 border-dashed"></div>
+                        ))}
+                      </div>
 
-                  <div className="space-y-6 mt-8 relative z-10">
-                    {tasks.map(task => {
-                      const planLeft = getLeftOffset(task.start_date);
-                      const planWidth = getWidth(task.start_date, task.end_date);
-                      
-                      let actualLeft = 0;
-                      let actualWidth = 0;
-                      let isDelayed = false;
-                      
-                      if (task.actual_start_date) {
-                        actualLeft = getLeftOffset(task.actual_start_date);
-                        // If no actual end date, use today's date or plan end date for visualization
-                        const endDateToUse = task.actual_end_date || new Date().toISOString().split('T')[0];
-                        actualWidth = getWidth(task.actual_start_date, endDateToUse);
-                        
-                        if (task.actual_end_date && new Date(task.actual_end_date) > new Date(task.end_date)) {
-                          isDelayed = true;
-                        } else if (!task.actual_end_date && new Date() > new Date(task.end_date)) {
-                          isDelayed = true;
-                        }
-                      }
-
-                      return (
-                        <div key={task.id} className="relative h-14 w-full flex items-center group mb-2">
-                          {/* Label and bars container */}
-                          <div className="absolute w-full h-full flex flex-col justify-center gap-1">
-                            
-                            {/* PLAN BAR (Gray) */}
-                            <div 
-                              className="absolute h-6 rounded-md bg-gray-200 border border-gray-300 shadow-sm overflow-hidden flex items-center"
-                              style={{ left: `${planLeft}%`, width: `${planWidth}%`, top: '0' }}
-                            >
-                               <span className="text-[10px] font-bold text-gray-500 px-2 truncate w-full text-center">แผน: {task.task_name}</span>
-                            </div>
-
-                            {/* ACTUAL BAR (Blue or Red) */}
-                            {task.actual_start_date && (
-                              <div 
-                                className={`absolute h-6 rounded-md shadow-sm overflow-hidden flex items-center transition-all group-hover:shadow-md group-hover:scale-[1.01] ${isDelayed ? 'bg-red-100 border border-red-300' : 'bg-blue-100 border border-blue-200'}`}
-                                style={{ left: `${actualLeft}%`, width: `${actualWidth}%`, bottom: '0' }}
-                              >
-                                 <div className={`h-full opacity-80 ${isDelayed ? 'bg-red-500' : 'bg-[#007AFF]'}`} style={{ width: `${task.progress}%` }}></div>
-                                 <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-900 truncate px-2">
-                                   จริง: {task.progress}%
-                                 </span>
-                              </div>
-                            )}
-                          </div>
+                      <div className="space-y-6 mt-10 relative z-10">
+                        {tasks.map(task => {
+                          const planLeft = getLeftOffset(task.start_date);
+                          const planWidth = getWidth(task.start_date, task.end_date);
                           
-                          {/* Tooltip on hover */}
-                          <div className="hidden group-hover:block absolute z-20 bg-gray-900/95 backdrop-blur-md text-white text-xs p-3 rounded-xl shadow-xl -top-16" style={{ left: `${planLeft + (planWidth/2)}%`, transform: 'translateX(-50%)', minWidth: '200px' }}>
-                            <p className="font-bold text-sm mb-2 pb-1 border-b border-gray-700">{task.task_name}</p>
-                            <div className="grid grid-cols-2 gap-2 text-gray-300 mb-1">
-                              <div><span className="text-gray-400">แผนเริ่ม:</span> {task.start_date}</div>
-                              <div><span className="text-gray-400">แผนเสร็จ:</span> {task.end_date}</div>
+                          let actualLeft = 0;
+                          let actualWidth = 0;
+                          
+                          if (task.actual_start_date) {
+                            actualLeft = getLeftOffset(task.actual_start_date);
+                            const endDateToUse = task.actual_end_date || new Date().toISOString().split('T')[0];
+                            actualWidth = getWidth(task.actual_start_date, endDateToUse);
+                          }
+
+                          return (
+                            <div key={task.id} className="relative h-14 w-full flex items-center group mb-2">
+                              <div className="absolute w-full h-full flex flex-col justify-center gap-1.5">
+                                
+                                {/* PLAN BAR */}
+                                <div 
+                                  className="absolute h-4 rounded bg-gray-200 shadow-sm border border-gray-300"
+                                  style={{ left: `${planLeft}%`, width: `${planWidth}%`, top: '0' }}
+                                >
+                                </div>
+
+                                {/* ACTUAL BAR */}
+                                {task.actual_start_date && (
+                                  <div 
+                                    className="absolute h-4 rounded bg-purple-100 border border-purple-300 overflow-hidden shadow-sm"
+                                    style={{ left: `${actualLeft}%`, width: `${actualWidth}%`, bottom: '0' }}
+                                  >
+                                     <div className="h-full bg-purple-600 opacity-90" style={{ width: `${task.progress}%` }}></div>
+                                  </div>
+                                )}
+                                <span className="absolute text-[11px] text-gray-600 font-bold whitespace-nowrap" style={{ left: `calc(${planLeft}% + ${planWidth}% + 12px)`, top: '6px' }}>
+                                  {task.task_name}
+                                </span>
+                              </div>
+                              
+                              <div className="hidden group-hover:block absolute z-20 bg-white border border-gray-200 text-gray-700 text-xs p-4 rounded-xl shadow-2xl -top-20" style={{ left: `${planLeft + (planWidth/2)}%`, transform: 'translateX(-50%)', minWidth: '240px' }}>
+                                <p className="font-bold text-sm text-purple-800 mb-3">{task.task_name}</p>
+                                <p className="mb-1"><span className="font-semibold">เริ่ม:</span> {task.start_date}</p>
+                                <p className="mb-2"><span className="font-semibold">สิ้นสุด:</span> {task.end_date}</p>
+                                <p className="font-bold text-purple-700">ความก้าวหน้า: {task.progress}%</p>
+                              </div>
                             </div>
-                            <div className={`grid grid-cols-2 gap-2 mb-2 ${isDelayed ? 'text-red-300' : 'text-blue-300'}`}>
-                              <div><span className="text-gray-400">จริงเริ่ม:</span> {task.actual_start_date || '-'}</div>
-                              <div><span className="text-gray-400">จริงเสร็จ:</span> {task.actual_end_date || '-'}</div>
-                            </div>
-                            <p className="text-gray-300 mt-1">ก้าวหน้า: <span className="text-white font-bold">{task.progress}%</span></p>
-                          </div>
-                        </div>
-                      );
-                    })}
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex-1 border border-gray-100 rounded-2xl bg-gray-50/50 p-4 pt-8">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={sCurveData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.5} />
-                    <XAxis 
-                      dataKey="date" 
-                      tick={{fontSize: 12}} 
-                      tickFormatter={(val) => new Date(val).toLocaleDateString('th-TH', {month: 'short', day: 'numeric'})}
-                    />
-                    <YAxis 
-                      domain={[0, 100]} 
-                      tick={{fontSize: 12}} 
-                      tickFormatter={(val) => `${val}%`}
-                    />
-                    <RechartsTooltip 
-                      formatter={(value: any) => [`${value}%`, '']}
-                      labelFormatter={(label: any) => new Date(label).toLocaleDateString('th-TH', {year: 'numeric', month: 'long', day: 'numeric'})}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    />
-                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                    <Line type="monotone" dataKey="Plan (%)" stroke="#94a3b8" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
-                    <Line type="monotone" dataKey="Actual (%)" stroke="#007AFF" strokeWidth={4} dot={false} activeDot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              )}
+
+              {/* TAB 3: S-CURVE */}
+              {activeTab === "scurve" && (
+                <div className="p-6 h-[700px] flex flex-col animate-in fade-in duration-300">
+                  <h3 className="text-xl font-extrabold text-gray-900 mb-8">S-Curve ความก้าวหน้าโครงการ</h3>
+                  <div className="flex-1 bg-amber-50/30 p-4 pt-12 relative rounded-xl border border-gray-100">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={sCurveData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#f3f4f6" />
+                        <XAxis 
+                          dataKey="date" 
+                          tick={{fontSize: 11, fill: '#6b7280', fontWeight: 600}} 
+                          tickFormatter={(val) => new Date(val).toLocaleDateString('th-TH', {month: 'short', year: '2-digit'})}
+                          axisLine={{ stroke: '#e5e7eb', strokeWidth: 2 }}
+                          tickLine={false}
+                          dy={15}
+                        />
+                        <YAxis 
+                          domain={[0, 100]} 
+                          tick={{fontSize: 11, fill: '#6b7280', fontWeight: 600}} 
+                          tickFormatter={(val) => `${val}`}
+                          axisLine={false}
+                          tickLine={false}
+                          dx={-15}
+                        />
+                        <RechartsTooltip 
+                          formatter={(value: any) => [`${value}%`, '']}
+                          labelFormatter={(label: any) => new Date(label).toLocaleDateString('th-TH', {year: 'numeric', month: 'long', day: 'numeric'})}
+                          contentStyle={{ borderRadius: '16px', border: '1px solid #f3f4f6', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', padding: '16px', fontWeight: 'bold' }}
+                        />
+                        <Legend wrapperStyle={{ top: -40 }} iconType="plainline" />
+                        <Line type="monotone" dataKey="แผนงาน (Plan) %" stroke="#f59e0b" strokeWidth={3} strokeDasharray="5 5" dot={{r: 5, fill: '#f59e0b', strokeWidth: 0}} activeDot={{ r: 8 }} />
+                        <Line type="monotone" dataKey="ผลงานจริง (Actual) %" stroke="#7c3aed" strokeWidth={4} dot={{r: 5, fill: '#7c3aed', strokeWidth: 0}} activeDot={{ r: 8 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: PHOTOS */}
+              {activeTab === "photos" && (
+                <div className="p-6 animate-in fade-in duration-300">
+                  <h3 className="text-xl font-extrabold text-gray-900 mb-6">รูปภาพความก้าวหน้าล่าสุด</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5">
+                    {[1,2,3,4,5,6,7,8,9,10].map(i => (
+                      <div key={i} className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all bg-white shadow-sm group cursor-pointer hover:-translate-y-1">
+                        <div className="aspect-video bg-gray-200 relative overflow-hidden">
+                          <img src={`https://picsum.photos/seed/${i + 200}/400/300`} alt="progress" className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" />
+                        </div>
+                        <div className="p-4">
+                          <p className="text-[10px] text-gray-500 mb-2 flex items-center gap-1.5 font-bold">
+                            <ImageIcon className="w-3.5 h-3.5" /> 2026-09-02
+                          </p>
+                          <p className="text-xs text-gray-800 font-bold line-clamp-2 leading-relaxed">ตัวอย่างรูปภาพความก้าวหน้างานก่อสร้าง (Mockup Data)</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: BUDGET */}
+              {activeTab === "budget" && (
+                <div className="p-6 animate-in fade-in duration-300">
+                  <div className="flex justify-between items-center mb-8">
+                    <h3 className="text-xl font-extrabold text-gray-900">เบิกจ่ายงบประมาณ</h3>
+                    <select className="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-white font-bold text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-purple-500">
+                      <option>ข้อมูลเดือน: ก.ย. 2569</option>
+                    </select>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 gap-6 mb-10">
+                    <div className="bg-white border-l-8 border-purple-800 shadow-md rounded-2xl p-6 border-y border-r border-gray-100">
+                      <p className="text-gray-500 text-[11px] font-bold mb-2 uppercase tracking-wider">วงเงินงบประมาณ</p>
+                      <p className="text-2xl font-extrabold text-purple-900">฿10,008,111.96</p>
+                    </div>
+                    <div className="bg-white border-l-8 border-emerald-500 shadow-md rounded-2xl p-6 border-y border-r border-gray-100">
+                      <p className="text-gray-500 text-[11px] font-bold mb-2 uppercase tracking-wider">จ่ายจริงสะสม</p>
+                      <p className="text-2xl font-extrabold text-emerald-600">฿745,961.75</p>
+                    </div>
+                    <div className="bg-white border-l-8 border-red-500 shadow-md rounded-2xl p-6 border-y border-r border-gray-100">
+                      <p className="text-gray-500 text-[11px] font-bold mb-2 uppercase tracking-wider">ภาระผูกพัน</p>
+                      <p className="text-2xl font-extrabold text-red-600">฿1,265,226.38</p>
+                    </div>
+                    <div className="bg-white border-l-8 border-amber-500 shadow-md rounded-2xl p-6 border-y border-r border-gray-100">
+                      <p className="text-gray-500 text-[11px] font-bold mb-2 uppercase tracking-wider">งบคงเหลือ</p>
+                      <p className="text-2xl font-extrabold text-amber-600">฿7,996,923.83</p>
+                    </div>
+                  </div>
+
+                  <div className="h-[400px] bg-gray-50 border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-inner">
+                    <BarChart2 className="w-16 h-16 text-gray-300 mb-4" />
+                    <p className="text-gray-500 font-bold text-lg">กราฟเปรียบเทียบแผนเบิกจ่าย vs จ่ายจริง</p>
+                    <p className="text-gray-400 text-sm mt-2">พื้นที่สำหรับแสดงกราฟแท่งเปรียบเทียบงบประมาณรายเดือน (Mockup)</p>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
