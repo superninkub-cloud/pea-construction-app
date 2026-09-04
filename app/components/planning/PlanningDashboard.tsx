@@ -455,16 +455,18 @@ export default function PlanningDashboard() {
 
                 <div className="flex items-center gap-5 ml-2 pr-12">
                   <div className="w-14 h-14 bg-purple-50 text-purple-700 flex items-center justify-center rounded-2xl border border-purple-100 shadow-sm shrink-0">
-                    <Home className="w-7 h-7" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22V2" />
+                      <path d="M7 6h10" />
+                      <path d="M7 10h10" />
+                      <path d="M12 6L9 10" />
+                      <path d="M12 6l3 4" />
+                    </svg>
                   </div>
                   <div>
                     <h2 className="text-xl font-extrabold text-gray-900 mb-1">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h2>
                     <p className="text-gray-500 text-xs font-medium leading-relaxed">
-                      ผู้รับเหมา: {currentProject?.contractor || "-"} | 
-                      ผู้ควบคุมงาน: {currentProject?.supervisor || "-"} | 
-                      กรรมการตรวจรับ: {currentProject?.committee || "-"} | 
-                      ระยะเวลา: {currentProject?.duration || "-"} | 
-                      สถานะ: {currentProject?.status || "อยู่ระหว่างก่อสร้าง"}
+                      ผู้ควบคุมงาน: {currentProject?.supervisor || "-"} | สถานะ: {currentProject?.status || "อยู่ระหว่างก่อสร้าง"}
                     </p>
                   </div>
                 </div>
@@ -726,20 +728,10 @@ export default function PlanningDashboard() {
                       <ImageIcon className="w-4 h-4" /> อัพโหลดภาพ
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5">
-                    {[1,2,3,4,5,6,7,8,9,10].map(i => (
-                      <div key={i} className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all bg-white shadow-sm group cursor-pointer hover:-translate-y-1">
-                        <div className="aspect-video bg-gray-200 relative overflow-hidden">
-                          <img src={`https://picsum.photos/seed/${i + 200}/400/300`} alt="progress" className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" />
-                        </div>
-                        <div className="p-4">
-                          <p className="text-[10px] text-gray-500 mb-2 flex items-center gap-1.5 font-bold">
-                            <ImageIcon className="w-3.5 h-3.5" /> 2026-09-02
-                          </p>
-                          <p className="text-xs text-gray-800 font-bold line-clamp-2 leading-relaxed">ตัวอย่างรูปภาพความก้าวหน้างานก่อสร้าง (Mockup Data)</p>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center mt-6">
+                    <ImageIcon className="w-16 h-16 text-gray-300 mb-4" />
+                    <p className="text-gray-500 font-bold text-lg mb-2">ยังไม่มีรูปภาพความก้าวหน้า</p>
+                    <p className="text-gray-400 text-sm">กรุณากดปุ่ม "อัพโหลดภาพ" เพื่อเพิ่มรูปภาพสำหรับโครงการนี้</p>
                   </div>
                 </div>
               )}
@@ -754,76 +746,13 @@ export default function PlanningDashboard() {
                     </select>
                   </div>
                   
-                  <div className="grid grid-cols-4 gap-6 mb-10">
-                    <div className="bg-white border-l-8 border-purple-800 shadow-md rounded-2xl p-6 border-y border-r border-gray-100">
-                      <p className="text-gray-500 text-[11px] font-bold mb-2 uppercase tracking-wider">วงเงินงบประมาณ</p>
-                      <p className="text-2xl font-extrabold text-purple-900">฿10,008,111.96</p>
-                    </div>
-                    <div className="bg-white border-l-8 border-emerald-500 shadow-md rounded-2xl p-6 border-y border-r border-gray-100">
-                      <p className="text-gray-500 text-[11px] font-bold mb-2 uppercase tracking-wider">จ่ายจริงสะสม</p>
-                      <p className="text-2xl font-extrabold text-emerald-600">฿745,961.75</p>
-                    </div>
-                    <div className="bg-white border-l-8 border-red-500 shadow-md rounded-2xl p-6 border-y border-r border-gray-100">
-                      <p className="text-gray-500 text-[11px] font-bold mb-2 uppercase tracking-wider">ภาระผูกพัน</p>
-                      <p className="text-2xl font-extrabold text-red-600">฿1,265,226.38</p>
-                    </div>
-                    <div className="bg-white border-l-8 border-amber-500 shadow-md rounded-2xl p-6 border-y border-r border-gray-100">
-                      <p className="text-gray-500 text-[11px] font-bold mb-2 uppercase tracking-wider">งบคงเหลือ</p>
-                      <p className="text-2xl font-extrabold text-amber-600">฿7,996,923.83</p>
-                    </div>
-                  </div>
-
-                  <div className="h-[400px] bg-gray-50 border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-inner mb-10">
+                  <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center mt-6">
                     <BarChart2 className="w-16 h-16 text-gray-300 mb-4" />
-                    <p className="text-gray-500 font-bold text-lg">กราฟเปรียบเทียบแผนเบิกจ่าย vs จ่ายจริง</p>
-                    <p className="text-gray-400 text-sm mt-2">พื้นที่สำหรับแสดงกราฟแท่งเปรียบเทียบงบประมาณรายเดือน (Mockup)</p>
-                  </div>
-
-                  {/* Budget Details Table */}
-                  <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-4">รายละเอียดข้อมูลเบิกจ่าย</h4>
-                    <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-                      <table className="w-full text-left border-collapse whitespace-nowrap">
-                        <thead>
-                          <tr className="bg-gray-50/80 text-gray-500 text-[10px] uppercase tracking-wider border-b border-gray-200">
-                            <th className="font-bold p-4">ลำดับ</th>
-                            <th className="font-bold p-4">รายการ</th>
-                            <th className="font-bold p-4">WBS</th>
-                            <th className="font-bold p-4 text-right">วงเงินงบประมาณ</th>
-                            <th className="font-bold p-4 text-right">จ่ายจริงสะสม</th>
-                            <th className="font-bold p-4 text-right">วงเงินคงเหลือ</th>
-                            <th className="font-bold p-4 text-right">ภาระผูกพันรวม</th>
-                            <th className="font-bold p-4 text-right">PR</th>
-                            <th className="font-bold p-4 text-right">PO</th>
-                            <th className="font-bold p-4 text-right">GR</th>
-                            <th className="font-bold p-4 text-right">IR</th>
-                            <th className="font-bold p-4 text-right">งบคงเหลือ</th>
-                            <th className="font-bold p-4 text-center">% เบิกจ่าย</th>
-                            <th className="font-bold p-4">สถานะ</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 text-xs">
-                          <tr className="hover:bg-purple-50/40 transition-colors">
-                            <td className="p-4 font-bold text-gray-800">1</td>
-                            <td className="p-4 font-bold text-gray-800">{currentProject?.name || "งานก่อสร้างสถานีไฟฟ้า"}</td>
-                            <td className="p-4 text-gray-500 font-medium">{currentProject?.wbs || "I-69-I-BNCXX.19.3904"}</td>
-                            <td className="p-4 text-right font-semibold text-gray-700">10,008,111.96</td>
-                            <td className="p-4 text-right font-bold text-emerald-600">745,961.75</td>
-                            <td className="p-4 text-right font-semibold text-gray-700">9,262,150.21</td>
-                            <td className="p-4 text-right font-semibold text-red-500">1,265,226.38</td>
-                            <td className="p-4 text-right text-gray-500">0.00</td>
-                            <td className="p-4 text-right text-gray-500">1,265,226.38</td>
-                            <td className="p-4 text-right text-gray-500">0.00</td>
-                            <td className="p-4 text-right text-gray-500">0.00</td>
-                            <td className="p-4 text-right font-bold text-amber-600">7,996,923.83</td>
-                            <td className="p-4 text-center font-bold text-gray-800">7.45%</td>
-                            <td className="p-4">
-                              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-[10px] font-bold">PREL BUDG AVAC</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                    <p className="text-gray-500 font-bold text-lg mb-2">ยังไม่มีข้อมูลเบิกจ่ายงบประมาณ</p>
+                    <p className="text-gray-400 text-sm mb-6">คุณสามารถเพิ่มรายละเอียดข้อมูลการเบิกจ่ายสำหรับโครงการนี้ได้</p>
+                    <button className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95">
+                      + เพิ่มรายละเอียดเบิกจ่าย
+                    </button>
                   </div>
                 </div>
               )}
