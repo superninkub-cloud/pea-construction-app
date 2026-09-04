@@ -1429,7 +1429,7 @@ export default function PlanningDashboard() {
                              const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
                              const w = Number(t.weight) || 0;
                              
-                             const date = new Date(t.actual_end_date);
+                             const date = new Date(t.actual_end_date as string);
                              const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                              
                              if (!monthMap.has(monthKey)) {
