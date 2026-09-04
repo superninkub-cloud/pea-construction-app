@@ -36,6 +36,9 @@ export default function PlanningDashboard() {
   const [activeTab, setActiveTab] = useState<"overview"|"gantt"|"scurve"|"photos"|"budget">("overview");
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   // New Project states
   const [isCreatingProject, setIsCreatingProject] = useState(false);
@@ -62,6 +65,20 @@ export default function PlanningDashboard() {
   const [progress, setProgress] = useState<number>(0);
   const [assignee, setAssignee] = useState("");
   const [showForm, setShowForm] = useState(false);
+
+  // Derived state for table
+  const filteredProjects = projects.filter(p => {
+    const matchesSupervisor = !selectedSupervisor || p.supervisor === selectedSupervisor;
+    const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.wbs.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSupervisor && matchesSearch;
+  });
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const paginatedProjects = filteredProjects.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedSupervisor, itemsPerPage]);
 
   useEffect(() => {
     fetchProjects();
@@ -459,7 +476,13 @@ export default function PlanningDashboard() {
                   <div className="flex items-center gap-3 w-full md:w-auto">
                     <div className="relative flex-1 md:w-64">
                       <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" placeholder="ค้นหา..." className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-9 pr-3 text-xs focus:ring-4 focus:ring-purple-500/10 focus:border-purple-400 outline-none font-medium transition-all" />
+                      <input 
+                        type="text" 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="ค้นหา..." 
+                        className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-9 pr-3 text-xs focus:ring-4 focus:ring-purple-500/10 focus:border-purple-400 outline-none font-medium transition-all" 
+                      />
                     </div>
                     <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> ตัวกรอง <ChevronDown className="w-3 h-3" />
@@ -506,10 +529,10 @@ export default function PlanningDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100/80 bg-white">
-                        {projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).length > 0 ? (
-                          projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).map((p, idx) => (
+                        {paginatedProjects.length > 0 ? (
+                          paginatedProjects.map((p, idx) => (
                             <tr key={p.id} className="hover:bg-gray-50/80 transition-colors group">
-                              <td className="px-6 py-4 text-gray-400 font-medium text-xs">{idx + 1}</td>
+                              <td className="px-6 py-4 text-gray-400 font-medium text-xs">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                               <td className="px-6 py-4 font-mono font-medium text-gray-600 text-xs">{p.wbs}</td>
                               <td className="px-6 py-4 font-bold text-gray-900">{p.name}</td>
                               <td className="px-6 py-4 text-gray-500 font-medium">{p.supervisor || "-"}</td>
@@ -551,23 +574,55 @@ export default function PlanningDashboard() {
                     </table>
                     
                     {/* Pagination */}
-                    <div className="px-6 py-4 flex items-center justify-between text-xs text-gray-500 font-medium bg-[#FAFAFA] border-t border-gray-100">
-                      <div className="flex items-center gap-3">
-                        <span className="text-gray-400">แสดง</span>
-                        <select className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all cursor-pointer font-bold">
-                          <option>10</option>
-                          <option>20</option>
-                          <option>50</option>
-                        </select>
-                        <span className="text-gray-400">รายการต่อหน้า</span>
+                    {totalPages > 0 && (
+                      <div className="px-6 py-4 flex items-center justify-between text-xs text-gray-500 font-medium bg-[#FAFAFA] border-t border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-400">แสดง</span>
+                          <select 
+                            value={itemsPerPage}
+                            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                            className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all cursor-pointer font-bold"
+                          >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                          </select>
+                          <span className="text-gray-400">รายการต่อหน้า</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <button 
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className={`w-8 h-8 flex items-center justify-center rounded-lg shadow-sm transition-all ${currentPage === 1 ? 'bg-gray-50 text-gray-300 cursor-not-allowed border-transparent' : 'bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 text-gray-400'}`}
+                          >&lt;</button>
+                          
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            // Simple logic to show pages around current page
+                            let pageNum = i + 1;
+                            if (totalPages > 5 && currentPage > 3) {
+                              pageNum = currentPage - 2 + i;
+                              if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                            }
+                            return (
+                              <button 
+                                key={pageNum}
+                                onClick={() => setCurrentPage(pageNum)}
+                                className={`w-8 h-8 flex items-center justify-center rounded-lg shadow-sm transition-all font-bold ${currentPage === pageNum ? 'bg-gray-900 border border-gray-900 text-white shadow-md' : 'bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 text-gray-600'}`}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          })}
+
+                          <button 
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className={`w-8 h-8 flex items-center justify-center rounded-lg shadow-sm transition-all ${currentPage === totalPages ? 'bg-gray-50 text-gray-300 cursor-not-allowed border-transparent' : 'bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 text-gray-400'}`}
+                          >&gt;</button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <button className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 rounded-lg text-gray-400 shadow-sm transition-all">&lt;</button>
-                        <button className="w-8 h-8 flex items-center justify-center bg-gray-900 border border-gray-900 text-white rounded-lg font-bold shadow-md">1</button>
-                        <button className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 rounded-lg text-gray-600 shadow-sm transition-all">2</button>
-                        <button className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 rounded-lg text-gray-400 shadow-sm transition-all">&gt;</button>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>
