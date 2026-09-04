@@ -423,17 +423,17 @@ export default function PlanningDashboard() {
                 <input type="text" placeholder="ค้นหางาน โครงการ หรือสถานที่..." className="w-full bg-gray-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-purple-500 outline-none font-medium" />
               </div>
               <div className="flex items-center gap-4">
-                <button className="relative text-gray-500 hover:text-gray-800 transition-colors">
+                <button className="relative text-gray-600 hover:bg-gray-50 transition-colors border border-gray-300 rounded-md p-1.5 bg-white">
                   <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">3</span>
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm border border-white">3</span>
                 </button>
-                <div className="flex items-center gap-3 border-l border-gray-200 pl-4 cursor-pointer">
-                  <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden border border-gray-300 shadow-sm">
+                <div className="flex items-center gap-3 cursor-pointer ml-2">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shadow-sm">
                     <img src="https://i.pravatar.cc/150?img=11" alt="Profile" className="w-full h-full object-cover" />
                   </div>
                   <div className="hidden md:block text-left">
                     <p className="text-sm font-bold text-gray-800 leading-tight">{currentProject?.supervisor || "อุดมศักดิ์"}</p>
-                    <p className="text-[10px] text-gray-500 font-medium leading-tight mt-0.5">ผู้ควบคุมงาน</p>
+                    <p className="text-[11px] text-gray-500 font-medium leading-tight mt-0.5">ผู้ควบคุมงาน</p>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
                 </div>
@@ -448,19 +448,19 @@ export default function PlanningDashboard() {
                 <div>
                   <p className="text-purple-200 text-[10px] font-bold tracking-[0.2em] uppercase mb-1">Construction Project</p>
                   <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2 drop-shadow-lg">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h2>
-                  <p className="text-white/90 text-sm font-medium drop-shadow-md">&quot;พลังงานที่มั่นคง เพื่อคุณภาพชีวิตที่ดีกว่า&quot;</p>
+                  <p className="text-white text-base font-bold">&quot;พลังงานที่มั่นคง เพื่อคุณภาพชีวิตที่ดีกว่า&quot;</p>
                 </div>
-                <div className="flex flex-wrap gap-3 md:gap-4 mt-auto">
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
+                <div className="flex flex-wrap gap-2 md:gap-3 mt-auto">
+                  <div className="flex items-center gap-2 bg-[#523F67]/90 px-4 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm border border-white/5">
                     <div className="w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div> สถานะ: {currentProject?.status || "C1"}
                   </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
+                  <div className="flex items-center gap-2 bg-[#523F67]/90 px-4 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm border border-white/5">
                     <Calendar className="w-3.5 h-3.5 opacity-80" /> เริ่ม 1 มี.ค. 2569
                   </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
+                  <div className="flex items-center gap-2 bg-[#523F67]/90 px-4 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm border border-white/5">
                     <Calendar className="w-3.5 h-3.5 opacity-80" /> สิ้นสุด 30 ก.ย. 2569
                   </div>
-                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
+                  <div className="flex items-center gap-2 bg-[#523F67]/90 px-4 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm border border-white/5">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-80"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                     อ. ศรีมงคล จ. นครปฐม
                   </div>
@@ -630,19 +630,19 @@ export default function PlanningDashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-200">
-                        <button className="flex items-center gap-2 px-4 py-2 bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm">
+                      <div className="flex items-center gap-1.5">
+                        <button className="flex items-center gap-2 px-5 py-2 bg-[#7B32D9] text-white text-xs font-bold rounded-lg shadow-sm border border-purple-800 shadow-purple-900/20">
                           <List className="w-4 h-4" /> รายการ
                         </button>
-                        <button className="flex items-center gap-2 px-4 py-2 text-gray-500 hover:text-gray-800 text-xs font-bold rounded-lg transition-colors">
+                        <button className="flex items-center gap-2 px-5 py-2 bg-[#F1F1F1] text-[#4A5568] text-xs font-bold rounded-lg shadow-sm border border-gray-300 hover:bg-gray-200 transition-colors">
                           <Grid className="w-4 h-4" /> การ์ด
                         </button>
-                        <button className="flex items-center gap-2 px-4 py-2 text-gray-500 hover:text-gray-800 text-xs font-bold rounded-lg transition-colors">
+                        <button className="flex items-center gap-2 px-5 py-2 bg-[#F1F1F1] text-[#4A5568] text-xs font-bold rounded-lg shadow-sm border border-gray-300 hover:bg-gray-200 transition-colors">
                           <TrendingUp className="w-4 h-4" /> ไทม์ไลน์
                         </button>
                       </div>
-                      <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors shadow-sm">
-                        <MoreVertical className="w-5 h-5" />
+                      <button className="w-9 h-9 flex items-center justify-center bg-white border border-gray-200 rounded-[10px] text-gray-500 hover:bg-gray-50 transition-colors shadow-sm ml-1">
+                        <MoreVertical className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
