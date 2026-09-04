@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface Project {
   id: string;
@@ -26,6 +27,7 @@ export default function PlanningDashboard() {
   const [selectedWbs, setSelectedWbs] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"gantt" | "scurve">("gantt");
 
   // Form states
   const [isEditing, setIsEditing] = useState(false);
@@ -168,6 +170,77 @@ export default function PlanningDashboard() {
     return w;
   };
 
+  const generateSCurveData = () => {
+    const sCurveData = [];
+    if (tasks.length === 0) return [];
+    
+    // Use unpadded min/max for tighter curve bounds if desired, or stick to getMinMaxDates
+    const starts = tasks.map(t => new Date(t.start_date).getTime());
+    const ends = tasks.map(t => new Date(t.end_date).getTime());
+    const pMin = new Date(Math.min(...starts));
+    const pMax = new Date(Math.max(...ends));
+    
+    // Extend actual max if delayed
+    tasks.forEach(t => {
+      if (t.actual_end_date) {
+        const aEnd = new Date(t.actual_end_date).getTime();
+        if (aEnd > pMax.getTime()) pMax.setTime(aEnd);
+      }
+    });
+
+    const totalWeight = tasks.reduce((acc, t) => {
+      return acc + Math.max(1, new Date(t.end_date).getTime() - new Date(t.start_date).getTime());
+    }, 0);
+
+    const today = new Date().setHours(0,0,0,0);
+
+    // Generate daily points
+    for (let d = new Date(pMin); d <= pMax; d.setDate(d.getDate() + 1)) {
+      const dTime = d.getTime();
+      let totalPlan = 0;
+      let totalActual = 0;
+      
+      tasks.forEach(t => {
+        const weight = Math.max(1, new Date(t.end_date).getTime() - new Date(t.start_date).getTime());
+        
+        // Plan
+        let plan = 0;
+        const pStart = new Date(t.start_date).getTime();
+        const pEnd = new Date(t.end_date).getTime();
+        if (dTime >= pEnd) plan = 100;
+        else if (dTime > pStart) plan = ((dTime - pStart) / (pEnd - pStart)) * 100;
+        totalPlan += (plan * weight);
+        
+        // Actual
+        if (dTime <= today) {
+          let actual = 0;
+          if (t.actual_start_date) {
+             const aStart = new Date(t.actual_start_date).getTime();
+             if (dTime >= aStart) {
+               if (t.actual_end_date) {
+                  const aEnd = new Date(t.actual_end_date).getTime();
+                  if (dTime >= aEnd) actual = 100;
+                  else actual = ((dTime - aStart) / Math.max(1, aEnd - aStart)) * 100;
+               } else {
+                  actual = ((dTime - aStart) / Math.max(1, today - aStart)) * t.progress;
+               }
+             }
+          }
+          totalActual += (actual * weight);
+        }
+      });
+
+      sCurveData.push({
+        date: d.toISOString().split('T')[0],
+        "Plan (%)": Number((totalPlan / totalWeight).toFixed(2)),
+        "Actual (%)": dTime <= today ? Number((totalActual / totalWeight).toFixed(2)) : null
+      });
+    }
+    return sCurveData;
+  };
+
+  const sCurveData = generateSCurveData();
+
   return (
     <div className="p-6 max-w-[1400px] mx-auto min-h-screen">
       <div className="flex justify-between items-center mb-8">
@@ -286,14 +359,31 @@ export default function PlanningDashboard() {
             </div>
           </div>
 
-          {/* Gantt Chart Section */}
+          {/* Chart Section */}
           <div className="lg:col-span-2 bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 p-6 h-[700px] flex flex-col">
-            <h2 className="text-xl font-bold text-gray-900 tracking-tight mb-6">ไทม์ไลน์ (Gantt Chart)</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">ไทม์ไลน์โครงการ</h2>
+              <div className="flex bg-gray-100 p-1 rounded-xl">
+                <button 
+                  onClick={() => setViewMode("gantt")}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${viewMode === 'gantt' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Gantt Chart
+                </button>
+                <button 
+                  onClick={() => setViewMode("scurve")}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${viewMode === 'scurve' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  S-Curve
+                </button>
+              </div>
+            </div>
+            
             {tasks.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-gray-400">
-                เพิ่มงานเพื่อดูแผนภูมิ Gantt Chart
+                เพิ่มงานเพื่อดูแผนภูมิ
               </div>
-            ) : (
+            ) : viewMode === "gantt" ? (
               <div className="flex-1 overflow-auto border border-gray-100 rounded-2xl bg-gray-50/50 relative">
                 <div className="min-w-[800px] h-full p-4 relative">
                   {/* Grid Lines */}
@@ -370,6 +460,32 @@ export default function PlanningDashboard() {
                     })}
                   </div>
                 </div>
+              </div>
+            ) : (
+              <div className="flex-1 border border-gray-100 rounded-2xl bg-gray-50/50 p-4 pt-8">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={sCurveData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.5} />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{fontSize: 12}} 
+                      tickFormatter={(val) => new Date(val).toLocaleDateString('th-TH', {month: 'short', day: 'numeric'})}
+                    />
+                    <YAxis 
+                      domain={[0, 100]} 
+                      tick={{fontSize: 12}} 
+                      tickFormatter={(val) => `${val}%`}
+                    />
+                    <RechartsTooltip 
+                      formatter={(value: number) => [`${value}%`, '']}
+                      labelFormatter={(label) => new Date(label).toLocaleDateString('th-TH', {year: 'numeric', month: 'long', day: 'numeric'})}
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Line type="monotone" dataKey="Plan (%)" stroke="#94a3b8" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="Actual (%)" stroke="#007AFF" strokeWidth={4} dot={false} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             )}
           </div>
