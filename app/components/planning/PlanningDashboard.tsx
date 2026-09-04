@@ -77,7 +77,7 @@ export default function PlanningDashboard() {
   const fetchProjects = async () => {
     const { data, error } = await supabase.from("projects").select("id, wbs, name, contractor, supervisor, committee, duration, status").order("wbs");
     if (!error && data) {
-      setProjects(data);
+      setProjects(data.filter(p => p.wbs !== 'SAFETY_PLAN_2026'));
     }
     setLoading(false);
   };
@@ -347,11 +347,11 @@ export default function PlanningDashboard() {
                 </div>
 
                 {/* Floating KPI Cards */}
-                <div className="absolute -bottom-8 left-0 w-full px-10 z-20">
+                <div className="absolute -bottom-10 left-0 w-full px-10 z-20">
                   <div className="flex flex-wrap gap-5 items-stretch">
                     {/* Supervisor Select */}
-                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[240px] hover:-translate-y-1 transition-transform duration-300">
-                      <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-4 flex-1 min-w-[240px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                      <div className="w-12 h-12 rounded-[16px] bg-purple-50/80 text-purple-600 flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                       </div>
                       <div className="flex-1 w-full relative">
@@ -359,20 +359,20 @@ export default function PlanningDashboard() {
                         <select 
                           value={selectedSupervisor}
                           onChange={(e) => setSelectedSupervisor(e.target.value)}
-                          className="w-full bg-transparent text-sm font-black text-gray-900 outline-none cursor-pointer appearance-none pr-6"
+                          className="w-full bg-transparent text-sm font-black text-gray-900 border-none outline-none focus:ring-0 cursor-pointer appearance-none p-0 pr-6"
                         >
                           <option value="">เลือกทั้งหมด</option>
                           {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
                             <option key={sup as string} value={sup as string}>{sup}</option>
                           ))}
                         </select>
-                        <ChevronDown className="w-4 h-4 absolute right-0 top-1/2 text-gray-400 pointer-events-none" />
+                        <ChevronDown className="w-4 h-4 absolute right-0 top-[60%] -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
                     </div>
                     
                     {/* Total Projects */}
-                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
-                      <div className="w-12 h-12 rounded-xl bg-gray-50 text-gray-700 flex items-center justify-center shrink-0">
+                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                      <div className="w-12 h-12 rounded-[16px] bg-gray-50 text-gray-700 flex items-center justify-center shrink-0">
                         <List className="w-5 h-5" />
                       </div>
                       <div>
@@ -382,35 +382,35 @@ export default function PlanningDashboard() {
                     </div>
                     
                     {/* In Progress */}
-                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
-                      <div className="w-12 h-12 rounded-xl bg-[#E8F5E9] text-[#2E7D32] flex items-center justify-center shrink-0">
+                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                      <div className="w-12 h-12 rounded-[16px] bg-[#E8F5E9]/60 text-[#2E7D32] flex items-center justify-center shrink-0">
                         <CheckCircle2 className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="text-2xl font-black text-gray-900 leading-none mb-1.5">{projects.filter(p => (!selectedSupervisor || p.supervisor === selectedSupervisor) && p.status !== 'F4').length}</h4>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">กำลังดำเนินการ</p>
+                        <h4 className="text-2xl font-black text-gray-300 leading-none mb-1.5">0</h4>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">กำลังดำเนินการ</p>
                       </div>
                     </div>
                     
                     {/* Pending */}
-                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
-                      <div className="w-12 h-12 rounded-xl bg-[#FFF8E1] text-[#F57F17] flex items-center justify-center shrink-0">
+                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                      <div className="w-12 h-12 rounded-[16px] bg-[#FFF8E1]/60 text-[#F57F17] flex items-center justify-center shrink-0">
                         <Clock className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="text-2xl font-black text-gray-900 leading-none mb-1.5">4</h4>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">รอการเริ่มงาน</p>
+                        <h4 className="text-2xl font-black text-gray-300 leading-none mb-1.5">0</h4>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">รอการเริ่มงาน</p>
                       </div>
                     </div>
                     
                     {/* Delayed */}
-                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
-                      <div className="w-12 h-12 rounded-xl bg-[#FFEBEE] text-[#C62828] flex items-center justify-center shrink-0">
+                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                      <div className="w-12 h-12 rounded-[16px] bg-[#FFEBEE]/60 text-[#C62828] flex items-center justify-center shrink-0">
                         <AlertTriangle className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="text-2xl font-black text-gray-900 leading-none mb-1.5">3</h4>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">งานล่าช้า</p>
+                        <h4 className="text-2xl font-black text-gray-300 leading-none mb-1.5">0</h4>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">งานล่าช้า</p>
                       </div>
                     </div>
                   </div>
