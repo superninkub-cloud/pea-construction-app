@@ -319,7 +319,7 @@ export default function PlanningDashboard() {
                 >
                   <option value="">-- ผู้ควบคุมงานทั้งหมด --</option>
                   {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
-                    <option key={sup} value={sup}>{sup}</option>
+                    <option key={sup as string} value={sup as string}>{sup}</option>
                   ))}
                 </select>
               </div>
