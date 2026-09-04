@@ -466,6 +466,33 @@ export default function UpdateStatus() {
 
       if (updateError) throw updateError;
 
+      // LINE Notification triggers
+      try {
+        if (status && status !== project.status) {
+          fetch('/api/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'job_status',
+              payload: { wbs: editWbs, status, project_name: editName }
+            })
+          });
+        }
+        
+        if (file && imageUrl) {
+          fetch('/api/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'photo_upload',
+              payload: { wbs: editWbs, project_name: editName, image_url: imageUrl }
+            })
+          });
+        }
+      } catch (e) {
+        console.error("Failed to trigger notify API:", e);
+      }
+
       setMessage({
         text: "บันทึกสถานะงานและเช็คลิสท์เรียบร้อยแล้ว",
         type: "success",

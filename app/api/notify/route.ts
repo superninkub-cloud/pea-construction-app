@@ -24,8 +24,8 @@ export async function POST(request: Request) {
                           `🚗 ทะเบียน: ${license_plate}\n` +
                           `👨‍🔧 ผู้ขับขี่: ${driver_name}\n` +
                           `📅 วันที่: ${dateStr}\n` +
-                          `💧 จำนวน: ${fuel_liters} ลิตร\n` +
-                          `💰 ยอดเงิน: ${fuel_cost} บาท`;
+                          `💧 จำนวน: ${fuel_liters || '-'} ลิตร\n` +
+                          `💰 ยอดเงิน: ${fuel_cost || '-'} บาท`;
 
       messages = [
         {
@@ -39,6 +39,19 @@ export async function POST(request: Request) {
          {
            type: 'text',
            text: `📢 [อัพเดทสถานะงาน]\n📌 งาน: ${wbs}\n📑 ชื่อ: ${project_name || '-'}\n🔄 สถานะ: ${status}`
+         }
+       ];
+    } else if (type === 'photo_upload') {
+       const { wbs, project_name, image_url } = payload;
+       messages = [
+         {
+           type: 'text',
+           text: `📸 [อัพโหลดรูปถ่าย]\n📌 งาน: ${wbs}\n📑 ชื่อ: ${project_name || '-'}`
+         },
+         {
+           type: 'image',
+           originalContentUrl: image_url,
+           previewImageUrl: image_url
          }
        ];
     } else {
