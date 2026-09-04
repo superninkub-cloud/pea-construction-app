@@ -171,6 +171,20 @@ export default function GasReportPage() {
         console.error(error);
         alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message);
       } else {
+        // Send LINE Notification
+        try {
+          fetch('/api/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'gas_report',
+              payload
+            })
+          });
+        } catch (e) {
+          console.error("Failed to trigger notify API:", e);
+        }
+
         alert(editId ? "อัปเดตข้อมูลเรียบร้อย" : "บันทึกข้อมูลเรียบร้อย");
         setEditId(null);
         // Reset some fields
