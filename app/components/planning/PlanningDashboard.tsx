@@ -16,6 +16,7 @@ interface Project {
   status: string | null;
   construction_type?: string;
   progress?: number;
+  plan_progress?: number;
 }
 
 export interface Task {
@@ -111,7 +112,7 @@ export default function PlanningDashboard() {
 
   const fetchProjects = async () => {
     const { data, error } = await supabase.from("projects").select("id, wbs, name, contractor, supervisor, committee, duration, status, construction_type").order("wbs");
-    const { data: tasksData } = await supabase.from("project_tasks").select("project_wbs, weight, target_qty, done_qty");
+    const { data: tasksData } = await supabase.from("project_tasks").select("project_wbs, weight, target_qty, done_qty, start_date, end_date");
     
     if (!error && data) {
       let validProjects = data.filter(p => p.wbs !== 'SAFETY_PLAN_2026');
@@ -133,7 +134,26 @@ export default function PlanningDashboard() {
             return sum + (w * pVal / 100);
           }, 0) / totalWeight * 100;
           
-          return { ...p, progress: Number(totalProgress.toFixed(1)) };
+          const totalPlanProgress = pTasks.reduce((sum, t) => {
+            const w = Number(t.weight) || 0;
+            let planPercent = 0;
+            if (t.start_date && t.end_date) {
+              const todayStr = new Date().toISOString().split('T')[0];
+              if (todayStr >= t.end_date) {
+                planPercent = 100;
+              } else if (todayStr > t.start_date) {
+                const start = new Date(t.start_date).getTime();
+                const end = new Date(t.end_date).getTime();
+                const todayTime = new Date(todayStr).getTime();
+                if (end > start) {
+                  planPercent = ((todayTime - start) / (end - start)) * 100;
+                }
+              }
+            }
+            return sum + (w * planPercent / 100);
+          }, 0) / totalWeight * 100;
+          
+          return { ...p, progress: Number(totalProgress.toFixed(1)), plan_progress: Number(totalPlanProgress.toFixed(1)) };
         });
       }
       
@@ -683,16 +703,33 @@ export default function PlanningDashboard() {
                                   {p.status || "C1"}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex flex-col items-center gap-1">
-                                  <span className={`text-xs font-black ${p.progress === 100 ? 'text-emerald-600' : (p.progress || 0) > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
-                                    {p.progress || 0}%
-                                  </span>
-                                  <div className="w-full min-w-[80px] bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                                    <div
-                                      className={`h-full rounded-full transition-all duration-500 ease-out ${p.progress === 100 ? 'bg-emerald-500' : 'bg-purple-500'}`}
-                                      style={{ width: `${p.progress || 0}%` }}
-                                    />
+                              <td className="px-6 py-4 whitespace-nowrap min-w-[140px]">
+                                <div className="flex flex-col gap-2">
+                                  {/* Plan */}
+                                  <div className="flex flex-col gap-1">
+                                    <div className="flex justify-between items-center text-[10px] font-bold">
+                                      <span className="text-gray-500">ตามแผน</span>
+                                      <span className="text-blue-600">{p.plan_progress || 0}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                      <div
+                                        className="h-full rounded-full transition-all duration-500 ease-out bg-blue-500"
+                                        style={{ width: `${p.plan_progress || 0}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                  {/* Actual */}
+                                  <div className="flex flex-col gap-1">
+                                    <div className="flex justify-between items-center text-[10px] font-bold">
+                                      <span className="text-gray-500">ทำได้จริง</span>
+                                      <span className={`${p.progress === 100 ? 'text-emerald-600' : (p.progress || 0) > 0 ? 'text-purple-700' : 'text-gray-400'}`}>{p.progress || 0}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                      <div
+                                        className={`h-full rounded-full transition-all duration-500 ease-out ${p.progress === 100 ? 'bg-emerald-500' : 'bg-purple-500'}`}
+                                        style={{ width: `${p.progress || 0}%` }}
+                                      />
+                                    </div>
                                   </div>
                                 </div>
                               </td>
