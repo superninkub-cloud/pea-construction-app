@@ -448,7 +448,7 @@ export default function PlanningDashboard() {
                 <div>
                   <p className="text-purple-200 text-[10px] font-bold tracking-[0.2em] uppercase mb-1">Construction Project</p>
                   <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2 drop-shadow-lg">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h2>
-                  <p className="text-white/90 text-sm font-medium drop-shadow-md">"พลังงานที่มั่นคง เพื่อคุณภาพชีวิตที่ดีกว่า"</p>
+                  <p className="text-white/90 text-sm font-medium drop-shadow-md">&quot;พลังงานที่มั่นคง เพื่อคุณภาพชีวิตที่ดีกว่า&quot;</p>
                 </div>
                 <div className="flex flex-wrap gap-3 md:gap-4 mt-auto">
                   <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
