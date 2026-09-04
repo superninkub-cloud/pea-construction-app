@@ -15,6 +15,7 @@ interface Project {
   duration: string | null;
   status: string | null;
   construction_type?: string;
+  progress?: number;
 }
 
 export interface Task {
@@ -110,8 +111,33 @@ export default function PlanningDashboard() {
 
   const fetchProjects = async () => {
     const { data, error } = await supabase.from("projects").select("id, wbs, name, contractor, supervisor, committee, duration, status, construction_type").order("wbs");
+    const { data: tasksData } = await supabase.from("project_tasks").select("project_wbs, weight, target_qty, done_qty");
+    
     if (!error && data) {
-      setProjects(data.filter(p => p.wbs !== 'SAFETY_PLAN_2026'));
+      let validProjects = data.filter(p => p.wbs !== 'SAFETY_PLAN_2026');
+      
+      // Calculate progress for each project
+      if (tasksData) {
+        validProjects = validProjects.map(p => {
+          const pTasks = tasksData.filter(t => t.project_wbs === p.wbs);
+          if (pTasks.length === 0) return { ...p, progress: 0 };
+          
+          const totalWeight = pTasks.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+          if (totalWeight === 0) return { ...p, progress: 0 };
+          
+          const totalProgress = pTasks.reduce((sum, t) => {
+            const w = Number(t.weight) || 0;
+            const targetQty = Number(t.target_qty) || 0;
+            const doneQty = Number(t.done_qty) || 0;
+            const pVal = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
+            return sum + (w * pVal / 100);
+          }, 0) / totalWeight * 100;
+          
+          return { ...p, progress: Number(totalProgress.toFixed(1)) };
+        });
+      }
+      
+      setProjects(validProjects);
     }
     setLoading(false);
   };
@@ -636,6 +662,7 @@ export default function PlanningDashboard() {
                           <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">ชื่อโครงการ</th>
                           <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">ผู้ควบคุมงาน</th>
                           <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">สถานะ</th>
+                          <th className="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider min-w-[120px]">ความก้าวหน้า</th>
                           <th className="px-6 py-4 text-center w-32 text-xs font-bold text-gray-400 uppercase tracking-wider">จัดการ</th>
                         </tr>
                       </thead>
@@ -655,6 +682,19 @@ export default function PlanningDashboard() {
                                 }`}>
                                   {p.status || "C1"}
                                 </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex flex-col items-center gap-1">
+                                  <span className={`text-xs font-black ${p.progress === 100 ? 'text-emerald-600' : (p.progress || 0) > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
+                                    {p.progress || 0}%
+                                  </span>
+                                  <div className="w-full min-w-[80px] bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full transition-all duration-500 ease-out ${p.progress === 100 ? 'bg-emerald-500' : 'bg-purple-500'}`}
+                                      style={{ width: `${p.progress || 0}%` }}
+                                    />
+                                  </div>
+                                </div>
                               </td>
                               <td className="px-6 py-4 text-center">
                                 <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
