@@ -34,11 +34,15 @@ export async function POST(request: Request) {
         }
       ];
     } else if (type === 'job_status') {
-       const { wbs, status, project_name } = payload;
+       const { wbs, status, project_name, remarks } = payload;
+       let text = `📢 [อัพเดทสถานะงาน]\n📌 งาน: ${wbs}\n📑 ชื่อ: ${project_name || '-'}\n🔄 สถานะ: ${status || '-'}`;
+       if (remarks) {
+         text += `\n📝 ความคืบหน้า: ${remarks}`;
+       }
        messages = [
          {
            type: 'text',
-           text: `📢 [อัพเดทสถานะงาน]\n📌 งาน: ${wbs}\n📑 ชื่อ: ${project_name || '-'}\n🔄 สถานะ: ${status}`
+           text: text
          }
        ];
     } else if (type === 'photo_upload') {

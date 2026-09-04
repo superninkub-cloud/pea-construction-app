@@ -468,13 +468,21 @@ export default function UpdateStatus() {
 
       // LINE Notification triggers
       try {
-        if (status && status !== project.status) {
+        const statusChanged = status && status !== project.status;
+        const remarksAdded = newRemarks.trim() !== "";
+        
+        if (statusChanged || remarksAdded) {
           fetch('/api/notify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               type: 'job_status',
-              payload: { wbs: editWbs, status, project_name: editName }
+              payload: { 
+                wbs: editWbs, 
+                status: statusChanged ? status : (project.status || '-'), 
+                project_name: editName,
+                remarks: newRemarks.trim()
+              }
             })
           });
         }
