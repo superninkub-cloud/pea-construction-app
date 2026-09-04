@@ -26,7 +26,20 @@ export interface Task {
   assignee: string | null;
   actual_start_date: string | null;
   actual_end_date: string | null;
+  step_order?: number;
+  weight?: number;
 }
+
+// 7 ขั้นตอนงานก่อสร้างระบบจำหน่ายที่ตายตัว
+const FIXED_CONSTRUCTION_STEPS = [
+  { order: 0, name: "0. เบิกของเตรียมอุปกรณ์", unit: "รายการ", defaultWeight: 5 },
+  { order: 1, name: "1. ขุดหลุมปักเสา", unit: "ต้น", defaultWeight: 15 },
+  { order: 2, name: "2. ปักเสา", unit: "ต้น", defaultWeight: 20 },
+  { order: 3, name: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา", unit: "ชุด", defaultWeight: 20 },
+  { order: 4, name: "4. พาดสายแรงสูง", unit: "วงจร-กม.", defaultWeight: 20 },
+  { order: 5, name: "5. พาดสายแรงต่ำ", unit: "วงจร-กม.", defaultWeight: 10 },
+  { order: 6, name: "6. งานรื้อถอน", unit: "ต้น", defaultWeight: 10 },
+];
 
 export default function PlanningDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -105,9 +118,31 @@ export default function PlanningDashboard() {
       .from("project_tasks")
       .select("*")
       .eq("project_wbs", wbs)
-      .order("start_date");
+      .order("step_order", { ascending: true });
     if (!error && data) {
-      setTasks(data);
+      if (data.length === 0) {
+        // Auto-initialize 7 fixed construction steps
+        const today = new Date().toISOString().split('T')[0];
+        const stepsToInsert = FIXED_CONSTRUCTION_STEPS.map(step => ({
+          project_wbs: wbs,
+          task_name: step.name,
+          start_date: today,
+          end_date: today,
+          progress: 0,
+          assignee: null,
+          step_order: step.order,
+          weight: step.defaultWeight,
+        }));
+        const { data: inserted, error: insertError } = await supabase
+          .from("project_tasks")
+          .insert(stepsToInsert)
+          .select();
+        if (!insertError && inserted) {
+          setTasks(inserted.sort((a: Task, b: Task) => (a.step_order ?? 0) - (b.step_order ?? 0)));
+        }
+      } else {
+        setTasks(data);
+      }
     }
   };
 
@@ -211,6 +246,16 @@ export default function PlanningDashboard() {
       await supabase.from("project_tasks").delete().eq("id", id);
       fetchTasks(selectedWbs);
     }
+  };
+
+  // Inline update for fixed step fields
+  const [savingStepId, setSavingStepId] = useState<string | null>(null);
+  const handleStepUpdate = async (taskId: string, field: string, value: string | number | null) => {
+    setSavingStepId(taskId);
+    // Update local state immediately for responsiveness
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, [field]: value } : t));
+    await supabase.from("project_tasks").update({ [field]: value }).eq("id", taskId);
+    setSavingStepId(null);
   };
 
   // Gantt Chart Logic
@@ -846,36 +891,6 @@ export default function PlanningDashboard() {
                           <label className="block text-xs font-bold text-gray-700 mb-1.5">ชื่องาน</label>
                           <input required type="text" value={taskName} onChange={e => setTaskName(e.target.value)} className="w-full p-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-gray-700 mb-1.5">เริ่ม (แผน)</label>
-                            <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-3 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-purple-500 outline-none" />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-gray-700 mb-1.5">เสร็จ (แผน)</label>
-                            <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-3 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-purple-500 outline-none" />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 mt-2">
-                          <div>
-                            <label className="block text-xs font-bold text-purple-800 mb-1.5">เริ่ม (จริง)</label>
-                            <input type="date" value={actualStartDate} onChange={e => setActualStartDate(e.target.value)} className="w-full p-3 text-sm border border-purple-200 rounded-xl bg-purple-50 focus:ring-2 focus:ring-purple-500 outline-none" />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-purple-800 mb-1.5">เสร็จ (จริง)</label>
-                            <input type="date" value={actualEndDate} onChange={e => setActualEndDate(e.target.value)} className="w-full p-3 text-sm border border-purple-200 rounded-xl bg-purple-50 focus:ring-2 focus:ring-purple-500 outline-none" />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-gray-700 mb-1.5">ความก้าวหน้า (%)</label>
-                            <input type="number" min="0" max="100" value={progress} onChange={e => setProgress(Number(e.target.value))} className="w-full p-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-gray-700 mb-1.5">ผู้รับผิดชอบ</label>
-                            <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} className="w-full p-3 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none" />
-                          </div>
-                        </div>
                         <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-purple-100">
                           <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-sm text-gray-600 hover:bg-gray-200 rounded-xl font-bold transition-colors">ยกเลิก</button>
                           <button type="submit" className="px-5 py-2.5 text-sm bg-purple-700 hover:bg-purple-800 text-white rounded-xl font-bold shadow-md transition-colors">บันทึกข้อมูล</button>
@@ -884,73 +899,160 @@ export default function PlanningDashboard() {
                     </form>
                   )}
 
-                  <div className="overflow-x-auto min-h-[400px]">
+                  {/* Fixed Construction Steps Table */}
+                  <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-gray-50/80 text-gray-500 text-[11px] uppercase tracking-wider border-b border-gray-100">
-                          <th className="font-bold p-5 w-1/3">ชื่องาน (Task)</th>
-                          <th className="font-bold p-5 text-center">วันที่เริ่ม - สิ้นสุด</th>
-                          <th className="font-bold p-5 text-center">น้ำหนัก (%)</th>
-                          <th className="font-bold p-5 text-center w-1/5">ความก้าวหน้าจริง (%)</th>
-                          <th className="font-bold p-5 text-center">สถานะ</th>
-                          <th className="font-bold p-5 text-right">จัดการ</th>
+                        <tr className="bg-gradient-to-r from-purple-50 to-indigo-50 text-gray-600 text-[11px] uppercase tracking-wider border-b border-purple-100">
+                          <th className="font-bold p-4 pl-6 w-8">#</th>
+                          <th className="font-bold p-4 min-w-[220px]">ขั้นตอนงาน</th>
+                          <th className="font-bold p-4 text-center min-w-[140px]">วันที่เริ่ม (แผน)</th>
+                          <th className="font-bold p-4 text-center min-w-[140px]">วันที่เสร็จ (แผน)</th>
+                          <th className="font-bold p-4 text-center min-w-[80px]">น้ำหนัก (%)</th>
+                          <th className="font-bold p-4 text-center min-w-[180px]">ความก้าวหน้า (%)</th>
+                          <th className="font-bold p-4 text-center min-w-[100px]">สถานะ</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100 text-sm">
-                        {tasks.map(task => {
-                          const tWeight = Math.max(1, new Date(task.end_date).getTime() - new Date(task.start_date).getTime());
-                          const pctWeight = totalW > 0 ? ((tWeight / totalW) * 100).toFixed(0) : "0";
-                          let statusLabel = "กำลังดำเนินการ";
-                          let statusColor = "bg-orange-100 text-orange-700";
-                          if (task.progress === 100) {
+                      <tbody className="divide-y divide-gray-50 text-sm">
+                        {tasks.map((task, index) => {
+                          const stepDef = FIXED_CONSTRUCTION_STEPS.find(s => s.order === (task.step_order ?? index));
+                          const progressVal = Number(task.progress) || 0;
+                          let statusLabel = "รอดำเนินการ";
+                          let statusColor = "bg-gray-100 text-gray-500 border-gray-200";
+                          let statusDot = "bg-gray-400";
+                          if (progressVal === 100) {
                             statusLabel = "เสร็จสมบูรณ์";
-                            statusColor = "bg-emerald-100 text-emerald-700";
-                          } else if (task.progress === 0) {
-                            statusLabel = "รอดำเนินการ";
-                            statusColor = "bg-gray-100 text-gray-600";
+                            statusColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                            statusDot = "bg-emerald-500";
+                          } else if (progressVal > 0) {
+                            statusLabel = "กำลังดำเนินการ";
+                            statusColor = "bg-amber-50 text-amber-700 border-amber-200";
+                            statusDot = "bg-amber-500";
                           }
+                          const isSaving = savingStepId === task.id;
+                          const stepColor = index === 0 ? "text-blue-600" : index <= 2 ? "text-purple-700" : index <= 4 ? "text-orange-600" : index === 5 ? "text-teal-600" : "text-red-600";
+
                           return (
-                            <tr key={task.id} className="hover:bg-purple-50/30 transition-colors group border-b border-gray-50/50">
-                              <td className="p-5 font-bold text-gray-800">{task.task_name}</td>
-                              <td className="p-5 text-gray-500 text-xs font-medium text-center">
-                                {new Date(task.start_date).toLocaleDateString('th-TH')} - {new Date(task.end_date).toLocaleDateString('th-TH')}
-                              </td>
-                              <td className="p-5 text-gray-600 font-bold text-center">{pctWeight}%</td>
-                              <td className="p-5">
-                                <div className="flex flex-col gap-1.5 items-center">
-                                  <span className="text-gray-900 font-bold text-xs">{task.progress}%</span>
-                                  <div className="w-full max-w-[120px] bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                                    <div className="bg-purple-600 h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${task.progress}%` }}></div>
-                                  </div>
+                            <tr key={task.id} className={`hover:bg-purple-50/40 transition-all duration-200 group ${isSaving ? 'opacity-70' : ''}`}>
+                              <td className="p-4 pl-6">
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black ${
+                                  progressVal === 100 ? 'bg-emerald-100 text-emerald-700' : progressVal > 0 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                  {progressVal === 100 ? <CheckCircle2 className="w-4 h-4" /> : task.step_order ?? index}
                                 </div>
                               </td>
-                              <td className="p-5 text-center">
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${statusColor}`}>{statusLabel}</span>
-                              </td>
-                              <td className="p-5 text-right">
-                                <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button onClick={() => handleEdit(task)} className="text-gray-400 hover:text-purple-700 hover:bg-purple-50 p-2 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
-                                  <button onClick={() => handleDelete(task.id)} className="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
+                              <td className="p-4">
+                                <div className="flex flex-col gap-0.5">
+                                  <span className={`font-bold text-[13px] ${stepColor}`}>{task.task_name}</span>
+                                  {stepDef && <span className="text-[10px] text-gray-400 font-medium">หน่วย: {stepDef.unit}</span>}
                                 </div>
+                              </td>
+                              <td className="p-4 text-center">
+                                <input
+                                  type="date"
+                                  value={task.start_date || ""}
+                                  onChange={(e) => handleStepUpdate(task.id, "start_date", e.target.value)}
+                                  className="w-full text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none font-medium text-gray-700 hover:border-purple-300 transition-colors"
+                                />
+                              </td>
+                              <td className="p-4 text-center">
+                                <input
+                                  type="date"
+                                  value={task.end_date || ""}
+                                  onChange={(e) => handleStepUpdate(task.id, "end_date", e.target.value)}
+                                  className="w-full text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none font-medium text-gray-700 hover:border-purple-300 transition-colors"
+                                />
+                              </td>
+                              <td className="p-4 text-center">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  value={task.weight ?? stepDef?.defaultWeight ?? 0}
+                                  onChange={(e) => handleStepUpdate(task.id, "weight", Number(e.target.value))}
+                                  className="w-16 text-xs bg-white border border-gray-200 rounded-lg px-2 py-2 text-center focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none font-bold text-purple-700 hover:border-purple-300 transition-colors mx-auto block"
+                                />
+                              </td>
+                              <td className="p-4">
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    step="5"
+                                    value={progressVal}
+                                    onChange={(e) => handleStepUpdate(task.id, "progress", Number(e.target.value))}
+                                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                                  />
+                                  <span className={`text-xs font-black min-w-[36px] text-right ${progressVal === 100 ? 'text-emerald-600' : progressVal > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
+                                    {progressVal}%
+                                  </span>
+                                </div>
+                                <div className="w-full bg-gray-100 rounded-full h-1 mt-1.5 overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ease-out ${progressVal === 100 ? 'bg-emerald-500' : 'bg-purple-500'}`}
+                                    style={{ width: `${progressVal}%` }}
+                                  />
+                                </div>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border ${statusColor}`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`}></span>
+                                  {statusLabel}
+                                </span>
                               </td>
                             </tr>
                           );
                         })}
-                        {tasks.length === 0 && (
-                          <tr>
-                            <td colSpan={6} className="p-16">
-                              <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto">
-                                <div className="relative w-48 h-48 mb-4">
-                                  <div className="absolute inset-0 bg-purple-100 rounded-full blur-3xl opacity-50"></div>
-                                  <img src="https://illustrations.popsy.co/purple/under-construction.svg" alt="Empty State" className="w-full h-full relative z-10 opacity-90 drop-shadow-md" onError={(e) => { e.currentTarget.src = "https://illustrations.popsy.co/purple/work-from-home.svg"; }} />
+
+                        {/* Summary Row */}
+                        {tasks.length > 0 && (
+                          <tr className="bg-gradient-to-r from-purple-50 to-indigo-50 border-t-2 border-purple-200">
+                            <td className="p-4 pl-6" colSpan={2}>
+                              <span className="font-extrabold text-purple-800 text-sm">รวมทั้งหมด</span>
+                            </td>
+                            <td className="p-4" colSpan={2}>
+                              <span className="text-xs text-gray-500 font-medium">
+                                {tasks.filter(t => Number(t.progress) === 100).length} / {tasks.length} ขั้นตอนเสร็จ
+                              </span>
+                            </td>
+                            <td className="p-4 text-center">
+                              <span className="text-xs font-black text-purple-700">
+                                {tasks.reduce((sum, t) => sum + (Number(t.weight) || 0), 0)}%
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                  <div
+                                    className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-700 ease-out"
+                                    style={{
+                                      width: `${(() => {
+                                        const totalWeight = tasks.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                                        if (totalWeight === 0) return 0;
+                                        return tasks.reduce((sum, t) => {
+                                          const w = Number(t.weight) || 0;
+                                          const p = Number(t.progress) || 0;
+                                          return sum + (w * p / 100);
+                                        }, 0) / totalWeight * 100;
+                                      })()}%`
+                                    }}
+                                  />
                                 </div>
-                                <h4 className="text-xl font-extrabold text-gray-900 mb-2">ยังไม่มีข้อมูลงานก่อสร้างในระบบ</h4>
-                                <p className="text-sm text-gray-500 font-medium mb-8">เริ่มต้นสร้างงานแรกของคุณ เพื่อวางแผนและติดตามความก้าวหน้า</p>
-                                <button onClick={() => { resetForm(); setShowForm(true); }} className="bg-purple-700 hover:bg-purple-800 text-white px-8 py-3 rounded-xl text-sm font-bold shadow-lg shadow-purple-500/30 transition-all active:scale-95 flex items-center gap-2">
-                                  + เพิ่มงาน
-                                </button>
+                                <span className="text-xs font-black text-purple-800 min-w-[42px] text-right">
+                                  {(() => {
+                                    const totalWeight = tasks.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                                    if (totalWeight === 0) return "0.0";
+                                    return (tasks.reduce((sum, t) => {
+                                      const w = Number(t.weight) || 0;
+                                      const p = Number(t.progress) || 0;
+                                      return sum + (w * p / 100);
+                                    }, 0) / totalWeight * 100).toFixed(1);
+                                  })()}%
+                                </span>
                               </div>
                             </td>
+                            <td className="p-4"></td>
                           </tr>
                         )}
                       </tbody>

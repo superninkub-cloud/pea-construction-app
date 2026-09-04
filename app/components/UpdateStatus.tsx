@@ -1577,25 +1577,26 @@ export default function UpdateStatus() {
                   }}
                 >
                   {[
-                    { label: "1. ขุดหลุมปักเสา", idx: 0, unit: "ต้น" },
-                    { label: "2. ปักเสา", idx: 1, unit: "ต้น" },
+                    { label: "0. เบิกของเตรียมอุปกรณ์", idx: 0, unit: "รายการ" },
+                    { label: "1. ขุดหลุมปักเสา", idx: 1, unit: "ต้น" },
+                    { label: "2. ปักเสา", idx: 2, unit: "ต้น" },
                     {
                       label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา",
-                      idx: 2,
+                      idx: 3,
                       unit: "ชุด",
                     },
-                    { label: "4. พาดสายแรงสูง", idx: 3, unit: "วงจร-กม." },
-                    { label: "5. พาดสายแรงต่ำ", idx: 4, unit: "วงจร-กม." },
-                    { label: "6. งานรื้อถอน", idx: 5, unit: "ต้น" },
+                    { label: "4. พาดสายแรงสูง", idx: 4, unit: "วงจร-กม." },
+                    { label: "5. พาดสายแรงต่ำ", idx: 5, unit: "วงจร-กม." },
+                    { label: "6. งานรื้อถอน", idx: 6, unit: "ต้น" },
                   ].map((step) => {
                     const weights =
                       constructionType === "2"
-                        ? [20, 30, 25, 25, 0, 0]
+                        ? [0, 20, 30, 25, 25, 0, 0]
                         : constructionType === "3"
-                          ? [20, 25, 25, 20, 0, 10]
+                          ? [0, 20, 25, 25, 20, 0, 10]
                           : constructionType === "4"
-                            ? [0, 0, 50, 50, 0, 0]
-                            : [15, 25, 20, 20, 10, 10];
+                            ? [0, 0, 0, 50, 50, 0, 0]
+                            : [0, 15, 25, 20, 20, 10, 10];
                     const weight = weights[step.idx];
                     if (weight === 0) return null; // Hide if not applicable
 
@@ -2082,6 +2083,7 @@ export default function UpdateStatus() {
             >
               {filteredProjects.map((p) => {
                 const steps = [
+                  false, // placeholder for เบิกของเตรียมอุปกรณ์ (no data)
                   p.check1,
                   p.check2,
                   p.check3,
@@ -2092,7 +2094,7 @@ export default function UpdateStatus() {
                   p.check8,
                 ];
                 const doneCount = steps.filter(Boolean).length;
-                const progressPercent = (doneCount / 8) * 100;
+                const progressPercent = (doneCount / steps.length) * 100;
                 const type = p.construction_type || "1";
                 const physicalProgress = (() => {
                   if (type === "5") return p.manual_progress || 0;
