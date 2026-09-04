@@ -3,12 +3,17 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Printer, Home, List, BarChart2, TrendingUp, Image as ImageIcon, DollarSign, Zap } from 'lucide-react';
+import { Printer, Home, List, BarChart2, TrendingUp, Image as ImageIcon, DollarSign, Zap, Edit2, X } from 'lucide-react';
 
 interface Project {
   id: string;
   wbs: string;
   name: string;
+  contractor: string | null;
+  supervisor: string | null;
+  committee: string | null;
+  duration: string | null;
+  status: string | null;
 }
 
 export interface Task {
@@ -29,6 +34,14 @@ export default function PlanningDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview"|"gantt"|"scurve"|"photos"|"budget">("overview");
+
+  // Project Edit states
+  const [isEditingProject, setIsEditingProject] = useState(false);
+  const [projContractor, setProjContractor] = useState("");
+  const [projSupervisor, setProjSupervisor] = useState("");
+  const [projCommittee, setProjCommittee] = useState("");
+  const [projDuration, setProjDuration] = useState("");
+  const [projStatus, setProjStatus] = useState("อยู่ระหว่างก่อสร้าง");
 
   // Form states
   const [isEditing, setIsEditing] = useState(false);
@@ -55,7 +68,7 @@ export default function PlanningDashboard() {
   }, [selectedWbs]);
 
   const fetchProjects = async () => {
-    const { data, error } = await supabase.from("projects").select("id, wbs, name").order("wbs");
+    const { data, error } = await supabase.from("projects").select("id, wbs, name, contractor, supervisor, committee, duration, status").order("wbs");
     if (!error && data) {
       setProjects(data);
     }
@@ -71,6 +84,31 @@ export default function PlanningDashboard() {
     if (!error && data) {
       setTasks(data);
     }
+  };
+
+  const openProjectEdit = () => {
+    const p = projects.find(p => p.wbs === selectedWbs);
+    if (!p) return;
+    setProjContractor(p.contractor || "");
+    setProjSupervisor(p.supervisor || "");
+    setProjCommittee(p.committee || "");
+    setProjDuration(p.duration || "");
+    setProjStatus(p.status || "อยู่ระหว่างก่อสร้าง");
+    setIsEditingProject(true);
+  };
+
+  const handleProjectSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedWbs) return;
+    await supabase.from("projects").update({
+      contractor: projContractor,
+      supervisor: projSupervisor,
+      committee: projCommittee,
+      duration: projDuration,
+      status: projStatus
+    }).eq("wbs", selectedWbs);
+    setIsEditingProject(false);
+    fetchProjects();
   };
 
   const resetForm = () => {
@@ -267,26 +305,76 @@ export default function PlanningDashboard() {
         {selectedWbs && (
           <>
             {/* Project Header Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-2 h-full bg-purple-700"></div>
-              <div className="flex items-center gap-5 ml-2">
-                <div className="w-14 h-14 bg-purple-50 text-purple-700 flex items-center justify-center rounded-2xl border border-purple-100 shadow-sm">
-                  <Home className="w-7 h-7" />
+            {isEditingProject ? (
+              <form onSubmit={handleProjectSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-bold text-gray-800">แก้ไขรายละเอียดโครงการ</h3>
+                  <button type="button" onClick={() => setIsEditingProject(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="w-5 h-5"/></button>
                 </div>
-                <div>
-                  <h2 className="text-xl font-extrabold text-gray-900">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h2>
-                  <p className="text-gray-500 text-xs mt-1.5 font-medium">ผู้รับเหมา: - | ผู้ควบคุมงาน: นายจักรพันธ์ นรเหรียญ | กรรมการตรวจรับ: - | ระยะเวลา: - | สถานะ: อยู่ระหว่างก่อสร้าง</p>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">ผู้รับเหมา</label>
+                    <input type="text" value={projContractor} onChange={e => setProjContractor(e.target.value)} className="w-full p-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">ผู้ควบคุมงาน</label>
+                    <input type="text" value={projSupervisor} onChange={e => setProjSupervisor(e.target.value)} className="w-full p-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">กรรมการตรวจรับ</label>
+                    <input type="text" value={projCommittee} onChange={e => setProjCommittee(e.target.value)} className="w-full p-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">ระยะเวลา</label>
+                    <input type="text" value={projDuration} onChange={e => setProjDuration(e.target.value)} className="w-full p-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">สถานะ</label>
+                    <select value={projStatus} onChange={e => setProjStatus(e.target.value)} className="w-full p-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 bg-white">
+                      <option value="อยู่ระหว่างก่อสร้าง">อยู่ระหว่างก่อสร้าง</option>
+                      <option value="ส่งมอบพื้นที่แล้ว">ส่งมอบพื้นที่แล้ว</option>
+                      <option value="ก่อสร้างแล้วเสร็จ">ก่อสร้างแล้วเสร็จ</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 mt-4">
+                  <button type="submit" className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all active:scale-95">บันทึกข้อมูล</button>
+                </div>
+              </form>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-2 h-full bg-purple-700"></div>
+                
+                {/* Edit Button */}
+                <button onClick={openProjectEdit} className="absolute top-3 right-3 text-gray-400 hover:text-purple-600 bg-gray-50 hover:bg-purple-50 p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-transparent hover:border-purple-200" title="แก้ไขข้อมูลโครงการ">
+                  <Edit2 className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center gap-5 ml-2 pr-12">
+                  <div className="w-14 h-14 bg-purple-50 text-purple-700 flex items-center justify-center rounded-2xl border border-purple-100 shadow-sm shrink-0">
+                    <Home className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-extrabold text-gray-900 mb-1">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h2>
+                    <p className="text-gray-500 text-xs font-medium leading-relaxed">
+                      ผู้รับเหมา: {currentProject?.contractor || "-"} | 
+                      ผู้ควบคุมงาน: {currentProject?.supervisor || "-"} | 
+                      กรรมการตรวจรับ: {currentProject?.committee || "-"} | 
+                      ระยะเวลา: {currentProject?.duration || "-"} | 
+                      สถานะ: {currentProject?.status || "อยู่ระหว่างก่อสร้าง"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3 w-full md:w-auto">
+                  <button onClick={() => setSelectedWbs("")} className="flex-1 md:flex-none px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl text-xs font-bold border border-gray-200 transition-colors">
+                    เปลี่ยนโครงการ
+                  </button>
+                  <button className="flex-1 md:flex-none bg-[#334155] hover:bg-[#1e293b] text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-colors">
+                    <Printer className="w-4 h-4" /> พิมพ์รายงาน (PDF)
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-3 w-full md:w-auto">
-                <button onClick={() => setSelectedWbs("")} className="flex-1 md:flex-none px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl text-xs font-bold border border-gray-200 transition-colors">
-                  เปลี่ยนโครงการ
-                </button>
-                <button className="flex-1 md:flex-none bg-[#334155] hover:bg-[#1e293b] text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-colors">
-                  <Printer className="w-4 h-4" /> พิมพ์รายงาน (PDF)
-                </button>
-              </div>
-            </div>
+            )}
 
             {/* Tabs */}
             <div className="bg-white/90 backdrop-blur-md border border-gray-200 sticky top-[68px] z-40 rounded-xl px-2 shadow-sm">
