@@ -17,6 +17,8 @@ export interface Task {
   end_date: string;
   progress: number;
   assignee: string | null;
+  actual_start_date: string | null;
+  actual_end_date: string | null;
 }
 
 export default function PlanningDashboard() {
@@ -31,6 +33,8 @@ export default function PlanningDashboard() {
   const [taskName, setTaskName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [actualStartDate, setActualStartDate] = useState("");
+  const [actualEndDate, setActualEndDate] = useState("");
   const [progress, setProgress] = useState<number>(0);
   const [assignee, setAssignee] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -70,6 +74,8 @@ export default function PlanningDashboard() {
     setTaskName("");
     setStartDate("");
     setEndDate("");
+    setActualStartDate("");
+    setActualEndDate("");
     setProgress(0);
     setAssignee("");
     setIsEditing(false);
@@ -86,6 +92,8 @@ export default function PlanningDashboard() {
       task_name: taskName,
       start_date: startDate,
       end_date: endDate,
+      actual_start_date: actualStartDate || null,
+      actual_end_date: actualEndDate || null,
       progress,
       assignee,
     };
@@ -105,6 +113,8 @@ export default function PlanningDashboard() {
     setTaskName(task.task_name);
     setStartDate(task.start_date);
     setEndDate(task.end_date);
+    setActualStartDate(task.actual_start_date || "");
+    setActualEndDate(task.actual_end_date || "");
     setProgress(task.progress);
     setAssignee(task.assignee || "");
     setShowForm(true);
@@ -120,10 +130,17 @@ export default function PlanningDashboard() {
   // Gantt Chart Logic
   const getMinMaxDates = () => {
     if (tasks.length === 0) return { min: new Date(), max: new Date(), days: 0 };
-    const starts = tasks.map(t => new Date(t.start_date).getTime());
-    const ends = tasks.map(t => new Date(t.end_date).getTime());
-    const minDate = new Date(Math.min(...starts));
-    const maxDate = new Date(Math.max(...ends));
+    
+    let allDates: number[] = [];
+    tasks.forEach(t => {
+      allDates.push(new Date(t.start_date).getTime());
+      allDates.push(new Date(t.end_date).getTime());
+      if (t.actual_start_date) allDates.push(new Date(t.actual_start_date).getTime());
+      if (t.actual_end_date) allDates.push(new Date(t.actual_end_date).getTime());
+    });
+    
+    const minDate = new Date(Math.min(...allDates));
+    const maxDate = new Date(Math.max(...allDates));
     
     // Add padding (7 days before and after)
     minDate.setDate(minDate.getDate() - 7);
@@ -199,12 +216,22 @@ export default function PlanningDashboard() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">วันที่เริ่ม</label>
-                      <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 text-sm border rounded" />
+                      <label className="block text-xs font-medium text-gray-600 mb-1">เริ่ม (แผน)</label>
+                      <input required type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 text-sm border rounded bg-white" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">วันที่เสร็จ</label>
-                      <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 text-sm border rounded" />
+                      <label className="block text-xs font-medium text-gray-600 mb-1">เสร็จ (แผน)</label>
+                      <input required type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 text-sm border rounded bg-white" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <label className="block text-xs font-medium text-blue-600 mb-1">เริ่ม (จริง)</label>
+                      <input type="date" value={actualStartDate} onChange={e => setActualStartDate(e.target.value)} className="w-full p-2 text-sm border border-blue-200 rounded bg-blue-50" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-blue-600 mb-1">เสร็จ (จริง)</label>
+                      <input type="date" value={actualEndDate} onChange={e => setActualEndDate(e.target.value)} className="w-full p-2 text-sm border border-blue-200 rounded bg-blue-50" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -239,10 +266,16 @@ export default function PlanningDashboard() {
                           <button onClick={() => handleDelete(task.id)} className="text-red-500 hover:text-red-700 text-xs">ลบ</button>
                         </div>
                       </div>
-                      <p className="text-xs text-gray-500 mb-2">
-                        {new Date(task.start_date).toLocaleDateString('th-TH')} - {new Date(task.end_date).toLocaleDateString('th-TH')}
+                      <p className="text-xs text-gray-500 mb-1">
+                        แผน: {new Date(task.start_date).toLocaleDateString('th-TH')} - {new Date(task.end_date).toLocaleDateString('th-TH')}
                         {task.assignee && ` • 👨‍🔧 ${task.assignee}`}
                       </p>
+                      {(task.actual_start_date || task.actual_end_date) && (
+                        <p className="text-xs text-blue-600 mb-2">
+                          จริง: {task.actual_start_date ? new Date(task.actual_start_date).toLocaleDateString('th-TH') : '-'} - {task.actual_end_date ? new Date(task.actual_end_date).toLocaleDateString('th-TH') : 'ยังไม่ระบุ'}
+                        </p>
+                      )}
+                      {(!task.actual_start_date && !task.actual_end_date) && <div className="mb-2"></div>}
                       <div className="w-full bg-gray-200 rounded-full h-1.5">
                         <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${task.progress}%` }}></div>
                       </div>
@@ -272,27 +305,64 @@ export default function PlanningDashboard() {
 
                   <div className="space-y-6 mt-8 relative z-10">
                     {tasks.map(task => {
-                      const left = getLeftOffset(task.start_date);
-                      const width = getWidth(task.start_date, task.end_date);
+                      const planLeft = getLeftOffset(task.start_date);
+                      const planWidth = getWidth(task.start_date, task.end_date);
+                      
+                      let actualLeft = 0;
+                      let actualWidth = 0;
+                      let isDelayed = false;
+                      
+                      if (task.actual_start_date) {
+                        actualLeft = getLeftOffset(task.actual_start_date);
+                        // If no actual end date, use today's date or plan end date for visualization
+                        const endDateToUse = task.actual_end_date || new Date().toISOString().split('T')[0];
+                        actualWidth = getWidth(task.actual_start_date, endDateToUse);
+                        
+                        if (task.actual_end_date && new Date(task.actual_end_date) > new Date(task.end_date)) {
+                          isDelayed = true;
+                        } else if (!task.actual_end_date && new Date() > new Date(task.end_date)) {
+                          isDelayed = true;
+                        }
+                      }
+
                       return (
-                        <div key={task.id} className="relative h-10 w-full flex items-center group">
-                          {/* Label on the left of the bar */}
-                          <div className="absolute w-full flex items-center h-full">
+                        <div key={task.id} className="relative h-14 w-full flex items-center group mb-2">
+                          {/* Label and bars container */}
+                          <div className="absolute w-full h-full flex flex-col justify-center gap-1">
+                            
+                            {/* PLAN BAR (Gray) */}
                             <div 
-                              className="absolute h-10 rounded-xl bg-blue-100 border border-blue-200 shadow-sm overflow-hidden transition-all group-hover:shadow-md group-hover:scale-[1.01]"
-                              style={{ left: `${left}%`, width: `${width}%` }}
+                              className="absolute h-6 rounded-md bg-gray-200 border border-gray-300 shadow-sm overflow-hidden flex items-center"
+                              style={{ left: `${planLeft}%`, width: `${planWidth}%`, top: '0' }}
                             >
-                               <div className="h-full bg-[#007AFF] opacity-80" style={{ width: `${task.progress}%` }}></div>
-                               <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-900 truncate px-2">
-                                 {task.task_name}
-                               </span>
+                               <span className="text-[10px] font-bold text-gray-500 px-2 truncate w-full text-center">แผน: {task.task_name}</span>
                             </div>
+
+                            {/* ACTUAL BAR (Blue or Red) */}
+                            {task.actual_start_date && (
+                              <div 
+                                className={`absolute h-6 rounded-md shadow-sm overflow-hidden flex items-center transition-all group-hover:shadow-md group-hover:scale-[1.01] ${isDelayed ? 'bg-red-100 border border-red-300' : 'bg-blue-100 border border-blue-200'}`}
+                                style={{ left: `${actualLeft}%`, width: `${actualWidth}%`, bottom: '0' }}
+                              >
+                                 <div className={`h-full opacity-80 ${isDelayed ? 'bg-red-500' : 'bg-[#007AFF]'}`} style={{ width: `${task.progress}%` }}></div>
+                                 <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-900 truncate px-2">
+                                   จริง: {task.progress}%
+                                 </span>
+                              </div>
+                            )}
                           </div>
                           
                           {/* Tooltip on hover */}
-                          <div className="hidden group-hover:block absolute z-20 bg-gray-900/90 backdrop-blur-md text-white text-xs p-3 rounded-xl shadow-xl -top-14" style={{ left: `${left + (width/2)}%`, transform: 'translateX(-50%)' }}>
-                            <p className="font-bold text-sm mb-1">{task.task_name}</p>
-                            <p className="text-gray-300">เริ่ม: {task.start_date} | เสร็จ: {task.end_date}</p>
+                          <div className="hidden group-hover:block absolute z-20 bg-gray-900/95 backdrop-blur-md text-white text-xs p-3 rounded-xl shadow-xl -top-16" style={{ left: `${planLeft + (planWidth/2)}%`, transform: 'translateX(-50%)', minWidth: '200px' }}>
+                            <p className="font-bold text-sm mb-2 pb-1 border-b border-gray-700">{task.task_name}</p>
+                            <div className="grid grid-cols-2 gap-2 text-gray-300 mb-1">
+                              <div><span className="text-gray-400">แผนเริ่ม:</span> {task.start_date}</div>
+                              <div><span className="text-gray-400">แผนเสร็จ:</span> {task.end_date}</div>
+                            </div>
+                            <div className={`grid grid-cols-2 gap-2 mb-2 ${isDelayed ? 'text-red-300' : 'text-blue-300'}`}>
+                              <div><span className="text-gray-400">จริงเริ่ม:</span> {task.actual_start_date || '-'}</div>
+                              <div><span className="text-gray-400">จริงเสร็จ:</span> {task.actual_end_date || '-'}</div>
+                            </div>
                             <p className="text-gray-300 mt-1">ก้าวหน้า: <span className="text-white font-bold">{task.progress}%</span></p>
                           </div>
                         </div>
