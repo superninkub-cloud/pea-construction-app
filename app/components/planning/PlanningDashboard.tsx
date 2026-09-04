@@ -1009,7 +1009,9 @@ export default function PlanningDashboard() {
                       <tbody className="divide-y divide-gray-50 text-sm">
                         {tasks.map((task, index) => {
                           const stepDef = FIXED_CONSTRUCTION_STEPS.find(s => s.order === (task.step_order ?? index));
-                          const progressVal = Number(task.progress) || 0;
+                          const targetQty = Number(task.target_qty) || 0;
+                          const doneQty = Number(task.done_qty) || 0;
+                          const progressVal = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
                           let statusLabel = "รอดำเนินการ";
                           let statusColor = "bg-gray-100 text-gray-500 border-gray-200";
                           let statusDot = "bg-gray-400";
@@ -1142,7 +1144,12 @@ export default function PlanningDashboard() {
                             </td>
                             <td className="p-4 text-center" colSpan={6}>
                               <span className="text-xs text-gray-500 font-medium">
-                                {tasks.filter(t => Number(t.progress) === 100).length} / {tasks.length} ขั้นตอนเสร็จ
+                                {tasks.filter(t => {
+                                  const targetQty = Number(t.target_qty) || 0;
+                                  const doneQty = Number(t.done_qty) || 0;
+                                  const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
+                                  return p === 100;
+                                }).length} / {tasks.length} ขั้นตอนเสร็จ
                               </span>
                             </td>
                             <td className="p-4 text-center">
@@ -1161,7 +1168,9 @@ export default function PlanningDashboard() {
                                         if (totalWeight === 0) return 0;
                                         return tasks.reduce((sum, t) => {
                                           const w = Number(t.weight) || 0;
-                                          const p = Number(t.progress) || 0;
+                                          const targetQty = Number(t.target_qty) || 0;
+                                          const doneQty = Number(t.done_qty) || 0;
+                                          const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
                                           return sum + (w * p / 100);
                                         }, 0) / totalWeight * 100;
                                       })()}%`
@@ -1174,7 +1183,9 @@ export default function PlanningDashboard() {
                                     if (totalWeight === 0) return "0.0";
                                     return (tasks.reduce((sum, t) => {
                                       const w = Number(t.weight) || 0;
-                                      const p = Number(t.progress) || 0;
+                                      const targetQty = Number(t.target_qty) || 0;
+                                      const doneQty = Number(t.done_qty) || 0;
+                                      const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
                                       return sum + (w * p / 100);
                                     }, 0) / totalWeight * 100).toFixed(1);
                                   })()}%
