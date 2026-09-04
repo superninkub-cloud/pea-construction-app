@@ -314,140 +314,140 @@ export default function PlanningDashboard() {
         
         {/* Project Selection Dashboard (When no project is selected) */}
         {!selectedWbs && (
-          <div className="w-full">
-            {/* Top Navigation Bar */}
-            <div className="bg-white flex items-center justify-between px-6 py-4 sticky top-0 z-50 mb-6 border-b border-gray-100">
-              <div className="flex items-center gap-4">
-                <button className="text-gray-700 hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <div className="w-full bg-[#FAFAFA] min-h-screen pb-20 font-sans">
+            {/* Premium Top Navigation Bar */}
+            <div className="bg-white/80 backdrop-blur-xl flex items-center justify-between px-8 py-4 sticky top-0 z-50 mb-8 border-b border-gray-200/50 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+              <div className="flex items-center gap-5">
+                <button className="text-gray-500 hover:bg-gray-100 p-2.5 rounded-xl transition-all duration-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
-                <div>
-                  <h1 className="text-lg font-extrabold text-[#3b2a5c] leading-tight">วางแผนงานก่อสร้างแผนกก่อสร้างระบบไฟฟ้า</h1>
-                  <p className="text-[10px] text-gray-500 font-bold tracking-[0.1em] uppercase">Electrical Construction Planning System</p>
+                <div className="flex flex-col">
+                  <h1 className="text-lg font-black text-gray-900 leading-tight tracking-tight">วางแผนงานก่อสร้างแผนกก่อสร้างระบบไฟฟ้า</h1>
+                  <p className="text-[10px] text-gray-500 font-bold tracking-[0.15em] uppercase mt-0.5">Electrical Construction Planning</p>
                 </div>
               </div>
-              <div className="hidden md:flex relative w-96">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder="ค้นหาโครงการ, รหัสโครงการ, พื้นที่..." className="w-full bg-[#F3F4F6] border-none rounded-lg py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-purple-500 outline-none font-medium" />
+              <div className="hidden md:flex relative w-[400px]">
+                <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input type="text" placeholder="ค้นหาโครงการ, รหัสโครงการ, พื้นที่..." className="w-full bg-gray-100/80 border-transparent focus:bg-white border focus:border-purple-300 rounded-xl py-2.5 pl-11 pr-4 text-xs focus:ring-4 focus:ring-purple-500/10 outline-none font-medium transition-all duration-300 placeholder-gray-400" />
               </div>
             </div>
 
-            <div className="px-6">
-              {/* Hero Banner */}
-              <div className="relative w-full h-[200px] rounded-[16px] overflow-visible mb-16 shadow-sm border border-purple-900/10 bg-gradient-to-r from-[#2c1d47] to-[#452a70]">
-                <img src="/images/pea_construction_banner.jpg" alt="Construction Banner" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50 rounded-[16px]" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#2c1d47]/95 via-[#3a225e]/70 to-transparent rounded-[16px]"></div>
+            <div className="max-w-[1400px] mx-auto px-8">
+              {/* Sleek Hero Header */}
+              <div className="relative w-full h-[180px] rounded-2xl overflow-visible mb-14 bg-gradient-to-br from-[#3b2a5c] via-[#4d3278] to-[#5a3891] shadow-lg shadow-purple-900/10">
+                <img src="/images/pea_construction_banner.jpg" alt="Construction Banner" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30 rounded-2xl" />
                 
-                <div className="relative h-full flex flex-col justify-center p-8 z-10">
-                  <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2 drop-shadow-md">เลือกระบบงานก่อสร้าง</h2>
-                  <p className="text-white/80 text-sm font-medium">เลือกผู้ควบคุมงานและดูโครงการที่รับผิดชอบ</p>
+                <div className="relative h-full flex flex-col justify-center px-10 z-10">
+                  <h2 className="text-3xl font-black text-white mb-2 tracking-tight">เลือกระบบงานก่อสร้าง</h2>
+                  <p className="text-purple-100/80 text-sm font-medium tracking-wide">เลือกผู้ควบคุมงานและดูโครงการที่รับผิดชอบ</p>
                 </div>
                 
-                <div className="absolute right-10 top-1/2 -translate-y-1/2 hidden md:block z-10">
-                  <h3 className="text-5xl font-black text-white/20 italic transform -skew-x-12 leading-[0.9] text-right" style={{ fontFamily: 'Impact, sans-serif' }}>Power<br/><span className="text-4xl">for Better Life</span></h3>
+                <div className="absolute right-12 top-1/2 -translate-y-1/2 hidden md:block z-10">
+                  <h3 className="text-5xl font-black text-white/10 italic transform -skew-x-12 leading-[0.9] text-right" style={{ fontFamily: 'Impact, sans-serif' }}>Power<br/><span className="text-4xl">for Better Life</span></h3>
                 </div>
 
-                {/* KPI Cards Overlapping */}
-                <div className="absolute -bottom-10 left-0 w-full px-8 z-20">
-                  <div className="flex flex-wrap gap-4 items-stretch">
+                {/* Floating KPI Cards */}
+                <div className="absolute -bottom-8 left-0 w-full px-10 z-20">
+                  <div className="flex flex-wrap gap-5 items-stretch">
                     {/* Supervisor Select */}
-                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 min-w-[220px] flex-1">
-                      <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[240px] hover:-translate-y-1 transition-transform duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                       </div>
-                      <div className="flex-1 w-full">
-                        <p className="text-[10px] text-gray-500 font-bold mb-0.5">ผู้ควบคุมงาน</p>
+                      <div className="flex-1 w-full relative">
+                        <p className="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">ผู้ควบคุมงาน</p>
                         <select 
                           value={selectedSupervisor}
                           onChange={(e) => setSelectedSupervisor(e.target.value)}
-                          className="w-full bg-transparent text-sm font-bold text-gray-800 outline-none cursor-pointer pr-4"
+                          className="w-full bg-transparent text-sm font-black text-gray-900 outline-none cursor-pointer appearance-none pr-6"
                         >
-                          <option value="">ทั้งหมด</option>
+                          <option value="">เลือกทั้งหมด</option>
                           {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
                             <option key={sup as string} value={sup as string}>{sup}</option>
                           ))}
                         </select>
+                        <ChevronDown className="w-4 h-4 absolute right-0 top-1/2 text-gray-400 pointer-events-none" />
                       </div>
                     </div>
                     
                     {/* Total Projects */}
-                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 flex-1 min-w-[160px]">
-                      <div className="w-10 h-10 rounded-lg bg-[#7B32D9] text-white flex items-center justify-center shrink-0 shadow-sm shadow-purple-500/30">
+                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-gray-50 text-gray-700 flex items-center justify-center shrink-0">
                         <List className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="text-2xl font-black text-gray-800 leading-none mb-1">{projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).length}</h4>
-                        <p className="text-[10px] text-gray-500 font-bold">โครงการทั้งหมด</p>
+                        <h4 className="text-2xl font-black text-gray-900 leading-none mb-1.5">{projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).length}</h4>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">โครงการทั้งหมด</p>
                       </div>
                     </div>
                     
                     {/* In Progress */}
-                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 flex-1 min-w-[160px]">
-                      <div className="w-10 h-10 rounded-full bg-[#1D9C5B] text-white flex items-center justify-center shrink-0 shadow-sm shadow-green-500/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-[#E8F5E9] text-[#2E7D32] flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="text-2xl font-black text-gray-800 leading-none mb-1">9</h4>
-                        <p className="text-[10px] text-gray-500 font-bold">กำลังดำเนินการ</p>
+                        <h4 className="text-2xl font-black text-gray-900 leading-none mb-1.5">{projects.filter(p => (!selectedSupervisor || p.supervisor === selectedSupervisor) && p.status !== 'F4').length}</h4>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">กำลังดำเนินการ</p>
                       </div>
                     </div>
                     
                     {/* Pending */}
-                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 flex-1 min-w-[160px]">
-                      <div className="w-10 h-10 rounded-full bg-[#F5A623] text-white flex items-center justify-center shrink-0 shadow-sm shadow-amber-500/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-[#FFF8E1] text-[#F57F17] flex items-center justify-center shrink-0">
+                        <Clock className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="text-2xl font-black text-gray-800 leading-none mb-1">4</h4>
-                        <p className="text-[10px] text-gray-500 font-bold">รอการเริ่มงาน</p>
+                        <h4 className="text-2xl font-black text-gray-900 leading-none mb-1.5">4</h4>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">รอการเริ่มงาน</p>
                       </div>
                     </div>
                     
                     {/* Delayed */}
-                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 flex-1 min-w-[160px]">
-                      <div className="w-10 h-10 rounded-full bg-[#E53935] text-white flex items-center justify-center shrink-0 shadow-sm shadow-red-500/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 p-3.5 flex items-center gap-4 flex-1 min-w-[180px] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] transition-all duration-300">
+                      <div className="w-12 h-12 rounded-xl bg-[#FFEBEE] text-[#C62828] flex items-center justify-center shrink-0">
+                        <AlertTriangle className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="text-2xl font-black text-gray-800 leading-none mb-1">3</h4>
-                        <p className="text-[10px] text-gray-500 font-bold">งานล่าช้า</p>
+                        <h4 className="text-2xl font-black text-gray-900 leading-none mb-1.5">3</h4>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">งานล่าช้า</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Table Section */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden text-left flex flex-col mb-10 mt-6">
-                <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-50 text-[#7B32D9] rounded-lg flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              {/* Data Table Section */}
+              <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-200/60 overflow-hidden text-left flex flex-col mt-4">
+                <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gray-50 text-gray-700 rounded-xl flex items-center justify-center border border-gray-200/50">
+                      <Grid className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900 text-base">รายการโครงการ</h3>
-                      <p className="text-[11px] text-gray-500 font-medium">รายการโครงการก่อสร้างในความรับผิดชอบ</p>
+                      <h3 className="font-extrabold text-gray-900 text-base tracking-tight">รายการโครงการ</h3>
+                      <p className="text-xs text-gray-500 font-medium mt-0.5">โครงการก่อสร้างในความรับผิดชอบทั้งหมด</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-3 w-full md:w-auto">
-                    <div className="relative flex-1 md:w-60">
+                    <div className="relative flex-1 md:w-64">
                       <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input type="text" placeholder="ค้นหา..." className="w-full bg-white border border-gray-200 rounded-lg py-2 pl-9 pr-3 text-xs focus:ring-2 focus:ring-purple-500 outline-none font-medium" />
+                      <input type="text" placeholder="ค้นหา..." className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-9 pr-3 text-xs focus:ring-4 focus:ring-purple-500/10 focus:border-purple-400 outline-none font-medium transition-all" />
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> ตัวกรอง <ChevronDown className="w-3 h-3" />
                     </button>
-                    <button onClick={() => setIsCreatingProject(!isCreatingProject)} className="flex items-center gap-2 px-4 py-2 bg-[#7B32D9] text-white rounded-lg text-xs font-bold hover:bg-[#6829b8] transition-colors shadow-sm">
-                      + เพิ่มโครงการใหม่
+                    <button onClick={() => setIsCreatingProject(!isCreatingProject)} className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white rounded-xl text-xs font-bold hover:bg-[#262626] transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                      + เพิ่มโครงการ
                     </button>
                   </div>
                 </div>
 
                 {isCreatingProject ? (
-                  <form onSubmit={handleCreateProject} className="max-w-3xl mx-auto bg-gray-50 p-6 rounded-2xl border border-gray-200 text-left my-8">
-                    <h3 className="font-bold text-gray-800 mb-4">สร้างโครงการใหม่</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <form onSubmit={handleCreateProject} className="max-w-3xl mx-auto bg-gray-50/50 p-8 rounded-2xl border border-gray-200/60 text-left my-8">
+                    <h3 className="font-bold text-gray-900 mb-6 text-lg">สร้างโครงการใหม่</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
                       <div>
                         <label className="block text-xs font-bold text-gray-700 mb-1.5">WBS (รหัสโครงการ)</label>
                         <input type="text" required value={newProjWbs} onChange={e => setNewProjWbs(e.target.value)} className="w-full p-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="เช่น I-69-I-BNCXX" />
@@ -467,40 +467,44 @@ export default function PlanningDashboard() {
                     </div>
                   </form>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-left">
-                      <thead className="bg-[#F9FAFB] text-gray-600 font-bold border-b border-gray-100">
+                  <div className="overflow-x-auto min-h-[400px]">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-[#FAFAFA] border-y border-gray-100">
                         <tr>
-                          <th className="px-6 py-4 w-16">#</th>
-                          <th className="px-6 py-4">WBS</th>
-                          <th className="px-6 py-4">ชื่อโครงการ</th>
-                          <th className="px-6 py-4">ผู้ควบคุมงาน</th>
-                          <th className="px-6 py-4">สถานะ</th>
-                          <th className="px-6 py-4 text-center w-32">จัดการ</th>
+                          <th className="px-6 py-4 w-16 text-xs font-bold text-gray-400 uppercase tracking-wider">#</th>
+                          <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">WBS</th>
+                          <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">ชื่อโครงการ</th>
+                          <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">ผู้ควบคุมงาน</th>
+                          <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">สถานะ</th>
+                          <th className="px-6 py-4 text-center w-32 text-xs font-bold text-gray-400 uppercase tracking-wider">จัดการ</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-gray-100/80 bg-white">
                         {projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).length > 0 ? (
                           projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).map((p, idx) => (
-                            <tr key={p.id} className="hover:bg-purple-50/50 transition-colors group">
-                              <td className="px-6 py-4 text-gray-500 font-medium">{idx + 1}</td>
-                              <td className="px-6 py-4 font-mono font-medium text-gray-900">{p.wbs}</td>
-                              <td className="px-6 py-4 font-bold text-gray-800">{p.name}</td>
-                              <td className="px-6 py-4 text-gray-600">{p.supervisor || "-"}</td>
+                            <tr key={p.id} className="hover:bg-gray-50/80 transition-colors group">
+                              <td className="px-6 py-4 text-gray-400 font-medium text-xs">{idx + 1}</td>
+                              <td className="px-6 py-4 font-mono font-medium text-gray-600 text-xs">{p.wbs}</td>
+                              <td className="px-6 py-4 font-bold text-gray-900">{p.name}</td>
+                              <td className="px-6 py-4 text-gray-500 font-medium">{p.supervisor || "-"}</td>
                               <td className="px-6 py-4">
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-[#E8F5E9] text-[#2E7D32]">
+                                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-extrabold tracking-wide ${
+                                  p.status === 'F4' ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#C8E6C9]' : 
+                                  p.status === 'D1' ? 'bg-[#FFF3E0] text-[#E65100] border border-[#FFE0B2]' :
+                                  'bg-[#F3E5F5] text-[#6A1B9A] border border-[#E1BEE7]'
+                                }`}>
                                   {p.status || "C1"}
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <div className="flex items-center justify-center gap-2">
+                                <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                   <button
                                     onClick={() => setSelectedWbs(p.wbs)}
-                                    className="px-4 py-1.5 border border-[#D8C2F2] text-[#7B32D9] hover:bg-purple-50 rounded-lg text-xs font-bold transition-colors shadow-sm"
+                                    className="px-4 py-1.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-xs font-bold transition-all shadow-sm"
                                   >
                                     เข้าสู่โครงการ
                                   </button>
-                                  <button className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                                  <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-transparent hover:border-gray-200">
                                     <MoreVertical className="w-4 h-4" />
                                   </button>
                                 </div>
@@ -509,8 +513,11 @@ export default function PlanningDashboard() {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium">
-                              ไม่พบโครงการที่ตรงกับเงื่อนไข
+                            <td colSpan={6} className="px-6 py-16 text-center">
+                              <div className="flex flex-col items-center justify-center text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-gray-300"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                <p className="font-medium text-sm">ไม่พบโครงการที่ตรงกับเงื่อนไข</p>
+                              </div>
                             </td>
                           </tr>
                         )}
@@ -518,21 +525,21 @@ export default function PlanningDashboard() {
                     </table>
                     
                     {/* Pagination */}
-                    <div className="p-4 flex items-center justify-between text-xs text-gray-500 font-medium bg-white">
-                      <div className="flex items-center gap-2">
-                        แสดง
-                        <select className="border border-gray-200 rounded px-2 py-1 outline-none bg-white">
+                    <div className="px-6 py-4 flex items-center justify-between text-xs text-gray-500 font-medium bg-[#FAFAFA] border-t border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <span className="text-gray-400">แสดง</span>
+                        <select className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all cursor-pointer font-bold">
                           <option>10</option>
                           <option>20</option>
                           <option>50</option>
                         </select>
-                        รายการต่อหน้า
+                        <span className="text-gray-400">รายการต่อหน้า</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded text-gray-400">&lt;</button>
-                        <button className="w-7 h-7 flex items-center justify-center bg-[#7B32D9] text-white rounded font-bold shadow-sm">1</button>
-                        <button className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600">2</button>
-                        <button className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded text-gray-400">&gt;</button>
+                      <div className="flex items-center gap-1.5">
+                        <button className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 rounded-lg text-gray-400 shadow-sm transition-all">&lt;</button>
+                        <button className="w-8 h-8 flex items-center justify-center bg-gray-900 border border-gray-900 text-white rounded-lg font-bold shadow-md">1</button>
+                        <button className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 rounded-lg text-gray-600 shadow-sm transition-all">2</button>
+                        <button className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 rounded-lg text-gray-400 shadow-sm transition-all">&gt;</button>
                       </div>
                     </div>
                   </div>
