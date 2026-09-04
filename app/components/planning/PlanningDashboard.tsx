@@ -478,7 +478,7 @@ export default function PlanningDashboard() {
                     />
                     <RechartsTooltip 
                       formatter={(value: any) => [`${value}%`, '']}
-                      labelFormatter={(label) => new Date(label).toLocaleDateString('th-TH', {year: 'numeric', month: 'long', day: 'numeric'})}
+                      labelFormatter={(label: any) => new Date(label).toLocaleDateString('th-TH', {year: 'numeric', month: 'long', day: 'numeric'})}
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
