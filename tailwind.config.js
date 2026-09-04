@@ -18,7 +18,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Prompt', 'sans-serif'],
+        sans: ['var(--font-prompt)', 'sans-serif'],
       }
     },
   },

@@ -35,6 +35,7 @@ export default function PlanningDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview"|"gantt"|"scurve"|"photos"|"budget">("overview");
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // New Project states
   const [isCreatingProject, setIsCreatingProject] = useState(false);
@@ -334,16 +335,26 @@ export default function PlanningDashboard() {
 
             <div className="max-w-[1400px] mx-auto px-8">
               {/* Sleek Hero Header */}
-              <div className="relative w-full h-[180px] rounded-2xl overflow-visible mb-14 bg-gradient-to-br from-[#3b2a5c] via-[#4d3278] to-[#5a3891] shadow-lg shadow-purple-900/10">
-                <img src="/images/pea_construction_banner.jpg" alt="Construction Banner" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30 rounded-2xl" />
-                
-                <div className="relative h-full flex flex-col justify-center px-10 z-10">
-                  <h2 className="text-3xl font-black text-white mb-2 tracking-tight">เลือกระบบงานก่อสร้าง</h2>
-                  <p className="text-purple-100/80 text-sm font-medium tracking-wide">เลือกผู้ควบคุมงานและดูโครงการที่รับผิดชอบ</p>
-                </div>
-                
-                <div className="absolute right-12 top-1/2 -translate-y-1/2 hidden md:block z-10">
-                  <h3 className="text-5xl font-black text-white/10 italic transform -skew-x-12 leading-[0.9] text-right" style={{ fontFamily: 'Impact, sans-serif' }}>Power<br/><span className="text-4xl">for Better Life</span></h3>
+              <div className="relative mb-20 z-10">
+                {/* Hero Banner */}
+                <div className="w-full h-[240px] rounded-[32px] overflow-visible relative shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-gradient-to-br from-[#4A148C] via-[#6B21A8] to-[#9333EA]">
+                  {/* Decorative Elements */}
+                  <div className="absolute inset-0 opacity-[0.15] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay rounded-[32px]"></div>
+                  <div className="absolute top-0 right-0 w-[600px] h-full opacity-30 bg-gradient-to-l from-white/20 to-transparent skew-x-12 translate-x-32 rounded-[32px]"></div>
+                  <img src="/pea_construction_banner_1788531405932.jpg" alt="Construction Banner" className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity rounded-[32px]" />
+                  
+                  {/* Text Content */}
+                  <div className="relative h-full flex flex-col justify-center px-10 z-10">
+                    <h2 className="text-4xl font-black text-white mb-2 drop-shadow-md tracking-tight">เลือกระบบงานก่อสร้าง</h2>
+                    <p className="text-white/90 font-medium text-sm max-w-md leading-relaxed">เลือกผู้ควบคุมงานและดูโครงการที่รับผิดชอบ</p>
+                  </div>
+                  
+                  <div className="absolute right-12 top-1/2 -translate-y-1/2 hidden md:block z-10">
+                    <h3 className="text-6xl font-black text-white/10 italic transform -skew-x-12 leading-[0.9] text-right" style={{ fontFamily: 'Impact, sans-serif' }}>Power<br/><span className="text-5xl">for Better Life</span></h3>
+                  </div>
+                  
+                  {/* Bottom Gradient Fade */}
+                  <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black/20 to-transparent rounded-b-[32px]"></div>
                 </div>
 
                 {/* Floating KPI Cards */}
@@ -356,17 +367,32 @@ export default function PlanningDashboard() {
                       </div>
                       <div className="flex-1 w-full relative">
                         <p className="text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">ผู้ควบคุมงาน</p>
-                        <select 
-                          value={selectedSupervisor}
-                          onChange={(e) => setSelectedSupervisor(e.target.value)}
-                          className="w-full bg-transparent text-sm font-black text-gray-900 border-none outline-none focus:ring-0 cursor-pointer appearance-none p-0 pr-6"
+                        <div 
+                          className="w-full bg-transparent text-sm font-black text-gray-900 cursor-pointer flex items-center justify-between"
+                          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         >
-                          <option value="">เลือกทั้งหมด</option>
-                          {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
-                            <option key={sup as string} value={sup as string}>{sup}</option>
-                          ))}
-                        </select>
-                        <ChevronDown className="w-4 h-4 absolute right-0 top-[60%] -translate-y-1/2 text-gray-400 pointer-events-none" />
+                          <span>{selectedSupervisor || "เลือกทั้งหมด"}</span>
+                          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                        </div>
+                        {isDropdownOpen && (
+                          <div className="absolute top-full left-0 w-full mt-4 bg-white border border-gray-100 rounded-xl shadow-[0_10px_40px_rgb(0,0,0,0.08)] py-2 z-50 max-h-60 overflow-y-auto">
+                            <div 
+                              className="px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+                              onClick={() => { setSelectedSupervisor(""); setIsDropdownOpen(false); }}
+                            >
+                              เลือกทั้งหมด
+                            </div>
+                            {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
+                              <div 
+                                key={sup as string}
+                                className={`px-4 py-2.5 text-sm font-bold cursor-pointer transition-colors ${selectedSupervisor === sup ? 'bg-purple-50 text-purple-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                onClick={() => { setSelectedSupervisor(sup as string); setIsDropdownOpen(false); }}
+                              >
+                                {sup}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
