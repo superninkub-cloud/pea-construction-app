@@ -51,7 +51,7 @@ export default function PlanningDashboard() {
   const [selectedWbs, setSelectedWbs] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview"|"gantt"|"scurve"|"photos"|"budget">("overview");
+  const [activeTab, setActiveTab] = useState<"overview"|"gantt"|"scurve"|"monthly"|"photos"|"budget">("overview");
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -343,7 +343,7 @@ export default function PlanningDashboard() {
     if (!confirm("การเปลี่ยนรูปแบบจะตั้งค่าน้ำหนัก (%) ของทุกขั้นตอนใหม่ ยืนยันหรือไม่?")) return;
     
     // Update DB projects table
-    await supabase.from("projects").update({ construction_type: type }).eq("wbs", selectedWbs);
+    supabase.from("projects").update({ construction_type: type }).eq("wbs", selectedWbs);
     // Update local project state
     setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, construction_type: type } : p));
     
@@ -352,22 +352,25 @@ export default function PlanningDashboard() {
     if (type === "2") w = [5, 20, 25, 25, 25, 0, 0];
     else if (type === "3") w = [5, 20, 20, 25, 20, 0, 10];
     else if (type === "4") w = [5, 0, 0, 45, 50, 0, 0];
-    else if (type === "5") {
-      // Custom - do nothing to weights automatically
-      return;
-    }
+    else if (type === "5") return;
     
-    // Update tasks
-    const updatedTasks = [...tasks];
-    for (let i = 0; i < updatedTasks.length; i++) {
-      const t = updatedTasks[i];
+    // Update tasks synchronously first
+    const updatedTasks = tasks.map((t, i) => {
       const newWeight = w[t.step_order ?? i];
       if (newWeight !== undefined) {
-        t.weight = newWeight;
-        await supabase.from("project_tasks").update({ weight: newWeight }).eq("id", t.id);
+         return { ...t, weight: newWeight };
       }
-    }
+      return t;
+    });
     setTasks(updatedTasks);
+
+    // Fire DB updates in background
+    updatedTasks.forEach((t, i) => {
+      const newWeight = w[t.step_order ?? i];
+      if (newWeight !== undefined) {
+         supabase.from("project_tasks").update({ weight: newWeight }).eq("id", t.id);
+      }
+    });
   };
 
   // Gantt Chart Logic
@@ -976,6 +979,9 @@ export default function PlanningDashboard() {
                 <button onClick={() => setActiveTab("scurve")} className={`flex items-center gap-2 py-2.5 px-6 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${activeTab === "scurve" ? "bg-purple-700 text-white shadow-md shadow-purple-500/20" : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"}`}>
                   <TrendingUp className="w-4 h-4" /> S-Curve
                 </button>
+                <button onClick={() => setActiveTab("monthly")} className={`flex items-center gap-2 py-2.5 px-6 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${activeTab === "monthly" ? "bg-purple-700 text-white shadow-md shadow-purple-500/20" : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"}`}>
+                  <Calendar className="w-4 h-4" /> รายงานประจำเดือน
+                </button>
                 <button onClick={() => setActiveTab("photos")} className={`flex items-center gap-2 py-2.5 px-6 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${activeTab === "photos" ? "bg-purple-700 text-white shadow-md shadow-purple-500/20" : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"}`}>
                   <ImageIcon className="w-4 h-4" /> รูปภาพความก้าวหน้า
                 </button>
@@ -1385,6 +1391,98 @@ export default function PlanningDashboard() {
                         <Line type="monotone" dataKey="ผลงานจริง (Actual) %" stroke="#7c3aed" strokeWidth={4} dot={{r: 5, fill: '#7c3aed', strokeWidth: 0}} activeDot={{ r: 8 }} />
                       </LineChart>
                     </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: MONTHLY REPORT */}
+              {activeTab === "monthly" && (
+                <div className="p-6 h-[700px] flex flex-col animate-in fade-in duration-300">
+                  <div className="flex justify-between items-center mb-8">
+                    <h3 className="text-xl font-extrabold text-gray-900">รายงานความก้าวหน้าประจำเดือน (ทำได้จริง)</h3>
+                  </div>
+                  
+                  <div className="flex-1 bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                          <th className="px-6 py-4 font-bold text-gray-600">เดือน / ปี</th>
+                          <th className="px-6 py-4 font-bold text-gray-600">งานที่ดำเนินการแล้วเสร็จในเดือนนี้</th>
+                          <th className="px-6 py-4 font-bold text-gray-600 text-center">ความก้าวหน้าที่ได้ (%)</th>
+                          <th className="px-6 py-4 font-bold text-gray-600 text-center">ความก้าวหน้าสะสม (%)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {(() => {
+                          const monthMap = new Map<string, { tasks: any[], progress: number }>();
+                          
+                          const completedTasks = tasks.filter(t => {
+                             const targetQty = Number(t.target_qty) || 0;
+                             const doneQty = Number(t.done_qty) || 0;
+                             const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
+                             return p > 0 && t.actual_end_date;
+                          });
+
+                          completedTasks.forEach(t => {
+                             const targetQty = Number(t.target_qty) || 0;
+                             const doneQty = Number(t.done_qty) || 0;
+                             const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
+                             const w = Number(t.weight) || 0;
+                             
+                             const date = new Date(t.actual_end_date);
+                             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                             
+                             if (!monthMap.has(monthKey)) {
+                               monthMap.set(monthKey, { tasks: [], progress: 0 });
+                             }
+                             const entry = monthMap.get(monthKey)!;
+                             entry.tasks.push(t);
+                             entry.progress += (w * p / 100);
+                          });
+
+                          const totalWeight = tasks.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                          const sortedMonths = Array.from(monthMap.keys()).sort();
+                          
+                          if (sortedMonths.length === 0) {
+                            return (
+                              <tr>
+                                <td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-bold">
+                                  ยังไม่มีข้อมูลผลงานที่ทำได้จริง (กรุณากรอกวันที่เสร็จจริงและปริมาณทำได้จริง)
+                                </td>
+                              </tr>
+                            );
+                          }
+
+                          let cumulative = 0;
+                          return sortedMonths.map(month => {
+                            const entry = monthMap.get(month)!;
+                            const monthProgress = totalWeight > 0 ? (entry.progress / totalWeight * 100) : 0;
+                            cumulative += monthProgress;
+                            
+                            const date = new Date(`${month}-01`);
+                            const monthName = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+                            
+                            return (
+                              <tr key={month} className="hover:bg-purple-50/30 transition-colors">
+                                <td className="px-6 py-4 font-bold text-gray-800">{monthName}</td>
+                                <td className="px-6 py-4">
+                                  <ul className="list-disc list-inside text-gray-600 text-xs space-y-1">
+                                    {entry.tasks.map(t => {
+                                      const stepDef = FIXED_CONSTRUCTION_STEPS.find(s=>s.order === t.step_order);
+                                      return (
+                                        <li key={t.id}>{t.task_name} (ได้ {t.done_qty} {stepDef?.unit || 'หน่วย'})</li>
+                                      );
+                                    })}
+                                  </ul>
+                                </td>
+                                <td className="px-6 py-4 text-center font-bold text-purple-700">+{monthProgress.toFixed(1)}%</td>
+                                <td className="px-6 py-4 text-center font-black text-emerald-600">{cumulative.toFixed(1)}%</td>
+                              </tr>
+                            );
+                          });
+                        })()}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
