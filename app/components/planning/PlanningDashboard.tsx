@@ -731,7 +731,7 @@ export default function PlanningDashboard() {
                   <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center mt-6">
                     <ImageIcon className="w-16 h-16 text-gray-300 mb-4" />
                     <p className="text-gray-500 font-bold text-lg mb-2">ยังไม่มีรูปภาพความก้าวหน้า</p>
-                    <p className="text-gray-400 text-sm">กรุณากดปุ่ม "อัพโหลดภาพ" เพื่อเพิ่มรูปภาพสำหรับโครงการนี้</p>
+                    <p className="text-gray-400 text-sm">กรุณากดปุ่ม &quot;อัพโหลดภาพ&quot; เพื่อเพิ่มรูปภาพสำหรับโครงการนี้</p>
                   </div>
                 </div>
               )}
