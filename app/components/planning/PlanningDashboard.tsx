@@ -152,20 +152,20 @@ export default function PlanningDashboard() {
   };
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto bg-gray-50 min-h-screen rounded-lg">
+    <div className="p-6 max-w-[1400px] mx-auto min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">วางแผนงานก่อสร้าง</h1>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">วางแผนงานก่อสร้าง</h1>
           <p className="text-gray-500 mt-1">Gantt Chart & Task Management</p>
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
+      <div className="bg-white/70 backdrop-blur-xl p-5 rounded-3xl shadow-sm border border-white/50 mb-6 transition-all">
         <label className="block text-sm font-semibold text-gray-700 mb-2">เลือกโครงการ (WBS)</label>
         <select
           value={selectedWbs}
           onChange={(e) => setSelectedWbs(e.target.value)}
-          className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#851a70] focus:border-transparent transition-all outline-none"
+          className="w-full p-3 bg-white/80 border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all outline-none backdrop-blur-md"
         >
           <option value="">-- กรุณาเลือกโครงการ --</option>
           {projects.map((p) => (
@@ -179,12 +179,12 @@ export default function PlanningDashboard() {
       {selectedWbs && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Task List Section */}
-          <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-gray-100 p-5 overflow-hidden flex flex-col h-[700px]">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">รายการงาน (Tasks)</h2>
+          <div className="lg:col-span-1 bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 p-6 overflow-hidden flex flex-col h-[700px]">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">รายการงาน (Tasks)</h2>
               <button
                 onClick={() => { resetForm(); setShowForm(true); }}
-                className="bg-[#851a70] hover:bg-[#6c155b] text-white px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+                className="bg-[#007AFF] hover:bg-[#005bb5] text-white px-4 py-2 rounded-full text-sm font-semibold transition-all shadow-md shadow-blue-500/30"
               >
                 + เพิ่มงาน
               </button>
@@ -254,17 +254,17 @@ export default function PlanningDashboard() {
           </div>
 
           {/* Gantt Chart Section */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-5 h-[700px] flex flex-col">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">ไทม์ไลน์ (Gantt Chart)</h2>
+          <div className="lg:col-span-2 bg-white/70 backdrop-blur-xl rounded-3xl shadow-sm border border-white/50 p-6 h-[700px] flex flex-col">
+            <h2 className="text-xl font-bold text-gray-900 tracking-tight mb-6">ไทม์ไลน์ (Gantt Chart)</h2>
             {tasks.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-gray-400">
                 เพิ่มงานเพื่อดูแผนภูมิ Gantt Chart
               </div>
             ) : (
-              <div className="flex-1 overflow-auto border border-gray-200 rounded-lg bg-gray-50 relative">
+              <div className="flex-1 overflow-auto border border-gray-100 rounded-2xl bg-gray-50/50 relative">
                 <div className="min-w-[800px] h-full p-4 relative">
                   {/* Grid Lines */}
-                  <div className="absolute inset-0 flex justify-between px-4 pointer-events-none opacity-20">
+                  <div className="absolute inset-0 flex justify-between px-4 pointer-events-none opacity-10">
                     {Array.from({ length: 10 }).map((_, i) => (
                       <div key={i} className="h-full border-l border-gray-400 border-dashed"></div>
                     ))}
@@ -279,21 +279,21 @@ export default function PlanningDashboard() {
                           {/* Label on the left of the bar */}
                           <div className="absolute w-full flex items-center h-full">
                             <div 
-                              className="absolute h-8 rounded-md bg-blue-100 border border-blue-300 shadow-sm overflow-hidden"
+                              className="absolute h-10 rounded-xl bg-blue-100 border border-blue-200 shadow-sm overflow-hidden transition-all group-hover:shadow-md group-hover:scale-[1.01]"
                               style={{ left: `${left}%`, width: `${width}%` }}
                             >
-                               <div className="h-full bg-blue-500 opacity-60" style={{ width: `${task.progress}%` }}></div>
-                               <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-blue-900 truncate px-2 mix-blend-multiply">
+                               <div className="h-full bg-[#007AFF] opacity-80" style={{ width: `${task.progress}%` }}></div>
+                               <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-900 truncate px-2">
                                  {task.task_name}
                                </span>
                             </div>
                           </div>
                           
                           {/* Tooltip on hover */}
-                          <div className="hidden group-hover:block absolute z-20 bg-gray-900 text-white text-xs p-2 rounded shadow-lg -top-10" style={{ left: `${left + (width/2)}%`, transform: 'translateX(-50%)' }}>
-                            <p className="font-bold">{task.task_name}</p>
-                            <p>เริ่ม: {task.start_date} | เสร็จ: {task.end_date}</p>
-                            <p>ก้าวหน้า: {task.progress}%</p>
+                          <div className="hidden group-hover:block absolute z-20 bg-gray-900/90 backdrop-blur-md text-white text-xs p-3 rounded-xl shadow-xl -top-14" style={{ left: `${left + (width/2)}%`, transform: 'translateX(-50%)' }}>
+                            <p className="font-bold text-sm mb-1">{task.task_name}</p>
+                            <p className="text-gray-300">เริ่ม: {task.start_date} | เสร็จ: {task.end_date}</p>
+                            <p className="text-gray-300 mt-1">ก้าวหน้า: <span className="text-white font-bold">{task.progress}%</span></p>
                           </div>
                         </div>
                       );

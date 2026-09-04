@@ -1,18 +1,19 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --pea-purple: #6B2169;
-  --pea-purple-light: #8A3B87;
-  --pea-purple-soft: #f3e8f3;
-  --pea-accent: #F1B500;
-  --bg-main: #f8fafc;
-  --sidebar-bg: #1e1b4b; /* Dark sidebar */
-  --sidebar-text: #cbd5e1;
-  --sidebar-text-active: #ffffff;
-  --sidebar-active-bg: rgba(255,255,255,0.1);
-  --text-dark: #0f172a;
-  --text-light: #64748b;
-  --border-color: #e2e8f0;
+  --pea-purple: #5E5CE6; /* Modern Apple-like Purple */
+  --pea-purple-light: #7D7AFF;
+  --pea-purple-soft: #F2F2F7;
+  --pea-accent: #007AFF; /* iOS Blue */
+  --bg-main: #F5F5F7; /* Apple light gray */
+  --sidebar-bg: rgba(255, 255, 255, 0.75); /* Translucent Glass */
+  --sidebar-text: #86868B;
+  --sidebar-text-active: #1D1D1F;
+  --sidebar-active-bg: rgba(0, 0, 0, 0.04);
+  --text-dark: #1D1D1F;
+  --text-light: #86868B;
+  --border-color: rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -42,6 +43,9 @@ body {
 .sidebar {
   width: 260px;
   background-color: var(--sidebar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
@@ -57,7 +61,7 @@ body {
   gap: 12px;
   margin-bottom: 40px;
   padding: 0 8px;
-  color: white;
+  color: var(--text-dark);
 }
 
 .sidebar-logo {
@@ -69,7 +73,7 @@ body {
 .sidebar-title {
   font-weight: 700;
   font-size: 1.1rem;
-  color: white;
+  color: var(--text-dark);
   line-height: 1.2;
 }
 
@@ -103,9 +107,10 @@ body {
 }
 
 .nav-item.active {
-  background-color: var(--pea-purple);
+  background-color: var(--pea-accent);
   color: white;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3); /* iOS Blue shadow */
 }
 
 /* Main Area Wrapper */
