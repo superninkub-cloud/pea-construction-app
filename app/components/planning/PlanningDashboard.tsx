@@ -477,7 +477,7 @@ export default function PlanningDashboard() {
                       tickFormatter={(val) => `${val}%`}
                     />
                     <RechartsTooltip 
-                      formatter={(value: number) => [`${value}%`, '']}
+                      formatter={(value: any) => [`${value}%`, '']}
                       labelFormatter={(label) => new Date(label).toLocaleDateString('th-TH', {year: 'numeric', month: 'long', day: 'numeric'})}
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                     />
