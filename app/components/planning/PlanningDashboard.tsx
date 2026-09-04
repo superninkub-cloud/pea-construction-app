@@ -366,39 +366,69 @@ export default function PlanningDashboard() {
                 </div>
               </form>
             ) : (
-              <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
-                  <label className="block text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">1</span> 
-                    กรองตามผู้ควบคุมงาน
-                  </label>
-                  <select
-                    value={selectedSupervisor}
-                    onChange={(e) => setSelectedSupervisor(e.target.value)}
-                    className="w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none font-bold text-sm shadow-sm cursor-pointer hover:border-purple-300 transition-colors"
-                  >
-                    <option value="">-- ผู้ควบคุมงานทั้งหมด --</option>
-                    {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
-                      <option key={sup as string} value={sup as string}>{sup}</option>
-                    ))}
-                  </select>
+              <div className="max-w-5xl mx-auto space-y-6">
+                <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 flex flex-col md:flex-row md:items-center gap-4 justify-between text-left">
+                  <div className="flex-1">
+                    <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
+                      กรองตามผู้ควบคุมงาน
+                    </label>
+                    <select
+                      value={selectedSupervisor}
+                      onChange={(e) => setSelectedSupervisor(e.target.value)}
+                      className="w-full md:max-w-sm p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none font-bold text-sm shadow-sm cursor-pointer hover:border-purple-300 transition-colors"
+                    >
+                      <option value="">-- ผู้ควบคุมงานทั้งหมด --</option>
+                      {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
+                        <option key={sup as string} value={sup as string}>{sup}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div className="bg-purple-50/50 p-5 rounded-xl border border-purple-100">
-                  <label className="block text-xs font-bold text-purple-700 mb-3 uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-purple-800">2</span>
-                    เลือกโครงการ
-                  </label>
-                  <select
-                    value={selectedWbs}
-                    onChange={(e) => setSelectedWbs(e.target.value)}
-                    className="w-full p-3 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none font-bold text-sm shadow-sm text-purple-900 cursor-pointer hover:border-purple-400 transition-colors"
-                  >
-                    <option value="">-- กรุณาเลือกโครงการ --</option>
-                    {projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).map((p) => (
-                      <option key={p.id} value={p.wbs}>{p.wbs} - {p.name}</option>
-                    ))}
-                  </select>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden text-left">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-gray-50 text-gray-600 font-bold border-b border-gray-200">
+                        <tr>
+                          <th className="px-6 py-4">WBS</th>
+                          <th className="px-6 py-4">ชื่อโครงการ</th>
+                          <th className="px-6 py-4">ผู้ควบคุมงาน</th>
+                          <th className="px-6 py-4">สถานะ</th>
+                          <th className="px-6 py-4 text-center">จัดการ</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).length > 0 ? (
+                          projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).map((p) => (
+                            <tr key={p.id} className="hover:bg-purple-50/50 transition-colors group">
+                              <td className="px-6 py-4 font-mono font-medium text-gray-900">{p.wbs}</td>
+                              <td className="px-6 py-4 font-bold text-gray-800">{p.name}</td>
+                              <td className="px-6 py-4 text-gray-600">{p.supervisor || "-"}</td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                  {p.status || "C1"}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <button
+                                  onClick={() => setSelectedWbs(p.wbs)}
+                                  className="px-4 py-1.5 bg-purple-100 text-purple-700 hover:bg-purple-600 hover:text-white rounded-lg text-xs font-bold transition-colors opacity-0 group-hover:opacity-100 md:opacity-100"
+                                >
+                                  เข้าสู่โครงการ
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center text-gray-500 font-medium">
+                              ไม่พบโครงการที่ตรงกับเงื่อนไข
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
