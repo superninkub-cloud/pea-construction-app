@@ -312,126 +312,233 @@ export default function PlanningDashboard() {
     <div className="w-full text-sm text-gray-800 font-sans">
       <div className="w-full mx-auto space-y-6">
         
-        {/* Cool Header */}
+        {/* Project Selection Dashboard (When no project is selected) */}
         {!selectedWbs && (
-          <div className="bg-gradient-to-r from-purple-900 to-indigo-800 text-white p-8 rounded-2xl shadow-lg border border-purple-900/50 flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500 opacity-20 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
-            <div className="relative z-10">
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">วางแผนงานก่อสร้างแผนกก่อสร้างระบบไฟฟ้า</h1>
-              <p className="text-purple-200 text-xs md:text-sm uppercase tracking-[0.2em] font-bold">Electrical Construction Planning System</p>
+          <div className="w-full">
+            {/* Top Navigation Bar */}
+            <div className="bg-white flex items-center justify-between px-6 py-4 sticky top-0 z-50 mb-6 border-b border-gray-100">
+              <div className="flex items-center gap-4">
+                <button className="text-gray-700 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <div>
+                  <h1 className="text-lg font-extrabold text-[#3b2a5c] leading-tight">วางแผนงานก่อสร้างแผนกก่อสร้างระบบไฟฟ้า</h1>
+                  <p className="text-[10px] text-gray-500 font-bold tracking-[0.1em] uppercase">Electrical Construction Planning System</p>
+                </div>
+              </div>
+              <div className="hidden md:flex relative w-96">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input type="text" placeholder="ค้นหาโครงการ, รหัสโครงการ, พื้นที่..." className="w-full bg-[#F3F4F6] border-none rounded-lg py-2.5 pl-10 pr-4 text-xs focus:ring-2 focus:ring-purple-500 outline-none font-medium" />
+              </div>
             </div>
-            <div className="hidden md:flex bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10 relative z-10">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300">
-                <path d="M22 11h-4l-3-6H5v10H3v6h2" />
-                <circle cx="8" cy="19" r="2" />
-                <circle cx="18" cy="19" r="2" />
-                <path d="M10 19h6" />
-                <path d="M13 11v4" />
-                <path d="M15 5l4 6" />
-              </svg>
-            </div>
-          </div>
-        )}
 
-        {/* Project Selector */}
-        {!selectedWbs && (
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
-            <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
-              <h2 className="text-xl font-extrabold text-gray-800">เลือกระบบงานก่อสร้าง</h2>
-              <button onClick={() => setIsCreatingProject(!isCreatingProject)} className="bg-purple-100 hover:bg-purple-200 text-purple-800 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2">
-                {isCreatingProject ? "ยกเลิก" : "+ เพิ่มโครงการใหม่"}
-              </button>
-            </div>
-            
-            {isCreatingProject ? (
-              <form onSubmit={handleCreateProject} className="max-w-3xl mx-auto bg-gray-50 p-6 rounded-2xl border border-gray-200 text-left">
-                <h3 className="font-bold text-gray-800 mb-4">สร้างโครงการใหม่</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">WBS (รหัสโครงการ)</label>
-                    <input type="text" required value={newProjWbs} onChange={e => setNewProjWbs(e.target.value)} className="w-full p-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="เช่น I-69-I-BNCXX" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">ชื่อโครงการ</label>
-                    <input type="text" required value={newProjName} onChange={e => setNewProjName(e.target.value)} className="w-full p-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="ชื่อโครงการ" />
-                  </div>
-                  <div className="md:col-span-3">
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">ชื่อผู้ควบคุมงาน</label>
-                    <input type="text" value={newProjSupervisor} onChange={e => setNewProjSupervisor(e.target.value)} className="w-full p-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="นาย..." />
-                  </div>
+            <div className="px-6">
+              {/* Hero Banner */}
+              <div className="relative w-full h-[200px] rounded-[16px] overflow-visible mb-16 shadow-sm border border-purple-900/10 bg-gradient-to-r from-[#2c1d47] to-[#452a70]">
+                <img src="/images/pea_construction_banner.jpg" alt="Construction Banner" className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50 rounded-[16px]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#2c1d47]/95 via-[#3a225e]/70 to-transparent rounded-[16px]"></div>
+                
+                <div className="relative h-full flex flex-col justify-center p-8 z-10">
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2 drop-shadow-md">เลือกระบบงานก่อสร้าง</h2>
+                  <p className="text-white/80 text-sm font-medium">เลือกผู้ควบคุมงานและดูโครงการที่รับผิดชอบ</p>
                 </div>
-                <div className="flex justify-end">
-                  <button type="submit" className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95">บันทึกโครงการ</button>
-                </div>
-              </form>
-            ) : (
-              <div className="max-w-5xl mx-auto space-y-6">
-                <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 flex flex-col md:flex-row md:items-center gap-4 justify-between text-left">
-                  <div className="flex-1">
-                    <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
-                      กรองตามผู้ควบคุมงาน
-                    </label>
-                    <select
-                      value={selectedSupervisor}
-                      onChange={(e) => setSelectedSupervisor(e.target.value)}
-                      className="w-full md:max-w-sm p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none font-bold text-sm shadow-sm cursor-pointer hover:border-purple-300 transition-colors"
-                    >
-                      <option value="">-- ผู้ควบคุมงานทั้งหมด --</option>
-                      {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
-                        <option key={sup as string} value={sup as string}>{sup}</option>
-                      ))}
-                    </select>
-                  </div>
+                
+                <div className="absolute right-10 top-1/2 -translate-y-1/2 hidden md:block z-10">
+                  <h3 className="text-5xl font-black text-white/20 italic transform -skew-x-12 leading-[0.9] text-right" style={{ fontFamily: 'Impact, sans-serif' }}>Power<br/><span className="text-4xl">for Better Life</span></h3>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden text-left">
+                {/* KPI Cards Overlapping */}
+                <div className="absolute -bottom-10 left-0 w-full px-8 z-20">
+                  <div className="flex flex-wrap gap-4 items-stretch">
+                    {/* Supervisor Select */}
+                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 min-w-[220px] flex-1">
+                      <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                      </div>
+                      <div className="flex-1 w-full">
+                        <p className="text-[10px] text-gray-500 font-bold mb-0.5">ผู้ควบคุมงาน</p>
+                        <select 
+                          value={selectedSupervisor}
+                          onChange={(e) => setSelectedSupervisor(e.target.value)}
+                          className="w-full bg-transparent text-sm font-bold text-gray-800 outline-none cursor-pointer pr-4"
+                        >
+                          <option value="">ทั้งหมด</option>
+                          {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
+                            <option key={sup as string} value={sup as string}>{sup}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    
+                    {/* Total Projects */}
+                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 flex-1 min-w-[160px]">
+                      <div className="w-10 h-10 rounded-lg bg-[#7B32D9] text-white flex items-center justify-center shrink-0 shadow-sm shadow-purple-500/30">
+                        <List className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-2xl font-black text-gray-800 leading-none mb-1">{projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).length}</h4>
+                        <p className="text-[10px] text-gray-500 font-bold">โครงการทั้งหมด</p>
+                      </div>
+                    </div>
+                    
+                    {/* In Progress */}
+                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 flex-1 min-w-[160px]">
+                      <div className="w-10 h-10 rounded-full bg-[#1D9C5B] text-white flex items-center justify-center shrink-0 shadow-sm shadow-green-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <div>
+                        <h4 className="text-2xl font-black text-gray-800 leading-none mb-1">9</h4>
+                        <p className="text-[10px] text-gray-500 font-bold">กำลังดำเนินการ</p>
+                      </div>
+                    </div>
+                    
+                    {/* Pending */}
+                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 flex-1 min-w-[160px]">
+                      <div className="w-10 h-10 rounded-full bg-[#F5A623] text-white flex items-center justify-center shrink-0 shadow-sm shadow-amber-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      </div>
+                      <div>
+                        <h4 className="text-2xl font-black text-gray-800 leading-none mb-1">4</h4>
+                        <p className="text-[10px] text-gray-500 font-bold">รอการเริ่มงาน</p>
+                      </div>
+                    </div>
+                    
+                    {/* Delayed */}
+                    <div className="bg-white rounded-xl shadow-md border border-gray-100 p-3 flex items-center gap-3 flex-1 min-w-[160px]">
+                      <div className="w-10 h-10 rounded-full bg-[#E53935] text-white flex items-center justify-center shrink-0 shadow-sm shadow-red-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                      </div>
+                      <div>
+                        <h4 className="text-2xl font-black text-gray-800 leading-none mb-1">3</h4>
+                        <p className="text-[10px] text-gray-500 font-bold">งานล่าช้า</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table Section */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden text-left flex flex-col mb-10 mt-6">
+                <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-50 text-[#7B32D9] rounded-lg flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-base">รายการโครงการ</h3>
+                      <p className="text-[11px] text-gray-500 font-medium">รายการโครงการก่อสร้างในความรับผิดชอบ</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="relative flex-1 md:w-60">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="text" placeholder="ค้นหา..." className="w-full bg-white border border-gray-200 rounded-lg py-2 pl-9 pr-3 text-xs focus:ring-2 focus:ring-purple-500 outline-none font-medium" />
+                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg> ตัวกรอง <ChevronDown className="w-3 h-3" />
+                    </button>
+                    <button onClick={() => setIsCreatingProject(!isCreatingProject)} className="flex items-center gap-2 px-4 py-2 bg-[#7B32D9] text-white rounded-lg text-xs font-bold hover:bg-[#6829b8] transition-colors shadow-sm">
+                      + เพิ่มโครงการใหม่
+                    </button>
+                  </div>
+                </div>
+
+                {isCreatingProject ? (
+                  <form onSubmit={handleCreateProject} className="max-w-3xl mx-auto bg-gray-50 p-6 rounded-2xl border border-gray-200 text-left my-8">
+                    <h3 className="font-bold text-gray-800 mb-4">สร้างโครงการใหม่</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1.5">WBS (รหัสโครงการ)</label>
+                        <input type="text" required value={newProjWbs} onChange={e => setNewProjWbs(e.target.value)} className="w-full p-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="เช่น I-69-I-BNCXX" />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-gray-700 mb-1.5">ชื่อโครงการ</label>
+                        <input type="text" required value={newProjName} onChange={e => setNewProjName(e.target.value)} className="w-full p-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="ชื่อโครงการ" />
+                      </div>
+                      <div className="md:col-span-3">
+                        <label className="block text-xs font-bold text-gray-700 mb-1.5">ชื่อผู้ควบคุมงาน</label>
+                        <input type="text" value={newProjSupervisor} onChange={e => setNewProjSupervisor(e.target.value)} className="w-full p-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="นาย..." />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <button type="button" onClick={() => setIsCreatingProject(false)} className="bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all">ยกเลิก</button>
+                      <button type="submit" className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95">บันทึกโครงการ</button>
+                    </div>
+                  </form>
+                ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-gray-50 text-gray-600 font-bold border-b border-gray-200">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-[#F9FAFB] text-gray-600 font-bold border-b border-gray-100">
                         <tr>
+                          <th className="px-6 py-4 w-16">#</th>
                           <th className="px-6 py-4">WBS</th>
                           <th className="px-6 py-4">ชื่อโครงการ</th>
                           <th className="px-6 py-4">ผู้ควบคุมงาน</th>
                           <th className="px-6 py-4">สถานะ</th>
-                          <th className="px-6 py-4 text-center">จัดการ</th>
+                          <th className="px-6 py-4 text-center w-32">จัดการ</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).length > 0 ? (
-                          projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).map((p) => (
+                          projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).map((p, idx) => (
                             <tr key={p.id} className="hover:bg-purple-50/50 transition-colors group">
+                              <td className="px-6 py-4 text-gray-500 font-medium">{idx + 1}</td>
                               <td className="px-6 py-4 font-mono font-medium text-gray-900">{p.wbs}</td>
                               <td className="px-6 py-4 font-bold text-gray-800">{p.name}</td>
                               <td className="px-6 py-4 text-gray-600">{p.supervisor || "-"}</td>
                               <td className="px-6 py-4">
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-[#E8F5E9] text-[#2E7D32]">
                                   {p.status || "C1"}
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <button
-                                  onClick={() => setSelectedWbs(p.wbs)}
-                                  className="px-4 py-1.5 bg-purple-100 text-purple-700 hover:bg-purple-600 hover:text-white rounded-lg text-xs font-bold transition-colors opacity-0 group-hover:opacity-100 md:opacity-100"
-                                >
-                                  เข้าสู่โครงการ
-                                </button>
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    onClick={() => setSelectedWbs(p.wbs)}
+                                    className="px-4 py-1.5 border border-[#D8C2F2] text-[#7B32D9] hover:bg-purple-50 rounded-lg text-xs font-bold transition-colors shadow-sm"
+                                  >
+                                    เข้าสู่โครงการ
+                                  </button>
+                                  <button className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={5} className="px-6 py-12 text-center text-gray-500 font-medium">
+                            <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium">
                               ไม่พบโครงการที่ตรงกับเงื่อนไข
                             </td>
                           </tr>
                         )}
                       </tbody>
                     </table>
+                    
+                    {/* Pagination */}
+                    <div className="p-4 flex items-center justify-between text-xs text-gray-500 font-medium bg-white">
+                      <div className="flex items-center gap-2">
+                        แสดง
+                        <select className="border border-gray-200 rounded px-2 py-1 outline-none bg-white">
+                          <option>10</option>
+                          <option>20</option>
+                          <option>50</option>
+                        </select>
+                        รายการต่อหน้า
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded text-gray-400">&lt;</button>
+                        <button className="w-7 h-7 flex items-center justify-center bg-[#7B32D9] text-white rounded font-bold shadow-sm">1</button>
+                        <button className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600">2</button>
+                        <button className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded text-gray-400">&gt;</button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
 
