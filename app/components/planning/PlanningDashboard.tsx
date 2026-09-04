@@ -14,6 +14,7 @@ interface Project {
   committee: string | null;
   duration: string | null;
   status: string | null;
+  construction_type?: string;
 }
 
 export interface Task {
@@ -108,7 +109,7 @@ export default function PlanningDashboard() {
   }, [selectedWbs]);
 
   const fetchProjects = async () => {
-    const { data, error } = await supabase.from("projects").select("id, wbs, name, contractor, supervisor, committee, duration, status").order("wbs");
+    const { data, error } = await supabase.from("projects").select("id, wbs, name, contractor, supervisor, committee, duration, status, construction_type").order("wbs");
     if (!error && data) {
       setProjects(data.filter(p => p.wbs !== 'SAFETY_PLAN_2026'));
     }
@@ -289,6 +290,38 @@ export default function PlanningDashboard() {
     }
     await supabase.from("project_tasks").update(updates).eq("id", taskId);
     setSavingStepId(null);
+  };
+
+  const handlePatternChange = async (type: string) => {
+    if (!selectedWbs) return;
+    if (!confirm("การเปลี่ยนรูปแบบจะตั้งค่าน้ำหนัก (%) ของทุกขั้นตอนใหม่ ยืนยันหรือไม่?")) return;
+    
+    // Update DB projects table
+    await supabase.from("projects").update({ construction_type: type }).eq("wbs", selectedWbs);
+    // Update local project state
+    setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, construction_type: type } : p));
+    
+    // Weights logic
+    let w = [5, 15, 20, 20, 20, 10, 10]; // default type 1
+    if (type === "2") w = [5, 20, 25, 25, 25, 0, 0];
+    else if (type === "3") w = [5, 20, 20, 25, 20, 0, 10];
+    else if (type === "4") w = [5, 0, 0, 45, 50, 0, 0];
+    else if (type === "5") {
+      // Custom - do nothing to weights automatically
+      return;
+    }
+    
+    // Update tasks
+    const updatedTasks = [...tasks];
+    for (let i = 0; i < updatedTasks.length; i++) {
+      const t = updatedTasks[i];
+      const newWeight = w[t.step_order ?? i];
+      if (newWeight !== undefined) {
+        t.weight = newWeight;
+        await supabase.from("project_tasks").update({ weight: newWeight }).eq("id", t.id);
+      }
+    }
+    setTasks(updatedTasks);
   };
 
   // Gantt Chart Logic
@@ -916,6 +949,25 @@ export default function PlanningDashboard() {
                       </button>
                     </div>
                   </div>
+                  
+                  {selectedWbs && (
+                    <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                      <div className="flex-1 w-full">
+                        <label className="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">รูปแบบลักษณะงานก่อสร้าง (หน้างาน)</label>
+                        <select 
+                          className="w-full max-w-2xl text-xs bg-white border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none font-medium text-gray-700 shadow-sm transition-all"
+                          value={projects.find(p => p.wbs === selectedWbs)?.construction_type || "1"}
+                          onChange={(e) => handlePatternChange(e.target.value)}
+                        >
+                          <option value="1">รูปแบบที่ 1: มีครบ 6 ขั้นตอน</option>
+                          <option value="2">รูปแบบที่ 2: ไม่มีพาดสายแรงต่ำ และไม่มีรื้อถอน (4 ขั้นตอน)</option>
+                          <option value="3">รูปแบบที่ 3: ไม่มีพาดสายแรงต่ำ แต่มีรื้อถอน (5 ขั้นตอน)</option>
+                          <option value="4">รูปแบบที่ 4: เฉพาะงานติดตั้งอุปกรณ์หัวเสาและงานพาดสายแรงสูง</option>
+                          <option value="5">รูปแบบที่ 5: กำหนดค่าน้ำหนักเอง (Custom)</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
 
                   {showForm && (
                     <form onSubmit={handleSubmit} className="m-6 bg-purple-50/50 p-6 rounded-2xl border border-purple-100 shadow-inner">
