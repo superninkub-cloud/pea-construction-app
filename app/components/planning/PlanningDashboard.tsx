@@ -28,6 +28,8 @@ export interface Task {
   actual_end_date: string | null;
   step_order?: number;
   weight?: number;
+  target_qty?: number;
+  done_qty?: number;
 }
 
 // 7 ขั้นตอนงานก่อสร้างระบบจำหน่ายที่ตายตัว
@@ -252,9 +254,40 @@ export default function PlanningDashboard() {
   const [savingStepId, setSavingStepId] = useState<string | null>(null);
   const handleStepUpdate = async (taskId: string, field: string, value: string | number | null) => {
     setSavingStepId(taskId);
+    
+    // Find the task to calculate new progress if needed
+    const currentTask = tasks.find(t => t.id === taskId);
+    let newProgress = currentTask?.progress || 0;
+    
+    if (field === 'target_qty' || field === 'done_qty') {
+      const target = field === 'target_qty' ? Number(value) : Number(currentTask?.target_qty || 0);
+      const done = field === 'done_qty' ? Number(value) : Number(currentTask?.done_qty || 0);
+      
+      if (target > 0) {
+        newProgress = Math.min(100, Math.round((done / target) * 100));
+      } else {
+        newProgress = 0;
+      }
+    }
+
     // Update local state immediately for responsiveness
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, [field]: value } : t));
-    await supabase.from("project_tasks").update({ [field]: value }).eq("id", taskId);
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        return { 
+          ...t, 
+          [field]: value,
+          ...(field === 'target_qty' || field === 'done_qty' ? { progress: newProgress } : {})
+        };
+      }
+      return t;
+    }));
+    
+    // Update DB
+    const updates: any = { [field]: value };
+    if (field === 'target_qty' || field === 'done_qty') {
+      updates.progress = newProgress;
+    }
+    await supabase.from("project_tasks").update(updates).eq("id", taskId);
     setSavingStepId(null);
   };
 
@@ -904,13 +937,21 @@ export default function PlanningDashboard() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-gradient-to-r from-purple-50 to-indigo-50 text-gray-600 text-[11px] uppercase tracking-wider border-b border-purple-100">
-                          <th className="font-bold p-4 pl-6 w-8">#</th>
-                          <th className="font-bold p-4 min-w-[220px]">ขั้นตอนงาน</th>
-                          <th className="font-bold p-4 text-center min-w-[140px]">วันที่เริ่ม (แผน)</th>
-                          <th className="font-bold p-4 text-center min-w-[140px]">วันที่เสร็จ (แผน)</th>
-                          <th className="font-bold p-4 text-center min-w-[80px]">น้ำหนัก (%)</th>
-                          <th className="font-bold p-4 text-center min-w-[180px]">ความก้าวหน้า (%)</th>
-                          <th className="font-bold p-4 text-center min-w-[100px]">สถานะ</th>
+                          <th className="font-bold p-4 pl-6 w-8 text-center" rowSpan={2}>#</th>
+                          <th className="font-bold p-4 min-w-[200px]" rowSpan={2}>ขั้นตอนงาน</th>
+                          <th className="font-bold p-3 text-center border-l border-r border-purple-100 bg-white/50" colSpan={3}>แผนงาน (Plan)</th>
+                          <th className="font-bold p-3 text-center border-r border-purple-100 bg-purple-50/50" colSpan={3}>ผลการดำเนินงาน (Actual)</th>
+                          <th className="font-bold p-4 text-center min-w-[80px]" rowSpan={2}>น้ำหนัก<br/>(%)</th>
+                          <th className="font-bold p-4 text-center min-w-[80px]" rowSpan={2}>ความก้าวหน้า<br/>(%)</th>
+                          <th className="font-bold p-4 text-center min-w-[100px]" rowSpan={2}>สถานะ</th>
+                        </tr>
+                        <tr className="bg-gradient-to-r from-purple-50 to-indigo-50 text-gray-600 text-[10px] tracking-wider border-b border-purple-100">
+                          <th className="font-medium p-2 text-center min-w-[110px] border-l border-purple-100 bg-white/50">วันที่เริ่ม</th>
+                          <th className="font-medium p-2 text-center min-w-[110px] bg-white/50">วันที่เสร็จ</th>
+                          <th className="font-medium p-2 text-center min-w-[90px] border-r border-purple-100 bg-white/50">เป้าหมาย</th>
+                          <th className="font-medium p-2 text-center min-w-[110px] bg-purple-50/50">วันที่เริ่มจริง</th>
+                          <th className="font-medium p-2 text-center min-w-[110px] bg-purple-50/50">วันที่เสร็จจริง</th>
+                          <th className="font-medium p-2 text-center min-w-[90px] border-r border-purple-100 bg-purple-50/50">ทำได้จริง</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50 text-sm">
@@ -934,70 +975,106 @@ export default function PlanningDashboard() {
 
                           return (
                             <tr key={task.id} className={`hover:bg-purple-50/40 transition-all duration-200 group ${isSaving ? 'opacity-70' : ''}`}>
-                              <td className="p-4 pl-6">
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black ${
+                              <td className="p-3 pl-6 text-center border-r border-gray-50">
+                                <div className={`w-7 h-7 rounded-lg inline-flex items-center justify-center text-xs font-black ${
                                   progressVal === 100 ? 'bg-emerald-100 text-emerald-700' : progressVal > 0 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'
                                 }`}>
                                   {progressVal === 100 ? <CheckCircle2 className="w-4 h-4" /> : task.step_order ?? index}
                                 </div>
                               </td>
-                              <td className="p-4">
+                              <td className="p-3 border-r border-gray-50">
                                 <div className="flex flex-col gap-0.5">
-                                  <span className={`font-bold text-[13px] ${stepColor}`}>{task.task_name}</span>
+                                  <span className={`font-bold text-[12px] ${stepColor}`}>{task.task_name}</span>
                                   {stepDef && <span className="text-[10px] text-gray-400 font-medium">หน่วย: {stepDef.unit}</span>}
                                 </div>
                               </td>
-                              <td className="p-4 text-center">
+                              
+                              {/* Plan Section */}
+                              <td className="p-2 text-center bg-white/30 border-l border-gray-50">
                                 <input
                                   type="date"
                                   value={task.start_date || ""}
                                   onChange={(e) => handleStepUpdate(task.id, "start_date", e.target.value)}
-                                  className="w-full text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none font-medium text-gray-700 hover:border-purple-300 transition-colors"
+                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-gray-600 hover:border-purple-300 transition-colors"
                                 />
                               </td>
-                              <td className="p-4 text-center">
+                              <td className="p-2 text-center bg-white/30">
                                 <input
                                   type="date"
                                   value={task.end_date || ""}
                                   onChange={(e) => handleStepUpdate(task.id, "end_date", e.target.value)}
-                                  className="w-full text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none font-medium text-gray-700 hover:border-purple-300 transition-colors"
+                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-gray-600 hover:border-purple-300 transition-colors"
                                 />
                               </td>
-                              <td className="p-4 text-center">
+                              <td className="p-2 text-center bg-white/30 border-r border-gray-50">
+                                <div className="flex items-center justify-center gap-1">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={task.target_qty ?? ""}
+                                    onChange={(e) => handleStepUpdate(task.id, "target_qty", e.target.value === "" ? null : Number(e.target.value))}
+                                    className="w-14 text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-400 outline-none font-bold text-gray-700 hover:border-purple-300 transition-colors"
+                                  />
+                                </div>
+                              </td>
+                              
+                              {/* Actual Section */}
+                              <td className="p-2 text-center bg-purple-50/30">
+                                <input
+                                  type="date"
+                                  value={task.actual_start_date || ""}
+                                  onChange={(e) => handleStepUpdate(task.id, "actual_start_date", e.target.value)}
+                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-purple-700 hover:border-purple-300 transition-colors"
+                                />
+                              </td>
+                              <td className="p-2 text-center bg-purple-50/30">
+                                <input
+                                  type="date"
+                                  value={task.actual_end_date || ""}
+                                  onChange={(e) => handleStepUpdate(task.id, "actual_end_date", e.target.value)}
+                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-purple-700 hover:border-purple-300 transition-colors"
+                                />
+                              </td>
+                              <td className="p-2 text-center bg-purple-50/30 border-r border-gray-50">
+                                <div className="flex items-center justify-center gap-1">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={task.done_qty ?? ""}
+                                    onChange={(e) => handleStepUpdate(task.id, "done_qty", e.target.value === "" ? null : Number(e.target.value))}
+                                    className="w-14 text-[11px] bg-white border border-purple-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-500 outline-none font-bold text-purple-700 hover:border-purple-400 transition-colors shadow-sm"
+                                  />
+                                </div>
+                              </td>
+
+                              <td className="p-2 text-center border-r border-gray-50">
                                 <input
                                   type="number"
                                   min="0"
                                   max="100"
                                   value={task.weight ?? stepDef?.defaultWeight ?? 0}
                                   onChange={(e) => handleStepUpdate(task.id, "weight", Number(e.target.value))}
-                                  className="w-16 text-xs bg-white border border-gray-200 rounded-lg px-2 py-2 text-center focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none font-bold text-purple-700 hover:border-purple-300 transition-colors mx-auto block"
+                                  className="w-14 text-[11px] bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-400 outline-none font-bold text-gray-700 hover:border-purple-300 transition-colors mx-auto block"
                                 />
                               </td>
-                              <td className="p-4">
-                                <div className="flex items-center gap-3">
-                                  <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    step="5"
-                                    value={progressVal}
-                                    onChange={(e) => handleStepUpdate(task.id, "progress", Number(e.target.value))}
-                                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                                  />
-                                  <span className={`text-xs font-black min-w-[36px] text-right ${progressVal === 100 ? 'text-emerald-600' : progressVal > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
+                              <td className="p-3 text-center border-r border-gray-50">
+                                <div className="flex flex-col items-center justify-center gap-1">
+                                  <span className={`text-sm font-black ${progressVal === 100 ? 'text-emerald-600' : progressVal > 0 ? 'text-purple-700' : 'text-gray-400'}`}>
                                     {progressVal}%
                                   </span>
-                                </div>
-                                <div className="w-full bg-gray-100 rounded-full h-1 mt-1.5 overflow-hidden">
-                                  <div
-                                    className={`h-full rounded-full transition-all duration-500 ease-out ${progressVal === 100 ? 'bg-emerald-500' : 'bg-purple-500'}`}
-                                    style={{ width: `${progressVal}%` }}
-                                  />
+                                  <div className="w-16 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full transition-all duration-500 ease-out ${progressVal === 100 ? 'bg-emerald-500' : 'bg-purple-500'}`}
+                                      style={{ width: `${progressVal}%` }}
+                                    />
+                                  </div>
                                 </div>
                               </td>
-                              <td className="p-4 text-center">
-                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border ${statusColor}`}>
-                                  <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`}></span>
+                              <td className="p-3 text-center">
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold border ${statusColor} whitespace-nowrap`}>
+                                  <span className={`w-1 h-1 rounded-full ${statusDot}`}></span>
                                   {statusLabel}
                                 </span>
                               </td>
@@ -1008,10 +1085,10 @@ export default function PlanningDashboard() {
                         {/* Summary Row */}
                         {tasks.length > 0 && (
                           <tr className="bg-gradient-to-r from-purple-50 to-indigo-50 border-t-2 border-purple-200">
-                            <td className="p-4 pl-6" colSpan={2}>
+                            <td className="p-4 pl-6 text-center" colSpan={2}>
                               <span className="font-extrabold text-purple-800 text-sm">รวมทั้งหมด</span>
                             </td>
-                            <td className="p-4" colSpan={2}>
+                            <td className="p-4 text-center" colSpan={6}>
                               <span className="text-xs text-gray-500 font-medium">
                                 {tasks.filter(t => Number(t.progress) === 100).length} / {tasks.length} ขั้นตอนเสร็จ
                               </span>
