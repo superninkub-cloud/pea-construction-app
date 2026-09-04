@@ -28,6 +28,10 @@ export default function Sidebar() {
           <LayoutDashboard size={20} />
           <span>Dashboard งานก่อสร้าง</span>
         </Link>
+        <Link href="/planning" className={`nav-item ${pathname === "/planning" ? "active" : ""}`}>
+          <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <span>วางแผนงานก่อสร้าง</span>
+        </Link>
         <Link href="/update" className={`nav-item ${pathname === "/update" ? "active" : ""}`}>
           <FileEdit size={20} />
           <span>อัพเดทสถานะงาน</span>
