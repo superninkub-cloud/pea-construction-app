@@ -34,6 +34,7 @@ export default function PlanningDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview"|"gantt"|"scurve"|"photos"|"budget">("overview");
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
 
   // Project Edit states
   const [isEditingProject, setIsEditingProject] = useState(false);
@@ -285,20 +286,61 @@ export default function PlanningDashboard() {
     <div className="w-full text-sm text-gray-800 font-sans">
       <div className="w-full mx-auto space-y-6">
         
-        {/* Project Selector (Since we need a way to pick project) */}
+        {/* Cool Header */}
         {!selectedWbs && (
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center mt-10">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">เลือกระบบงานก่อสร้าง</h2>
-            <select
-              value={selectedWbs}
-              onChange={(e) => setSelectedWbs(e.target.value)}
-              className="w-full max-w-md mx-auto p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-600 outline-none font-medium text-base shadow-inner"
-            >
-              <option value="">-- กรุณาเลือกโครงการ --</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.wbs}>{p.wbs} - {p.name}</option>
-              ))}
-            </select>
+          <div className="bg-gradient-to-r from-purple-900 to-indigo-800 text-white p-8 rounded-2xl shadow-lg border border-purple-900/50 flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-500 opacity-20 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+            <div className="relative z-10">
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">วางแผนงานก่อสร้างแผนกก่อสร้างระบบไฟฟ้า</h1>
+              <p className="text-purple-200 text-xs md:text-sm uppercase tracking-[0.2em] font-bold">Electrical Construction Planning System</p>
+            </div>
+            <div className="hidden md:flex bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10 relative z-10">
+              <Zap className="w-10 h-10 text-purple-300" />
+            </div>
+          </div>
+        )}
+
+        {/* Project Selector */}
+        {!selectedWbs && (
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
+            <h2 className="text-xl font-extrabold text-gray-800 mb-8">เลือกระบบงานก่อสร้าง</h2>
+            
+            <div className="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
+                <label className="block text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">1</span> 
+                  กรองตามผู้ควบคุมงาน
+                </label>
+                <select
+                  value={selectedSupervisor}
+                  onChange={(e) => setSelectedSupervisor(e.target.value)}
+                  className="w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none font-bold text-sm shadow-sm cursor-pointer hover:border-purple-300 transition-colors"
+                >
+                  <option value="">-- ผู้ควบคุมงานทั้งหมด --</option>
+                  {Array.from(new Set(projects.map(p => p.supervisor).filter(Boolean))).map(sup => (
+                    <option key={sup} value={sup}>{sup}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="bg-purple-50/50 p-5 rounded-xl border border-purple-100">
+                <label className="block text-xs font-bold text-purple-700 mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-purple-800">2</span>
+                  เลือกโครงการ
+                </label>
+                <select
+                  value={selectedWbs}
+                  onChange={(e) => setSelectedWbs(e.target.value)}
+                  className="w-full p-3 bg-white border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none font-bold text-sm shadow-sm text-purple-900 cursor-pointer hover:border-purple-400 transition-colors"
+                >
+                  <option value="">-- กรุณาเลือกโครงการ --</option>
+                  {projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor).map((p) => (
+                    <option key={p.id} value={p.wbs}>{p.wbs} - {p.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
         )}
 
