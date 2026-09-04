@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Printer, Home, List, BarChart2, TrendingUp, Image as ImageIcon, DollarSign, Zap, Edit2, X } from 'lucide-react';
+import { Printer, Home, List, BarChart2, TrendingUp, Image as ImageIcon, DollarSign, Zap, Edit2, X, Search, Bell, ChevronDown, CheckCircle2, Clock, AlertTriangle, MoreVertical, Grid, Calendar, FileText, CheckCircle } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -407,12 +407,79 @@ export default function PlanningDashboard() {
 
         {selectedWbs && (
           <>
-            {/* Project Header Card */}
-            {isEditingProject ? (
-              <form onSubmit={handleProjectSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-bold text-gray-800">แก้ไขรายละเอียดโครงการ</h3>
-                  <button type="button" onClick={() => setIsEditingProject(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="w-5 h-5"/></button>
+            {/* Top Navigation Bar for Project View */}
+            <div className="bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-6 py-3 sticky top-0 z-50 rounded-2xl shadow-sm mb-2">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setSelectedWbs("")} className="w-10 h-10 bg-purple-100 text-purple-700 flex items-center justify-center rounded-xl shadow-sm hover:bg-purple-200 transition-colors" title="กลับไปหน้าหลัก">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22V2"/><path d="M7 6h10"/><path d="M7 10h10"/><path d="M12 6L9 10"/><path d="M12 6l3 4"/></svg>
+                </button>
+                <div>
+                  <h1 className="text-lg font-extrabold text-gray-900 leading-tight">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h1>
+                  <p className="text-xs text-gray-500 font-medium">ผู้ควบคุมงาน: {currentProject?.supervisor || "-"} | สถานะ: {currentProject?.status || "อยู่ระหว่างก่อสร้าง"}</p>
+                </div>
+              </div>
+              <div className="hidden md:flex relative w-96">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input type="text" placeholder="ค้นหางาน โครงการ หรือสถานที่..." className="w-full bg-gray-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-purple-500 outline-none font-medium" />
+              </div>
+              <div className="flex items-center gap-4">
+                <button className="relative text-gray-500 hover:text-gray-800 transition-colors">
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">3</span>
+                </button>
+                <div className="flex items-center gap-3 border-l border-gray-200 pl-4 cursor-pointer">
+                  <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden border border-gray-300 shadow-sm">
+                    <img src="https://i.pravatar.cc/150?img=11" alt="Profile" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-bold text-gray-800 leading-tight">{currentProject?.supervisor || "อุดมศักดิ์"}</p>
+                    <p className="text-[10px] text-gray-500 font-medium leading-tight mt-0.5">ผู้ควบคุมงาน</p>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Hero Banner */}
+            <div className="relative w-full h-[220px] rounded-[24px] overflow-hidden shadow-lg group border border-purple-900/20">
+              <img src="/images/pea_construction_banner.jpg" alt="Construction Banner" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/90 via-purple-900/60 to-transparent"></div>
+              <div className="absolute inset-0 flex flex-col justify-between p-8">
+                <div>
+                  <p className="text-purple-200 text-[10px] font-bold tracking-[0.2em] uppercase mb-1">Construction Project</p>
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2 drop-shadow-lg">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h2>
+                  <p className="text-white/90 text-sm font-medium drop-shadow-md">"พลังงานที่มั่นคง เพื่อคุณภาพชีวิตที่ดีกว่า"</p>
+                </div>
+                <div className="flex flex-wrap gap-3 md:gap-4 mt-auto">
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div> สถานะ: {currentProject?.status || "C1"}
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
+                    <Calendar className="w-3.5 h-3.5 opacity-80" /> เริ่ม 1 มี.ค. 2569
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
+                    <Calendar className="w-3.5 h-3.5 opacity-80" /> สิ้นสุด 30 ก.ย. 2569
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-white text-xs font-bold shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-80"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    อ. ศรีมงคล จ. นครปฐม
+                  </div>
+                </div>
+              </div>
+              <div className="absolute right-10 top-1/2 -translate-y-1/2 hidden md:block">
+                <h3 className="text-6xl font-black text-white/20 italic transform -skew-x-12 leading-[0.9] text-right" style={{ fontFamily: 'Impact, sans-serif' }}>Power<br/><span className="text-5xl">for Better Life</span></h3>
+              </div>
+              <button onClick={openProjectEdit} className="absolute top-5 right-5 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 p-2.5 rounded-xl backdrop-blur-sm transition-all border border-white/10" title="แก้ไขข้อมูลโครงการ">
+                <Edit2 className="w-4 h-4" />
+              </button>
+            </div>
+            
+            {/* Project Edit Form Overlay */}
+            {isEditingProject && (
+              <form onSubmit={handleProjectSubmit} className="bg-white rounded-2xl shadow-2xl border border-purple-200 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200 absolute z-[60] left-1/2 -translate-x-1/2 top-40 w-11/12 max-w-4xl">
+                <div className="flex justify-between items-center mb-2 border-b border-gray-100 pb-4">
+                  <h3 className="text-lg font-extrabold text-gray-800">แก้ไขรายละเอียดโครงการ</h3>
+                  <button type="button" onClick={() => setIsEditingProject(false)} className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 rounded-full p-1.5"><X className="w-5 h-5"/></button>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div>
@@ -440,64 +507,108 @@ export default function PlanningDashboard() {
                     </select>
                   </div>
                 </div>
-                <div className="flex justify-end gap-3 mt-4">
-                  <button type="submit" className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all active:scale-95">บันทึกข้อมูล</button>
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-50 mt-4">
+                  <button type="submit" className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95">บันทึกข้อมูล</button>
                 </div>
               </form>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-2 h-full bg-purple-700"></div>
-                
-                {/* Edit Button */}
-                <button onClick={openProjectEdit} className="absolute top-3 right-3 text-gray-400 hover:text-purple-600 bg-gray-50 hover:bg-purple-50 p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity border border-transparent hover:border-purple-200" title="แก้ไขข้อมูลโครงการ">
-                  <Edit2 className="w-4 h-4" />
-                </button>
-
-                <div className="flex items-center gap-5 ml-2 pr-12">
-                  <div className="w-14 h-14 bg-purple-50 text-purple-700 flex items-center justify-center rounded-2xl border border-purple-100 shadow-sm shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 22V2" />
-                      <path d="M7 6h10" />
-                      <path d="M7 10h10" />
-                      <path d="M12 6L9 10" />
-                      <path d="M12 6l3 4" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-extrabold text-gray-900 mb-1">{currentProject?.name || "ไม่ระบุชื่อโครงการ"}</h2>
-                    <p className="text-gray-500 text-xs font-medium leading-relaxed">
-                      ผู้ควบคุมงาน: {currentProject?.supervisor || "-"} | สถานะ: {currentProject?.status || "อยู่ระหว่างก่อสร้าง"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-3 w-full md:w-auto">
-                  <button onClick={() => setSelectedWbs("")} className="flex-1 md:flex-none px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl text-xs font-bold border border-gray-200 transition-colors">
-                    เปลี่ยนโครงการ
-                  </button>
-                  <button className="flex-1 md:flex-none bg-[#334155] hover:bg-[#1e293b] text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-colors">
-                    <Printer className="w-4 h-4" /> พิมพ์รายงาน (PDF)
-                  </button>
-                </div>
-              </div>
             )}
 
-            {/* Tabs */}
-            <div className="bg-white/90 backdrop-blur-md border border-gray-200 sticky top-[68px] z-40 rounded-xl px-2 shadow-sm">
-              <div className="flex gap-2 px-4 overflow-x-auto custom-scrollbar">
-                <button onClick={() => setActiveTab("overview")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "overview" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+            {/* KPI Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
+              <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
+                <div>
+                  <p className="text-gray-500 text-xs font-bold mb-1">งานทั้งหมด</p>
+                  <p className="text-3xl font-black text-gray-900">{tasks.length}</p>
+                  <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/30">
+                  <FileText className="w-6 h-6" />
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
+                <div>
+                  <p className="text-gray-500 text-xs font-bold mb-1">งานที่เสร็จแล้ว</p>
+                  <p className="text-3xl font-black text-gray-900">{tasks.filter(t => t.progress === 100).length}</p>
+                  <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/30 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  <CheckCircle className="w-6 h-6 relative z-10" />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex flex-col justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default relative overflow-hidden">
+                <div className="flex items-center justify-between w-full relative z-10">
+                  <div>
+                    <p className="text-gray-500 text-xs font-bold mb-1">ความก้าวหน้าจริง</p>
+                    <p className="text-3xl font-black text-gray-900">
+                      {tasks.length > 0 ? (tasks.reduce((acc, t) => acc + t.progress, 0) / tasks.length).toFixed(0) : "0"}%
+                    </p>
+                  </div>
+                  <div className="w-14 h-14 rounded-2xl bg-blue-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/30">
+                    <TrendingUp className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-2 mt-4 relative z-10 overflow-hidden">
+                  <div className="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${tasks.length > 0 ? (tasks.reduce((acc, t) => acc + t.progress, 0) / tasks.length) : 0}%` }}></div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
+                <div>
+                  <p className="text-gray-500 text-xs font-bold mb-1">งานที่กำลังดำเนินการ</p>
+                  <p className="text-3xl font-black text-gray-900">{tasks.filter(t => t.progress > 0 && t.progress < 100).length}</p>
+                  <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-orange-500/30">
+                  <Clock className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
+                <div>
+                  <p className="text-gray-500 text-xs font-bold mb-1">งานล่าช้า</p>
+                  <p className="text-3xl font-black text-gray-900">0</p>
+                  <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-red-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-red-500/30">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+              </div>
+            </div>
+
+            {/* Modern Tab Navigation & Controls */}
+            <div className="flex flex-col xl:flex-row justify-between items-center gap-4 py-2 mt-2">
+              <div className="flex gap-2 overflow-x-auto w-full xl:w-auto pb-2 xl:pb-0 custom-scrollbar hide-scroll-indicator">
+                <button onClick={() => setActiveTab("overview")} className={`flex items-center gap-2 py-2.5 px-6 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${activeTab === "overview" ? "bg-purple-700 text-white shadow-md shadow-purple-500/20" : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"}`}>
                   <List className="w-4 h-4" /> แผนงาน/ผลงานก่อสร้าง
                 </button>
-                <button onClick={() => setActiveTab("gantt")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "gantt" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("gantt")} className={`flex items-center gap-2 py-2.5 px-6 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${activeTab === "gantt" ? "bg-purple-700 text-white shadow-md shadow-purple-500/20" : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"}`}>
                   <BarChart2 className="w-4 h-4" /> Gantt Chart
                 </button>
-                <button onClick={() => setActiveTab("scurve")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "scurve" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("scurve")} className={`flex items-center gap-2 py-2.5 px-6 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${activeTab === "scurve" ? "bg-purple-700 text-white shadow-md shadow-purple-500/20" : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"}`}>
                   <TrendingUp className="w-4 h-4" /> S-Curve
                 </button>
-                <button onClick={() => setActiveTab("photos")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "photos" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("photos")} className={`flex items-center gap-2 py-2.5 px-6 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${activeTab === "photos" ? "bg-purple-700 text-white shadow-md shadow-purple-500/20" : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"}`}>
                   <ImageIcon className="w-4 h-4" /> รูปภาพความก้าวหน้า
                 </button>
-                <button onClick={() => setActiveTab("budget")} className={`flex items-center gap-2 py-4 px-4 text-sm font-bold border-b-[3px] transition-colors whitespace-nowrap ${activeTab === "budget" ? "border-purple-700 text-purple-800" : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"}`}>
+                <button onClick={() => setActiveTab("budget")} className={`flex items-center gap-2 py-2.5 px-6 text-sm font-bold rounded-xl transition-all whitespace-nowrap ${activeTab === "budget" ? "bg-purple-700 text-white shadow-md shadow-purple-500/20" : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"}`}>
                   <DollarSign className="w-4 h-4" /> เบิกจ่ายงบประมาณ
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 w-full xl:w-auto">
+                <button className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                  ทั้งหมด <ChevronDown className="w-4 h-4 text-gray-400" />
+                </button>
+                <div className="relative flex-1 xl:w-64">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input type="text" placeholder="ค้นหางาน..." className="w-full bg-white border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-purple-500 outline-none font-medium shadow-sm" />
+                </div>
+                <button onClick={() => { setActiveTab("overview"); resetForm(); setShowForm(true); }} className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95 flex items-center gap-2 shrink-0">
+                  + เพิ่มงาน
                 </button>
               </div>
             </div>
@@ -508,11 +619,32 @@ export default function PlanningDashboard() {
               {/* TAB 1: OVERVIEW */}
               {activeTab === "overview" && (
                 <div className="animate-in fade-in duration-300">
-                  <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                    <h3 className="text-xl font-extrabold text-gray-900 tracking-tight">แผนงาน/ผลงานก่อสร้าง</h3>
-                    <button onClick={() => { resetForm(); setShowForm(true); }} className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95">
-                      + เพิ่มงาน
-                    </button>
+                  <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-700 shadow-sm border border-purple-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22V2"/><path d="M7 6h10"/><path d="M7 10h10"/><path d="M12 6L9 10"/><path d="M12 6l3 4"/></svg>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-extrabold text-gray-900 tracking-tight mb-1">แผนงาน/ผลงานก่อสร้าง</h3>
+                        <p className="text-xs text-gray-500 font-medium">รายการงานและความก้าวหน้าของโครงการ</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-200">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm">
+                          <List className="w-4 h-4" /> รายการ
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2 text-gray-500 hover:text-gray-800 text-xs font-bold rounded-lg transition-colors">
+                          <Grid className="w-4 h-4" /> การ์ด
+                        </button>
+                        <button className="flex items-center gap-2 px-4 py-2 text-gray-500 hover:text-gray-800 text-xs font-bold rounded-lg transition-colors">
+                          <TrendingUp className="w-4 h-4" /> ไทม์ไลน์
+                        </button>
+                      </div>
+                      <button className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors shadow-sm">
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
 
                   {showForm && (
@@ -560,14 +692,15 @@ export default function PlanningDashboard() {
                     </form>
                   )}
 
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto min-h-[400px]">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-gray-50/80 text-gray-500 text-xs tracking-wider border-b border-gray-100">
+                        <tr className="bg-gray-50/80 text-gray-500 text-[11px] uppercase tracking-wider border-b border-gray-100">
                           <th className="font-bold p-5 w-1/3">ชื่องาน (Task)</th>
-                          <th className="font-bold p-5">วันที่เริ่ม - สิ้นสุด</th>
-                          <th className="font-bold p-5">น้ำหนัก (%)</th>
-                          <th className="font-bold p-5 w-1/4">ความก้าวหน้าจริง (%)</th>
+                          <th className="font-bold p-5 text-center">วันที่เริ่ม - สิ้นสุด</th>
+                          <th className="font-bold p-5 text-center">น้ำหนัก (%)</th>
+                          <th className="font-bold p-5 text-center w-1/5">ความก้าวหน้าจริง (%)</th>
+                          <th className="font-bold p-5 text-center">สถานะ</th>
                           <th className="font-bold p-5 text-right">จัดการ</th>
                         </tr>
                       </thead>
@@ -575,32 +708,58 @@ export default function PlanningDashboard() {
                         {tasks.map(task => {
                           const tWeight = Math.max(1, new Date(task.end_date).getTime() - new Date(task.start_date).getTime());
                           const pctWeight = totalW > 0 ? ((tWeight / totalW) * 100).toFixed(0) : "0";
+                          let statusLabel = "กำลังดำเนินการ";
+                          let statusColor = "bg-orange-100 text-orange-700";
+                          if (task.progress === 100) {
+                            statusLabel = "เสร็จสมบูรณ์";
+                            statusColor = "bg-emerald-100 text-emerald-700";
+                          } else if (task.progress === 0) {
+                            statusLabel = "รอดำเนินการ";
+                            statusColor = "bg-gray-100 text-gray-600";
+                          }
                           return (
-                            <tr key={task.id} className="hover:bg-purple-50/40 transition-colors group">
+                            <tr key={task.id} className="hover:bg-purple-50/30 transition-colors group border-b border-gray-50/50">
                               <td className="p-5 font-bold text-gray-800">{task.task_name}</td>
-                              <td className="p-5 text-gray-600 text-xs font-medium">
-                                {new Date(task.start_date).toISOString().split('T')[0]} ถึง {new Date(task.end_date).toISOString().split('T')[0]}
+                              <td className="p-5 text-gray-500 text-xs font-medium text-center">
+                                {new Date(task.start_date).toLocaleDateString('th-TH')} - {new Date(task.end_date).toLocaleDateString('th-TH')}
                               </td>
-                              <td className="p-5 text-gray-600 font-semibold">{pctWeight}%</td>
+                              <td className="p-5 text-gray-600 font-bold text-center">{pctWeight}%</td>
                               <td className="p-5">
-                                <div className="flex flex-col gap-1.5">
+                                <div className="flex flex-col gap-1.5 items-center">
                                   <span className="text-gray-900 font-bold text-xs">{task.progress}%</span>
-                                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden shadow-inner">
-                                    <div className="bg-purple-800 h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${task.progress}%` }}></div>
+                                  <div className="w-full max-w-[120px] bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                                    <div className="bg-purple-600 h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${task.progress}%` }}></div>
                                   </div>
                                 </div>
                               </td>
+                              <td className="p-5 text-center">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${statusColor}`}>{statusLabel}</span>
+                              </td>
                               <td className="p-5 text-right">
-                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button onClick={() => handleEdit(task)} className="text-purple-700 hover:bg-purple-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">แก้ไข</button>
-                                  <button onClick={() => handleDelete(task.id)} className="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors">ลบ</button>
+                                <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => handleEdit(task)} className="text-gray-400 hover:text-purple-700 hover:bg-purple-50 p-2 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
+                                  <button onClick={() => handleDelete(task.id)} className="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
                                 </div>
                               </td>
                             </tr>
                           );
                         })}
                         {tasks.length === 0 && (
-                          <tr><td colSpan={5} className="text-center p-12 text-gray-400 font-medium">ยังไม่มีข้อมูลงานก่อสร้างในระบบ</td></tr>
+                          <tr>
+                            <td colSpan={6} className="p-16">
+                              <div className="flex flex-col items-center justify-center text-center max-w-md mx-auto">
+                                <div className="relative w-48 h-48 mb-4">
+                                  <div className="absolute inset-0 bg-purple-100 rounded-full blur-3xl opacity-50"></div>
+                                  <img src="https://illustrations.popsy.co/purple/under-construction.svg" alt="Empty State" className="w-full h-full relative z-10 opacity-90 drop-shadow-md" onError={(e) => { e.currentTarget.src = "https://illustrations.popsy.co/purple/work-from-home.svg"; }} />
+                                </div>
+                                <h4 className="text-xl font-extrabold text-gray-900 mb-2">ยังไม่มีข้อมูลงานก่อสร้างในระบบ</h4>
+                                <p className="text-sm text-gray-500 font-medium mb-8">เริ่มต้นสร้างงานแรกของคุณ เพื่อวางแผนและติดตามความก้าวหน้า</p>
+                                <button onClick={() => { resetForm(); setShowForm(true); }} className="bg-purple-700 hover:bg-purple-800 text-white px-8 py-3 rounded-xl text-sm font-bold shadow-lg shadow-purple-500/30 transition-all active:scale-95 flex items-center gap-2">
+                                  + เพิ่มงาน
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
                         )}
                       </tbody>
                     </table>
