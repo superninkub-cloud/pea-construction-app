@@ -95,6 +95,14 @@ export default function PlanningDashboard() {
   const [progress, setProgress] = useState<number>(0);
   const [assignee, setAssignee] = useState("");
   const [showForm, setShowForm] = useState(false);
+  // Budget states
+  const [budgets, setBudgets] = useState<any[]>([]);
+  const [isAddingBudget, setIsAddingBudget] = useState(false);
+  const [newBudgetItem, setNewBudgetItem] = useState("");
+  const [newBudgetSubWbs, setNewBudgetSubWbs] = useState("");
+  const [newBudgetTotal, setNewBudgetTotal] = useState<string>("0");
+  const [newBudgetActualPaid, setNewBudgetActualPaid] = useState<string>("0");
+  const [newBudgetObligation, setNewBudgetObligation] = useState<string>("0");
 
   // Derived state for table
   const filteredProjects = projects.filter(p => {
@@ -131,11 +139,61 @@ export default function PlanningDashboard() {
     fetchProjects();
   }, []);
 
+  const fetchBudgets = async (wbs: string) => {
+    const { data, error } = await supabase
+      .from('project_budgets')
+      .select('*')
+      .eq('project_wbs', wbs)
+      .order('created_at', { ascending: true });
+    
+    if (error) {
+      console.error("Error fetching budgets:", error);
+    } else {
+      setBudgets(data || []);
+    }
+  };
+
+  const handleSaveBudget = async () => {
+    if (!selectedWbs || !newBudgetItem.trim()) return;
+
+    const total = parseFloat(newBudgetTotal.replace(/,/g, '')) || 0;
+    const actual = parseFloat(newBudgetActualPaid.replace(/,/g, '')) || 0;
+    const obligation = parseFloat(newBudgetObligation.replace(/,/g, '')) || 0;
+
+    const { error } = await supabase.from('project_budgets').insert({
+      project_wbs: selectedWbs,
+      item_name: newBudgetItem,
+      sub_wbs: newBudgetSubWbs,
+      total_budget: total,
+      actual_paid: actual,
+      obligation: obligation,
+      remaining: total - actual,
+      remain_b: total - (actual + obligation),
+      percent: total > 0 ? (actual / total) * 100 : 0,
+      status: "CRTD BUDG AVAC NTUP SETC // C1"
+    });
+
+    if (error) {
+      console.error("Error saving budget:", error);
+      alert("Failed to save budget");
+    } else {
+      fetchBudgets(selectedWbs);
+      setIsAddingBudget(false);
+      setNewBudgetItem("");
+      setNewBudgetSubWbs("");
+      setNewBudgetTotal("0");
+      setNewBudgetActualPaid("0");
+      setNewBudgetObligation("0");
+    }
+  };
+
   useEffect(() => {
     if (selectedWbs) {
       fetchTasks(selectedWbs);
+      fetchBudgets(selectedWbs);
     } else {
       setTasks([]);
+      setBudgets([]);
     }
   }, [selectedWbs]);
 
@@ -2097,7 +2155,10 @@ export default function PlanningDashboard() {
                       <div>
                         <div className="flex justify-between items-center mb-4">
                           <h4 className="text-sm font-extrabold text-gray-800">รายละเอียดข้อมูลเบิกจ่าย</h4>
-                          <button className="bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2">
+                          <button 
+                            onClick={() => setIsAddingBudget(true)}
+                            className="bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2"
+                          >
                             <Plus className="w-3.5 h-3.5" />
                             เพิ่มรายการเบิกจ่าย
                           </button>
@@ -2120,14 +2181,122 @@ export default function PlanningDashboard() {
                                 <th className="p-4 text-right">งบคงเหลือ</th>
                                 <th className="p-4 text-right">% เบิกจ่าย</th>
                                 <th className="p-4 text-center">สถานะ</th>
+                                <th className="p-4 text-center">จัดการ</th>
                               </tr>
                             </thead>
                             <tbody className="text-[11px] text-gray-700 divide-y divide-gray-50">
-                              <tr>
-                                <td colSpan={14} className="p-8 text-center text-gray-400 font-medium">
-                                  ยังไม่มีข้อมูลรายการเบิกจ่าย (คุณสามารถเพิ่มข้อมูลได้)
-                                </td>
-                              </tr>
+                              {budgets.length > 0 ? (
+                                budgets.map((row, index) => (
+                                  <tr key={row.id} className="hover:bg-purple-50/30 transition-colors">
+                                    <td className="p-4 text-center font-medium">{index + 1}</td>
+                                    <td className="p-4 font-bold min-w-[200px]" title={row.item_name}>{row.item_name}</td>
+                                    <td className="p-4 text-gray-500 whitespace-nowrap">{row.sub_wbs || row.wbs || '-'}</td>
+                                    <td className="p-4 text-right font-medium">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.total_budget || 0)}</td>
+                                    <td className="p-4 text-right font-medium">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.actual_paid || 0)}</td>
+                                    <td className="p-4 text-right font-medium text-blue-600">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.remaining || 0)}</td>
+                                    <td className="p-4 text-right font-medium text-red-500">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.obligation || 0)}</td>
+                                    <td className="p-4 text-right text-gray-500">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.pr || 0)}</td>
+                                    <td className="p-4 text-right text-green-600 font-medium">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.po || 0)}</td>
+                                    <td className="p-4 text-right text-gray-500">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.gr || 0)}</td>
+                                    <td className="p-4 text-right text-gray-500">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.ir || 0)}</td>
+                                    <td className="p-4 text-right font-bold text-gray-800">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.remain_b || 0)}</td>
+                                    <td className="p-4 text-right font-medium">{((row.actual_paid / (row.total_budget || 1)) * 100).toFixed(2)}%</td>
+                                    <td className="p-4 text-center">
+                                      <span className="px-2.5 py-1 rounded-md text-[9px] font-bold tracking-wider whitespace-nowrap text-orange-500 bg-orange-50">
+                                        {row.status || 'C1'}
+                                      </span>
+                                    </td>
+                                    <td className="p-4 text-center">
+                                      <button 
+                                        onClick={async () => {
+                                          if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
+                                            const { error } = await supabase.from('project_budgets').delete().eq('id', row.id);
+                                            if (!error) fetchBudgets(selectedWbs);
+                                          }
+                                        }}
+                                        className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : !isAddingBudget && (
+                                <tr>
+                                  <td colSpan={15} className="p-8 text-center text-gray-400 font-medium">
+                                    ยังไม่มีข้อมูลรายการเบิกจ่าย (คลิกเพิ่มรายการเบิกจ่ายด้านบน)
+                                  </td>
+                                </tr>
+                              )}
+
+                              {isAddingBudget && (
+                                <tr className="bg-purple-50/20">
+                                  <td className="p-4 text-center font-bold text-purple-600">ใหม่</td>
+                                  <td className="p-4 min-w-[200px]">
+                                    <input 
+                                      type="text" 
+                                      value={newBudgetItem}
+                                      onChange={(e) => setNewBudgetItem(e.target.value)}
+                                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                      placeholder="ชื่อรายการ"
+                                    />
+                                  </td>
+                                  <td className="p-4">
+                                    <input 
+                                      type="text" 
+                                      value={newBudgetSubWbs}
+                                      onChange={(e) => setNewBudgetSubWbs(e.target.value)}
+                                      className="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                                      placeholder="WBS ย่อย"
+                                    />
+                                  </td>
+                                  <td className="p-4">
+                                    <input 
+                                      type="text" 
+                                      value={newBudgetTotal}
+                                      onChange={(e) => setNewBudgetTotal(e.target.value)}
+                                      className="w-24 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-purple-500 text-right outline-none"
+                                      placeholder="0"
+                                    />
+                                  </td>
+                                  <td className="p-4">
+                                    <input 
+                                      type="text" 
+                                      value={newBudgetActualPaid}
+                                      onChange={(e) => setNewBudgetActualPaid(e.target.value)}
+                                      className="w-24 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-purple-500 text-right outline-none"
+                                      placeholder="0"
+                                    />
+                                  </td>
+                                  <td colSpan={2}></td>
+                                  <td className="p-4">
+                                    <input 
+                                      type="text" 
+                                      value={newBudgetObligation}
+                                      onChange={(e) => setNewBudgetObligation(e.target.value)}
+                                      className="w-24 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-purple-500 text-right outline-none"
+                                      placeholder="ภาระผูกพัน"
+                                    />
+                                  </td>
+                                  <td colSpan={6}></td>
+                                  <td className="p-4 text-center">
+                                    <div className="flex justify-center gap-2">
+                                      <button 
+                                        onClick={handleSaveBudget}
+                                        className="text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                                      >
+                                        บันทึก
+                                      </button>
+                                      <button 
+                                        onClick={() => setIsAddingBudget(false)}
+                                        className="text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                                      >
+                                        ยกเลิก
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
                             </tbody>
                           </table>
                         </div>

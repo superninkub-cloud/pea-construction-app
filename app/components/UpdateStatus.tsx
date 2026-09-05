@@ -472,8 +472,6 @@ export default function UpdateStatus() {
         const remarksAdded = newRemarks.trim() !== "";
         
         if (statusChanged || remarksAdded) {
-          // Temporarily disable LINE notifications while fixing data
-          /*
           fetch('/api/notify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -487,12 +485,9 @@ export default function UpdateStatus() {
               }
             })
           });
-          */
         }
         
         if (file && imageUrl) {
-          // Temporarily disable LINE notifications while fixing data
-          /*
           fetch('/api/notify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -501,7 +496,6 @@ export default function UpdateStatus() {
               payload: { wbs: editWbs, project_name: editName, image_url: imageUrl }
             })
           });
-          */
         }
       } catch (e) {
         console.error("Failed to trigger notify API:", e);
