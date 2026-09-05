@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Printer, Home, List, BarChart2, TrendingUp, Image as ImageIcon, DollarSign, Zap, Edit2, X, Search, Bell, ChevronDown, CheckCircle2, Clock, AlertTriangle, MoreVertical, Grid, Calendar, FileText, CheckCircle } from 'lucide-react';
+import { Printer, Home, List, BarChart2, TrendingUp, Image as ImageIcon, DollarSign, Zap, Edit2, X, Search, Bell, ChevronDown, CheckCircle2, Clock, AlertTriangle, MoreVertical, Grid, Calendar, FileText, CheckCircle, Trash2, Plus } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -360,7 +360,7 @@ export default function PlanningDashboard() {
       if (newWeight !== undefined) {
          return { ...t, weight: newWeight };
       }
-      return t;
+      return { ...t, weight: 0 };
     });
     setTasks(updatedTasks);
 
@@ -369,8 +369,32 @@ export default function PlanningDashboard() {
       const newWeight = w[t.step_order ?? i];
       if (newWeight !== undefined) {
          supabase.from("project_tasks").update({ weight: newWeight }).eq("id", t.id);
+      } else {
+         supabase.from("project_tasks").update({ weight: 0 }).eq("id", t.id);
       }
     });
+  };
+
+  const handleAddCustomStep = async () => {
+    if (!selectedWbs) return;
+    
+    const maxOrder = tasks.length > 0 ? Math.max(...tasks.map(t => t.step_order ?? 0)) : -1;
+    const newOrder = maxOrder + 1;
+    
+    const payload = {
+      project_wbs: selectedWbs,
+      task_name: "ขั้นตอนใหม่",
+      weight: 0,
+      step_order: newOrder,
+      progress: 0,
+      target_qty: 0,
+      done_qty: 0
+    };
+    
+    const { data, error } = await supabase.from("project_tasks").insert([payload]).select();
+    if (!error && data) {
+      setTasks(prev => [...prev, ...data]);
+    }
   };
 
   // Gantt Chart Logic
@@ -485,7 +509,9 @@ export default function PlanningDashboard() {
     return tasks.reduce((acc, t) => acc + Math.max(1, new Date(t.end_date).getTime() - new Date(t.start_date).getTime()), 0);
   };
   const totalW = calculateTotalWeight();
-  const activeTasks = tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0);
+  const activeTasks = currentProject?.construction_type === '5' 
+    ? tasks 
+    : tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0);
 
   return (
     <div className="w-full text-sm text-gray-800 font-sans">
@@ -1091,7 +1117,7 @@ export default function PlanningDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50 text-sm">
-                        {tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0).map((task, index) => {
+                        {activeTasks.map((task, index) => {
                           const stepDef = FIXED_CONSTRUCTION_STEPS.find(s => s.order === (task.step_order ?? index));
                           const targetQty = Number(task.target_qty) || 0;
                           const doneQty = Number(task.done_qty) || 0;
@@ -1122,8 +1148,17 @@ export default function PlanningDashboard() {
                               </td>
                               <td className="p-3 border-r border-gray-50">
                                 <div className="flex flex-col gap-0.5">
-                                  <span className={`font-bold text-[12px] ${stepColor}`}>{task.task_name}</span>
-                                  {stepDef && <span className="text-[10px] text-gray-400 font-medium">หน่วย: {stepDef.unit}</span>}
+                                  {currentProject?.construction_type === '5' ? (
+                                    <input
+                                      type="text"
+                                      value={task.task_name}
+                                      onChange={(e) => handleStepUpdate(task.id, "task_name", e.target.value)}
+                                      className={`font-bold text-[12px] ${stepColor} w-full bg-white border border-gray-200 rounded px-2 py-1 focus:ring-2 focus:ring-purple-400 outline-none hover:border-purple-300 transition-colors`}
+                                    />
+                                  ) : (
+                                    <span className={`font-bold text-[12px] ${stepColor}`}>{task.task_name}</span>
+                                  )}
+                                  <span className="text-[10px] text-gray-400 font-medium">หน่วย: {stepDef?.unit || 'รายการ'}</span>
                                 </div>
                               </td>
                               
@@ -1194,7 +1229,8 @@ export default function PlanningDashboard() {
                                   max="100"
                                   value={task.weight ?? stepDef?.defaultWeight ?? 0}
                                   onChange={(e) => handleStepUpdate(task.id, "weight", Number(e.target.value))}
-                                  className="w-14 text-[11px] bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-400 outline-none font-bold text-gray-700 hover:border-purple-300 transition-colors mx-auto block"
+                                  disabled={currentProject?.construction_type !== '5'}
+                                  className={`w-14 text-[11px] ${currentProject?.construction_type === '5' ? 'bg-white hover:border-purple-300' : 'bg-gray-50'} border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-400 outline-none font-bold text-gray-700 transition-colors mx-auto block`}
                                 />
                               </td>
                               <td className="p-3 text-center border-r border-gray-50">
@@ -1215,6 +1251,11 @@ export default function PlanningDashboard() {
                                   <span className={`w-1 h-1 rounded-full ${statusDot}`}></span>
                                   {statusLabel}
                                 </span>
+                                {currentProject?.construction_type === '5' && (
+                                  <button onClick={() => handleDelete(task.id)} className="ml-2 text-red-400 hover:text-red-600 transition-colors" title="ลบขั้นตอน">
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           );
@@ -1233,7 +1274,7 @@ export default function PlanningDashboard() {
                                   const doneQty = Number(t.done_qty) || 0;
                                   const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
                                   return p === 100 && (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0;
-                                }).length} / {tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0).length} ขั้นตอนเสร็จ
+                                }).length} / {activeTasks.length} ขั้นตอนเสร็จ
                               </span>
                             </td>
                             <td className="p-4 text-center">
@@ -1281,6 +1322,14 @@ export default function PlanningDashboard() {
                         )}
                       </tbody>
                     </table>
+                    
+                    {currentProject?.construction_type === '5' && (
+                      <div className="p-4 bg-gray-50/50 border-t border-gray-100 flex justify-center">
+                        <button onClick={handleAddCustomStep} className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 hover:text-purple-700 hover:border-purple-300 hover:bg-purple-50 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm">
+                          <Plus className="w-4 h-4" /> เพิ่มขั้นตอนงาน
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -1305,7 +1354,7 @@ export default function PlanningDashboard() {
                       </div>
 
                       <div className="space-y-6 mt-10 relative z-10">
-                        {tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0).map(task => {
+                        {activeTasks.map(task => {
                           const planLeft = getLeftOffset(task.start_date);
                           const planWidth = getWidth(task.start_date, task.end_date);
                           
