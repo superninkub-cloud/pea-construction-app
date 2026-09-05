@@ -29,9 +29,13 @@ export default function SafetyHubPage() {
     const thaiDate = `${d.getDate()} ${["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."][d.getMonth()]} ${d.getFullYear() + 543}`;
     setDateStr(thaiDate);
     
-    if (sessionStorage.getItem("pea_role") === 'admin') {
-      setIsAuthorized(true);
-    } else {
+    try {
+      if (sessionStorage.getItem("pea_role") === 'admin') {
+        setIsAuthorized(true);
+      } else {
+        setIsAuthorized(false);
+      }
+    } catch (error) {
       setIsAuthorized(false);
     }
   }, []);
