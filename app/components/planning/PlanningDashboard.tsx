@@ -71,6 +71,7 @@ export default function PlanningDashboard() {
   const [newProjWbs, setNewProjWbs] = useState("");
   const [newProjName, setNewProjName] = useState("");
   const [newProjSupervisor, setNewProjSupervisor] = useState("");
+  const [isLegacyProject, setIsLegacyProject] = useState(false);
 
   // Project Edit states
   const [isEditingProject, setIsEditingProject] = useState(false);
@@ -259,13 +260,32 @@ export default function PlanningDashboard() {
       wbs: newProjWbs,
       name: newProjName,
       supervisor: newProjSupervisor,
-      status: 'ร่างแผนงาน'
+      status: isLegacyProject ? 'ปิดงาน (TECO)' : 'ร่างแผนงาน'
     }).select();
     if (!error) {
+      if (isLegacyProject) {
+        const today = new Date().toISOString().split('T')[0];
+        const stepsToInsert = FIXED_CONSTRUCTION_STEPS.map(step => ({
+          project_wbs: newProjWbs,
+          task_name: step.name,
+          start_date: today,
+          end_date: today,
+          progress: 100,
+          assignee: null,
+          step_order: step.order,
+          weight: step.defaultWeight,
+          target_qty: 1,
+          done_qty: 1,
+          actual_start_date: today,
+          actual_end_date: today
+        }));
+        await supabase.from("project_tasks").insert(stepsToInsert);
+      }
       setIsCreatingProject(false);
       setNewProjWbs("");
       setNewProjName("");
       setNewProjSupervisor("");
+      setIsLegacyProject(false);
       fetchProjects();
       setSelectedWbs(newProjWbs);
     } else {
@@ -633,6 +653,32 @@ export default function PlanningDashboard() {
     setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'อยู่ระหว่างก่อสร้าง' } : p));
   };
 
+  const handleFastTrackLegacy = async () => {
+    if (!selectedWbs) return;
+    if (!confirm("ยืนยันนำเข้า 'โครงการที่เสร็จสิ้นแล้ว' (Legacy)?\n\nระบบจะข้ามขั้นตอนการทำแผน ปรับความก้าวหน้าทุกขั้นตอนเป็น 100% อัตโนมัติ และเปลี่ยนสถานะโครงการเป็น TECO ทันที")) return;
+    
+    // Update project status
+    await supabase.from("projects").update({ status: 'ปิดงาน (TECO)' }).eq("wbs", selectedWbs);
+    
+    // Update all tasks to 100%
+    const today = new Date().toISOString().split('T')[0];
+    const { data: existingTasks } = await supabase.from("project_tasks").select("id").eq("project_wbs", selectedWbs);
+    if (existingTasks && existingTasks.length > 0) {
+      for (const t of existingTasks) {
+        await supabase.from("project_tasks").update({
+          progress: 100,
+          target_qty: 1,
+          done_qty: 1,
+          actual_start_date: today,
+          actual_end_date: today
+        }).eq("id", t.id);
+      }
+    }
+    
+    setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'ปิดงาน (TECO)' } : p));
+    await fetchTasks(selectedWbs);
+  };
+
   const activeTasksWithDerivedProgress = activeTasks.map(t => {
     const targetQty = Number(t.target_qty) || 0;
     const doneQty = Number(t.done_qty) || 0;
@@ -825,6 +871,15 @@ export default function PlanningDashboard() {
                       <div className="md:col-span-3">
                         <label className="block text-xs font-bold text-gray-700 mb-1.5">ชื่อผู้ควบคุมงาน</label>
                         <input type="text" value={newProjSupervisor} onChange={e => setNewProjSupervisor(e.target.value)} className="w-full p-2.5 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500" placeholder="นาย..." />
+                      </div>
+                      <div className="md:col-span-3 mt-2">
+                        <label className="flex items-center gap-3 cursor-pointer p-4 border border-emerald-200 bg-emerald-50/50 rounded-xl hover:bg-emerald-50 transition-colors">
+                          <input type="checkbox" checked={isLegacyProject} onChange={(e) => setIsLegacyProject(e.target.checked)} className="w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer" />
+                          <div>
+                            <span className="block text-sm font-bold text-emerald-800">✅ โครงการนี้ดำเนินการเสร็จสิ้นแล้ว (นำเข้าข้อมูลประวัติ)</span>
+                            <span className="block text-xs text-emerald-600/80 font-medium">ระบบจะข้ามขั้นตอนการทำแผนและปรับความก้าวหน้าเป็น 100% ทันที</span>
+                          </div>
+                        </label>
                       </div>
                     </div>
                     <div className="flex justify-end gap-2">
@@ -1182,9 +1237,14 @@ export default function PlanningDashboard() {
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1.5">
                         {isPlanningPhase && (
-                          <button onClick={handleLockPlan} className="flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm shadow-emerald-900/20 transition-all active:scale-95">
-                            <CheckCircle className="w-4 h-4" /> ยืนยันและล็อคแผนงาน
-                          </button>
+                          <>
+                            <button onClick={handleFastTrackLegacy} className="flex items-center gap-2 px-5 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg shadow-sm border border-blue-200 transition-all active:scale-95" title="ปรับ 100% ทันทีสำหรับโครงการเก่า">
+                              <CheckCircle className="w-4 h-4" /> สรุปงานเสร็จสิ้น (Legacy)
+                            </button>
+                            <button onClick={handleLockPlan} className="flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm shadow-emerald-900/20 transition-all active:scale-95">
+                              <CheckCircle className="w-4 h-4" /> ยืนยันและล็อคแผนงาน
+                            </button>
+                          </>
                         )}
                         {!isPlanningPhase && (
                           <button onClick={handleUnlockPlan} className="flex items-center gap-2 px-5 py-2 bg-white text-emerald-700 hover:bg-emerald-50 text-xs font-bold rounded-lg shadow-sm border border-emerald-200 transition-all active:scale-95 group" title="คลิกเพื่อแก้ไขแผนงาน">
