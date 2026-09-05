@@ -224,6 +224,7 @@
   z-index: 2;
   opacity: 0.9;
   mix-blend-mode: multiply;
+  transform: scaleX(-1);
 }
 
 /* Info Cards */
