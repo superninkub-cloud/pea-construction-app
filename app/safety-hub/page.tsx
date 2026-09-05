@@ -244,7 +244,7 @@ export default function SafetyHubPage() {
                 <img src="/crane.jpg" alt="Crane" className="deco-crane" />
                 
                 <div className="collage-header-new">
-                  <h2>รายงานผลการดำเนินงานด้านความปลอดภัย</h2>
+                  <h2>การดำเนินงานด้านความปลอดภัย</h2>
                   <div className="subtitle-en">Safety Report</div>
                   <div className="subtitle-th">แผนกก่อสร้างระบบไฟฟ้า (ผกร.กรย.(ก3))</div>
                 </div>
