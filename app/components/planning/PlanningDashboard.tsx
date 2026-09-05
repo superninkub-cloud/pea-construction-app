@@ -423,25 +423,59 @@ export default function PlanningDashboard() {
     else if (type === "4") w = [5, 0, 0, 45, 50, 0, 0];
     else if (type === "5") return;
     
-    // Update tasks synchronously first
-    const updatedTasks = tasks.map((t, i) => {
-      const newWeight = w[t.step_order ?? i];
-      if (newWeight !== undefined) {
-         return { ...t, weight: newWeight };
-      }
-      return { ...t, weight: 0 };
-    });
-    setTasks(updatedTasks);
+    // Restore missing default steps and update weights
+    const currentTasks = [...tasks];
+    const today = new Date().toISOString().split('T')[0];
 
-    // Fire DB updates in background
-    updatedTasks.forEach((t, i) => {
-      const newWeight = w[t.step_order ?? i];
-      if (newWeight !== undefined) {
-         supabase.from("project_tasks").update({ weight: newWeight }).eq("id", t.id);
+    for (const step of FIXED_CONSTRUCTION_STEPS) {
+      const existingTask = currentTasks.find(t => t.step_order === step.order);
+      const newWeight = w[step.order];
+
+      if (existingTask) {
+        // Update existing
+        await supabase.from("project_tasks").update({ 
+          task_name: step.name, 
+          weight: newWeight 
+        }).eq("id", existingTask.id);
+        
+        existingTask.task_name = step.name;
+        existingTask.weight = newWeight;
       } else {
-         supabase.from("project_tasks").update({ weight: 0 }).eq("id", t.id);
+        // Insert missing
+        const { data } = await supabase.from("project_tasks").insert([{
+          project_wbs: selectedWbs,
+          task_name: step.name,
+          start_date: today,
+          end_date: today,
+          progress: 0,
+          step_order: step.order,
+          weight: newWeight,
+          target_qty: 0,
+          done_qty: 0
+        }]).select();
+        
+        if (data && data[0]) {
+          currentTasks.push(data[0]);
+        }
       }
-    });
+    }
+
+    // Hide any custom steps by setting weight to 0
+    const customTasks = currentTasks.filter(t => (t.step_order ?? 0) > 6);
+    for (const t of customTasks) {
+      await supabase.from("project_tasks").update({ weight: 0 }).eq("id", t.id);
+      t.weight = 0;
+    }
+
+    setTasks(currentTasks.sort((a, b) => (a.step_order ?? 0) - (b.step_order ?? 0)));
+  };
+
+  const handleUnlockPlan = async () => {
+    if (!selectedWbs) return;
+    if (!confirm("คุณต้องการปลดล็อคเพื่อแก้ไขแผนงานใช่หรือไม่?\n\n(การปลดล็อคจะนำโครงการกลับสู่ 'โหมดวางแผนงาน' เพื่อแก้ไขเป้าหมายอีกครั้ง)")) return;
+    
+    await supabase.from("projects").update({ status: 'ร่างแผนงาน' }).eq("wbs", selectedWbs);
+    setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'ร่างแผนงาน' } : p));
   };
 
   const handleAddCustomStep = async () => {
@@ -1146,8 +1180,8 @@ export default function PlanningDashboard() {
                           </button>
                         )}
                         {!isPlanningPhase && (
-                          <button className="flex items-center gap-2 px-5 py-2 bg-gray-100 text-emerald-700 text-xs font-bold rounded-lg shadow-sm border border-emerald-200 cursor-default">
-                            <CheckCircle2 className="w-4 h-4" /> แผนงานถูกล็อคแล้ว
+                          <button onClick={handleUnlockPlan} className="flex items-center gap-2 px-5 py-2 bg-white text-emerald-700 hover:bg-emerald-50 text-xs font-bold rounded-lg shadow-sm border border-emerald-200 transition-all active:scale-95 group" title="คลิกเพื่อแก้ไขแผนงาน">
+                            <CheckCircle2 className="w-4 h-4" /> แผนงานถูกล็อคแล้ว <span className="hidden group-hover:inline ml-1 text-emerald-600 underline">คลิกเพื่อแก้ไข</span>
                           </button>
                         )}
                       </div>
