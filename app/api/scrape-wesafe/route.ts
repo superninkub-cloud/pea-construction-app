@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const maxDuration = 60; // Allow up to 60 seconds for Vercel
+
 function extractVal(html: string, name: string) {
     const regex = new RegExp(`name="${name}"\\s+(?:id="${name}"\\s+)?value="([^"]*)"`);
     const match = html.match(regex);
@@ -191,27 +193,31 @@ export async function POST(req: Request) {
     console.log(`[WeSafe API] Found ${imagesArray.length} images for ${reqNo}`);
     console.log('[WeSafe API] Debug:', debugInfo);
 
-    // Download images as base64 so browser can display without WeSafe session
-    const base64Images: string[] = [];
-    for (const imgUrl of imagesArray) {
-        try {
-            const imgDownload = await fetch(imgUrl, {
-                headers: {
-                    'Cookie': finalCookies,
-                    'User-Agent': USER_AGENT,
-                    'Referer': 'https://wesafe.pea.co.th/admin/detailsub.aspx'
+    // Download images as base64 in parallel so browser can display without WeSafe session
+    const base64Results = await Promise.all(
+        imagesArray.map(async (imgUrl) => {
+            try {
+                const imgDownload = await fetch(imgUrl, {
+                    headers: {
+                        'Cookie': finalCookies,
+                        'User-Agent': USER_AGENT,
+                        'Referer': 'https://wesafe.pea.co.th/admin/detailsub.aspx'
+                    }
+                });
+                if (imgDownload.ok) {
+                    const contentType = imgDownload.headers.get('content-type') || 'image/jpeg';
+                    const buffer = await imgDownload.arrayBuffer();
+                    const base64 = Buffer.from(buffer).toString('base64');
+                    return `data:${contentType};base64,${base64}`;
                 }
-            });
-            if (imgDownload.ok) {
-                const contentType = imgDownload.headers.get('content-type') || 'image/jpeg';
-                const buffer = await imgDownload.arrayBuffer();
-                const base64 = Buffer.from(buffer).toString('base64');
-                base64Images.push(`data:${contentType};base64,${base64}`);
+                return null;
+            } catch (e) {
+                console.error(`Failed to download image: ${imgUrl}`, e);
+                return null;
             }
-        } catch (e) {
-            console.error(`Failed to download image: ${imgUrl}`, e);
-        }
-    }
+        })
+    );
+    const base64Images = base64Results.filter(Boolean) as string[];
 
     return NextResponse.json({
       success: true,
