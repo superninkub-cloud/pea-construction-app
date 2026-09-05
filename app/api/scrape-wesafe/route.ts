@@ -98,16 +98,17 @@ export async function POST(req: Request) {
     let combinedCookies = mergeCookies(cookieStr, newCookies);
 
     const location = authRes.headers.get('location') || '';
+    const debugSteps: string[] = [
+        `login status: ${authRes.status}`,
+        `login location: ${location}`,
+        `login cookies received: ${newCookies.join(', ')}`,
+        `combined cookies after login: ${combinedCookies.substring(0, 100)}...`
+    ];
 
     if (authRes.status !== 302 && authRes.status !== 303) {
          return NextResponse.json({ 
              error: 'Login failed. Please check credentials.',
-             debug: {
-                 status: authRes.status,
-                 cookieSent: cookieStr,
-                 cookieReceived: newCookies,
-                 location: location
-             }
+             debug: debugSteps
          }, { status: 401 });
     }
 
@@ -126,6 +127,8 @@ export async function POST(req: Request) {
     const vs2 = extractVal(chooseHtml, '__VIEWSTATE');
     const vsg2 = extractVal(chooseHtml, '__VIEWSTATEGENERATOR');
     const ev2 = extractVal(chooseHtml, '__EVENTVALIDATION');
+    debugSteps.push(`choose GET status: ${chooseRes.status}, url: ${chooseUrl}`);
+    debugSteps.push(`choose VIEWSTATE found: ${!!vs2}, html_len: ${chooseHtml.length}`);
 
     // 4. Post Choose Page (Select Operation and Maintenance)
     const chooseData = new URLSearchParams();
@@ -148,6 +151,10 @@ export async function POST(req: Request) {
 
     let chooseCookies = getCookies(choosePostRes.headers);
     let finalCookies = mergeCookies(combinedCookies, chooseCookies);
+    debugSteps.push(`choose POST status: ${choosePostRes.status}`);
+    debugSteps.push(`choose POST location: ${choosePostRes.headers.get('location')}`);
+    debugSteps.push(`choose POST new cookies: ${chooseCookies.join(', ')}`);
+    debugSteps.push(`final cookies: ${finalCookies.substring(0, 150)}...`);
 
     // 5. Fetch detail.aspx (Initialization for the session just in case)
     const detailUrl = `https://wesafe.pea.co.th/admin/detail.aspx?WebGetReqNO=${reqNo}`;
@@ -206,7 +213,7 @@ export async function POST(req: Request) {
       success: true,
       message: 'Scraping successful',
       images: imagesArray,
-      debug: debugInfo
+      debug: debugSteps
     });
 
   } catch (error: any) {
