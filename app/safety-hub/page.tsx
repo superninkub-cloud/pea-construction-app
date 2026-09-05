@@ -76,7 +76,11 @@ export default function SafetyHubPage() {
       }
       
       if (data.images && data.images.length > 0) {
-        setImages(prev => [...prev, ...data.images].slice(0, 4));
+        // Route images through our proxy to bypass CORS
+        const proxiedImages = data.images.map((url: string) => 
+          `/api/proxy-image?url=${encodeURIComponent(url)}`
+        );
+        setImages(prev => [...prev, ...proxiedImages].slice(0, 4));
         alert(`ดึงรูปสำเร็จ ${data.images.length} รูป`);
       } else {
         const dbg = data.debug ? '\n\nDebug:\n' + data.debug.join('\n') : '';

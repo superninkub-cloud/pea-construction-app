@@ -193,41 +193,12 @@ export async function POST(req: Request) {
     console.log(`[WeSafe API] Found ${imagesArray.length} images for ${reqNo}`);
     console.log('[WeSafe API] Debug:', debugInfo);
 
-    // Download images as base64 in parallel
-    // NOTE: WeSafe images at /imgwesafe/ are public static files - no auth needed
-    const base64Results = await Promise.all(
-        imagesArray.map(async (imgUrl) => {
-            try {
-                const imgDownload = await fetch(imgUrl, {
-                    headers: {
-                        'User-Agent': USER_AGENT,
-                        'Referer': 'https://wesafe.pea.co.th/'
-                    }
-                });
-                console.log(`[Image Download] ${imgUrl} -> status=${imgDownload.status}, type=${imgDownload.headers.get('content-type')}`);
-                if (imgDownload.ok) {
-                    // Fix content-type: only keep "image/jpeg" part, not "image/jpeg; charset=..." 
-                    const rawContentType = imgDownload.headers.get('content-type') || 'image/jpeg';
-                    const contentType = rawContentType.split(';')[0].trim();
-                    const buffer = await imgDownload.arrayBuffer();
-                    const base64 = Buffer.from(buffer).toString('base64');
-                    return `data:${contentType};base64,${base64}`;
-                }
-                console.log(`[Image Download] FAILED: status=${imgDownload.status}`);
-                return null;
-            } catch (e) {
-                console.error(`Failed to download image: ${imgUrl}`, e);
-                return null;
-            }
-        })
-    );
-    const base64Images = base64Results.filter(Boolean) as string[];
+    console.log('[WeSafe API] Image URLs:', imagesArray);
 
     return NextResponse.json({
       success: true,
       message: 'Scraping successful',
-
-      images: base64Images.length > 0 ? base64Images : imagesArray,
+      images: imagesArray,
       debug: debugInfo
     });
 
