@@ -58,6 +58,14 @@ export default function PlanningDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
+  // Monthly Report states
+  const [reportMonth, setReportMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const [monthlyData, setMonthlyData] = useState<Record<string, number>>({});
+  const [monthlyLoading, setMonthlyLoading] = useState(false);
+
   // New Project states
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjWbs, setNewProjWbs] = useState("");
@@ -162,6 +170,30 @@ export default function PlanningDashboard() {
     setLoading(false);
   };
 
+  const fetchMonthlyData = async () => {
+    if (!selectedWbs || !reportMonth) return;
+    setMonthlyLoading(true);
+    const { data, error } = await supabase
+      .from("monthly_progress")
+      .select("task_id, done_qty")
+      .eq("project_wbs", selectedWbs)
+      .eq("report_month", reportMonth);
+    
+    if (!error && data) {
+      const mapped = data.reduce((acc: any, curr: any) => ({ ...acc, [curr.task_id]: Number(curr.done_qty) }), {});
+      setMonthlyData(mapped);
+    } else {
+      setMonthlyData({});
+    }
+    setMonthlyLoading(false);
+  };
+
+  useEffect(() => {
+    if (activeTab === "monthly" && selectedWbs) {
+      fetchMonthlyData();
+    }
+  }, [activeTab, selectedWbs, reportMonth]);
+
   const fetchTasks = async (wbs: string) => {
     const { data, error } = await supabase
       .from("project_tasks")
@@ -226,7 +258,8 @@ export default function PlanningDashboard() {
     const { data, error } = await supabase.from("projects").insert({
       wbs: newProjWbs,
       name: newProjName,
-      supervisor: newProjSupervisor
+      supervisor: newProjSupervisor,
+      status: 'ร่างแผนงาน'
     }).select();
     if (!error) {
       setIsCreatingProject(false);
@@ -299,6 +332,42 @@ export default function PlanningDashboard() {
 
   // Inline update for fixed step fields
   const [savingStepId, setSavingStepId] = useState<string | null>(null);
+
+  const handleMonthlyUpdate = async (taskId: string, qty: number | null) => {
+    const val = qty === null ? 0 : qty;
+    setMonthlyData(prev => ({ ...prev, [taskId]: val }));
+    
+    // Optimistic update done, now save to DB
+    const { data: existing } = await supabase
+      .from("monthly_progress")
+      .select("id")
+      .eq("task_id", taskId)
+      .eq("report_month", reportMonth)
+      .single();
+      
+    if (existing) {
+       await supabase.from("monthly_progress").update({ done_qty: val }).eq("id", existing.id);
+    } else {
+       await supabase.from("monthly_progress").insert({
+          project_wbs: selectedWbs,
+          task_id: taskId,
+          report_month: reportMonth,
+          done_qty: val
+       });
+    }
+
+    // Recalculate total done_qty for this task
+    const { data: allMonths } = await supabase
+      .from("monthly_progress")
+      .select("done_qty")
+      .eq("task_id", taskId);
+      
+    if (allMonths) {
+      const totalDone = allMonths.reduce((sum: number, row: any) => sum + Number(row.done_qty), 0);
+      handleStepUpdate(taskId, "done_qty", totalDone);
+    }
+  };
+
   const handleStepUpdate = async (taskId: string, field: string, value: string | number | null) => {
     setSavingStepId(taskId);
     
@@ -512,6 +581,16 @@ export default function PlanningDashboard() {
   const activeTasks = currentProject?.construction_type === '5' 
     ? tasks 
     : tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0);
+
+  const isPlanningPhase = currentProject?.status === 'ร่างแผนงาน';
+
+  const handleLockPlan = async () => {
+    if (!selectedWbs) return;
+    if (!confirm("ยืนยันการล็อคแผนงาน?\n\nเมื่อยืนยันแล้ว ข้อมูลแผนงาน (วันที่และเป้าหมาย) จะไม่สามารถแก้ไขได้อีก เพื่อให้คุณสามารถเริ่มบันทึกผลการดำเนินงานจริงได้")) return;
+    
+    await supabase.from("projects").update({ status: 'อยู่ระหว่างก่อสร้าง' }).eq("wbs", selectedWbs);
+    setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'อยู่ระหว่างก่อสร้าง' } : p));
+  };
 
   const activeTasksWithDerivedProgress = activeTasks.map(t => {
     const targetQty = Number(t.target_qty) || 0;
@@ -927,6 +1006,7 @@ export default function PlanningDashboard() {
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5">สถานะ</label>
                     <select value={projStatus} onChange={e => setProjStatus(e.target.value)} className="w-full p-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 bg-white">
+                      <option value="ร่างแผนงาน">ร่างแผนงาน</option>
                       <option value="อยู่ระหว่างก่อสร้าง">อยู่ระหว่างก่อสร้าง</option>
                       <option value="ส่งมอบพื้นที่แล้ว">ส่งมอบพื้นที่แล้ว</option>
                       <option value="ก่อสร้างแล้วเสร็จ">ก่อสร้างแล้วเสร็จ</option>
@@ -1054,15 +1134,22 @@ export default function PlanningDashboard() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22V2"/><path d="M7 6h10"/><path d="M7 10h10"/><path d="M12 6L9 10"/><path d="M12 6l3 4"/></svg>
                       </div>
                       <div>
-                        <h3 className="text-xl font-extrabold text-gray-900 tracking-tight mb-1">แผนงาน/ผลงานก่อสร้าง</h3>
-                        <p className="text-xs text-gray-500 font-medium">รายการงานและความก้าวหน้าของโครงการ</p>
+                        <h3 className="text-xl font-extrabold text-gray-900 tracking-tight mb-1">{isPlanningPhase ? "โหมดวางแผนงาน (Planning)" : "โหมดอัปเดตผลงาน (Execution)"}</h3>
+                        <p className="text-xs text-gray-500 font-medium">{isPlanningPhase ? "กำหนดเป้าหมายและแผนงานก่อนเริ่มโครงการ" : "รายงานความก้าวหน้าและการดำเนินการจริง"}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1.5">
-                        <button className="flex items-center gap-2 px-5 py-2 bg-[#7B32D9] text-white text-xs font-bold rounded-lg shadow-sm border border-purple-800 shadow-purple-900/20">
-                          <List className="w-4 h-4" /> รายการ
-                        </button>
+                        {isPlanningPhase && (
+                          <button onClick={handleLockPlan} className="flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm shadow-emerald-900/20 transition-all active:scale-95">
+                            <CheckCircle className="w-4 h-4" /> ยืนยันและล็อคแผนงาน
+                          </button>
+                        )}
+                        {!isPlanningPhase && (
+                          <button className="flex items-center gap-2 px-5 py-2 bg-gray-100 text-emerald-700 text-xs font-bold rounded-lg shadow-sm border border-emerald-200 cursor-default">
+                            <CheckCircle2 className="w-4 h-4" /> แผนงานถูกล็อคแล้ว
+                          </button>
+                        )}
                       </div>
                       <button className="w-9 h-9 flex items-center justify-center bg-white border border-gray-200 rounded-[10px] text-gray-500 hover:bg-gray-50 transition-colors shadow-sm ml-1">
                         <MoreVertical className="w-4 h-4" />
@@ -1075,7 +1162,8 @@ export default function PlanningDashboard() {
                       <div className="flex-1 w-full">
                         <label className="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">รูปแบบลักษณะงานก่อสร้าง (หน้างาน)</label>
                         <select 
-                          className="w-full max-w-2xl text-xs bg-white border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none font-medium text-gray-700 shadow-sm transition-all"
+                          disabled={!isPlanningPhase}
+                          className="w-full max-w-2xl text-xs bg-white border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none font-medium text-gray-700 shadow-sm transition-all disabled:bg-gray-100 disabled:text-gray-500"
                           value={projects.find(p => p.wbs === selectedWbs)?.construction_type || "1"}
                           onChange={(e) => handlePatternChange(e.target.value)}
                         >
@@ -1162,8 +1250,9 @@ export default function PlanningDashboard() {
                                     <input
                                       type="text"
                                       value={task.task_name}
+                                      disabled={!isPlanningPhase}
                                       onChange={(e) => handleStepUpdate(task.id, "task_name", e.target.value)}
-                                      className={`font-bold text-[12px] ${stepColor} w-full bg-white border border-gray-200 rounded px-2 py-1 focus:ring-2 focus:ring-purple-400 outline-none hover:border-purple-300 transition-colors`}
+                                      className={`font-bold text-[12px] ${stepColor} w-full bg-white border border-gray-200 rounded px-2 py-1 focus:ring-2 focus:ring-purple-400 outline-none hover:border-purple-300 transition-colors disabled:opacity-70 disabled:bg-gray-50`}
                                     />
                                   ) : (
                                     <span className={`font-bold text-[12px] ${stepColor}`}>{task.task_name}</span>
@@ -1177,16 +1266,18 @@ export default function PlanningDashboard() {
                                 <input
                                   type="date"
                                   value={task.start_date || ""}
+                                  disabled={!isPlanningPhase}
                                   onChange={(e) => handleStepUpdate(task.id, "start_date", e.target.value)}
-                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-gray-600 hover:border-purple-300 transition-colors"
+                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-gray-600 hover:border-purple-300 transition-colors disabled:opacity-70 disabled:bg-gray-50"
                                 />
                               </td>
                               <td className="p-2 text-center bg-white/30">
                                 <input
                                   type="date"
                                   value={task.end_date || ""}
+                                  disabled={!isPlanningPhase}
                                   onChange={(e) => handleStepUpdate(task.id, "end_date", e.target.value)}
-                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-gray-600 hover:border-purple-300 transition-colors"
+                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-gray-600 hover:border-purple-300 transition-colors disabled:opacity-70 disabled:bg-gray-50"
                                 />
                               </td>
                               <td className="p-2 text-center bg-white/30 border-r border-gray-50">
@@ -1196,8 +1287,9 @@ export default function PlanningDashboard() {
                                     min="0"
                                     placeholder="0"
                                     value={task.target_qty ?? ""}
+                                    disabled={!isPlanningPhase}
                                     onChange={(e) => handleStepUpdate(task.id, "target_qty", e.target.value === "" ? null : Number(e.target.value))}
-                                    className="w-14 text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-400 outline-none font-bold text-gray-700 hover:border-purple-300 transition-colors"
+                                    className="w-14 text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-400 outline-none font-bold text-gray-700 hover:border-purple-300 transition-colors disabled:opacity-70 disabled:bg-gray-50"
                                   />
                                 </div>
                               </td>
@@ -1207,16 +1299,18 @@ export default function PlanningDashboard() {
                                 <input
                                   type="date"
                                   value={task.actual_start_date || ""}
+                                  disabled={isPlanningPhase}
                                   onChange={(e) => handleStepUpdate(task.id, "actual_start_date", e.target.value)}
-                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-purple-700 hover:border-purple-300 transition-colors"
+                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-purple-700 hover:border-purple-300 transition-colors disabled:opacity-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 />
                               </td>
                               <td className="p-2 text-center bg-purple-50/30">
                                 <input
                                   type="date"
                                   value={task.actual_end_date || ""}
+                                  disabled={isPlanningPhase}
                                   onChange={(e) => handleStepUpdate(task.id, "actual_end_date", e.target.value)}
-                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-purple-700 hover:border-purple-300 transition-colors"
+                                  className="w-[105px] text-[11px] bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-purple-400 outline-none font-medium text-purple-700 hover:border-purple-300 transition-colors disabled:opacity-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 />
                               </td>
                               <td className="p-2 text-center bg-purple-50/30 border-r border-gray-50">
@@ -1226,8 +1320,9 @@ export default function PlanningDashboard() {
                                     min="0"
                                     placeholder="0"
                                     value={task.done_qty ?? ""}
+                                    disabled={isPlanningPhase}
                                     onChange={(e) => handleStepUpdate(task.id, "done_qty", e.target.value === "" ? null : Number(e.target.value))}
-                                    className="w-14 text-[11px] bg-white border border-purple-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-500 outline-none font-bold text-purple-700 hover:border-purple-400 transition-colors shadow-sm"
+                                    className="w-14 text-[11px] bg-white border border-purple-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-500 outline-none font-bold text-purple-700 hover:border-purple-400 transition-colors shadow-sm disabled:opacity-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                   />
                                 </div>
                               </td>
@@ -1239,8 +1334,8 @@ export default function PlanningDashboard() {
                                   max="100"
                                   value={task.weight ?? stepDef?.defaultWeight ?? 0}
                                   onChange={(e) => handleStepUpdate(task.id, "weight", Number(e.target.value))}
-                                  disabled={currentProject?.construction_type !== '5'}
-                                  className={`w-14 text-[11px] ${currentProject?.construction_type === '5' ? 'bg-white hover:border-purple-300' : 'bg-gray-50'} border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-400 outline-none font-bold text-gray-700 transition-colors mx-auto block`}
+                                  disabled={currentProject?.construction_type !== '5' || !isPlanningPhase}
+                                  className={`w-14 text-[11px] ${(currentProject?.construction_type === '5' && isPlanningPhase) ? 'bg-white hover:border-purple-300' : 'bg-gray-50'} border border-gray-200 rounded-lg px-2 py-1.5 text-center focus:ring-2 focus:ring-purple-400 outline-none font-bold text-gray-700 transition-colors mx-auto block disabled:opacity-70 disabled:bg-gray-50`}
                                 />
                               </td>
                               <td className="p-3 text-center border-r border-gray-50">
@@ -1457,93 +1552,90 @@ export default function PlanningDashboard() {
 
               {/* TAB: MONTHLY REPORT */}
               {activeTab === "monthly" && (
-                <div className="p-6 h-[700px] flex flex-col animate-in fade-in duration-300">
-                  <div className="flex justify-between items-center mb-8">
-                    <h3 className="text-xl font-extrabold text-gray-900">รายงานความก้าวหน้าประจำเดือน (ทำได้จริง)</h3>
+                <div className="p-6 min-h-[700px] flex flex-col animate-in fade-in duration-300">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                      <h3 className="text-xl font-extrabold text-gray-900">อัปเดตผลงานประจำเดือน</h3>
+                      <p className="text-sm text-gray-500 mt-1">ระบุปริมาณงานที่ดำเนินการแล้วเสร็จในแต่ละเดือน</p>
+                    </div>
+                    <div className="flex items-center gap-3 bg-purple-50 p-2.5 rounded-xl border border-purple-100 shadow-inner">
+                      <label className="text-sm font-bold text-purple-900 ml-2">เลือกเดือนที่ต้องการรายงาน:</label>
+                      <input 
+                        type="month" 
+                        value={reportMonth}
+                        onChange={(e) => setReportMonth(e.target.value)}
+                        className="bg-white border border-purple-200 rounded-lg px-4 py-2 font-bold text-purple-700 outline-none focus:ring-2 focus:ring-purple-500 shadow-sm cursor-pointer"
+                      />
+                    </div>
                   </div>
                   
-                  <div className="flex-1 bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-gray-50 border-b border-gray-100">
-                        <tr>
-                          <th className="px-6 py-4 font-bold text-gray-600">เดือน / ปี</th>
-                          <th className="px-6 py-4 font-bold text-gray-600">งานที่ดำเนินการแล้วเสร็จในเดือนนี้</th>
-                          <th className="px-6 py-4 font-bold text-gray-600 text-center">ความก้าวหน้าที่ได้ (%)</th>
-                          <th className="px-6 py-4 font-bold text-gray-600 text-center">ความก้าวหน้าสะสม (%)</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-50">
-                        {(() => {
-                          const monthMap = new Map<string, { tasks: any[], progress: number }>();
-                          
-                          const completedTasks = tasks.filter(t => {
-                             const targetQty = Number(t.target_qty) || 0;
-                             const doneQty = Number(t.done_qty) || 0;
-                             const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
-                             return p > 0 && t.actual_end_date;
-                          });
-
-                          completedTasks.forEach(t => {
-                             const targetQty = Number(t.target_qty) || 0;
-                             const doneQty = Number(t.done_qty) || 0;
-                             const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
-                             const w = Number(t.weight) || 0;
-                             
-                             const date = new Date(t.actual_end_date as string);
-                             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                             
-                             if (!monthMap.has(monthKey)) {
-                               monthMap.set(monthKey, { tasks: [], progress: 0 });
-                             }
-                             const entry = monthMap.get(monthKey)!;
-                             entry.tasks.push(t);
-                             entry.progress += (w * p / 100);
-                          });
-
-                          const totalWeight = tasks.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
-                          const sortedMonths = Array.from(monthMap.keys()).sort();
-                          
-                          if (sortedMonths.length === 0) {
-                            return (
-                              <tr>
-                                <td colSpan={4} className="px-6 py-12 text-center text-gray-400 font-bold">
-                                  ยังไม่มีข้อมูลผลงานที่ทำได้จริง (กรุณากรอกวันที่เสร็จจริงและปริมาณทำได้จริง)
-                                </td>
+                  {isPlanningPhase ? (
+                    <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 p-10 text-center animate-in fade-in zoom-in-95 duration-500">
+                      <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-gray-300 mb-6 shadow-sm border border-gray-100">
+                        <CheckCircle2 className="w-10 h-10" />
+                      </div>
+                      <h4 className="text-xl font-black text-gray-700 mb-3">ยังอยู่ในโหมดวางแผนงาน</h4>
+                      <p className="text-gray-500 max-w-md font-medium leading-relaxed">
+                        คุณต้องทำการ <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">ยืนยันและล็อคแผนงาน</span> ในหน้าแผนงานก่อน จึงจะสามารถเริ่มรายงานความก้าวหน้าประจำเดือนได้
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                      {monthlyLoading ? (
+                        <div className="flex justify-center items-center h-60">
+                          <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-purple-700"></div>
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left border-collapse">
+                            <thead>
+                              <tr className="bg-gradient-to-r from-purple-50/50 to-indigo-50/50 text-gray-600 text-[11px] uppercase tracking-wider border-b border-purple-100">
+                                <th className="font-bold p-5">ขั้นตอนงาน</th>
+                                <th className="font-bold p-5 text-center w-32 border-l border-gray-100">เป้าหมายรวม</th>
+                                <th className="font-bold p-5 text-center w-40 border-l border-gray-100">ทำได้แล้วทั้งหมด (สะสม)</th>
+                                <th className="font-bold p-5 text-purple-700 text-center w-48 bg-purple-100/50 border-l border-purple-100">จำนวนที่ทำได้ในเดือนนี้</th>
                               </tr>
-                            );
-                          }
-
-                          let cumulative = 0;
-                          return sortedMonths.map(month => {
-                            const entry = monthMap.get(month)!;
-                            const monthProgress = totalWeight > 0 ? (entry.progress / totalWeight * 100) : 0;
-                            cumulative += monthProgress;
-                            
-                            const date = new Date(`${month}-01`);
-                            const monthName = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-                            
-                            return (
-                              <tr key={month} className="hover:bg-purple-50/30 transition-colors">
-                                <td className="px-6 py-4 font-bold text-gray-800">{monthName}</td>
-                                <td className="px-6 py-4">
-                                  <ul className="list-disc list-inside text-gray-600 text-xs space-y-1">
-                                    {entry.tasks.map(t => {
-                                      const stepDef = FIXED_CONSTRUCTION_STEPS.find(s=>s.order === t.step_order);
-                                      return (
-                                        <li key={t.id}>{t.task_name} (ได้ {t.done_qty} {stepDef?.unit || 'หน่วย'})</li>
-                                      );
-                                    })}
-                                  </ul>
-                                </td>
-                                <td className="px-6 py-4 text-center font-bold text-purple-700">+{monthProgress.toFixed(1)}%</td>
-                                <td className="px-6 py-4 text-center font-black text-emerald-600">{cumulative.toFixed(1)}%</td>
-                              </tr>
-                            );
-                          });
-                        })()}
-                      </tbody>
-                    </table>
-                  </div>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                              {activeTasks.map((task, index) => {
+                                const stepDef = FIXED_CONSTRUCTION_STEPS.find(s => s.order === task.step_order);
+                                const targetQty = Number(task.target_qty) || 0;
+                                const totalDoneQty = Number(task.done_qty) || 0;
+                                const monthQty = monthlyData[task.id] || 0;
+                                const stepColor = index === 0 ? "text-blue-600" : index <= 2 ? "text-purple-700" : index <= 4 ? "text-orange-600" : index === 5 ? "text-teal-600" : "text-red-600";
+                                
+                                return (
+                                  <tr key={task.id} className="hover:bg-purple-50/20 transition-colors group">
+                                    <td className="p-5">
+                                      <p className={`font-bold text-sm ${stepColor} mb-1`}>{task.task_name}</p>
+                                      <p className="text-xs text-gray-400 font-medium">หน่วย: <span className="text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">{stepDef?.unit || 'รายการ'}</span></p>
+                                    </td>
+                                    <td className="p-5 text-center font-bold text-gray-600 border-l border-gray-50 bg-gray-50/30 text-lg">{targetQty}</td>
+                                    <td className="p-5 text-center border-l border-gray-50 bg-gray-50/30">
+                                      <div className={`inline-flex items-center justify-center min-w-[3rem] px-3 py-1 rounded-full font-black text-lg ${totalDoneQty >= targetQty && targetQty > 0 ? 'bg-emerald-100 text-emerald-700 shadow-sm shadow-emerald-200' : 'bg-white text-gray-700 border border-gray-200 shadow-sm'}`}>
+                                        {totalDoneQty}
+                                      </div>
+                                    </td>
+                                    <td className="p-4 bg-purple-50/30 border-l border-purple-50 relative group-hover:bg-purple-50/60 transition-colors">
+                                      <div className="absolute inset-y-0 left-0 w-1 bg-purple-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={monthQty === 0 ? "" : monthQty}
+                                        placeholder="0"
+                                        onChange={(e) => handleMonthlyUpdate(task.id, e.target.value === "" ? null : Number(e.target.value))}
+                                        className="w-full text-center bg-white border-2 border-purple-100 rounded-xl px-4 py-3 font-black text-purple-700 text-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 outline-none hover:border-purple-300 transition-all shadow-sm"
+                                      />
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
