@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Printer, Home, List, BarChart2, TrendingUp, Image as ImageIcon, DollarSign, Zap, Edit2, X, Search, Bell, ChevronDown, CheckCircle2, Clock, AlertTriangle, MoreVertical, Grid, Calendar, FileText, CheckCircle, Trash2, Plus } from 'lucide-react';
 
 interface Project {
@@ -57,6 +57,7 @@ export default function PlanningDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [showBudgetMock, setShowBudgetMock] = useState(false);
 
   // Monthly Report states
   const [reportMonth, setReportMonth] = useState(() => {
@@ -1987,18 +1988,152 @@ export default function PlanningDashboard() {
                   <div className="flex justify-between items-center mb-8">
                     <h3 className="text-xl font-extrabold text-gray-900">เบิกจ่ายงบประมาณ</h3>
                     <select className="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-white font-bold text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-purple-500">
-                      <option>ข้อมูลเดือน: ก.ย. 2569</option>
+                      <option>ข้อมูลเดือน: ส.ค. 2569</option>
                     </select>
                   </div>
                   
-                  <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center mt-6">
-                    <BarChart2 className="w-16 h-16 text-gray-300 mb-4" />
-                    <p className="text-gray-500 font-bold text-lg mb-2">ยังไม่มีข้อมูลเบิกจ่ายงบประมาณ</p>
-                    <p className="text-gray-400 text-sm mb-6">คุณสามารถเพิ่มรายละเอียดข้อมูลการเบิกจ่ายสำหรับโครงการนี้ได้</p>
-                    <button className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95">
-                      + เพิ่มรายละเอียดเบิกจ่าย
-                    </button>
-                  </div>
+                  {!showBudgetMock ? (
+                    <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center mt-6">
+                      <BarChart2 className="w-16 h-16 text-gray-300 mb-4" />
+                      <p className="text-gray-500 font-bold text-lg mb-2">ยังไม่มีข้อมูลเบิกจ่ายงบประมาณ</p>
+                      <p className="text-gray-400 text-sm mb-6">คุณสามารถเพิ่มรายละเอียดข้อมูลการเบิกจ่ายสำหรับโครงการนี้ได้</p>
+                      <button 
+                        onClick={() => setShowBudgetMock(true)}
+                        className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95">
+                        + เพิ่มรายละเอียดเบิกจ่าย
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Summary KPI Cards */}
+                      <div className="grid grid-cols-5 gap-4">
+                        <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border-l-4 border-[#8E24AA] p-4 flex flex-col justify-center">
+                          <p className="text-[10px] text-gray-400 font-bold mb-1">วงเงินงบประมาณ</p>
+                          <h4 className="text-xl font-black text-[#8E24AA]">฿10,008,111.96</h4>
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border-l-4 border-[#2E7D32] p-4 flex flex-col justify-center">
+                          <p className="text-[10px] text-gray-400 font-bold mb-1">จ่ายจริงสะสม</p>
+                          <h4 className="text-xl font-black text-[#2E7D32]">฿745,961.75</h4>
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border-l-4 border-[#D32F2F] p-4 flex flex-col justify-center">
+                          <p className="text-[10px] text-gray-400 font-bold mb-1">ภาระผูกพัน</p>
+                          <h4 className="text-xl font-black text-[#D32F2F]">฿1,265,226.38</h4>
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border-l-4 border-[#F57C00] p-4 flex flex-col justify-center">
+                          <p className="text-[10px] text-gray-400 font-bold mb-1">งบคงเหลือ</p>
+                          <h4 className="text-xl font-black text-[#F57C00]">฿7,996,923.83</h4>
+                        </div>
+                        <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.04)] border-l-4 border-[#1976D2] p-4 flex flex-col justify-center">
+                          <p className="text-[10px] text-gray-400 font-bold mb-1">อัตราเบิกจ่าย</p>
+                          <h4 className="text-xl font-black text-[#1976D2]">7.45%</h4>
+                        </div>
+                      </div>
+
+                      {/* Bar Chart */}
+                      <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 p-6">
+                        <h4 className="text-sm font-extrabold text-gray-800 mb-6">กราฟเปรียบเทียบแผนเบิกจ่าย vs จ่ายจริง (รายเดือน)</h4>
+                        <div className="w-full h-[300px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={[
+                                { month: 'ม.ค. 2569', plan: 0, actual: 0 },
+                                { month: 'ก.พ. 2569', plan: 0, actual: 0 },
+                                { month: 'มี.ค. 2569', plan: 0, actual: 0 },
+                                { month: 'เม.ย. 2569', plan: 0, actual: 300000 },
+                                { month: 'พ.ค. 2569', plan: 300000, actual: 400000 },
+                                { month: 'มิ.ย. 2569', plan: 500000, actual: 500000 },
+                                { month: 'ก.ค. 2569', plan: 700000, actual: 600000 },
+                                { month: 'ส.ค. 2569', plan: 1200000, actual: 745961.75 },
+                                { month: 'ก.ย. 2569', plan: 4800000, actual: 0 },
+                                { month: 'ต.ค. 2569', plan: 6000000, actual: 0 },
+                                { month: 'พ.ย. 2569', plan: 8800000, actual: 0 },
+                                { month: 'ธ.ค. 2569', plan: 15000000, actual: 0 },
+                                { month: 'สะสมถึง ส.ค.', plan: 1200000, actual: 745961.75 },
+                              ]}
+                              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6B7280' }} dy={10} />
+                              <YAxis 
+                                axisLine={false} 
+                                tickLine={false} 
+                                tick={{ fontSize: 10, fill: '#6B7280' }} 
+                                tickFormatter={(val) => `${val / 1000000}M`}
+                                dx={-10}
+                              />
+                              <RechartsTooltip 
+                                formatter={(value: number) => new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(value)}
+                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: '12px', fontWeight: 'bold' }}
+                              />
+                              <Legend iconType="rect" iconSize={12} wrapperStyle={{ fontSize: '12px', fontWeight: 'bold', color: '#4B5563', paddingBottom: '20px' }} verticalAlign="top" height={50} />
+                              <Bar dataKey="plan" name="แผนเบิกจ่าย" fill="#5C93C7" radius={[2, 2, 0, 0]} barSize={30} />
+                              <Bar dataKey="actual" name="จ่ายจริง" fill="#7DCEA0" radius={[2, 2, 0, 0]} barSize={30} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+
+                      {/* Detail Table */}
+                      <div>
+                        <h4 className="text-sm font-extrabold text-gray-800 mb-4">รายละเอียดข้อมูลเบิกจ่าย</h4>
+                        <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 overflow-x-auto">
+                          <table className="w-full text-left border-collapse">
+                            <thead>
+                              <tr className="bg-gray-50 border-b border-gray-100 text-[10px] text-gray-500 font-bold uppercase whitespace-nowrap">
+                                <th className="p-4 text-center">ลำดับ</th>
+                                <th className="p-4">รายการ</th>
+                                <th className="p-4">WBS</th>
+                                <th className="p-4 text-right">วงเงินงบประมาณ</th>
+                                <th className="p-4 text-right">จ่ายจริงสะสม</th>
+                                <th className="p-4 text-right">วงเงินคงเหลือ</th>
+                                <th className="p-4 text-right">ภาระผูกพันรวม</th>
+                                <th className="p-4 text-right">PR</th>
+                                <th className="p-4 text-right">PO</th>
+                                <th className="p-4 text-right">GR</th>
+                                <th className="p-4 text-right">IR</th>
+                                <th className="p-4 text-right">งบคงเหลือ</th>
+                                <th className="p-4 text-right">% เบิกจ่าย</th>
+                                <th className="p-4 text-center">สถานะ</th>
+                              </tr>
+                            </thead>
+                            <tbody className="text-[11px] text-gray-700 divide-y divide-gray-50">
+                              {[
+                                { id: 1, item: "งานก่อสร้างสถานีไฟฟ้าสมุทรสาคร 18 (ทวิต)", wbs: "I-69-I-BNCXX.19.3904", totalBudget: 0.00, actualPaid: 0.00, remaining: 0.00, obligation: 0.00, pr: 0.00, po: 0.00, gr: 0.00, ir: 0.00, remainB: 0.00, percent: 0, status: "PREL BUDG AVAC // Z0", statusColor: "text-blue-500 bg-blue-50" },
+                                { id: 2, item: "ก่อสร้างสถานีไฟฟ้าสมุทรสาคร 18 (ซ)", wbs: "I-69-I-BNCXX.19.3904.A", totalBudget: 7131005.88, actualPaid: 682124.35, remaining: 6448881.53, obligation: 1265226.38, pr: 362.62, po: 1255670.00, gr: 0.00, ir: 9193.76, remainB: 5183655.15, percent: 9.57, status: "REL BUDG AVAC NTUP SETC // C1", statusColor: "text-orange-500 bg-orange-50" },
+                                { id: 3, item: "กล.สายส่ง 115kV รองรับ สฟฟ.สค.18(ซ)", wbs: "I-69-I-BNCXX.19.3904.B", totalBudget: 1277889.20, actualPaid: 0.00, remaining: 1277889.20, obligation: 0.00, pr: 0.00, po: 0.00, gr: 0.00, ir: 0.00, remainB: 1277889.20, percent: 0, status: "CRTD BUDG AVAC NTUP SETC // C1", statusColor: "text-orange-500 bg-orange-50" },
+                                { id: 4, item: "กล.ระบบจำหน่าย 22kV รองรับ สฟฟ.สค.18(ซ)", wbs: "I-69-I-BNCXX.19.3904.C", totalBudget: 1196310.20, actualPaid: 0.00, remaining: 1196310.20, obligation: 0.00, pr: 0.00, po: 0.00, gr: 0.00, ir: 0.00, remainB: 1196310.20, percent: 0, status: "CRTD BUDG AVAC NTUP SETC // B2", statusColor: "text-orange-500 bg-orange-50" },
+                                { id: 5, item: "กส.ระบบสื่อสาร รองรับ สฟฟ.สค.18(ซ)", wbs: "I-69-I-BNCXX.19.3904.D", totalBudget: 103286.04, actualPaid: 0.00, remaining: 103286.04, obligation: 0.00, pr: 0.00, po: 0.00, gr: 0.00, ir: 0.00, remainB: 103286.04, percent: 0, status: "CRTD BUDG AVAC SETC // B2", statusColor: "text-orange-500 bg-orange-50" },
+                                { id: 6, item: "จุด A ติดตั้ง DIS Tie Line บริเวณ ปากซอย", wbs: "I-69-I-BNCXX.19.3904.E", totalBudget: 27135.00, actualPaid: 8.10, remaining: 27126.90, obligation: 0.00, pr: 0.00, po: 0.00, gr: 0.00, ir: 0.00, remainB: 27126.90, percent: 0.03, status: "REL BUDG AVAC NTUP SETC // C1", statusColor: "text-orange-500 bg-orange-50" },
+                                { id: 7, item: "จุด B ติดตั้ง DIS Tie Line บริเวณ ปากซอย", wbs: "I-69-I-BNCXX.19.3904.F", totalBudget: 10691.12, actualPaid: 4.51, remaining: 10686.61, obligation: 0.00, pr: 0.00, po: 0.00, gr: 0.00, ir: 0.00, remainB: 10686.61, percent: 0.04, status: "REL BUDG AVAC NTUP SETC // C1", statusColor: "text-orange-500 bg-orange-50" },
+                                { id: 8, item: "จุด C ติดตั้ง SF6 แทน DIS (KTB08S-11) บริ", wbs: "I-69-I-BNCXX.19.3904.G", totalBudget: 44684.48, actualPaid: 27.59, remaining: 44656.89, obligation: 0.00, pr: 0.00, po: 0.00, gr: 0.00, ir: 0.00, remainB: 44656.89, percent: 0.06, status: "REL BUDG AVAC NTUP SETC // C1", statusColor: "text-orange-500 bg-orange-50" }
+                              ].map((row) => (
+                                <tr key={row.id} className="hover:bg-purple-50/30 transition-colors">
+                                  <td className="p-4 text-center font-medium">{row.id}</td>
+                                  <td className="p-4 font-bold min-w-[200px]" title={row.item}>{row.item}</td>
+                                  <td className="p-4 text-gray-500 whitespace-nowrap">{row.wbs}</td>
+                                  <td className="p-4 text-right font-medium">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.totalBudget)}</td>
+                                  <td className="p-4 text-right font-medium">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.actualPaid)}</td>
+                                  <td className="p-4 text-right font-medium text-blue-600">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.remaining)}</td>
+                                  <td className="p-4 text-right font-medium text-red-500">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.obligation)}</td>
+                                  <td className="p-4 text-right text-gray-500">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.pr)}</td>
+                                  <td className="p-4 text-right text-green-600 font-medium">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.po)}</td>
+                                  <td className="p-4 text-right text-gray-500">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.gr)}</td>
+                                  <td className="p-4 text-right text-gray-500">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.ir)}</td>
+                                  <td className="p-4 text-right font-bold text-gray-800">{new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2 }).format(row.remainB)}</td>
+                                  <td className="p-4 text-right font-medium">{row.percent}%</td>
+                                  <td className="p-4 text-center">
+                                    <span className={`px-2.5 py-1 rounded-md text-[9px] font-bold tracking-wider whitespace-nowrap ${row.statusColor}`}>
+                                      {row.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
