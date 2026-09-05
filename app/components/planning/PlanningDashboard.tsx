@@ -65,6 +65,7 @@ export default function PlanningDashboard() {
   });
   const [monthlyData, setMonthlyData] = useState<Record<string, number>>({});
   const [monthlyLoading, setMonthlyLoading] = useState(false);
+  const [allMonthlyData, setAllMonthlyData] = useState<any[]>([]);
 
   // New Project states
   const [isCreatingProject, setIsCreatingProject] = useState(false);
@@ -203,9 +204,24 @@ export default function PlanningDashboard() {
     setMonthlyLoading(false);
   };
 
+  const fetchAllMonthlyData = async () => {
+    if (!selectedWbs) return;
+    const { data, error } = await supabase
+      .from("monthly_progress")
+      .select("task_id, done_qty, report_month")
+      .eq("project_wbs", selectedWbs)
+      .order("report_month");
+    if (!error && data) {
+      setAllMonthlyData(data);
+    } else {
+      setAllMonthlyData([]);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "monthly" && selectedWbs) {
       fetchMonthlyData();
+      fetchAllMonthlyData();
     }
   }, [activeTab, selectedWbs, reportMonth]);
 
@@ -1698,7 +1714,9 @@ export default function PlanningDashboard() {
                       </p>
                     </div>
                   ) : (
-                    <div className="flex-1 bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                    <div className="flex-1 space-y-6">
+                      {/* Input Table */}
+                      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                       {monthlyLoading ? (
                         <div className="flex justify-center items-center h-60">
                           <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-purple-700"></div>
@@ -1708,10 +1726,11 @@ export default function PlanningDashboard() {
                           <table className="w-full text-left border-collapse">
                             <thead>
                               <tr className="bg-gradient-to-r from-purple-50/50 to-indigo-50/50 text-gray-600 text-[11px] uppercase tracking-wider border-b border-purple-100">
-                                <th className="font-bold p-5">ขั้นตอนงาน</th>
-                                <th className="font-bold p-5 text-center w-32 border-l border-gray-100">เป้าหมายรวม</th>
-                                <th className="font-bold p-5 text-center w-40 border-l border-gray-100">ทำได้แล้วทั้งหมด (สะสม)</th>
-                                <th className="font-bold p-5 text-purple-700 text-center w-48 bg-purple-100/50 border-l border-purple-100">จำนวนที่ทำได้ในเดือนนี้</th>
+                                <th className="font-bold p-4">ขั้นตอนงาน</th>
+                                <th className="font-bold p-4 text-center w-24 border-l border-gray-100">เป้าหมาย</th>
+                                <th className="font-bold p-4 text-center w-28 border-l border-gray-100">สะสมทั้งหมด</th>
+                                <th className="font-bold p-4 text-center w-36 border-l border-gray-100">ความก้าวหน้า</th>
+                                <th className="font-bold p-4 text-purple-700 text-center w-40 bg-purple-100/50 border-l border-purple-100">ทำได้เดือนนี้</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -1720,21 +1739,33 @@ export default function PlanningDashboard() {
                                 const targetQty = Number(task.target_qty) || 0;
                                 const totalDoneQty = Number(task.done_qty) || 0;
                                 const monthQty = monthlyData[task.id] || 0;
+                                const progressPct = targetQty > 0 ? Math.min(100, Math.round((totalDoneQty / targetQty) * 100)) : 0;
                                 const stepColor = index === 0 ? "text-blue-600" : index <= 2 ? "text-purple-700" : index <= 4 ? "text-orange-600" : index === 5 ? "text-teal-600" : "text-red-600";
                                 
                                 return (
                                   <tr key={task.id} className="hover:bg-purple-50/20 transition-colors group">
-                                    <td className="p-5">
-                                      <p className={`font-bold text-sm ${stepColor} mb-1`}>{task.task_name}</p>
-                                      <p className="text-xs text-gray-400 font-medium">หน่วย: <span className="text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">{stepDef?.unit || 'รายการ'}</span></p>
+                                    <td className="p-4">
+                                      <p className={`font-bold text-[12px] ${stepColor} mb-0.5`}>{task.task_name}</p>
+                                      <p className="text-[10px] text-gray-400 font-medium">หน่วย: {stepDef?.unit || 'รายการ'}</p>
                                     </td>
-                                    <td className="p-5 text-center font-bold text-gray-600 border-l border-gray-50 bg-gray-50/30 text-lg">{targetQty}</td>
-                                    <td className="p-5 text-center border-l border-gray-50 bg-gray-50/30">
-                                      <div className={`inline-flex items-center justify-center min-w-[3rem] px-3 py-1 rounded-full font-black text-lg ${totalDoneQty >= targetQty && targetQty > 0 ? 'bg-emerald-100 text-emerald-700 shadow-sm shadow-emerald-200' : 'bg-white text-gray-700 border border-gray-200 shadow-sm'}`}>
+                                    <td className="p-4 text-center font-bold text-gray-600 border-l border-gray-50 bg-gray-50/30">{targetQty}</td>
+                                    <td className="p-4 text-center border-l border-gray-50 bg-gray-50/30">
+                                      <div className={`inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded-full font-black text-sm ${totalDoneQty >= targetQty && targetQty > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-white text-gray-700 border border-gray-200'}`}>
                                         {totalDoneQty}
                                       </div>
                                     </td>
-                                    <td className="p-4 bg-purple-50/30 border-l border-purple-50 relative group-hover:bg-purple-50/60 transition-colors">
+                                    <td className="p-4 border-l border-gray-50">
+                                      <div className="flex items-center gap-2">
+                                        <div className="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                          <div 
+                                            className={`h-full rounded-full transition-all duration-500 ${progressPct >= 100 ? 'bg-emerald-500' : progressPct > 50 ? 'bg-blue-500' : progressPct > 0 ? 'bg-amber-500' : 'bg-gray-200'}`}
+                                            style={{ width: `${Math.min(progressPct, 100)}%` }}
+                                          />
+                                        </div>
+                                        <span className={`text-xs font-black min-w-[36px] text-right ${progressPct >= 100 ? 'text-emerald-600' : progressPct > 0 ? 'text-blue-600' : 'text-gray-400'}`}>{progressPct}%</span>
+                                      </div>
+                                    </td>
+                                    <td className="p-3 bg-purple-50/30 border-l border-purple-50 relative group-hover:bg-purple-50/60 transition-colors">
                                       <div className="absolute inset-y-0 left-0 w-1 bg-purple-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                       <input
                                         type="number"
@@ -1742,7 +1773,7 @@ export default function PlanningDashboard() {
                                         value={monthQty === 0 ? "" : monthQty}
                                         placeholder="0"
                                         onChange={(e) => handleMonthlyUpdate(task.id, e.target.value === "" ? null : Number(e.target.value))}
-                                        className="w-full text-center bg-white border-2 border-purple-100 rounded-xl px-4 py-3 font-black text-purple-700 text-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 outline-none hover:border-purple-300 transition-all shadow-sm"
+                                        className="w-full text-center bg-white border-2 border-purple-100 rounded-xl px-3 py-2.5 font-black text-purple-700 text-base focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 outline-none hover:border-purple-300 transition-all shadow-sm"
                                       />
                                     </td>
                                   </tr>
@@ -1752,6 +1783,164 @@ export default function PlanningDashboard() {
                           </table>
                         </div>
                       )}
+                      </div>
+
+                      {/* Monthly Summary Table */}
+                      {(() => {
+                        // Generate months from project start to current
+                        const projectTasks = activeTasks;
+                        if (projectTasks.length === 0) return null;
+                        
+                        const allStartDates = projectTasks.map(t => t.start_date).filter(Boolean).sort();
+                        const allEndDates = projectTasks.map(t => t.end_date).filter(Boolean).sort();
+                        if (allStartDates.length === 0) return null;
+                        
+                        const projectStartDate = new Date(allStartDates[0]);
+                        const projectEndDate = allEndDates.length > 0 ? new Date(allEndDates[allEndDates.length - 1]) : new Date();
+                        const today = new Date();
+                        const lastDate = today > projectEndDate ? today : projectEndDate;
+                        
+                        const months: string[] = [];
+                        const d = new Date(projectStartDate.getFullYear(), projectStartDate.getMonth(), 1);
+                        while (d <= lastDate) {
+                          months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+                          d.setMonth(d.getMonth() + 1);
+                        }
+                        
+                        if (months.length === 0) return null;
+                        
+                        const totalWeight = projectTasks.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                        if (totalWeight === 0) return null;
+                        
+                        const thaiMonthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                        
+                        const monthSummary = months.map(m => {
+                          const [year, month] = m.split('-').map(Number);
+                          const endOfMonth = new Date(year, month, 0); // last day of month
+                          const endOfMonthStr = endOfMonth.toISOString().split('T')[0];
+                          const thaiYear = year + 543;
+                          
+                          // Calculate plan % at end of this month
+                          let planPct = 0;
+                          projectTasks.forEach(t => {
+                            const w = Number(t.weight) || 0;
+                            const tStart = new Date(t.start_date).getTime();
+                            const tEnd = new Date(t.end_date).getTime();
+                            const eom = endOfMonth.getTime();
+                            
+                            let pct = 0;
+                            if (eom >= tEnd) pct = 100;
+                            else if (eom > tStart && tEnd > tStart) pct = ((eom - tStart) / (tEnd - tStart)) * 100;
+                            
+                            planPct += (w * pct / 100);
+                          });
+                          planPct = planPct / totalWeight * 100;
+                          
+                          // Calculate actual % — cumulative done_qty up to this month
+                          let actualPct = 0;
+                          projectTasks.forEach(t => {
+                            const w = Number(t.weight) || 0;
+                            const targetQty = Number(t.target_qty) || 0;
+                            if (targetQty === 0) return;
+                            
+                            // Sum done_qty from allMonthlyData for this task up to this month
+                            const cumulativeDone = allMonthlyData
+                              .filter(r => r.task_id === t.id && r.report_month <= m)
+                              .reduce((sum: number, r: any) => sum + Number(r.done_qty), 0);
+                            
+                            const pct = Math.min(100, (cumulativeDone / targetQty) * 100);
+                            actualPct += (w * pct / 100);
+                          });
+                          actualPct = actualPct / totalWeight * 100;
+                          
+                          const diff = actualPct - planPct;
+                          const currentMonth = new Date().toISOString().slice(0, 7);
+                          const isFuture = m > currentMonth;
+                          
+                          return {
+                            month: m,
+                            label: `${thaiMonthNames[month - 1]} ${String(thaiYear).slice(-2)}`,
+                            plan: Number(planPct.toFixed(1)),
+                            actual: isFuture ? null : Number(actualPct.toFixed(1)),
+                            diff: isFuture ? null : Number(diff.toFixed(1)),
+                            isCurrent: m === currentMonth
+                          };
+                        });
+                        
+                        return (
+                          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+                            <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-indigo-50/30 to-purple-50/30">
+                              <h4 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                                <Calendar className="w-5 h-5 text-purple-600" />
+                                สรุปความก้าวหน้ารายเดือน
+                              </h4>
+                              <p className="text-xs text-gray-500 mt-1">เปรียบเทียบผลงานจริงกับแผนงานตั้งแต่เริ่มโครงการ</p>
+                            </div>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm border-collapse">
+                                <thead>
+                                  <tr className="bg-gray-50 text-[11px] uppercase tracking-wider text-gray-500 border-b border-gray-100">
+                                    <th className="font-bold p-3 text-left">เดือน</th>
+                                    <th className="font-bold p-3 text-center w-28">ตามแผน (%)</th>
+                                    <th className="font-bold p-3 text-center w-28">ทำได้จริง (%)</th>
+                                    <th className="font-bold p-3 text-center w-20">+/-</th>
+                                    <th className="font-bold p-3 text-left min-w-[200px]">กราฟเปรียบเทียบ</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                  {monthSummary.map((row) => (
+                                    <tr key={row.month} className={`hover:bg-gray-50/50 transition-colors ${row.isCurrent ? 'bg-purple-50/40 border-l-4 border-l-purple-500' : ''}`}>
+                                      <td className={`p-3 font-bold text-sm ${row.isCurrent ? 'text-purple-700' : 'text-gray-700'}`}>
+                                        {row.label}
+                                        {row.isCurrent && <span className="ml-2 text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold">เดือนนี้</span>}
+                                      </td>
+                                      <td className="p-3 text-center">
+                                        <span className="font-bold text-blue-600">{row.plan}%</span>
+                                      </td>
+                                      <td className="p-3 text-center">
+                                        {row.actual !== null ? (
+                                          <span className={`font-bold ${row.actual >= row.plan ? 'text-emerald-600' : 'text-orange-600'}`}>{row.actual}%</span>
+                                        ) : (
+                                          <span className="text-gray-300">-</span>
+                                        )}
+                                      </td>
+                                      <td className="p-3 text-center">
+                                        {row.diff !== null ? (
+                                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black ${
+                                            row.diff >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'
+                                          }`}>
+                                            {row.diff >= 0 ? '+' : ''}{row.diff}%
+                                          </span>
+                                        ) : (
+                                          <span className="text-gray-300">-</span>
+                                        )}
+                                      </td>
+                                      <td className="p-3">
+                                        <div className="flex flex-col gap-1">
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-[9px] text-blue-500 font-bold w-6">แผน</span>
+                                            <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                                              <div className="h-full bg-blue-400 rounded-full transition-all duration-500" style={{ width: `${row.plan}%` }} />
+                                            </div>
+                                          </div>
+                                          {row.actual !== null && (
+                                            <div className="flex items-center gap-1.5">
+                                              <span className="text-[9px] text-purple-500 font-bold w-6">จริง</span>
+                                              <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                                                <div className={`h-full rounded-full transition-all duration-500 ${row.actual >= row.plan ? 'bg-emerald-400' : 'bg-orange-400'}`} style={{ width: `${row.actual}%` }} />
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
