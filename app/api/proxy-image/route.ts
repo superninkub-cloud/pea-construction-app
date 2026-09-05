@@ -21,13 +21,18 @@ export async function GET(req: Request) {
       return new NextResponse(`Failed to fetch image: ${response.status}`, { status: response.status });
     }
 
-    const contentType = response.headers.get('content-type') || 'image/jpeg';
-    const buffer = await response.arrayBuffer();
+    const rawContentType = response.headers.get('content-type') || 'image/jpeg';
+    const contentType = rawContentType.split(';')[0].trim();
 
-    return new NextResponse(buffer, {
+    // Convert ArrayBuffer → Buffer (Node.js) → ReadableStream for response
+    const arrayBuffer = await response.arrayBuffer();
+    const nodeBuffer = Buffer.from(arrayBuffer);
+
+    return new NextResponse(nodeBuffer, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=86400', // Cache for 1 day
+        'Cache-Control': 'public, max-age=86400',
+        'Access-Control-Allow-Origin': '*',
       }
     });
   } catch (error: any) {
