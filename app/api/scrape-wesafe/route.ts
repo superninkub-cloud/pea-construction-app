@@ -41,8 +41,12 @@ export async function POST(req: Request) {
     loginData.append('TextBox2', password);
     loginData.append('Button1', 'Login');
 
-    let loginCookies = loginRes.headers.get('set-cookie') || '';
-    let cookieStr = loginCookies.split(',').map(c => c.split(';')[0].trim()).join('; ');
+    const getCookies = (headers: Headers) => {
+        const setCookies = headers.getSetCookie ? headers.getSetCookie() : [];
+        return setCookies.map(c => c.split(';')[0].trim());
+    };
+
+    let cookieStr = getCookies(loginRes.headers).join('; ');
 
     const authRes = await fetch('https://wesafe.pea.co.th/admin/login.aspx', {
       method: 'POST',
@@ -54,8 +58,8 @@ export async function POST(req: Request) {
       redirect: 'manual'
     });
 
-    let newCookies = authRes.headers.get('set-cookie') || '';
-    let combinedCookies = [cookieStr, ...newCookies.split(',').map(c => c.split(';')[0].trim())].join('; ');
+    let newCookies = getCookies(authRes.headers);
+    let combinedCookies = [...cookieStr.split('; '), ...newCookies].filter(Boolean).join('; ');
 
     if (authRes.status !== 302) {
          return NextResponse.json({ error: 'Login failed. Please check credentials.' }, { status: 401 });
@@ -93,8 +97,8 @@ export async function POST(req: Request) {
         redirect: 'manual'
     });
 
-    let chooseCookies = choosePostRes.headers.get('set-cookie') || '';
-    let finalCookies = [combinedCookies, ...chooseCookies.split(',').map(c => c.split(';')[0].trim())].join('; ');
+    let chooseCookies = getCookies(choosePostRes.headers);
+    let finalCookies = [combinedCookies, ...chooseCookies].filter(Boolean).join('; ');
 
     // 5. Fetch detail.aspx (Initialization for the session just in case)
     const detailUrl = `https://wesafe.pea.co.th/admin/detail.aspx?WebGetReqNO=${reqNo}`;
