@@ -722,12 +722,12 @@ export default function PlanningDashboard() {
   const totalActiveWeight = activeTasksWithDerivedProgress.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
   const actualProgressPercentage = totalActiveWeight > 0 ? (activeTasksWithDerivedProgress.reduce((sum, t) => sum + ((Number(t.weight) || 0) * t.derivedProgress / 100), 0) / totalActiveWeight * 100).toFixed(0) : "0";
 
-  const filteredProjects = projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor);
-  const countTotal = filteredProjects.length;
-  const countPlanning = filteredProjects.filter(p => p.status === 'ร่างแผนงาน' || !p.status).length;
-  const countInProgress = filteredProjects.filter(p => p.status === 'อยู่ระหว่างก่อสร้าง' || (p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)' && p.status !== 'ร่างแผนงาน')).length;
-  const countCompleted = filteredProjects.filter(p => p.status === 'ก่อสร้างแล้วเสร็จ' || p.status === 'ปิดงาน (TECO)').length;
-  const countDelayed = filteredProjects.filter(p => (p.plan_progress || 0) > (p.progress || 0) && p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)').length;
+  const dashboardFilteredProjects = projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor);
+  const countTotal = dashboardFilteredProjects.length;
+  const countPlanning = dashboardFilteredProjects.filter(p => p.status === 'ร่างแผนงาน' || !p.status).length;
+  const countInProgress = dashboardFilteredProjects.filter(p => p.status === 'อยู่ระหว่างก่อสร้าง' || (p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)' && p.status !== 'ร่างแผนงาน')).length;
+  const countCompleted = dashboardFilteredProjects.filter(p => p.status === 'ก่อสร้างแล้วเสร็จ' || p.status === 'ปิดงาน (TECO)').length;
+  const countDelayed = dashboardFilteredProjects.filter(p => (p.plan_progress || 0) > (p.progress || 0) && p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)').length;
 
   return (
     <div className="w-full text-sm text-gray-800 font-sans">
