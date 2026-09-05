@@ -1,13 +1,10 @@
 /* === GAS REPORT - Professional Modern Design === */
 
-/* Import Sarabun for Thai content elegance */
-@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-
 .gas-report-container {
   padding: 28px 32px;
   max-width: 1280px;
   margin: 0 auto;
-  font-family: 'Sarabun', 'Prompt', sans-serif;
+  font-family: 'Prompt', sans-serif;
 }
 
 /* === TABS === */
@@ -75,7 +72,7 @@
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   font-size: 1rem;
-  font-family: 'Sarabun', 'Prompt', sans-serif;
+  font-family: 'Prompt', sans-serif;
   transition: border-color 0.2s, box-shadow 0.2s;
   color: #0f172a;
   background: #fafafa;
@@ -104,7 +101,7 @@
   width: 100%;
   letter-spacing: 0.02em;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-  font-family: 'Sarabun', 'Prompt', sans-serif;
+  font-family: 'Prompt', sans-serif;
 }
 
 .gas-submit-btn:hover {
@@ -142,7 +139,7 @@
   border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   font-size: 0.95rem;
-  font-family: 'Sarabun', 'Prompt', sans-serif;
+  font-family: 'Prompt', sans-serif;
   color: #1e293b;
   background: #fafafa;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -168,7 +165,7 @@
   gap: 8px;
   transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  font-family: 'Sarabun', 'Prompt', sans-serif;
+  font-family: 'Prompt', sans-serif;
 }
 
 .print-btn:hover {
@@ -274,7 +271,7 @@
 
 /* === OFFICIAL FORM (PDF LAYOUT) === */
 .official-form {
-  font-family: 'Sarabun', 'TH Sarabun New', sans-serif;
+  font-family: 'Prompt', sans-serif;
   color: #000;
   background: white;
   padding: 10px 20px;

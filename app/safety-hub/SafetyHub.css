@@ -2,7 +2,7 @@
   padding: 32px;
   max-width: 1400px;
   margin: 0 auto;
-  font-family: 'Sarabun', 'Prompt', sans-serif;
+  font-family: 'Prompt', sans-serif;
   min-height: calc(100vh - 80px);
 }
 
@@ -160,7 +160,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   overflow: hidden;
-  font-family: 'Sarabun', 'Prompt', sans-serif;
+  font-family: 'Prompt', sans-serif;
   display: flex;
   flex-direction: column;
 }

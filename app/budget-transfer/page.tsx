@@ -358,11 +358,7 @@ function BudgetTransferContent() {
         <meta charset='utf-8'>
         <title>Export</title>
         <style>
-          @font-family {
-            font-family: 'TH Sarabun New';
-            src: local('TH Sarabun New');
-          }
-          body { font-family: 'TH Sarabun New', 'Sarabun', sans-serif; font-size: 16pt; }
+          body { font-family: 'Prompt', sans-serif; font-size: 16pt; }
           table { width: 100%; border-collapse: collapse; }
           th, td { border: 1px solid black; padding: 4px; }
           .print-header { text-align: center; }
