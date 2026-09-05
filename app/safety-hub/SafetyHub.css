@@ -223,7 +223,7 @@
   height: auto;
   z-index: 2;
   opacity: 0.9;
-  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+  mix-blend-mode: multiply;
 }
 
 /* Info Cards */
