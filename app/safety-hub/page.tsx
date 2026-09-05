@@ -262,7 +262,7 @@ export default function SafetyHubPage() {
                 {/* Geometric background elements */}
                 <div className="bg-shape bg-shape-1"></div>
                 <div className="bg-shape bg-shape-2"></div>
-                <img src="/crane.jpg" alt="Crane" className="deco-crane" />
+                <img src="/crane.png" alt="Crane" className="deco-crane" />
                 
                 <div className="collage-header-new">
                   <h2>การดำเนินงานด้านความปลอดภัย</h2>
