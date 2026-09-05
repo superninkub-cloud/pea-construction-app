@@ -142,7 +142,7 @@ export default function PlanningDashboard() {
     }
     
     if (!error && data) {
-      let validProjects = data.filter(p => p.wbs !== 'SAFETY_PLAN_2026');
+      let validProjects = data.filter(p => p.wbs !== 'SAFETY_PLAN_2026' && !p.wbs.includes('IMPORTANT_TASKS'));
       
       if (tasksData) {
         validProjects = validProjects.map(p => {
