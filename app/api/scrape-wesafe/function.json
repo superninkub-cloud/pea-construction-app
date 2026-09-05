@@ -1,0 +1,6 @@
+[
+  {
+    "src": "/api/scrape-wesafe",
+    "maxDuration": 60
+  }
+]
