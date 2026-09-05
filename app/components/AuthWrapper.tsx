@@ -24,7 +24,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (password === "Cha16072534") {
+      if (password === "Cha16072534" || password === "Cha16072534--") {
         sessionStorage.setItem("pea_auth", "true");
         sessionStorage.setItem("pea_role", "admin");
         setIsAuthenticated(true);
