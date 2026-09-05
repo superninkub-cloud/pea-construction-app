@@ -4,14 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import TopBar from "../components/TopBar";
 import "./SafetyHub.css";
-import { Upload, X, Download, Copy, CheckCircle2 } from "lucide-react";
+import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera } from "lucide-react";
 
 export default function SafetyHubPage() {
   const [images, setImages] = useState<string[]>([]);
   const [projName, setProjName] = useState("");
   const [location, setLocation] = useState("");
   const [supervisor, setSupervisor] = useState("");
-  const [workerCount, setWorkerCount] = useState("");
   const [dateStr, setDateStr] = useState("");
   const [isCopied, setIsCopied] = useState(false);
 
@@ -91,21 +90,16 @@ export default function SafetyHubPage() {
   };
 
   const generateReportText = () => {
-    return `📢 รายงานความปลอดภัยประจำวัน (Safety Report)
-📅 วันที่: ${dateStr}
-📍 ชื่องาน: ${projName || "-"}
-🏢 สถานที่: ${location || "-"}
+    return `📅 วันที่: ${dateStr}
+📢 กรย.(ก3) ดำเนินการกิจกรรม SafetyTalk ชี้แจงแผนงาน และพูดคุยเน้นย้ำความปลอดภัย
 👷 ผู้ควบคุมงาน: ${supervisor || "-"}
-👥 จำนวนผู้ปฏิบัติงาน: ${workerCount || "0"} คน
-
+📍 ชื่องาน: ${projName || "-"}
+🏢 ในพื้นที่: ${location || "-"}
 ✅ การเตรียมความพร้อมก่อนปฏิบัติงาน:
-- มีการประชุมชี้แจงอันตรายก่อนปฏิบัติงาน (KYT)
-- ผู้ปฏิบัติงานสวมใส่อุปกรณ์ PPE ครบถ้วน
-- ติดตั้งป้ายเตือนและกรวยจราจรในพื้นที่การทำงานเรียบร้อย
-- ตรวจสอบเครื่องมือและอุปกรณ์ก่อนใช้งาน
-
-สถานการณ์ปกติ ไม่มีอุบัติเหตุเกิดขึ้น
-จึงเรียนมาเพื่อโปรดทราบ`;
+- ประชุมชี้แจงอันตรายก่อนปฏิบัติงาน (KYT)
+- เน้นย้ำผู้ปฏิบัติงานสวมใส่อุปกรณ์ PPE ครบถ้วน
+- ติดตั้งป้ายเตือนและกรวยจราจรในพื้นที่การปฏิบัติงาน
+- ตรวจสอบเครื่องมือและอุปกรณ์ก่อนใช้งาน`;
   };
 
   const copyToClipboard = () => {
@@ -150,8 +144,8 @@ export default function SafetyHubPage() {
               </div>
               
               <div className="form-group">
-                <label>สถานที่ (Location)</label>
-                <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น บริเวณสามแยก..." />
+                <label>พื้นที่รับผิดชอบ</label>
+                <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น กฟจ.กาญจนบุรี" />
               </div>
               
               <div className="form-group">
@@ -159,11 +153,7 @@ export default function SafetyHubPage() {
                 <input type="text" value={supervisor} onChange={e => setSupervisor(e.target.value)} placeholder="ชื่อผู้ควบคุมงาน" />
               </div>
               
-              <div className="form-group">
-                <label>จำนวนผู้ปฏิบัติงาน (คน)</label>
-                <input type="number" value={workerCount} onChange={e => setWorkerCount(e.target.value)} placeholder="เช่น 5" />
               </div>
-            </div>
 
             <div className="safety-form mb-6">
               <h3 className="text-lg font-bold text-slate-800 mb-4">ดึงรูปอัตโนมัติ (จาก WeSafe)</h3>
@@ -243,33 +233,65 @@ export default function SafetyHubPage() {
 
               {/* The actual element to capture */}
               <div ref={collageRef} className="collage-board">
-                <div className="collage-header">
-                  <img src="/PEA-Logo.png" alt="PEA Logo" className="collage-logo" crossOrigin="anonymous" />
-                  <div className="collage-title">
-                    <h2>รายงานความปลอดภัย (Safety Report)</h2>
-                    <p>แผนกกอสร้างระบบไฟฟ้า (ผกร.กรย.(ก3))</p>
+                {/* Geometric background elements */}
+                <div className="bg-shape bg-shape-1"></div>
+                <div className="bg-shape bg-shape-2"></div>
+                
+                <div className="collage-header-new">
+                  <h2>รายงานความปลอดภัย</h2>
+                  <div className="subtitle-en">Safety Report</div>
+                  <div className="subtitle-th">แผนกก่อสร้างระบบไฟฟ้า (ผกร.กรย.(ก3))</div>
+                </div>
+
+                <div className="collage-info-cards">
+                  <div className="info-card">
+                    <div className="icon-wrapper"><Calendar className="w-6 h-6 text-white" /></div>
+                    <div className="info-text">
+                      <span className="info-label">วันที่</span>
+                      <span className="info-value">{dateStr}</span>
+                    </div>
+                  </div>
+                  <div className="info-card">
+                    <div className="icon-wrapper"><MapPin className="w-6 h-6 text-white" /></div>
+                    <div className="info-text">
+                      <span className="info-label">สถานที่</span>
+                      <span className="info-value">{location || "-"}</span>
+                    </div>
+                  </div>
+                  <div className="info-card">
+                    <div className="icon-wrapper"><FileText className="w-6 h-6 text-white" /></div>
+                    <div className="info-text">
+                      <span className="info-label">ชื่องาน</span>
+                      <span className="info-value">{projName || "-"}</span>
+                    </div>
+                  </div>
+                  <div className="info-card">
+                    <div className="icon-wrapper"><User className="w-6 h-6 text-white" /></div>
+                    <div className="info-text">
+                      <span className="info-label">ผู้ควบคุมงาน</span>
+                      <span className="info-value">{supervisor || "-"}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="collage-info">
-                  <div className="info-item"><span className="info-label">วันที่:</span><span className="info-value">{dateStr}</span></div>
-                  <div className="info-item"><span className="info-label">สถานที่:</span><span className="info-value">{location || "-"}</span></div>
-                  <div className="info-item" style={{ gridColumn: 'span 2' }}><span className="info-label">ชื่องาน:</span><span className="info-value">{projName || "-"}</span></div>
-                  <div className="info-item"><span className="info-label">ผู้ควบคุมงาน:</span><span className="info-value">{supervisor || "-"}</span></div>
-                  <div className="info-item"><span className="info-label">จำนวนคนงาน:</span><span className="info-value">{workerCount ? workerCount + ' คน' : "-"}</span></div>
+                <div className="section-divider">
+                  <div className="section-title">
+                    <div className="icon-camera"><Camera className="w-5 h-5 text-white" /></div>
+                    <span>ภาพการปฏิบัติงาน</span>
+                  </div>
+                  <div className="line-divider"></div>
+                  <div className="polygon-deco"></div>
                 </div>
 
-                <div className="collage-photos">
-                  {[0, 1, 2, 3].map(i => (
-                    <div key={i} className={`photo-slot ${!images[i] ? 'empty' : ''}`}>
-                      {images[i] ? (
-                        // No crossOrigin here - WeSafe doesn't support CORS, img tags don't need it anyway
-                        <img src={images[i]} alt={`Pic ${i+1}`} />
-                      ) : (
-                        <span>รูปภาพที่ {i+1}</span>
-                      )}
+                <div className={`collage-photos-dynamic layout-${images.length || 0}`}>
+                  {images.map((src, i) => (
+                    <div key={i} className="photo-slot">
+                      <img src={src} alt={`Pic ${i+1}`} />
                     </div>
                   ))}
+                  {images.length === 0 && (
+                     <div className="photo-slot empty"><p>เพิ่มรูปภาพเพื่อแสดงผล (1-4 รูป)</p></div>
+                  )}
                 </div>
               </div>
             </div>
