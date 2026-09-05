@@ -55,16 +55,24 @@ export async function POST(req: Request) {
     const mergeCookies = (oldCookieStr: string, newCookiesArr: string[]) => {
         const cookieMap = new Map<string, string>();
         
-        // Parse old
+        // Parse old cookies - split on FIRST '=' only (values may contain '=' in base64)
         oldCookieStr.split(';').forEach(c => {
-            const [k, v] = c.trim().split('=');
-            if (k && v) cookieMap.set(k, v);
+            const idx = c.trim().indexOf('=');
+            if (idx > 0) {
+                const k = c.trim().substring(0, idx);
+                const v = c.trim().substring(idx + 1);
+                if (k) cookieMap.set(k, v);
+            }
         });
 
-        // Parse new
+        // Parse new cookies - split on FIRST '=' only
         newCookiesArr.forEach(c => {
-            const [k, v] = c.trim().split('=');
-            if (k && v) cookieMap.set(k, v);
+            const idx = c.trim().indexOf('=');
+            if (idx > 0) {
+                const k = c.trim().substring(0, idx);
+                const v = c.trim().substring(idx + 1);
+                if (k) cookieMap.set(k, v);
+            }
         });
 
         return Array.from(cookieMap.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
