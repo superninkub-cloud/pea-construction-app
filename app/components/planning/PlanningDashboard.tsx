@@ -138,13 +138,12 @@ export default function PlanningDashboard() {
     const { data, error } = await supabase.from("projects").select("id, wbs, name, contractor, supervisor, committee, duration, status, construction_type").order("wbs");
     const { data: tasksData, error: tasksError } = await supabase.from("project_tasks").select("project_wbs, weight, target_qty, done_qty, progress, start_date, end_date");
     if (tasksError) {
-      console.warn("project_tasks query error (trying fallback):", tasksError.message);
+      console.warn("project_tasks query error:", tasksError.message);
     }
     
     if (!error && data) {
       let validProjects = data.filter(p => p.wbs !== 'SAFETY_PLAN_2026');
       
-      // Calculate progress for each project
       if (tasksData) {
         validProjects = validProjects.map(p => {
           const pTasks = tasksData.filter(t => t.project_wbs === p.wbs);
@@ -156,16 +155,12 @@ export default function PlanningDashboard() {
           const totalProgress = pTasks.reduce((sum, t) => {
             const w = Number(t.weight) || 0;
             let pVal = 0;
-            if (p.status === 'ก่อสร้างแล้วเสร็จ' || p.status === 'ปิดงาน (TECO)') {
-              pVal = 100;
-            } else {
-              const targetQty = Number(t.target_qty) || 0;
-              const doneQty = Number(t.done_qty) || 0;
-              if (targetQty > 0) {
-                pVal = Math.min(100, Math.round((doneQty / targetQty) * 100));
-              } else if (Number(t.progress) > 0) {
-                pVal = Number(t.progress);
-              }
+            const targetQty = Number(t.target_qty) || 0;
+            const doneQty = Number(t.done_qty) || 0;
+            if (targetQty > 0) {
+              pVal = Math.min(100, Math.round((doneQty / targetQty) * 100));
+            } else if (Number(t.progress) > 0) {
+              pVal = Number(t.progress);
             }
             return sum + (w * pVal / 100);
           }, 0) / totalWeight * 100;
@@ -542,11 +537,8 @@ export default function PlanningDashboard() {
   };
 
   const handleUnlockPlan = async () => {
-    if (!selectedWbs) return;
-    if (!confirm("คุณต้องการปลดล็อคเพื่อแก้ไขแผนงานใช่หรือไม่?\n\n(การปลดล็อคจะนำโครงการกลับสู่ 'โหมดวางแผนงาน' เพื่อแก้ไขเป้าหมายอีกครั้ง)")) return;
-    
-    await supabase.from("projects").update({ status: 'ร่างแผนงาน' }).eq("wbs", selectedWbs);
-    setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'ร่างแผนงาน' } : p));
+    // Legacy function, replaced by dynamic progress check
+    alert("การปลดล็อคแผนงานจะทำได้ก็ต่อเมื่อยังไม่มีผลความก้าวหน้าจริง (Progress = 0%) เท่านั้น\nกรุณาลบผลการดำเนินงานจริงออกก่อนหากต้องการแก้ไขแผน");
   };
 
   const handleAddCustomStep = async () => {
@@ -687,22 +679,16 @@ export default function PlanningDashboard() {
     ? tasks 
     : tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0);
 
-  const isPlanningPhase = currentProject?.status === 'ร่างแผนงาน';
+  const isPlanningPhase = (currentProject?.progress || 0) === 0;
 
   const handleLockPlan = async () => {
     if (!selectedWbs) return;
-    if (!confirm("ยืนยันการล็อคแผนงาน?\n\nเมื่อยืนยันแล้ว ข้อมูลแผนงาน (วันที่และเป้าหมาย) จะไม่สามารถแก้ไขได้อีก เพื่อให้คุณสามารถเริ่มบันทึกผลการดำเนินงานจริงได้")) return;
-    
-    await supabase.from("projects").update({ status: 'อยู่ระหว่างก่อสร้าง' }).eq("wbs", selectedWbs);
-    setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'อยู่ระหว่างก่อสร้าง' } : p));
+    alert("ระบบได้เปลี่ยนมาใช้การล็อคแผนอัตโนมัติแล้ว\nเมื่อมีการอัพเดทความก้าวหน้าจริง (> 0%) แผนงานจะถูกล็อคไม่ให้แก้ไขทันที");
   };
 
   const handleFastTrackLegacy = async () => {
     if (!selectedWbs) return;
-    if (!confirm("ยืนยันนำเข้า 'โครงการที่เสร็จสิ้นแล้ว' (Legacy)?\n\nระบบจะข้ามขั้นตอนการทำแผน ปรับความก้าวหน้าทุกขั้นตอนเป็น 100% อัตโนมัติ และเปลี่ยนสถานะโครงการเป็น ก่อสร้างแล้วเสร็จ ทันที")) return;
-    
-    // Update project status
-    await supabase.from("projects").update({ status: 'ก่อสร้างแล้วเสร็จ' }).eq("wbs", selectedWbs);
+    if (!confirm("ยืนยันนำเข้า 'โครงการที่เสร็จสิ้นแล้ว' (Legacy)?\n\nระบบจะข้ามขั้นตอนการทำแผน ปรับความก้าวหน้าทุกขั้นตอนเป็น 100% อัตโนมัติ")) return;
     
     // Update all tasks to 100%
     const today = new Date().toISOString().split('T')[0];
