@@ -1052,7 +1052,7 @@ export default function PlanningDashboard() {
                           paginatedProjects.map((p, idx) => (
                             <tr key={p.id} className="hover:bg-gray-50/80 transition-colors group">
                               <td className="px-6 py-4 text-gray-400 font-medium text-xs">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                              <td className="px-6 py-4 font-mono font-medium text-gray-600 text-xs">{p.wbs}</td>
+                              <td className="px-6 py-4 font-mono font-black text-gray-900 text-[13px] tracking-wide bg-gray-50/50">{p.wbs}</td>
                               <td className="px-6 py-4 font-bold text-gray-900">{p.name}</td>
                               <td className="px-6 py-4 text-gray-500 font-medium">{p.supervisor || "-"}</td>
                               <td className="px-6 py-4">
