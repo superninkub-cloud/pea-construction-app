@@ -140,13 +140,17 @@ export default function PlanningDashboard() {
           
           const totalProgress = pTasks.reduce((sum, t) => {
             const w = Number(t.weight) || 0;
-            const targetQty = Number(t.target_qty) || 0;
-            const doneQty = Number(t.done_qty) || 0;
             let pVal = 0;
-            if (targetQty > 0) {
-              pVal = Math.min(100, Math.round((doneQty / targetQty) * 100));
-            } else if (Number(t.progress) > 0) {
-              pVal = Number(t.progress);
+            if (p.status === 'ก่อสร้างแล้วเสร็จ' || p.status === 'ปิดงาน (TECO)') {
+              pVal = 100;
+            } else {
+              const targetQty = Number(t.target_qty) || 0;
+              const doneQty = Number(t.done_qty) || 0;
+              if (targetQty > 0) {
+                pVal = Math.min(100, Math.round((doneQty / targetQty) * 100));
+              } else if (Number(t.progress) > 0) {
+                pVal = Number(t.progress);
+              }
             }
             return sum + (w * pVal / 100);
           }, 0) / totalWeight * 100;
