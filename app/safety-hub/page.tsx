@@ -67,7 +67,12 @@ export default function SafetyHubPage() {
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.error || "เกิดข้อผิดพลาดในการดึงรูป");
+        let errMsg = data.error || "เกิดข้อผิดพลาดในการดึงรูป";
+        if (data.debug) {
+           errMsg += `\n\nDebug Info:\nStatus: ${data.debug.status}\nCookies Sent: ${data.debug.cookieSent ? "YES" : "NO"}`;
+           console.log("Debug Info from API:", data.debug);
+        }
+        throw new Error(errMsg);
       }
       
       if (data.images && data.images.length > 0) {

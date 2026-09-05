@@ -21,10 +21,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid URL format. Missing WebGetReqNO.' }, { status: 400 });
     }
 
+    const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36';
+
     console.log(`[WeSafe API] Starting scrape for ${reqNo}...`);
 
     // 1. Get Login Page
-    const loginRes = await fetch('https://wesafe.pea.co.th/admin/login.aspx');
+    const loginRes = await fetch('https://wesafe.pea.co.th/admin/login.aspx', {
+        headers: { 'User-Agent': USER_AGENT }
+    });
     if (!loginRes.ok) throw new Error('Failed to load login page');
     const loginHtml = await loginRes.text();
     
@@ -54,6 +58,10 @@ export async function POST(req: Request) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cookie': cookieStr,
+        'User-Agent': USER_AGENT,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Origin': 'https://wesafe.pea.co.th',
+        'Referer': 'https://wesafe.pea.co.th/admin/login.aspx'
       },
       redirect: 'manual'
     });
@@ -62,7 +70,15 @@ export async function POST(req: Request) {
     let combinedCookies = [...cookieStr.split('; '), ...newCookies].filter(Boolean).join('; ');
 
     if (authRes.status !== 302) {
-         return NextResponse.json({ error: 'Login failed. Please check credentials.' }, { status: 401 });
+         return NextResponse.json({ 
+             error: 'Login failed. Please check credentials.',
+             debug: {
+                 status: authRes.status,
+                 cookieSent: cookieStr,
+                 cookieReceived: newCookies,
+                 location: authRes.headers.get('location')
+             }
+         }, { status: 401 });
     }
 
     const location = authRes.headers.get('location') || '';
@@ -72,7 +88,10 @@ export async function POST(req: Request) {
 
     // 3. Get Choose Page
     const chooseRes = await fetch(chooseUrl, {
-        headers: { 'Cookie': combinedCookies }
+        headers: { 
+            'Cookie': combinedCookies,
+            'User-Agent': USER_AGENT
+        }
     });
     const chooseHtml = await chooseRes.text();
     const vs2 = extractVal(chooseHtml, '__VIEWSTATE');
@@ -93,6 +112,7 @@ export async function POST(req: Request) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Cookie': combinedCookies,
+            'User-Agent': USER_AGENT
         },
         redirect: 'manual'
     });
@@ -102,7 +122,12 @@ export async function POST(req: Request) {
 
     // 5. Fetch detail.aspx (Initialization for the session just in case)
     const detailUrl = `https://wesafe.pea.co.th/admin/detail.aspx?WebGetReqNO=${reqNo}`;
-    await fetch(detailUrl, { headers: { 'Cookie': finalCookies } });
+    await fetch(detailUrl, { 
+        headers: { 
+            'Cookie': finalCookies,
+            'User-Agent': USER_AGENT
+        } 
+    });
 
     // 6. Fetch images from sub-checklists
     const allImages = new Set<string>();
@@ -111,7 +136,10 @@ export async function POST(req: Request) {
     for (let i = 1; i <= 5; i++) {
         const detailSubUrl = `https://wesafe.pea.co.th/admin/detailsub.aspx?WebGetReqNO=${reqNo}&WebGetCheckList=${i}`;
         const imgRes = await fetch(detailSubUrl, {
-            headers: { 'Cookie': finalCookies }
+            headers: { 
+                'Cookie': finalCookies,
+                'User-Agent': USER_AGENT
+            }
         });
         const html = await imgRes.text();
         
