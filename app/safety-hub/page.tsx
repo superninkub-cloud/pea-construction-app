@@ -241,9 +241,10 @@ export default function SafetyHubPage() {
                 {/* Geometric background elements */}
                 <div className="bg-shape bg-shape-1"></div>
                 <div className="bg-shape bg-shape-2"></div>
+                <img src="/crane.jpg" alt="Crane" className="deco-crane" />
                 
                 <div className="collage-header-new">
-                  <h2>รายงานความปลอดภัย</h2>
+                  <h2>รายงานผลการดำเนินงานด้านความปลอดภัย</h2>
                   <div className="subtitle-en">Safety Report</div>
                   <div className="subtitle-th">แผนกก่อสร้างระบบไฟฟ้า (ผกร.กรย.(ก3))</div>
                 </div>
