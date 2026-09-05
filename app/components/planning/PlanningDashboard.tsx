@@ -58,6 +58,7 @@ export default function PlanningDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [showBudgetMock, setShowBudgetMock] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "PLANNING" | "IN_PROGRESS" | "COMPLETED" | "DELAYED">("ALL");
 
   // Monthly Report states
   const [reportMonth, setReportMonth] = useState(() => {
@@ -99,7 +100,19 @@ export default function PlanningDashboard() {
   const filteredProjects = projects.filter(p => {
     const matchesSupervisor = !selectedSupervisor || p.supervisor === selectedSupervisor;
     const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.wbs.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSupervisor && matchesSearch;
+    
+    let matchesStatus = true;
+    if (statusFilter === "PLANNING") {
+      matchesStatus = p.status === 'ร่างแผนงาน' || !p.status;
+    } else if (statusFilter === "IN_PROGRESS") {
+      matchesStatus = p.status === 'อยู่ระหว่างก่อสร้าง' || (p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)' && p.status !== 'ร่างแผนงาน');
+    } else if (statusFilter === "COMPLETED") {
+      matchesStatus = p.status === 'ก่อสร้างแล้วเสร็จ' || p.status === 'ปิดงาน (TECO)';
+    } else if (statusFilter === "DELAYED") {
+      matchesStatus = (p.plan_progress || 0) > (p.progress || 0) && p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)';
+    }
+
+    return matchesSupervisor && matchesSearch && matchesStatus;
   });
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
   const paginatedProjects = filteredProjects.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -107,7 +120,7 @@ export default function PlanningDashboard() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedSupervisor, itemsPerPage]);
+  }, [searchQuery, selectedSupervisor, itemsPerPage, statusFilter]);
 
   useEffect(() => {
     fetchProjects();
@@ -818,7 +831,9 @@ export default function PlanningDashboard() {
                     </div>
                     
                     {/* Total Projects */}
-                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-3 flex-1 min-w-[150px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                    <div 
+                      onClick={() => setStatusFilter("ALL")}
+                      className={`bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] p-4 flex items-center gap-3 flex-1 min-w-[150px] cursor-pointer hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500 border-2 ${statusFilter === "ALL" ? "border-purple-500" : "border-transparent"}`}>
                       <div className="w-12 h-12 rounded-[16px] bg-gray-50 text-gray-700 flex items-center justify-center shrink-0">
                         <List className="w-5 h-5" />
                       </div>
@@ -829,7 +844,9 @@ export default function PlanningDashboard() {
                     </div>
                     
                     {/* Planning */}
-                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-3 flex-1 min-w-[150px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                    <div 
+                      onClick={() => setStatusFilter("PLANNING")}
+                      className={`bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] p-4 flex items-center gap-3 flex-1 min-w-[150px] cursor-pointer hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500 border-2 ${statusFilter === "PLANNING" ? "border-[#1976D2]" : "border-transparent"}`}>
                       <div className="w-12 h-12 rounded-[16px] bg-[#E3F2FD]/80 text-[#1976D2] flex items-center justify-center shrink-0">
                         <Clock className="w-5 h-5" />
                       </div>
@@ -840,7 +857,9 @@ export default function PlanningDashboard() {
                     </div>
 
                     {/* In Progress */}
-                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-3 flex-1 min-w-[150px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                    <div 
+                      onClick={() => setStatusFilter("IN_PROGRESS")}
+                      className={`bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] p-4 flex items-center gap-3 flex-1 min-w-[150px] cursor-pointer hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500 border-2 ${statusFilter === "IN_PROGRESS" ? "border-[#F57F17]" : "border-transparent"}`}>
                       <div className="w-12 h-12 rounded-[16px] bg-[#FFF8E1]/80 text-[#F57F17] flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                       </div>
@@ -851,7 +870,9 @@ export default function PlanningDashboard() {
                     </div>
 
                     {/* Completed */}
-                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-3 flex-1 min-w-[150px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                    <div 
+                      onClick={() => setStatusFilter("COMPLETED")}
+                      className={`bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] p-4 flex items-center gap-3 flex-1 min-w-[150px] cursor-pointer hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500 border-2 ${statusFilter === "COMPLETED" ? "border-[#2E7D32]" : "border-transparent"}`}>
                       <div className="w-12 h-12 rounded-[16px] bg-[#E8F5E9]/80 text-[#2E7D32] flex items-center justify-center shrink-0">
                         <CheckCircle2 className="w-5 h-5" />
                       </div>
@@ -862,7 +883,9 @@ export default function PlanningDashboard() {
                     </div>
                     
                     {/* Delayed */}
-                    <div className="bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] border-transparent p-4 flex items-center gap-3 flex-1 min-w-[150px] hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500">
+                    <div 
+                      onClick={() => setStatusFilter("DELAYED")}
+                      className={`bg-white rounded-[24px] shadow-[0_10px_40px_rgb(0,0,0,0.03)] p-4 flex items-center gap-3 flex-1 min-w-[150px] cursor-pointer hover:-translate-y-1 hover:shadow-[0_15px_50px_rgb(0,0,0,0.06)] transition-all duration-500 border-2 ${statusFilter === "DELAYED" ? "border-[#C62828]" : "border-transparent"}`}>
                       <div className="w-12 h-12 rounded-[16px] bg-[#FFEBEE]/80 text-[#C62828] flex items-center justify-center shrink-0">
                         <AlertTriangle className="w-5 h-5" />
                       </div>
