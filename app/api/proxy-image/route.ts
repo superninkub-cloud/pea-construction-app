@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+// No imports needed - using native Web API Response
 
 // Lightweight proxy to fetch WeSafe images bypassing CORS
 export async function GET(req: Request) {
@@ -6,7 +6,7 @@ export async function GET(req: Request) {
   const imgUrl = searchParams.get('url');
 
   if (!imgUrl || !imgUrl.startsWith('https://wesafe.pea.co.th/')) {
-    return new NextResponse('Invalid URL', { status: 400 });
+    return new Response('Invalid URL', { status: 400 });
   }
 
   try {
@@ -18,17 +18,14 @@ export async function GET(req: Request) {
     });
 
     if (!response.ok) {
-      return new NextResponse(`Failed to fetch image: ${response.status}`, { status: response.status });
+      return new Response(`Failed to fetch image: ${response.status}`, { status: response.status });
     }
 
     const rawContentType = response.headers.get('content-type') || 'image/jpeg';
     const contentType = rawContentType.split(';')[0].trim();
 
-    // Convert ArrayBuffer → Buffer (Node.js) → ReadableStream for response
-    const arrayBuffer = await response.arrayBuffer();
-    const nodeBuffer = Buffer.from(arrayBuffer);
-
-    return new NextResponse(nodeBuffer, {
+    // Stream the response body directly
+    return new Response(response.body, {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=86400',
@@ -36,6 +33,6 @@ export async function GET(req: Request) {
       }
     });
   } catch (error: any) {
-    return new NextResponse(`Proxy error: ${error.message}`, { status: 500 });
+    return new Response(`Proxy error: ${error.message}`, { status: 500 });
   }
 }
