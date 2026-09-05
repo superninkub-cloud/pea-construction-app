@@ -513,6 +513,16 @@ export default function PlanningDashboard() {
     ? tasks 
     : tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0);
 
+  const activeTasksWithDerivedProgress = activeTasks.map(t => {
+    const targetQty = Number(t.target_qty) || 0;
+    const doneQty = Number(t.done_qty) || 0;
+    const derivedProgress = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
+    return { ...t, derivedProgress };
+  });
+
+  const totalActiveWeight = activeTasksWithDerivedProgress.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+  const actualProgressPercentage = totalActiveWeight > 0 ? (activeTasksWithDerivedProgress.reduce((sum, t) => sum + ((Number(t.weight) || 0) * t.derivedProgress / 100), 0) / totalActiveWeight * 100).toFixed(0) : "0";
+
   return (
     <div className="w-full text-sm text-gray-800 font-sans">
       <div className="w-full mx-auto space-y-6">
@@ -945,7 +955,7 @@ export default function PlanningDashboard() {
               <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
                 <div>
                   <p className="text-gray-500 text-xs font-bold mb-1">งานที่เสร็จแล้ว</p>
-                  <p className="text-3xl font-black text-gray-900">{activeTasks.filter(t => t.progress === 100).length}</p>
+                  <p className="text-3xl font-black text-gray-900">{activeTasksWithDerivedProgress.filter(t => t.derivedProgress === 100).length}</p>
                   <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/30 relative overflow-hidden">
@@ -959,7 +969,7 @@ export default function PlanningDashboard() {
                   <div>
                     <p className="text-gray-500 text-xs font-bold mb-1">ความก้าวหน้าจริง</p>
                     <p className="text-3xl font-black text-gray-900">
-                      {activeTasks.length > 0 ? (activeTasks.reduce((acc, t) => acc + t.progress, 0) / activeTasks.length).toFixed(0) : "0"}%
+                      {actualProgressPercentage}%
                     </p>
                   </div>
                   <div className="w-14 h-14 rounded-2xl bg-blue-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/30">
@@ -967,14 +977,14 @@ export default function PlanningDashboard() {
                   </div>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2 mt-4 relative z-10 overflow-hidden">
-                  <div className="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${activeTasks.length > 0 ? (activeTasks.reduce((acc, t) => acc + t.progress, 0) / activeTasks.length) : 0}%` }}></div>
+                  <div className="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${actualProgressPercentage}%` }}></div>
                 </div>
               </div>
 
               <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
                 <div>
                   <p className="text-gray-500 text-xs font-bold mb-1">งานที่กำลังดำเนินการ</p>
-                  <p className="text-3xl font-black text-gray-900">{activeTasks.filter(t => t.progress > 0 && t.progress < 100).length}</p>
+                  <p className="text-3xl font-black text-gray-900">{activeTasksWithDerivedProgress.filter(t => t.derivedProgress > 0 && t.derivedProgress < 100).length}</p>
                   <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-orange-500/30">
