@@ -485,6 +485,7 @@ export default function PlanningDashboard() {
     return tasks.reduce((acc, t) => acc + Math.max(1, new Date(t.end_date).getTime() - new Date(t.start_date).getTime()), 0);
   };
   const totalW = calculateTotalWeight();
+  const activeTasks = tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0);
 
   return (
     <div className="w-full text-sm text-gray-800 font-sans">
@@ -907,7 +908,7 @@ export default function PlanningDashboard() {
               <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
                 <div>
                   <p className="text-gray-500 text-xs font-bold mb-1">งานทั้งหมด</p>
-                  <p className="text-3xl font-black text-gray-900">{tasks.length}</p>
+                  <p className="text-3xl font-black text-gray-900">{activeTasks.length}</p>
                   <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/30">
@@ -918,7 +919,7 @@ export default function PlanningDashboard() {
               <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
                 <div>
                   <p className="text-gray-500 text-xs font-bold mb-1">งานที่เสร็จแล้ว</p>
-                  <p className="text-3xl font-black text-gray-900">{tasks.filter(t => t.progress === 100).length}</p>
+                  <p className="text-3xl font-black text-gray-900">{activeTasks.filter(t => t.progress === 100).length}</p>
                   <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/30 relative overflow-hidden">
@@ -932,7 +933,7 @@ export default function PlanningDashboard() {
                   <div>
                     <p className="text-gray-500 text-xs font-bold mb-1">ความก้าวหน้าจริง</p>
                     <p className="text-3xl font-black text-gray-900">
-                      {tasks.length > 0 ? (tasks.reduce((acc, t) => acc + t.progress, 0) / tasks.length).toFixed(0) : "0"}%
+                      {activeTasks.length > 0 ? (activeTasks.reduce((acc, t) => acc + t.progress, 0) / activeTasks.length).toFixed(0) : "0"}%
                     </p>
                   </div>
                   <div className="w-14 h-14 rounded-2xl bg-blue-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/30">
@@ -940,14 +941,14 @@ export default function PlanningDashboard() {
                   </div>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2 mt-4 relative z-10 overflow-hidden">
-                  <div className="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${tasks.length > 0 ? (tasks.reduce((acc, t) => acc + t.progress, 0) / tasks.length) : 0}%` }}></div>
+                  <div className="bg-blue-500 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${activeTasks.length > 0 ? (activeTasks.reduce((acc, t) => acc + t.progress, 0) / activeTasks.length) : 0}%` }}></div>
                 </div>
               </div>
 
               <div className="bg-white rounded-[20px] shadow-sm border border-gray-100 p-5 flex items-center justify-between group hover:shadow-md transition-all hover:-translate-y-1 cursor-default">
                 <div>
                   <p className="text-gray-500 text-xs font-bold mb-1">งานที่กำลังดำเนินการ</p>
-                  <p className="text-3xl font-black text-gray-900">{tasks.filter(t => t.progress > 0 && t.progress < 100).length}</p>
+                  <p className="text-3xl font-black text-gray-900">{activeTasks.filter(t => t.progress > 0 && t.progress < 100).length}</p>
                   <p className="text-gray-400 text-[10px] mt-1 font-medium">รายการ</p>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-orange-500/30">
@@ -1090,7 +1091,7 @@ export default function PlanningDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50 text-sm">
-                        {tasks.map((task, index) => {
+                        {tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0).map((task, index) => {
                           const stepDef = FIXED_CONSTRUCTION_STEPS.find(s => s.order === (task.step_order ?? index));
                           const targetQty = Number(task.target_qty) || 0;
                           const doneQty = Number(task.done_qty) || 0;
@@ -1116,7 +1117,7 @@ export default function PlanningDashboard() {
                                 <div className={`w-7 h-7 rounded-lg inline-flex items-center justify-center text-xs font-black ${
                                   progressVal === 100 ? 'bg-emerald-100 text-emerald-700' : progressVal > 0 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'
                                 }`}>
-                                  {progressVal === 100 ? <CheckCircle2 className="w-4 h-4" /> : task.step_order ?? index}
+                                  {progressVal === 100 ? <CheckCircle2 className="w-4 h-4" /> : task.step_order}
                                 </div>
                               </td>
                               <td className="p-3 border-r border-gray-50">
@@ -1231,8 +1232,8 @@ export default function PlanningDashboard() {
                                   const targetQty = Number(t.target_qty) || 0;
                                   const doneQty = Number(t.done_qty) || 0;
                                   const p = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
-                                  return p === 100;
-                                }).length} / {tasks.length} ขั้นตอนเสร็จ
+                                  return p === 100 && (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0;
+                                }).length} / {tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0).length} ขั้นตอนเสร็จ
                               </span>
                             </td>
                             <td className="p-4 text-center">
@@ -1304,7 +1305,7 @@ export default function PlanningDashboard() {
                       </div>
 
                       <div className="space-y-6 mt-10 relative z-10">
-                        {tasks.map(task => {
+                        {tasks.filter(t => (t.weight ?? FIXED_CONSTRUCTION_STEPS.find(s => s.order === t.step_order)?.defaultWeight ?? 0) > 0).map(task => {
                           const planLeft = getLeftOffset(task.start_date);
                           const planWidth = getWidth(task.start_date, task.end_date);
                           
