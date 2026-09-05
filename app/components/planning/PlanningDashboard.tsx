@@ -121,7 +121,10 @@ export default function PlanningDashboard() {
 
   const fetchProjects = async () => {
     const { data, error } = await supabase.from("projects").select("id, wbs, name, contractor, supervisor, committee, duration, status, construction_type").order("wbs");
-    const { data: tasksData } = await supabase.from("project_tasks").select("project_wbs, weight, target_qty, done_qty, start_date, end_date");
+    const { data: tasksData, error: tasksError } = await supabase.from("project_tasks").select("project_wbs, weight, target_qty, done_qty, progress, start_date, end_date");
+    if (tasksError) {
+      console.warn("project_tasks query error (trying fallback):", tasksError.message);
+    }
     
     if (!error && data) {
       let validProjects = data.filter(p => p.wbs !== 'SAFETY_PLAN_2026');
@@ -139,14 +142,21 @@ export default function PlanningDashboard() {
             const w = Number(t.weight) || 0;
             const targetQty = Number(t.target_qty) || 0;
             const doneQty = Number(t.done_qty) || 0;
-            const pVal = targetQty > 0 ? Math.min(100, Math.round((doneQty / targetQty) * 100)) : 0;
+            let pVal = 0;
+            if (targetQty > 0) {
+              pVal = Math.min(100, Math.round((doneQty / targetQty) * 100));
+            } else if (Number(t.progress) > 0) {
+              pVal = Number(t.progress);
+            }
             return sum + (w * pVal / 100);
           }, 0) / totalWeight * 100;
           
           const totalPlanProgress = pTasks.reduce((sum, t) => {
             const w = Number(t.weight) || 0;
             let planPercent = 0;
-            if (t.start_date && t.end_date) {
+            if (p.status === 'ก่อสร้างแล้วเสร็จ' || p.status === 'ปิดงาน (TECO)') {
+              planPercent = 100;
+            } else if (t.start_date && t.end_date) {
               const todayStr = new Date().toISOString().split('T')[0];
               if (todayStr >= t.end_date) {
                 planPercent = 100;
@@ -655,7 +665,7 @@ export default function PlanningDashboard() {
 
   const handleFastTrackLegacy = async () => {
     if (!selectedWbs) return;
-    if (!confirm("ยืนยันนำเข้า 'โครงการที่เสร็จสิ้นแล้ว' (Legacy)?\n\nระบบจะข้ามขั้นตอนการทำแผน ปรับความก้าวหน้าทุกขั้นตอนเป็น 100% อัตโนมัติ และเปลี่ยนสถานะโครงการเป็น TECO ทันที")) return;
+    if (!confirm("ยืนยันนำเข้า 'โครงการที่เสร็จสิ้นแล้ว' (Legacy)?\n\nระบบจะข้ามขั้นตอนการทำแผน ปรับความก้าวหน้าทุกขั้นตอนเป็น 100% อัตโนมัติ และเปลี่ยนสถานะโครงการเป็น ก่อสร้างแล้วเสร็จ ทันที")) return;
     
     // Update project status
     await supabase.from("projects").update({ status: 'ก่อสร้างแล้วเสร็จ' }).eq("wbs", selectedWbs);
@@ -666,6 +676,8 @@ export default function PlanningDashboard() {
     if (existingTasks && existingTasks.length > 0) {
       for (const t of existingTasks) {
         await supabase.from("project_tasks").update({
+          start_date: today,
+          end_date: today,
           progress: 100,
           target_qty: 1,
           done_qty: 1,
@@ -677,6 +689,7 @@ export default function PlanningDashboard() {
     
     setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'ก่อสร้างแล้วเสร็จ' } : p));
     await fetchTasks(selectedWbs);
+    await fetchProjects();
   };
 
   const activeTasksWithDerivedProgress = activeTasks.map(t => {
@@ -915,7 +928,7 @@ export default function PlanningDashboard() {
                                   p.status === 'D1' ? 'bg-[#FFF3E0] text-[#E65100] border border-[#FFE0B2]' :
                                   'bg-[#F3E5F5] text-[#6A1B9A] border border-[#E1BEE7]'
                                 }`}>
-                                  {p.status || "C1"}
+                                  {p.status === 'ปิดงาน (TECO)' ? 'ก่อสร้างแล้วเสร็จ' : (p.status || "C1")}
                                 </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap min-w-[140px]">
