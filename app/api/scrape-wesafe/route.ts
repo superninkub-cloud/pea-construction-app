@@ -69,19 +69,20 @@ export async function POST(req: Request) {
     let newCookies = getCookies(authRes.headers);
     let combinedCookies = [...cookieStr.split('; '), ...newCookies].filter(Boolean).join('; ');
 
-    if (authRes.status !== 302) {
+    const location = authRes.headers.get('location') || '';
+
+    if (authRes.status !== 302 && authRes.status !== 303) {
          return NextResponse.json({ 
              error: 'Login failed. Please check credentials.',
              debug: {
                  status: authRes.status,
                  cookieSent: cookieStr,
                  cookieReceived: newCookies,
-                 location: authRes.headers.get('location')
+                 location: location
              }
          }, { status: 401 });
     }
 
-    const location = authRes.headers.get('location') || '';
     const chooseUrl = location.startsWith('http') ? location : 
                       location.startsWith('/') ? 'https://wesafe.pea.co.th' + location : 
                       'https://wesafe.pea.co.th/admin/' + location;
