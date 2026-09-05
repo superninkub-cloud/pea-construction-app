@@ -76,11 +76,8 @@ export default function SafetyHubPage() {
       }
       
       if (data.images && data.images.length > 0) {
-        // Route images through our proxy to bypass CORS
-        const proxiedImages = data.images.map((url: string) => 
-          `/api/proxy-image?url=${encodeURIComponent(url)}`
-        );
-        setImages(prev => [...prev, ...proxiedImages].slice(0, 4));
+        // Use direct WeSafe URLs - img tags don't need CORS headers
+        setImages(prev => [...prev, ...data.images].slice(0, 4));
         alert(`ดึงรูปสำเร็จ ${data.images.length} รูป`);
       } else {
         const dbg = data.debug ? '\n\nDebug:\n' + data.debug.join('\n') : '';
@@ -266,7 +263,8 @@ export default function SafetyHubPage() {
                   {[0, 1, 2, 3].map(i => (
                     <div key={i} className={`photo-slot ${!images[i] ? 'empty' : ''}`}>
                       {images[i] ? (
-                        <img src={images[i]} alt={`Pic ${i+1}`} crossOrigin="anonymous" />
+                        // No crossOrigin here - WeSafe doesn't support CORS, img tags don't need it anyway
+                        <img src={images[i]} alt={`Pic ${i+1}`} />
                       ) : (
                         <span>รูปภาพที่ {i+1}</span>
                       )}
