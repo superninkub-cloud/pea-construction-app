@@ -101,15 +101,20 @@ export default function PlanningDashboard() {
     const matchesSupervisor = !selectedSupervisor || p.supervisor === selectedSupervisor;
     const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.wbs.toLowerCase().includes(searchQuery.toLowerCase());
     
+    const isCompleted = p.status === 'F4' || p.status === 'ปิดงาน (TECO)' || p.status === 'ก่อสร้างแล้วเสร็จ' || (p.progress || 0) >= 100;
+    const isPlanning = !isCompleted && (p.progress || 0) === 0 && (p.plan_progress || 0) === 0;
+    const isInProgress = !isCompleted && !isPlanning;
+    const isDelayed = !isCompleted && (p.plan_progress || 0) > (p.progress || 0);
+
     let matchesStatus = true;
     if (statusFilter === "PLANNING") {
-      matchesStatus = p.status === 'ร่างแผนงาน' || !p.status;
+      matchesStatus = isPlanning;
     } else if (statusFilter === "IN_PROGRESS") {
-      matchesStatus = p.status === 'อยู่ระหว่างก่อสร้าง' || (p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)' && p.status !== 'ร่างแผนงาน');
+      matchesStatus = isInProgress;
     } else if (statusFilter === "COMPLETED") {
-      matchesStatus = p.status === 'ก่อสร้างแล้วเสร็จ' || p.status === 'ปิดงาน (TECO)';
+      matchesStatus = isCompleted;
     } else if (statusFilter === "DELAYED") {
-      matchesStatus = (p.plan_progress || 0) > (p.progress || 0) && p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)';
+      matchesStatus = isDelayed;
     }
 
     return matchesSupervisor && matchesSearch && matchesStatus;
@@ -724,10 +729,17 @@ export default function PlanningDashboard() {
 
   const dashboardFilteredProjects = projects.filter(p => !selectedSupervisor || p.supervisor === selectedSupervisor);
   const countTotal = dashboardFilteredProjects.length;
-  const countPlanning = dashboardFilteredProjects.filter(p => p.status === 'ร่างแผนงาน' || !p.status).length;
-  const countInProgress = dashboardFilteredProjects.filter(p => p.status === 'อยู่ระหว่างก่อสร้าง' || (p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)' && p.status !== 'ร่างแผนงาน')).length;
-  const countCompleted = dashboardFilteredProjects.filter(p => p.status === 'ก่อสร้างแล้วเสร็จ' || p.status === 'ปิดงาน (TECO)').length;
-  const countDelayed = dashboardFilteredProjects.filter(p => (p.plan_progress || 0) > (p.progress || 0) && p.status !== 'ก่อสร้างแล้วเสร็จ' && p.status !== 'ปิดงาน (TECO)').length;
+  
+  const getPhase = (p: any) => {
+    const isCompleted = p.status === 'F4' || p.status === 'ปิดงาน (TECO)' || p.status === 'ก่อสร้างแล้วเสร็จ' || (p.progress || 0) >= 100;
+    const isPlanning = !isCompleted && (p.progress || 0) === 0 && (p.plan_progress || 0) === 0;
+    return { isCompleted, isPlanning, isInProgress: !isCompleted && !isPlanning, isDelayed: !isCompleted && (p.plan_progress || 0) > (p.progress || 0) };
+  };
+
+  const countPlanning = dashboardFilteredProjects.filter(p => getPhase(p).isPlanning).length;
+  const countInProgress = dashboardFilteredProjects.filter(p => getPhase(p).isInProgress).length;
+  const countCompleted = dashboardFilteredProjects.filter(p => getPhase(p).isCompleted).length;
+  const countDelayed = dashboardFilteredProjects.filter(p => getPhase(p).isDelayed).length;
 
   return (
     <div className="w-full text-sm text-gray-800 font-sans">
