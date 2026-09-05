@@ -187,16 +187,37 @@ export async function POST(req: Request) {
         }
     }
 
-    const imagesArray = Array.from(allImages);
+    const imagesArray = Array.from(allImages).slice(0, 4);
     console.log(`[WeSafe API] Found ${imagesArray.length} images for ${reqNo}`);
     console.log('[WeSafe API] Debug:', debugInfo);
+
+    // Download images as base64 so browser can display without WeSafe session
+    const base64Images: string[] = [];
+    for (const imgUrl of imagesArray) {
+        try {
+            const imgDownload = await fetch(imgUrl, {
+                headers: {
+                    'Cookie': finalCookies,
+                    'User-Agent': USER_AGENT,
+                    'Referer': 'https://wesafe.pea.co.th/admin/detailsub.aspx'
+                }
+            });
+            if (imgDownload.ok) {
+                const contentType = imgDownload.headers.get('content-type') || 'image/jpeg';
+                const buffer = await imgDownload.arrayBuffer();
+                const base64 = Buffer.from(buffer).toString('base64');
+                base64Images.push(`data:${contentType};base64,${base64}`);
+            }
+        } catch (e) {
+            console.error(`Failed to download image: ${imgUrl}`, e);
+        }
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Scraping successful',
-      images: imagesArray.slice(0, 4), // Return first 4 images to match UI
+      images: base64Images.length > 0 ? base64Images : imagesArray,
       debug: debugInfo
-
     });
 
   } catch (error: any) {
