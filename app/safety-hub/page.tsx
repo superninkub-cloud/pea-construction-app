@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import TopBar from "../components/TopBar";
 import "./SafetyHub.css";
-import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera } from "lucide-react";
+import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck } from "lucide-react";
 
 export default function SafetyHubPage() {
   const [images, setImages] = useState<string[]>([]);
