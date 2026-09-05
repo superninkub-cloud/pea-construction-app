@@ -13,6 +13,7 @@ export default function SafetyHubPage() {
   const [supervisor, setSupervisor] = useState("");
   const [dateStr, setDateStr] = useState("");
   const [isCopied, setIsCopied] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   // States for API scraping
   const [wesafeUrl, setWesafeUrl] = useState("");
@@ -27,7 +28,27 @@ export default function SafetyHubPage() {
     const d = new Date();
     const thaiDate = `${d.getDate()} ${["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."][d.getMonth()]} ${d.getFullYear() + 543}`;
     setDateStr(thaiDate);
+    
+    if (sessionStorage.getItem("pea_role") === 'admin') {
+      setIsAuthorized(true);
+    } else {
+      setIsAuthorized(false);
+    }
   }, []);
+
+  if (isAuthorized === false) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 p-8 h-screen">
+        <ShieldCheck size={64} className="text-red-500 mb-4" />
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">ไม่มีสิทธิ์เข้าถึง (Access Denied)</h1>
+        <p className="text-slate-600 text-lg">เมนู <b>รายงาน Safety Hub</b> สงวนไว้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น</p>
+      </div>
+    );
+  }
+
+  if (isAuthorized === null) {
+    return <div className="flex-1 bg-slate-50 h-screen"></div>;
+  }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {

@@ -4,10 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut, Recycle, ArrowRightLeft, Camera } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
+import { useEffect, useState } from "react";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { isSidebarOpen, closeSidebar } = useSidebar();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUserRole(sessionStorage.getItem("pea_role"));
+  }, []);
 
   return (
     <div className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
@@ -62,10 +68,12 @@ export default function Sidebar() {
           <ShieldCheck size={20} />
           <span>งานความปลอดภัย</span>
         </Link>
-        <Link href="/safety-hub" className={`nav-item ${pathname === "/safety-hub" ? "active" : ""}`}>
-          <Camera size={20} />
-          <span>รายงาน Safety Hub</span>
-        </Link>
+        {userRole === 'admin' && (
+          <Link href="/safety-hub" className={`nav-item ${pathname === "/safety-hub" ? "active" : ""}`}>
+            <Camera size={20} />
+            <span>รายงาน Safety Hub</span>
+          </Link>
+        )}
         <Link href="/guide" className={`nav-item ${pathname === "/guide" ? "active" : ""}`}>
           <BookOpen size={20} />
           <span>คู่มือเทคนิคงานก่อสร้างระบบ 115 kV</span>
