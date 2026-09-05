@@ -104,6 +104,9 @@ export default function PlanningDashboard() {
   const [newBudgetActualPaid, setNewBudgetActualPaid] = useState<string>("0");
   const [newBudgetObligation, setNewBudgetObligation] = useState<string>("0");
 
+  // Dropdown states
+  const [openDropdownWbs, setOpenDropdownWbs] = useState<string | null>(null);
+
   // Derived state for table
   const filteredProjects = projects.filter(p => {
     const matchesSupervisor = !selectedSupervisor || p.supervisor === selectedSupervisor;
@@ -138,6 +141,18 @@ export default function PlanningDashboard() {
   useEffect(() => {
     fetchProjects();
   }, []);
+
+  const handleClearPlan = async (wbs: string) => {
+    if (confirm('คุณต้องการล้างแผนงานของโครงการนี้ (ให้กลับไปเป็นงานกำลังวางแผน) ใช่หรือไม่?')) {
+      const { error } = await supabase.from('project_tasks').delete().eq('project_wbs', wbs);
+      if (!error) {
+        fetchProjects();
+        setOpenDropdownWbs(null);
+      } else {
+        alert('เกิดข้อผิดพลาดในการล้างแผนงาน');
+      }
+    }
+  };
 
   const fetchBudgets = async (wbs: string) => {
     const { data, error } = await supabase
@@ -1080,16 +1095,39 @@ export default function PlanningDashboard() {
                                 </div>
                               </td>
                               <td className="px-6 py-4 text-center">
-                                <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative">
                                   <button
                                     onClick={() => setSelectedWbs(p.wbs)}
                                     className="px-4 py-1.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-xs font-bold transition-all shadow-sm"
                                   >
                                     เข้าสู่โครงการ
                                   </button>
-                                  <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-transparent hover:border-gray-200">
-                                    <MoreVertical className="w-4 h-4" />
-                                  </button>
+                                  <div className="relative">
+                                    <button 
+                                      onClick={() => setOpenDropdownWbs(openDropdownWbs === p.wbs ? null : p.wbs)}
+                                      className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-transparent hover:border-gray-200"
+                                    >
+                                      <MoreVertical className="w-4 h-4" />
+                                    </button>
+                                    
+                                    {openDropdownWbs === p.wbs && (
+                                      <>
+                                        <div 
+                                          className="fixed inset-0 z-10" 
+                                          onClick={() => setOpenDropdownWbs(null)}
+                                        />
+                                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-20 transform origin-top-right transition-all">
+                                          <button
+                                            onClick={() => handleClearPlan(p.wbs)}
+                                            className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                            ล้างแผนงานโครงการนี้
+                                          </button>
+                                        </div>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
                               </td>
                             </tr>
