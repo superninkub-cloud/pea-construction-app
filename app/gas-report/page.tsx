@@ -600,7 +600,7 @@ export default function GasReportPage() {
                           </div>
                         </div>
 
-                        <table className="official-table" style={{ flex: 1 }}>
+                        <table className="official-table" style={{ flex: 1, marginBottom: '8px' }}>
                           <thead>
                             <tr>
                               <th rowSpan={2} style={{ width: '50px' }}>วันที่</th>
@@ -659,11 +659,11 @@ export default function GasReportPage() {
                           </tbody>
                         </table>
                         
-                        <div style={{ marginTop: '8px', marginLeft: '40px', fontSize: '16px' }}>
+                        <div style={{ marginTop: '4px', marginLeft: '40px', fontSize: '16px' }}>
                           จึงเรียนมาเพื่อโปรดทราบ
                         </div>
 
-                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '20px' }}>
+                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '0px' }}>
                           <div className="signature-section flex-between">
                             <div className="signature-box" style={{ flex: 1 }}>
                               <div>({reports[0]?.driver_name ? ` ${reports[0].driver_name} ` : "......................................................................................."})</div>
@@ -674,7 +674,7 @@ export default function GasReportPage() {
                               <div className="font-bold mt-2">ผู้ควบคุม</div>
                             </div>
                           </div>
-                          <div className="form-code" style={{ position: 'absolute', bottom: '0px', left: '0' }}>ยพ.6-ป.46</div>
+                          <div className="form-code" style={{ position: 'absolute', bottom: '-15px', left: '0' }}>ยพ.6-ป.46</div>
                         </div>
                       </div>
                     );
