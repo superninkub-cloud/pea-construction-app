@@ -150,48 +150,47 @@ export async function POST(req: Request) {
         } 
     });
 
-    // 6. Fetch images from sub-checklists
-    const allImages = new Set<string>();
-    const debugInfo: string[] = [];
-    
-    // Checklists 1 to 5 to make sure we cover everything
-    for (let i = 1; i <= 5; i++) {
-        const detailSubUrl = `https://wesafe.pea.co.th/admin/detailsub.aspx?WebGetReqNO=${reqNo}&WebGetCheckList=${i}`;
-        const imgRes = await fetch(detailSubUrl, {
-            headers: { 
-                'Cookie': finalCookies,
-                'User-Agent': USER_AGENT
-            }
-        });
-        const html = await imgRes.text();
-        
-        debugInfo.push(`CheckList ${i}: status=${imgRes.status}, html_len=${html.length}`);
-        
-        const imgMatches = html.match(/<img[^>]+src\s*=\s*"([^">]+)"/ig);
-        if (imgMatches) {
-            debugInfo.push(`CheckList ${i}: found ${imgMatches.length} img tags`);
-            imgMatches.forEach(img => {
-                const srcMatch = img.match(/src\s*=\s*"([^">]+)"/i);
-                if (srcMatch && srcMatch[1]) {
-                    const src = srcMatch[1];
-                    debugInfo.push(`  src: ${src}`);
-                    // Handle both absolute and relative paths
-                    if (src.includes('imgwesafe') || src.match(/\.(jpg|jpeg|png|gif)/i)) {
-                        const fullUrl = src.startsWith('http') ? src : 
-                                        src.startsWith('/') ? 'https://wesafe.pea.co.th' + src :
-                                        'https://wesafe.pea.co.th/admin/' + src;
-                        allImages.add(fullUrl);
+    // 6. Fetch images from ALL sub-checklists IN PARALLEL (much faster than sequential)
+    const checklistNums = [1, 2, 3, 4, 5];
+    const checklistResults = await Promise.all(
+        checklistNums.map(async (i) => {
+            const detailSubUrl = `https://wesafe.pea.co.th/admin/detailsub.aspx?WebGetReqNO=${reqNo}&WebGetCheckList=${i}`;
+            try {
+                const imgRes = await fetch(detailSubUrl, {
+                    headers: {
+                        'Cookie': finalCookies,
+                        'User-Agent': USER_AGENT
                     }
+                });
+                const html = await imgRes.text();
+                const urls: string[] = [];
+                
+                const imgMatches = html.match(/<img[^>]+src\s*=\s*"([^">]+)"/ig);
+                if (imgMatches) {
+                    imgMatches.forEach(img => {
+                        const srcMatch = img.match(/src\s*=\s*"([^">]+)"/i);
+                        if (srcMatch && srcMatch[1]) {
+                            const src = srcMatch[1];
+                            if (src.includes('imgwesafe') || src.match(/\.(jpg|jpeg|png|gif)/i)) {
+                                const fullUrl = src.startsWith('http') ? src :
+                                                src.startsWith('/') ? 'https://wesafe.pea.co.th' + src :
+                                                'https://wesafe.pea.co.th/admin/' + src;
+                                urls.push(fullUrl);
+                            }
+                        }
+                    });
                 }
-            });
-        } else {
-            debugInfo.push(`CheckList ${i}: no img tags found`);
-        }
-    }
+                return urls;
+            } catch (e) {
+                return [];
+            }
+        })
+    );
 
-    const imagesArray = Array.from(allImages).slice(0, 4);
+    // Flatten results preserving order
+    const imagesArray = checklistResults.flat().slice(0, 4);
     console.log(`[WeSafe API] Found ${imagesArray.length} images for ${reqNo}`);
-    console.log('[WeSafe API] Debug:', debugInfo);
+    const debugInfo: string[] = [`Found ${imagesArray.length} images`];
 
     console.log('[WeSafe API] Image URLs:', imagesArray);
 
