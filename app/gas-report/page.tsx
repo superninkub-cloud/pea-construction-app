@@ -569,12 +569,12 @@ export default function GasReportPage() {
                             <span className="ml-2">หมายเลขทะเบียน</span>
                             <span className="dotted-blank text-center" style={{ width: '120px' }}>{reportPlate}</span>
                             <span className="ml-2">รหัส</span>
-                            <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
-                            <span className="ml-2">ประเภท</span>
-                            <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
+                            <span className="dotted-blank text-center" style={{ flex: 1, minWidth: '80px' }}></span>
                           </div>
                           <div className="form-row flex-start" style={{ marginTop: '4px', display: 'flex', width: '100%' }}>
-                            <span>ชนิด</span>
+                            <span>ประเภท</span>
+                            <span className="dotted-blank text-center" style={{ width: '150px' }}></span>
+                            <span className="ml-2">ชนิด</span>
                             <span className="dotted-blank text-center" style={{ flex: 1, minWidth: '80px' }}></span>
                           </div>
 
@@ -587,7 +587,7 @@ export default function GasReportPage() {
                             <label><input type="checkbox" /> แก๊สโซฮอล์ E85</label>
                             <label><input type="checkbox" /> ดีเซล</label>
                             <label><input type="checkbox" /> น้ำมันหล่อลื่น จำนวน</label>
-                            <span className="dotted-blank" style={{ width: '100px' }}></span>
+                            <span className="dotted-blank" style={{ flex: 1, minWidth: '40px', maxWidth: '80px' }}></span>
                             <span>ลิตร</span>
                           </div>
 
