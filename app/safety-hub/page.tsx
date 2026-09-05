@@ -139,6 +139,11 @@ export default function SafetyHubPage() {
               <h3 className="text-lg font-bold text-slate-800 mb-4">ข้อมูลรายงาน</h3>
               
               <div className="form-group">
+                <label>วันที่ (Date)</label>
+                <input type="text" value={dateStr} onChange={e => setDateStr(e.target.value)} placeholder="เช่น 5 ก.ย. 2569" />
+              </div>
+
+              <div className="form-group">
                 <label>ชื่องาน (Project Name)</label>
                 <input type="text" value={projName} onChange={e => setProjName(e.target.value)} placeholder="เช่น งานก่อสร้างระบบ 115kV..." />
               </div>
