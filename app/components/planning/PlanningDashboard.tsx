@@ -102,7 +102,7 @@ export default function PlanningDashboard() {
     const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.wbs.toLowerCase().includes(searchQuery.toLowerCase());
     
     const isCompleted = p.status === 'F4' || p.status === 'ปิดงาน (TECO)' || p.status === 'ก่อสร้างแล้วเสร็จ' || (p.progress || 0) >= 100;
-    const isPlanning = !isCompleted && (p.progress || 0) === 0 && (p.plan_progress || 0) === 0;
+    const isPlanning = !isCompleted && (p.progress || 0) === 0;
     const isInProgress = !isCompleted && !isPlanning;
     const isDelayed = !isCompleted && (p.plan_progress || 0) > (p.progress || 0);
 
@@ -732,7 +732,7 @@ export default function PlanningDashboard() {
   
   const getPhase = (p: any) => {
     const isCompleted = p.status === 'F4' || p.status === 'ปิดงาน (TECO)' || p.status === 'ก่อสร้างแล้วเสร็จ' || (p.progress || 0) >= 100;
-    const isPlanning = !isCompleted && (p.progress || 0) === 0 && (p.plan_progress || 0) === 0;
+    const isPlanning = !isCompleted && (p.progress || 0) === 0;
     return { isCompleted, isPlanning, isInProgress: !isCompleted && !isPlanning, isDelayed: !isCompleted && (p.plan_progress || 0) > (p.progress || 0) };
   };
 
