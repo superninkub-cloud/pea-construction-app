@@ -11,34 +11,46 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     setIsClient(true);
-    const auth = sessionStorage.getItem("pea_auth");
-    if (auth === "true") {
-      setIsAuthenticated(true);
+    try {
+      const auth = sessionStorage.getItem("pea_auth");
+      if (auth === "true") {
+        setIsAuthenticated(true);
+      }
+    } catch (error) {
+      // Ignore if sessionStorage is blocked
     }
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "Cha16072534") {
-      sessionStorage.setItem("pea_auth", "true");
-      sessionStorage.setItem("pea_role", "admin");
-      setIsAuthenticated(true);
-      setError(false);
-    } else if (password === "pscc3") {
-      sessionStorage.setItem("pea_auth", "true");
-      sessionStorage.setItem("pea_role", "user");
-      setIsAuthenticated(true);
-      setError(false);
-    } else {
-      setError(true);
+    try {
+      if (password === "Cha16072534") {
+        sessionStorage.setItem("pea_auth", "true");
+        sessionStorage.setItem("pea_role", "admin");
+        setIsAuthenticated(true);
+        setError(false);
+      } else if (password === "pscc3") {
+        sessionStorage.setItem("pea_auth", "true");
+        sessionStorage.setItem("pea_role", "user");
+        setIsAuthenticated(true);
+        setError(false);
+      } else {
+        setError(true);
+      }
+    } catch (error) {
+      alert("เบราว์เซอร์ของคุณบล็อกการบันทึกข้อมูล กรุณาปิดโหมด Incognito (ไม่ระบุตัวตน) เพื่อล็อกอิน");
     }
   };
 
   const handleGuestLogin = () => {
-    sessionStorage.setItem("pea_auth", "true");
-    sessionStorage.setItem("pea_role", "guest");
-    setIsAuthenticated(true);
-    setError(false);
+    try {
+      sessionStorage.setItem("pea_auth", "true");
+      sessionStorage.setItem("pea_role", "guest");
+      setIsAuthenticated(true);
+      setError(false);
+    } catch (error) {
+      alert("เบราว์เซอร์ของคุณบล็อกการบันทึกข้อมูล กรุณาปิดโหมด Incognito (ไม่ระบุตัวตน) เพื่อล็อกอิน");
+    }
   };
 
   // Avoid hydration mismatch by waiting for client mount
