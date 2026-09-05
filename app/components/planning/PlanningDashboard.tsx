@@ -2062,7 +2062,7 @@ export default function PlanningDashboard() {
                                 dx={-10}
                               />
                               <RechartsTooltip 
-                                formatter={(value: number) => new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(value)}
+                                formatter={(value: any) => new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(Number(value) || 0)}
                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: '12px', fontWeight: 'bold' }}
                               />
                               <Legend iconType="rect" iconSize={12} wrapperStyle={{ fontSize: '12px', fontWeight: 'bold', color: '#4B5563', paddingBottom: '20px' }} verticalAlign="top" height={50} />
