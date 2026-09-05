@@ -15,6 +15,12 @@ export default function SafetyHubPage() {
   const [dateStr, setDateStr] = useState("");
   const [isCopied, setIsCopied] = useState(false);
 
+  // States for API scraping
+  const [wesafeUrl, setWesafeUrl] = useState("");
+  const [username, setUsername] = useState("504540"); // Default provided by user
+  const [password, setPassword] = useState("Cha16072534--"); // Default provided by user
+  const [isScraping, setIsScraping] = useState(false);
+
   const collageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,6 +39,53 @@ export default function SafetyHubPage() {
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleScrape = async () => {
+    if (!wesafeUrl || !username || !password) {
+      alert("กรุณากรอกลิงก์ WeSafe, รหัสพนักงาน และรหัสผ่านให้ครบถ้วน");
+      return;
+    }
+
+    // Extract URL if user pasted the entire message text
+    const urlMatch = wesafeUrl.match(/https?:\/\/[^\s]+/);
+    const finalUrl = urlMatch ? urlMatch[0] : wesafeUrl;
+
+    if (!finalUrl.includes('detail.aspx?WebGetReqNO=')) {
+        alert("ลิงก์ไม่ถูกต้อง! ต้องเป็นลิงก์ detail.aspx ที่มี WebGetReqNO");
+        return;
+    }
+
+    setIsScraping(true);
+    try {
+      const res = await fetch("/api/scrape-wesafe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: finalUrl, username, password })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "เกิดข้อผิดพลาดในการดึงรูป");
+      }
+      
+      if (data.images && data.images.length > 0) {
+        // Since WeSafe images might need cookies to view, we can try to display them directly 
+        // if they are public within the network, or we might need to proxy them.
+        // Assuming they can be viewed directly if logged in, or we just pass the URLs.
+        // Actually, WeSafe images are static files on the server: /imgwesafe/...
+        // We will just set them as src. 
+        setImages(prev => [...prev, ...data.images].slice(0, 4));
+        alert(`ดึงรูปสำเร็จ ${data.images.length} รูป`);
+      } else {
+        alert("ไม่พบรูปภาพในลิงก์นี้ หรืออาจจะยังไม่ได้อัปโหลดรูป");
+      }
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setIsScraping(false);
+    }
   };
 
   const generateReportText = () => {
@@ -112,26 +165,43 @@ export default function SafetyHubPage() {
 
             <div className="safety-form mb-6">
               <h3 className="text-lg font-bold text-slate-800 mb-4">ดึงรูปอัตโนมัติ (จาก WeSafe)</h3>
+              <p className="text-sm text-slate-500 mb-4">คุณสามารถ Copy ข้อความจาก Webex มาวางในช่องนี้ได้เลย</p>
               
               <div className="form-group">
-                <label>ลิงก์ระบบ WeSafe</label>
-                <input type="url" placeholder="https://..." />
+                <label>ลิงก์ระบบ WeSafe (หรือข้อความจาก Webex)</label>
+                <input 
+                  type="text" 
+                  value={wesafeUrl} 
+                  onChange={e => setWesafeUrl(e.target.value)} 
+                  placeholder="วางลิงก์ https://wesafe.pea.co.th/admin/detail.aspx?..." 
+                />
               </div>
               <div className="flex gap-4">
                 <div className="form-group flex-1">
                   <label>รหัสพนักงาน</label>
-                  <input type="text" placeholder="Username" />
+                  <input 
+                    type="text" 
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    placeholder="Username" 
+                  />
                 </div>
                 <div className="form-group flex-1">
                   <label>รหัสผ่าน</label>
-                  <input type="password" placeholder="Password" />
+                  <input 
+                    type="password" 
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Password" 
+                  />
                 </div>
               </div>
               <button 
                 className="btn btn-primary w-full justify-center mt-2"
-                onClick={() => alert('กำลังพัฒนาระบบดูดรูปอัตโนมัติ (กรุณารอข้อมูล URL ของ WeSafe เพื่อเชื่อมต่อ API)')}
+                onClick={handleScrape}
+                disabled={isScraping}
               >
-                ดึงรูปภาพอัตโนมัติ
+                {isScraping ? "กำลังดึงข้อมูล..." : "ดึงรูปภาพอัตโนมัติ"}
               </button>
             </div>
 
