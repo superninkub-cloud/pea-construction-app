@@ -260,7 +260,7 @@ export default function PlanningDashboard() {
       wbs: newProjWbs,
       name: newProjName,
       supervisor: newProjSupervisor,
-      status: isLegacyProject ? 'ปิดงาน (TECO)' : 'ร่างแผนงาน'
+      status: isLegacyProject ? 'ก่อสร้างแล้วเสร็จ' : 'ร่างแผนงาน'
     }).select();
     if (!error) {
       if (isLegacyProject) {
@@ -658,7 +658,7 @@ export default function PlanningDashboard() {
     if (!confirm("ยืนยันนำเข้า 'โครงการที่เสร็จสิ้นแล้ว' (Legacy)?\n\nระบบจะข้ามขั้นตอนการทำแผน ปรับความก้าวหน้าทุกขั้นตอนเป็น 100% อัตโนมัติ และเปลี่ยนสถานะโครงการเป็น TECO ทันที")) return;
     
     // Update project status
-    await supabase.from("projects").update({ status: 'ปิดงาน (TECO)' }).eq("wbs", selectedWbs);
+    await supabase.from("projects").update({ status: 'ก่อสร้างแล้วเสร็จ' }).eq("wbs", selectedWbs);
     
     // Update all tasks to 100%
     const today = new Date().toISOString().split('T')[0];
@@ -675,7 +675,7 @@ export default function PlanningDashboard() {
       }
     }
     
-    setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'ปิดงาน (TECO)' } : p));
+    setProjects(prev => prev.map(p => p.wbs === selectedWbs ? { ...p, status: 'ก่อสร้างแล้วเสร็จ' } : p));
     await fetchTasks(selectedWbs);
   };
 
