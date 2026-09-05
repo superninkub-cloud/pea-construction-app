@@ -201,7 +201,9 @@ export async function POST(req: Request) {
                         const srcMatch = img.match(/src\s*=\s*"([^">]+)"/i);
                         if (srcMatch && srcMatch[1]) {
                             const src = srcMatch[1];
-                            if (src.includes('imgwesafe') || src.match(/\.(jpg|jpeg|png|gif)/i)) {
+                            // Exclude logos and assets, only include actual uploaded photos
+                            if (!src.includes('pea-logo') && !src.includes('assets/') && 
+                                (src.includes('imgwesafe') || src.match(/\.(jpg|jpeg|png|gif)/i))) {
                                 const fullUrl = src.startsWith('http') ? src :
                                                 src.startsWith('/') ? 'https://wesafe.pea.co.th' + src :
                                                 'https://wesafe.pea.co.th/admin/' + src;
