@@ -12,7 +12,11 @@ export default function Sidebar() {
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    setUserRole(sessionStorage.getItem("pea_role"));
+    try {
+      setUserRole(sessionStorage.getItem("pea_role"));
+    } catch (error) {
+      setUserRole(null);
+    }
   }, []);
 
   return (
