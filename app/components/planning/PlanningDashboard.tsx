@@ -437,12 +437,9 @@ export default function PlanningDashboard() {
           task_name: step.name, 
           weight: newWeight 
         }).eq("id", existingTask.id);
-        
-        existingTask.task_name = step.name;
-        existingTask.weight = newWeight;
       } else {
         // Insert missing
-        const { data } = await supabase.from("project_tasks").insert([{
+        const { error: insertError } = await supabase.from("project_tasks").insert([{
           project_wbs: selectedWbs,
           task_name: step.name,
           start_date: today,
@@ -452,10 +449,20 @@ export default function PlanningDashboard() {
           weight: newWeight,
           target_qty: 0,
           done_qty: 0
-        }]).select();
+        }]);
         
-        if (data && data[0]) {
-          currentTasks.push(data[0]);
+        if (insertError) {
+          console.error("Failed to restore step:", step.name, insertError);
+          // Try again without target_qty and done_qty just in case schema differs slightly
+          await supabase.from("project_tasks").insert([{
+            project_wbs: selectedWbs,
+            task_name: step.name,
+            start_date: today,
+            end_date: today,
+            progress: 0,
+            step_order: step.order,
+            weight: newWeight
+          }]);
         }
       }
     }
@@ -464,10 +471,10 @@ export default function PlanningDashboard() {
     const customTasks = currentTasks.filter(t => (t.step_order ?? 0) > 6);
     for (const t of customTasks) {
       await supabase.from("project_tasks").update({ weight: 0 }).eq("id", t.id);
-      t.weight = 0;
     }
 
-    setTasks(currentTasks.sort((a, b) => (a.step_order ?? 0) - (b.step_order ?? 0)));
+    // Reload tasks from database to ensure state is perfectly synced
+    await fetchTasks(selectedWbs);
   };
 
   const handleUnlockPlan = async () => {
