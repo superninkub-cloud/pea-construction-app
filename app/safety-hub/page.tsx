@@ -76,15 +76,11 @@ export default function SafetyHubPage() {
       }
       
       if (data.images && data.images.length > 0) {
-        // Since WeSafe images might need cookies to view, we can try to display them directly 
-        // if they are public within the network, or we might need to proxy them.
-        // Assuming they can be viewed directly if logged in, or we just pass the URLs.
-        // Actually, WeSafe images are static files on the server: /imgwesafe/...
-        // We will just set them as src. 
         setImages(prev => [...prev, ...data.images].slice(0, 4));
         alert(`ดึงรูปสำเร็จ ${data.images.length} รูป`);
       } else {
-        alert("ไม่พบรูปภาพในลิงก์นี้ หรืออาจจะยังไม่ได้อัปโหลดรูป");
+        const dbg = data.debug ? '\n\nDebug:\n' + data.debug.join('\n') : '';
+        alert("ไม่พบรูปภาพในลิงก์นี้ หรืออาจจะยังไม่ได้อัปโหลดรูป" + dbg);
       }
     } catch (err: any) {
       alert("Error: " + err.message);

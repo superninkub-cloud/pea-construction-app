@@ -50,6 +50,24 @@ export async function POST(req: Request) {
         return setCookies.map(c => c.split(';')[0].trim());
     };
 
+    const mergeCookies = (oldCookieStr: string, newCookiesArr: string[]) => {
+        const cookieMap = new Map<string, string>();
+        
+        // Parse old
+        oldCookieStr.split(';').forEach(c => {
+            const [k, v] = c.trim().split('=');
+            if (k && v) cookieMap.set(k, v);
+        });
+
+        // Parse new
+        newCookiesArr.forEach(c => {
+            const [k, v] = c.trim().split('=');
+            if (k && v) cookieMap.set(k, v);
+        });
+
+        return Array.from(cookieMap.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
+    };
+
     let cookieStr = getCookies(loginRes.headers).join('; ');
 
     const authRes = await fetch('https://wesafe.pea.co.th/admin/login.aspx', {
@@ -67,7 +85,7 @@ export async function POST(req: Request) {
     });
 
     let newCookies = getCookies(authRes.headers);
-    let combinedCookies = [...cookieStr.split('; '), ...newCookies].filter(Boolean).join('; ');
+    let combinedCookies = mergeCookies(cookieStr, newCookies);
 
     const location = authRes.headers.get('location') || '';
 
@@ -119,7 +137,7 @@ export async function POST(req: Request) {
     });
 
     let chooseCookies = getCookies(choosePostRes.headers);
-    let finalCookies = [combinedCookies, ...chooseCookies].filter(Boolean).join('; ');
+    let finalCookies = mergeCookies(combinedCookies, chooseCookies);
 
     // 5. Fetch detail.aspx (Initialization for the session just in case)
     const detailUrl = `https://wesafe.pea.co.th/admin/detail.aspx?WebGetReqNO=${reqNo}`;
@@ -132,6 +150,7 @@ export async function POST(req: Request) {
 
     // 6. Fetch images from sub-checklists
     const allImages = new Set<string>();
+    const debugInfo: string[] = [];
     
     // Checklists 1 to 5 to make sure we cover everything
     for (let i = 1; i <= 5; i++) {
@@ -144,27 +163,40 @@ export async function POST(req: Request) {
         });
         const html = await imgRes.text();
         
+        debugInfo.push(`CheckList ${i}: status=${imgRes.status}, html_len=${html.length}`);
+        
         const imgMatches = html.match(/<img[^>]+src\s*=\s*"([^">]+)"/ig);
         if (imgMatches) {
+            debugInfo.push(`CheckList ${i}: found ${imgMatches.length} img tags`);
             imgMatches.forEach(img => {
                 const srcMatch = img.match(/src\s*=\s*"([^">]+)"/i);
                 if (srcMatch && srcMatch[1]) {
-                    // Only add .jpg / .png images from imgwesafe
-                    if (srcMatch[1].includes('imgwesafe')) {
-                        allImages.add(srcMatch[1]);
+                    const src = srcMatch[1];
+                    debugInfo.push(`  src: ${src}`);
+                    // Handle both absolute and relative paths
+                    if (src.includes('imgwesafe') || src.match(/\.(jpg|jpeg|png|gif)/i)) {
+                        const fullUrl = src.startsWith('http') ? src : 
+                                        src.startsWith('/') ? 'https://wesafe.pea.co.th' + src :
+                                        'https://wesafe.pea.co.th/admin/' + src;
+                        allImages.add(fullUrl);
                     }
                 }
             });
+        } else {
+            debugInfo.push(`CheckList ${i}: no img tags found`);
         }
     }
 
     const imagesArray = Array.from(allImages);
     console.log(`[WeSafe API] Found ${imagesArray.length} images for ${reqNo}`);
+    console.log('[WeSafe API] Debug:', debugInfo);
 
     return NextResponse.json({
       success: true,
       message: 'Scraping successful',
-      images: imagesArray.slice(0, 4) // Return first 4 images to match UI
+      images: imagesArray.slice(0, 4), // Return first 4 images to match UI
+      debug: debugInfo
+
     });
 
   } catch (error: any) {
