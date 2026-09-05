@@ -23,7 +23,23 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid URL format. Missing WebGetReqNO.' }, { status: 400 });
     }
 
-    const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36';
+    const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+
+    const DEFAULT_HEADERS = {
+        'User-Agent': USER_AGENT,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'th-TH,th;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-User': '?1',
+        'Sec-Ch-Ua': '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"'
+    };
 
     console.log(`[WeSafe API] Starting scrape for ${reqNo}...`);
 
@@ -84,10 +100,9 @@ export async function POST(req: Request) {
       method: 'POST',
       body: loginData,
       headers: {
+        ...DEFAULT_HEADERS,
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cookie': cookieStr,
-        'User-Agent': USER_AGENT,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Origin': 'https://wesafe.pea.co.th',
         'Referer': 'https://wesafe.pea.co.th/admin/login.aspx'
       },
@@ -119,8 +134,8 @@ export async function POST(req: Request) {
     // 3. Get Choose Page
     const chooseRes = await fetch(chooseUrl, {
         headers: { 
-            'Cookie': combinedCookies,
-            'User-Agent': USER_AGENT
+            ...DEFAULT_HEADERS,
+            'Cookie': combinedCookies
         }
     });
     const chooseHtml = await chooseRes.text();
@@ -142,9 +157,9 @@ export async function POST(req: Request) {
         method: 'POST',
         body: chooseData,
         headers: {
+            ...DEFAULT_HEADERS,
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Cookie': combinedCookies,
-            'User-Agent': USER_AGENT
+            'Cookie': combinedCookies
         },
         redirect: 'manual'
     });
@@ -160,8 +175,8 @@ export async function POST(req: Request) {
     const detailUrl = `https://wesafe.pea.co.th/admin/detail.aspx?WebGetReqNO=${reqNo}`;
     await fetch(detailUrl, { 
         headers: { 
-            'Cookie': finalCookies,
-            'User-Agent': USER_AGENT
+            ...DEFAULT_HEADERS,
+            'Cookie': finalCookies
         } 
     });
 
@@ -173,8 +188,8 @@ export async function POST(req: Request) {
             try {
                 const imgRes = await fetch(detailSubUrl, {
                     headers: {
-                        'Cookie': finalCookies,
-                        'User-Agent': USER_AGENT
+                        ...DEFAULT_HEADERS,
+                        'Cookie': finalCookies
                     }
                 });
                 const html = await imgRes.text();
