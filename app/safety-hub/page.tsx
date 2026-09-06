@@ -295,11 +295,15 @@ export default function SafetyHubPage() {
   };
 
   // Group history by month
-  const groupedHistory = historyData.reduce((acc, curr) => {
-    const date = new Date(curr.report_date);
-    const monthYear = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-    if (!acc[monthYear]) acc[monthYear] = [];
-    acc[monthYear].push(curr);
+  const groupedHistory = (historyData || []).reduce((acc, curr) => {
+    try {
+      const date = curr.report_date ? new Date(curr.report_date) : new Date();
+      const monthYear = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+      if (!acc[monthYear]) acc[monthYear] = [];
+      acc[monthYear].push(curr);
+    } catch (e) {
+      console.error("Invalid date in history:", curr);
+    }
     return acc;
   }, {} as Record<string, any[]>);
 
