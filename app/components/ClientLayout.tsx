@@ -17,7 +17,7 @@ function AppContent({ children }: { children: ReactNode }) {
       ></div>
       
       <Sidebar />
-      <div className="main-wrapper">
+      <div className="main-content">
         {children}
       </div>
       <MobileBottomNav />

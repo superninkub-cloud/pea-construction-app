@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
-import { Home, CheckCircle2, CircleDashed, Layers, Users } from "lucide-react";
+import { Home, CheckCircle2, CircleDashed, Layers, Users, AlertTriangle } from "lucide-react";
 import { wireDataList } from "../../lib/wireData";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function Overview() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -53,16 +54,13 @@ export default function Overview() {
     return (num || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const filteredProjects = projects.filter((p) => {
+  const projectsWithNonStatusFilters = projects.filter((p) => {
     if (
       (p.wbs && (p.wbs.includes("IMPORTANT_TASKS") || p.wbs.includes("SAFETY_PLAN"))) ||
       (p.name && (p.name.includes("Important Tasks") || p.name.includes("Safety Training")))
     ) {
       return false;
     }
-    const s = p.status || "ไม่มีข้อมูล";
-    const sup = p.supervisor || "ไม่ระบุ";
-
     const matchYear = true; // year is handled in loop below
     let yearMatched = true;
     if (yearFilter !== "ALL") {
@@ -72,9 +70,7 @@ export default function Overview() {
       else if (yearFilter === "2569") yearMatched = year === 2569;
     }
 
-    const matchStatus = statusFilters.length === 0 || statusFilters.includes(s);
     const matchMonth = monthFilter === "ALL" || (p.remarks && p.remarks.includes(`[${monthFilter}`));
-    const matchSupervisor = supervisorFilter === "ALL" || sup === supervisorFilter;
     const matchPTracking = pTrackingFilter === "ALL" || (pTrackingFilter === "TRACKED" && p.p_tracking && p.p_tracking !== "" && p.p_tracking !== "ไม่ติดตาม");
     const currentActionPlan = p.action_plan || "";
     const matchActionPlan = actionPlanFilter === "ALL" || (currentActionPlan === "" && actionPlanFilter === "ไม่ได้กำหนด") || currentActionPlan === actionPlanFilter;
@@ -83,12 +79,35 @@ export default function Overview() {
     const matchSearch = Object.values(p).some((val) =>
       val && val.toString().toLowerCase().includes(search.toLowerCase())
     );
-    return matchStatus && matchMonth && matchSupervisor && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
+    return matchMonth && matchSearch && yearMatched && matchPTracking && matchActionPlan && matchClosingPlan;
   });
+
+  const projectsForTopCards = projectsWithNonStatusFilters.filter(p => supervisorFilter === "ALL" || (p.supervisor || "ไม่ระบุ") === supervisorFilter);
+
+  const baseFilteredProjects = projectsWithNonStatusFilters.filter((p) => {
+    const s = p.status || "ไม่มีข้อมูล";
+    return statusFilters.length === 0 || statusFilters.includes(s);
+  });
+
+  const handleStatusClick = (type: 'ALL' | 'F4' | 'OTHER' | 'D1') => {
+    if (type === 'ALL') {
+      setStatusFilters([]);
+    } else if (type === 'F4') {
+      setStatusFilters(statusFilters.includes('F4') && statusFilters.length === 1 ? [] : ['F4']);
+    } else if (type === 'D1') {
+      setStatusFilters(statusFilters.includes('D1') && statusFilters.length === 1 ? [] : ['D1']);
+    } else if (type === 'OTHER') {
+      const nonF4 = statuses.filter(s => s !== 'F4');
+      const isCurrentlyNonF4 = nonF4.every(o => statusFilters.includes(o)) && statusFilters.length === nonF4.length;
+      setStatusFilters(isCurrentlyNonF4 ? [] : nonF4);
+    }
+  };
+
+  const filteredProjects = baseFilteredProjects.filter(p => supervisorFilter === "ALL" || (p.supervisor || "ไม่ระบุ") === supervisorFilter);
   const totalF4OfAll = filteredProjects.filter(p => p.status === 'F4').length;
   
   const supervisorStats = supervisors.map(sup => {
-    const supProjects = filteredProjects.filter(p => (p.supervisor || "ไม่ระบุ") === sup);
+    const supProjects = baseFilteredProjects.filter(p => (p.supervisor || "ไม่ระบุ") === sup);
     const total = supProjects.length;
     const f4 = supProjects.filter(p => p.status === 'F4').length;
     const percentage = total > 0 ? (f4 / total) * 100 : 0;
@@ -125,155 +144,168 @@ export default function Overview() {
 
 
           <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-            <div className="stat-card" style={{ borderTop: '4px solid var(--pea-purple)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+            <div 
+              className="stat-card" 
+              onClick={() => handleStatusClick('ALL')}
+              style={{ borderTop: '4px solid var(--pea-purple)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: statusFilters.length === 0 ? '0 4px 12px rgba(116, 56, 163, 0.2)' : 'none', outline: statusFilters.length === 0 ? '2px solid var(--pea-purple)' : 'none' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                 <div className="stat-icon-wrapper" style={{ background: 'var(--pea-purple-soft)', color: 'var(--pea-purple)', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
                   <Home size={36} />
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>โครงการทั้งหมด</div>
-                  <div className="stat-value" style={{ color: 'var(--pea-purple)', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.length}</div>
+                  <div className="stat-value" style={{ color: 'var(--pea-purple)', fontSize: '3rem', margin: '8px 0' }}>{projectsForTopCards.length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: 'var(--pea-purple)', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: 'var(--pea-purple)', fontSize: '1.1rem' }}>฿ {formatNumber(projectsForTopCards.reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
-            <div className="stat-card" style={{ borderTop: '4px solid #10b981', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+            <div 
+              className="stat-card" 
+              onClick={() => handleStatusClick('F4')}
+              style={{ borderTop: '4px solid #10b981', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: (statusFilters.includes('F4') && statusFilters.length === 1) ? '0 4px 12px rgba(16, 185, 129, 0.2)' : 'none', outline: (statusFilters.includes('F4') && statusFilters.length === 1) ? '2px solid #10b981' : 'none' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                 <div className="stat-icon-wrapper" style={{ background: '#d1fae5', color: '#10b981', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
                   <CheckCircle2 size={36} />
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>สถานะ F4 (ปิดงาน)</div>
-                  <div className="stat-value" style={{ color: '#059669', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.filter(p => p.status === 'F4').length}</div>
+                  <div className="stat-value" style={{ color: '#059669', fontSize: '3rem', margin: '8px 0' }}>{projectsForTopCards.filter(p => p.status === 'F4').length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: '#059669', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: '#059669', fontSize: '1.1rem' }}>฿ {formatNumber(projectsForTopCards.filter(p => p.status === 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
 
-            <div className="stat-card" style={{ borderTop: '4px solid #f59e0b', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px' }}>
+            <div 
+              className="stat-card" 
+              onClick={() => handleStatusClick('OTHER')}
+              style={{ borderTop: '4px solid #f59e0b', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: (statusFilters.length > 0 && !statusFilters.includes('F4')) ? '0 4px 12px rgba(245, 158, 11, 0.2)' : 'none', outline: (statusFilters.length > 0 && !statusFilters.includes('F4')) ? '2px solid #f59e0b' : 'none' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                 <div className="stat-icon-wrapper" style={{ background: '#fef3c7', color: '#d97706', marginBottom: '16px', padding: '16px', borderRadius: '50%' }}>
                   <CircleDashed size={36} />
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div className="stat-title" style={{ fontSize: '1.15rem' }}>สถานะอื่นๆ</div>
-                  <div className="stat-value" style={{ color: '#d97706', fontSize: '3rem', margin: '8px 0' }}>{filteredProjects.filter(p => p.status !== 'F4').length}</div>
+                  <div className="stat-value" style={{ color: '#d97706', fontSize: '3rem', margin: '8px 0' }}>{projectsForTopCards.filter(p => p.status !== 'F4').length}</div>
                   <div className="stat-subtitle" style={{ fontSize: '1rem' }}>โครงการ</div>
                 </div>
               </div>
               <div style={{ width: '100%', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="stat-subtitle" style={{ fontSize: '0.95rem' }}>งบประมาณรวม</span>
-                <span style={{ fontWeight: '600', color: '#d97706', fontSize: '1.1rem' }}>฿ {formatNumber(filteredProjects.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
+                <span style={{ fontWeight: '600', color: '#d97706', fontSize: '1.1rem' }}>฿ {formatNumber(projectsForTopCards.filter(p => p.status !== 'F4').reduce((sum, p) => sum + (Number(p.value) || 0), 0))}</span>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '20px' }}>
 
-            {/* Donut Chart Card */}
-            <div className="card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '32px', alignSelf: 'center', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
-
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '48px', width: '100%' }}>
-                <div className="donut-chart-container" style={{ width: '220px', height: '220px' }}>
-                  <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%' }}>
-                    {/* Background circle */}
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="#f1f5f9"
-                      strokeWidth="6"
+            {/* Recharts Pie Chart */}
+            <div className="card" style={{ minWidth: 0, marginBottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '16px', alignSelf: 'flex-start', color: 'var(--text-dark)' }}>ความคืบหน้าตามสถานะ</h3>
+              
+              <div style={{ width: '100%', height: '300px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'F4 (ปิดงาน)', value: filteredProjects.filter(p => p.status === 'F4').length },
+                        { name: 'D1', value: filteredProjects.filter(p => p.status === 'D1').length },
+                        { name: 'อื่นๆ', value: filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                      label={({ name, percent }) => (percent && percent > 0) ? `${name} ${(percent * 100).toFixed(0)}%` : null}
+                      onClick={(entry) => {
+                        if (entry.name === 'F4 (ปิดงาน)') {
+                          handleStatusClick('F4');
+                        } else if (entry.name === 'D1') {
+                          handleStatusClick('D1');
+                        } else {
+                          // For 'อื่นๆ' in pie chart
+                          const nonF4D1 = statuses.filter(s => s !== 'F4' && s !== 'D1');
+                          const isCurrentlyOthers = nonF4D1.every(o => statusFilters.includes(o)) && statusFilters.length === nonF4D1.length;
+                          setStatusFilters(isCurrentlyOthers ? [] : nonF4D1);
+                        }
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <Cell fill="#10b981" />
+                      <Cell fill="#f59e0b" />
+                      <Cell fill="var(--pea-purple)" />
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      itemStyle={{ color: '#1e293b', fontWeight: '600' }}
                     />
-
-                    {/* Note: In a real app we'd calculate stroke-dasharray dynamically. 
-                        For now, we'll use a static placeholder that looks like the mockup */}
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="6"
-                      strokeDasharray="25, 100"
-                    />
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="#f59e0b"
-                      strokeWidth="6"
-                      strokeDasharray="20, 100"
-                      strokeDashoffset="-25"
-                    />
-                    <path
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      fill="none"
-                      stroke="var(--pea-purple)"
-                      strokeWidth="6"
-                      strokeDasharray="55, 100"
-                      strokeDashoffset="-45"
-                    />
-                  </svg>
-                  <div className="donut-chart-text">
-                    <div className="value" style={{ fontSize: '3.5rem', fontWeight: '700', color: 'var(--text-dark)', lineHeight: '1.1' }}>{filteredProjects.length}</div>
-                    <div className="label" style={{ fontSize: '1.1rem', color: 'var(--text-light)' }}>โครงการ</div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontSize: '1.1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '80px' }}>F4 (ปิดงาน)</span>
-                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'F4').length}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '80px' }}>D1</span>
-                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status === 'D1').length}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: 'var(--pea-purple)' }}></div>
-                    <span style={{ color: 'var(--text-light)', width: '80px' }}>อื่นๆ</span>
-                    <span style={{ fontWeight: '700', fontSize: '1.2rem', marginLeft: 'auto' }}>{filteredProjects.filter(p => p.status !== 'F4' && p.status !== 'D1').length}</span>
-                  </div>
-                </div>
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Supervisor Comparison */}
+            {/* Supervisor Comparison Progress Bar Cards */}
             {supervisorStats.length > 0 && (
-              <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}>
+              <div className="card animation-fade-in" style={{ marginBottom: '32px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Users size={20} color="var(--pea-purple)" />
                   เปรียบเทียบผลงานการปิดงาน (F4) ของช่างแต่ละคน
                 </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '8px' }}>
                   {supervisorStats.map(stat => (
-                    <div key={stat.name} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'flex-start' }}>
-                        <span style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '0.95rem' }}>{stat.name}</span>
+                    <div 
+                      key={stat.name} 
+                      onClick={() => supervisorFilter === stat.name ? setSupervisorFilter("ALL") : setSupervisorFilter(stat.name)}
+                      style={{ 
+                        border: supervisorFilter === stat.name ? '2px solid var(--pea-purple)' : '1px solid #e2e8f0', 
+                        borderRadius: '8px', 
+                        padding: '16px', 
+                        background: supervisorFilter === stat.name ? '#f5f3ff' : '#f8fafc',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: supervisorFilter === stat.name ? '0 4px 12px rgba(116, 56, 163, 0.1)' : 'none'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontWeight: '600', color: supervisorFilter === stat.name ? 'var(--pea-purple)' : '#1e293b' }}>{stat.name}</span>
                         <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: stat.percentage >= 80 ? '#10b981' : (stat.percentage >= 40 ? '#f59e0b' : '#ef4444') }}>
+                          <span style={{ fontWeight: '700', color: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') }}>
                             {stat.percentage.toFixed(1)}%
                           </span>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', marginTop: '-2px' }}>(อัตราการปิดงานสำเร็จ)</div>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>(อัตราการปิดงานสำเร็จ)</div>
                         </div>
                       </div>
-                      <div style={{ background: "#e2e8f0", height: "8px", borderRadius: "4px", overflow: "hidden", marginBottom: '12px' }}>
-                        <div style={{ height: "100%", width: `${Math.min(stat.percentage, 100)}%`, backgroundColor: stat.percentage >= 80 ? "#10b981" : (stat.percentage >= 40 ? "#f59e0b" : "#ef4444"), transition: "width 0.3s ease" }}></div>
+                      <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '3px', marginBottom: '12px', overflow: 'hidden' }}>
+                        <div style={{ 
+                          height: '100%', 
+                          width: `${stat.percentage}%`, 
+                          background: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') 
+                        }}></div>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-light)', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
-                        <span>จำนวนงานทั้งหมด: <span style={{ fontWeight: '600', color: 'var(--text-dark)' }}>{stat.total}</span> โครงการ</span>
-                        <span>ปิดงาน F4 แล้ว: <span style={{ fontWeight: '600', color: '#10b981' }}>{stat.f4}</span> โครงการ</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
+                        <span>จำนวนงานทั้งหมด: <strong style={{ color: '#1e293b' }}>{stat.total}</strong> โครงการ</span>
+                        <span>ปิดงาน F4 แล้ว: <strong style={{ color: '#10b981' }}>{stat.f4}</strong> โครงการ</span>
                       </div>
                     </div>
                   ))}
+                </div>
+                <div style={{ marginTop: '12px', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "14px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                  หมายเหตุ: คลิกเลือกที่ชื่อช่างเพื่อดูงานที่รับผิดชอบ คลิกซ้ำเพื่อยกเลิกและดูงานทั้งหมด
                 </div>
               </div>
             )}

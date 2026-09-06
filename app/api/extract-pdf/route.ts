@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { extractText, getDocumentProxy } from "unpdf";
 
 // Specify edge or node runtime. Edge might have issues with some large files if limit is reached,
 // but for 1-10 page PDFs, it should be fine. We'll use nodejs runtime just to be safe.
@@ -26,9 +27,10 @@ export async function POST(req: NextRequest) {
 
     // Read the file into an ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
-    const base64Data = Buffer.from(arrayBuffer).toString("base64");
-
-    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+    // Parse PDF text using unpdf (Vercel edge friendly)
+    const pdfBuffer = new Uint8Array(arrayBuffer);
+    const pdf = await getDocumentProxy(pdfBuffer);
+    const { text: extractedText } = await extractText(pdf, { mergePages: true });
 
     const prompt = `
 You are a financial data extractor. I am providing you with a construction project report PDF.
@@ -64,15 +66,31 @@ Example output:
 }
     `;
 
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: file.type || "application/pdf",
-        },
-      },
-      prompt,
-    ]);
+    const modelsToTry = ["gemini-3.7-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"];
+    let result;
+    let lastError;
+
+    for (const modelName of modelsToTry) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        result = await model.generateContent([
+          `ข้อมูลจากเอกสาร PDF:\n${extractedText}\n\n`,
+          prompt,
+        ]);
+        console.log(`Successfully used model: ${modelName}`);
+        break; // Success!
+      } catch (err: any) {
+        console.warn(`Model ${modelName} failed:`, err.message);
+        lastError = err;
+        if (!err.message?.includes("503") && !err.message?.includes("429") && err.status !== 503 && err.status !== 429) {
+          break;
+        }
+      }
+    }
+
+    if (!result) {
+      throw lastError || new Error("All AI models are currently overloaded. Please try again later.");
+    }
 
     const responseText = result.response.text();
     // Clean up potential markdown formatting if the model still outputs it

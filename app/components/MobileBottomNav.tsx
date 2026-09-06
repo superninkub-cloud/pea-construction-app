@@ -1,12 +1,82 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit, Bell, User } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { LayoutDashboard, FileEdit, Bell, User, UploadCloud, FileText, Printer, PackageSearch, LayoutList, Camera, Calculator } from "lucide-react";
+import { Suspense } from "react";
 
-export default function MobileBottomNav() {
+function BottomNavContent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentStep = searchParams?.get("step") || "1";
 
+  if (pathname?.startsWith("/budget-transfer")) {
+    return (
+      <nav className="mobile-bottom-nav">
+        <Link href="/" className="mobile-nav-item">
+          <LayoutDashboard size={24} />
+          <span>หน้าหลัก</span>
+        </Link>
+        <Link href="/budget-transfer?step=1" className={`mobile-nav-item ${currentStep === "1" ? "active" : ""}`}>
+          <UploadCloud size={24} />
+          <span>1. อัปโหลด</span>
+        </Link>
+        <Link href="/budget-transfer?step=2" className={`mobile-nav-item ${currentStep === "2" ? "active" : ""}`}>
+          <FileText size={24} />
+          <span>2. ข้อมูล</span>
+        </Link>
+        <Link href="/budget-transfer?step=3" className={`mobile-nav-item ${currentStep === "3" ? "active" : ""}`}>
+          <Printer size={24} />
+          <span>3. พิมพ์</span>
+        </Link>
+      </nav>
+    );
+  }
+
+  if (pathname?.startsWith("/wire-return")) {
+    return (
+      <nav className="mobile-bottom-nav">
+        <Link href="/" className="mobile-nav-item">
+          <LayoutDashboard size={24} />
+          <span>หน้าหลัก</span>
+        </Link>
+        <Link href="/wire-return?step=1" className={`mobile-nav-item ${currentStep === "1" ? "active" : ""}`}>
+          <UploadCloud size={24} />
+          <span>1. อัปโหลด</span>
+        </Link>
+        <Link href="/wire-return?step=2" className={`mobile-nav-item ${currentStep === "2" ? "active" : ""}`}>
+          <PackageSearch size={24} />
+          <span>2. ตรวจสอบ</span>
+        </Link>
+        <Link href="/wire-return?step=3" className={`mobile-nav-item ${currentStep === "3" ? "active" : ""}`}>
+          <Printer size={24} />
+          <span>3. พิมพ์</span>
+        </Link>
+      </nav>
+    );
+  }
+  if (pathname?.startsWith("/update")) {
+    return (
+      <nav className="mobile-bottom-nav">
+        <Link href="/" className="mobile-nav-item">
+          <LayoutDashboard size={24} />
+          <span>หน้าหลัก</span>
+        </Link>
+        <Link href="/update?step=1" className={`mobile-nav-item ${currentStep === "1" ? "active" : ""}`}>
+          <LayoutList size={24} />
+          <span>งานทั้งหมด</span>
+        </Link>
+        <Link href="/update?step=2" className={`mobile-nav-item ${currentStep === "2" ? "active" : ""}`}>
+          <Camera size={24} />
+          <span>อัปเดต</span>
+        </Link>
+        <Link href="/update?step=3" className={`mobile-nav-item ${currentStep === "3" ? "active" : ""}`}>
+          <Calculator size={24} />
+          <span>คำนวณสาย</span>
+        </Link>
+      </nav>
+    );
+  }
   return (
     <nav className="mobile-bottom-nav">
       <Link href="/" className={`mobile-nav-item ${pathname === "/" ? "active" : ""}`}>
@@ -17,14 +87,22 @@ export default function MobileBottomNav() {
         <FileEdit size={24} />
         <span>งานก่อสร้าง</span>
       </Link>
-      <Link href="#" className="mobile-nav-item">
-        <Bell size={24} />
-        <span>แจ้งเตือน</span>
+      <Link href="/wire-return" className={`mobile-nav-item ${pathname === "/wire-return" ? "active" : ""}`}>
+        <PackageSearch size={24} />
+        <span>คืนสายส่ง</span>
       </Link>
-      <Link href="#" className="mobile-nav-item">
-        <User size={24} />
-        <span>โปรไฟล์</span>
+      <Link href="/budget-transfer" className={`mobile-nav-item ${pathname === "/budget-transfer" ? "active" : ""}`}>
+        <FileText size={24} />
+        <span>โอนงบ</span>
       </Link>
     </nav>
+  );
+}
+
+export default function MobileBottomNav() {
+  return (
+    <Suspense fallback={<nav className="mobile-bottom-nav"></nav>}>
+      <BottomNavContent />
+    </Suspense>
   );
 }

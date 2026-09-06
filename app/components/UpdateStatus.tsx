@@ -1,13 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Users } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { wireDataList } from "../../lib/wireData";
 
+const getLatestRemarkDetail = (remarks?: string) => {
+  if (!remarks) return null;
+  const lines = remarks.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (trimmed.includes(' | ')) {
+      return trimmed.split(' | ').slice(1).join(' | ').trim();
+    }
+    if (!trimmed.includes('📍')) {
+      return trimmed;
+    }
+  }
+  return null;
+};
+
 export default function UpdateStatus() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const step = searchParams?.get("step");
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
@@ -16,6 +38,14 @@ export default function UpdateStatus() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [selectedWbs, setSelectedWbs] = useState("");
+  const [isScrapModalOpen, setIsScrapModalOpen] = useState(false);
+
+  // Calculator State
+  const [calcWireId, setCalcWireId] = useState("");
+  const [calcLength, setCalcLength] = useState("");
+  const [calcPercentage, setCalcPercentage] = useState("100");
+  const [calcWeight, setCalcWeight] = useState("");
+  const [calcActiveInput, setCalcActiveInput] = useState<"length" | "weight" | "percentage" | null>(null);
 
   const [project, setProject] = useState<Project | null>(null);
 
@@ -51,6 +81,7 @@ export default function UpdateStatus() {
   );
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [estSiteExpense, setEstSiteExpense] = useState("");
   const [allocatedSiteBudget, setAllocatedSiteBudget] = useState("");
   const [disbursedSiteExpense, setDisbursedSiteExpense] = useState("");
@@ -66,6 +97,7 @@ export default function UpdateStatus() {
   const [userRole, setUserRole] = useState("user");
   const [viewMode, setViewMode] = useState("grid");
   const [expandedWbs, setExpandedWbs] = useState(new Set<string>());
+  const [showAllProgress, setShowAllProgress] = useState(false);
 
   // Add New Project State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -101,6 +133,19 @@ export default function UpdateStatus() {
     const role = sessionStorage.getItem("pea_role");
     if (role) setUserRole(role);
   }, []);
+
+  // Handle URL step changes
+  useEffect(() => {
+    if (step === "1") {
+      setSelectedWbs("");
+      setIsScrapModalOpen(false);
+    } else if (step === "2") {
+      setIsScrapModalOpen(false);
+      // We don't alert here because it could be annoying, just let them be on the form if selected, or list if not
+    } else if (step === "3") {
+      setIsScrapModalOpen(true);
+    }
+  }, [step]);
 
   const fetchProjects = async () => {
     const { data, error } = await supabase
@@ -251,6 +296,71 @@ export default function UpdateStatus() {
     }
   }, [selectedWbs, projects]);
 
+  const selectedCalcWire = wireDataList.find(w => w.id === calcWireId);
+
+  const handleCalcWireChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newId = e.target.value;
+    setCalcWireId(newId);
+    const wire = wireDataList.find(w => w.id === newId);
+    if (wire) {
+      if ((calcActiveInput === "length" || calcActiveInput === "percentage") && calcLength && !isNaN(Number(calcLength))) {
+        const p = Number(calcPercentage) || 0;
+        setCalcWeight((Number(calcLength) * (p / 100) * wire.weightPerMeter).toFixed(2));
+      } else if (calcActiveInput === "weight" && calcWeight && !isNaN(Number(calcWeight)) && wire.weightPerMeter > 0) {
+        if (calcLength && !isNaN(Number(calcLength)) && Number(calcLength) > 0) {
+          const newPercent = (Number(calcWeight) / (Number(calcLength) * wire.weightPerMeter)) * 100;
+          setCalcPercentage(newPercent.toFixed(1));
+        } else {
+          const p = Number(calcPercentage) || 100;
+          if (p > 0) {
+            setCalcLength((Number(calcWeight) / (wire.weightPerMeter * (p / 100))).toFixed(2));
+          }
+        }
+      }
+    }
+  };
+
+  const handleCalcLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcLength(val);
+    setCalcActiveInput("length");
+    if (selectedCalcWire && val && !isNaN(Number(val))) {
+      const p = Number(calcPercentage) || 0;
+      setCalcWeight((Number(val) * (p / 100) * selectedCalcWire.weightPerMeter).toFixed(2));
+    } else {
+      setCalcWeight("");
+    }
+  };
+
+  const handleCalcWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcWeight(val);
+    setCalcActiveInput("weight");
+    if (selectedCalcWire && val && !isNaN(Number(val)) && selectedCalcWire.weightPerMeter > 0) {
+      if (calcLength && !isNaN(Number(calcLength)) && Number(calcLength) > 0) {
+        const p = (Number(val) / (Number(calcLength) * selectedCalcWire.weightPerMeter)) * 100;
+        setCalcPercentage(p.toFixed(1));
+      } else {
+        const p = Number(calcPercentage) || 100;
+        if (p > 0) {
+          setCalcLength((Number(val) / (selectedCalcWire.weightPerMeter * (p / 100))).toFixed(2));
+        }
+      }
+    } else {
+      if (!calcLength) setCalcPercentage("100");
+    }
+  };
+
+  const handleCalcPercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCalcPercentage(val);
+    setCalcActiveInput("percentage");
+    if (selectedCalcWire && calcLength && !isNaN(Number(calcLength))) {
+      const p = Number(val) || 0;
+      setCalcWeight((Number(calcLength) * (p / 100) * selectedCalcWire.weightPerMeter).toFixed(2));
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -355,6 +465,41 @@ export default function UpdateStatus() {
         .eq("id", project.id);
 
       if (updateError) throw updateError;
+
+      // LINE Notification triggers
+      try {
+        const statusChanged = status && status !== project.status;
+        const remarksAdded = newRemarks.trim() !== "";
+        
+        if (statusChanged || remarksAdded) {
+          fetch('/api/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'job_status',
+              payload: { 
+                wbs: editWbs, 
+                status: statusChanged ? status : (project.status || '-'), 
+                project_name: editName,
+                remarks: newRemarks.trim()
+              }
+            })
+          });
+        }
+        
+        if (file && imageUrl) {
+          fetch('/api/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'photo_upload',
+              payload: { wbs: editWbs, project_name: editName, image_url: imageUrl }
+            })
+          });
+        }
+      } catch (e) {
+        console.error("Failed to trigger notify API:", e);
+      }
 
       setMessage({
         text: "บันทึกสถานะงานและเช็คลิสท์เรียบร้อยแล้ว",
@@ -479,10 +624,109 @@ export default function UpdateStatus() {
     setAddLoading(false);
   };
 
+  const baseFilteredProjectsForStats = projects.filter((p) =>
+    selectedStatuses.length === 0 ? true : selectedStatuses.includes(p.status || "ไม่มีสถานะ")
+  );
+
+  const supervisorStats = supervisors.map(sup => {
+    const supProjects = baseFilteredProjectsForStats.filter(p => (p.supervisor || "ไม่มีข้อมูล") === sup);
+    const total = supProjects.length;
+    const f4 = supProjects.filter(p => p.status === 'F4').length;
+    const percentage = total > 0 ? (f4 / total) * 100 : 0;
+    return { name: sup, total, f4, percentage };
+  }).filter(s => s.total > 0).sort((a, b) => {
+    if (b.percentage !== a.percentage) return b.percentage - a.percentage;
+    return b.f4 - a.f4;
+  });
+
   return (
     <>
       <TopBar title="อัพเดทสถานะงาน" />
       <div className="content-area animation-fade-in">
+
+        {/* Supervisor Comparison Section */}
+        {supervisorStats.length > 0 && !project && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '20px', marginBottom: '24px' }}>
+            {/* Original Style: Progress Bar Cards */}
+            <div className="card animation-fade-in" style={{ margin: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users size={20} color="var(--pea-purple)" />
+                เปรียบเทียบผลงานการปิดงาน (F4) ของช่างแต่ละคน
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', maxHeight: '400px', overflowY: 'auto', paddingRight: '8px' }}>
+                {supervisorStats.map(stat => (
+                  <div
+                    key={stat.name}
+                    onClick={() => selectedSupervisor === stat.name ? setSelectedSupervisor("ALL") : setSelectedSupervisor(stat.name)}
+                    style={{
+                      border: selectedSupervisor === stat.name ? '2px solid var(--pea-purple)' : '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      background: selectedSupervisor === stat.name ? '#f5f3ff' : '#f8fafc',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: selectedSupervisor === stat.name ? '0 4px 12px rgba(116, 56, 163, 0.1)' : 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontWeight: '600', color: selectedSupervisor === stat.name ? 'var(--pea-purple)' : '#1e293b' }}>{stat.name}</span>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontWeight: '700', color: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444') }}>
+                          {stat.percentage.toFixed(1)}%
+                        </span>
+                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>(อัตราการปิดงานสำเร็จ)</div>
+                      </div>
+                    </div>
+                    <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '3px', marginBottom: '12px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${stat.percentage}%`,
+                        background: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444')
+                      }}></div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
+                      <span>จำนวนงานทั้งหมด: <strong style={{ color: '#1e293b' }}>{stat.total}</strong> โครงการ</span>
+                      <span>ปิดงาน F4 แล้ว: <strong style={{ color: '#10b981' }}>{stat.f4}</strong> โครงการ</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: '12px', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "14px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                หมายเหตุ: คลิกเลือกที่ชื่อช่างเพื่อดูงานที่รับผิดชอบ คลิกซ้ำเพื่อยกเลิกและดูงานทั้งหมด
+              </div>
+            </div>
+
+            {/* New Style: Bar Chart */}
+            <div className="card animation-fade-in" style={{ minWidth: 0, margin: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users size={20} color="var(--pea-purple)" />
+                เปรียบเทียบจำนวนงาน F4 และงานทั้งหมด แยกตามช่าง
+              </h3>
+              <div style={{ width: '100%', height: '400px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={supervisorStats} margin={{ top: 20, right: 30, left: 0, bottom: 50 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} angle={-45} textAnchor="end" />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      cursor={{ fill: '#f1f5f9' }}
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    />
+                    <Legend verticalAlign="top" height={36} />
+                    <Bar dataKey="total" name="งานทั้งหมด" fill="var(--pea-purple)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="f4" name="ปิดงาน (F4)" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div
           className="card"
           style={{
@@ -813,8 +1057,8 @@ export default function UpdateStatus() {
                     value={
                       projectValue
                         ? projectValue
-                            .toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          .toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         : ""
                     }
                     onChange={(e) => {
@@ -943,8 +1187,8 @@ export default function UpdateStatus() {
                     value={
                       estSiteExpense
                         ? estSiteExpense
-                            .toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          .toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         : ""
                     }
                     onChange={(e) => {
@@ -973,8 +1217,8 @@ export default function UpdateStatus() {
                       value={
                         allocatedSiteBudget
                           ? allocatedSiteBudget
-                              .toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            .toString()
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                           : ""
                       }
                       onChange={(e) => {
@@ -1014,8 +1258,8 @@ export default function UpdateStatus() {
                     value={
                       disbursedSiteExpense
                         ? disbursedSiteExpense
-                            .toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                          .toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                         : ""
                     }
                     onChange={(e) => {
@@ -1056,7 +1300,7 @@ export default function UpdateStatus() {
                       color:
                         Number(allocatedSiteBudget) -
                           Number(disbursedSiteExpense) >=
-                        0
+                          0
                           ? "#10b981"
                           : "#ef4444",
                     }}
@@ -1333,25 +1577,26 @@ export default function UpdateStatus() {
                   }}
                 >
                   {[
-                    { label: "1. ขุดหลุมปักเสา", idx: 0, unit: "ต้น" },
-                    { label: "2. ปักเสา", idx: 1, unit: "ต้น" },
+                    { label: "0. เบิกของเตรียมอุปกรณ์", idx: 0, unit: "รายการ" },
+                    { label: "1. ขุดหลุมปักเสา", idx: 1, unit: "ต้น" },
+                    { label: "2. ปักเสา", idx: 2, unit: "ต้น" },
                     {
                       label: "3. ติดตั้งอุปกรณ์ประกอบหัวเสา",
-                      idx: 2,
+                      idx: 3,
                       unit: "ชุด",
                     },
-                    { label: "4. พาดสายแรงสูง", idx: 3, unit: "วงจร-กม." },
-                    { label: "5. พาดสายแรงต่ำ", idx: 4, unit: "วงจร-กม." },
-                    { label: "6. งานรื้อถอน", idx: 5, unit: "ต้น" },
+                    { label: "4. พาดสายแรงสูง", idx: 4, unit: "วงจร-กม." },
+                    { label: "5. พาดสายแรงต่ำ", idx: 5, unit: "วงจร-กม." },
+                    { label: "6. งานรื้อถอน", idx: 6, unit: "ต้น" },
                   ].map((step) => {
                     const weights =
                       constructionType === "2"
-                        ? [20, 30, 25, 25, 0, 0]
+                        ? [0, 20, 30, 25, 25, 0, 0]
                         : constructionType === "3"
-                          ? [20, 25, 25, 20, 0, 10]
+                          ? [0, 20, 25, 25, 20, 0, 10]
                           : constructionType === "4"
-                            ? [0, 0, 50, 50, 0, 0]
-                            : [15, 25, 20, 20, 10, 10];
+                            ? [0, 0, 0, 50, 50, 0, 0]
+                            : [0, 15, 25, 20, 20, 10, 10];
                     const weight = weights[step.idx];
                     if (weight === 0) return null; // Hide if not applicable
 
@@ -1380,7 +1625,7 @@ export default function UpdateStatus() {
                             className="form-control"
                             value={
                               progDone[step.idx] === 0 &&
-                              progTargets[step.idx] === 0
+                                progTargets[step.idx] === 0
                                 ? ""
                                 : progDone[step.idx]
                             }
@@ -1402,7 +1647,7 @@ export default function UpdateStatus() {
                             className="form-control"
                             value={
                               progTargets[step.idx] === 0 &&
-                              progDone[step.idx] === 0
+                                progDone[step.idx] === 0
                                 ? ""
                                 : progTargets[step.idx]
                             }
@@ -1664,14 +1909,31 @@ export default function UpdateStatus() {
                   <img
                     src={previewUrl}
                     alt="Preview"
+                    onClick={() => setIsLightboxOpen(true)}
                     style={{
                       maxWidth: "100%",
                       maxHeight: "250px",
                       borderRadius: "12px",
                       border: "4px solid white",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      cursor: "pointer",
+                      transition: "transform 0.2s ease"
                     }}
+                    onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
+                    onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
                   />
+                  {project?.image_url === previewUrl && project?.updated_at && (
+                    <div style={{ marginTop: "12px", fontSize: "14px", color: "#64748b", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      อัพโหลดเมื่อวันที่ {new Date(project.updated_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.
+                    </div>
+                  )}
+                  {file && previewUrl && previewUrl !== project?.image_url && (
+                    <div style={{ marginTop: "12px", fontSize: "14px", color: "#f59e0b", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                      รูปภาพใหม่ยังไม่ได้บันทึก
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1786,6 +2048,25 @@ export default function UpdateStatus() {
                 >
                   📄 แบบรายการ
                 </button>
+                <button
+                  onClick={() => setShowAllProgress(!showAllProgress)}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: "6px",
+                    border: "none",
+                    background: showAllProgress ? "#fff" : "transparent",
+                    color: showAllProgress ? "var(--pea-purple)" : "#64748b",
+                    fontWeight: showAllProgress ? "600" : "500",
+                    cursor: "pointer",
+                    boxShadow: showAllProgress
+                      ? "0 1px 3px rgba(0,0,0,0.1)"
+                      : "none",
+                    transition: "all 0.2s",
+                    marginLeft: "4px"
+                  }}
+                >
+                  {showAllProgress ? "ซ่อนความคืบหน้า" : "แสดงความคืบหน้า"}
+                </button>
               </div>
             </div>
 
@@ -1802,6 +2083,7 @@ export default function UpdateStatus() {
             >
               {filteredProjects.map((p) => {
                 const steps = [
+                  false, // placeholder for เบิกของเตรียมอุปกรณ์ (no data)
                   p.check1,
                   p.check2,
                   p.check3,
@@ -1812,7 +2094,7 @@ export default function UpdateStatus() {
                   p.check8,
                 ];
                 const doneCount = steps.filter(Boolean).length;
-                const progressPercent = (doneCount / 8) * 100;
+                const progressPercent = (doneCount / steps.length) * 100;
                 const type = p.construction_type || "1";
                 const physicalProgress = (() => {
                   if (type === "5") return p.manual_progress || 0;
@@ -2104,12 +2386,52 @@ export default function UpdateStatus() {
                           style={{
                             color: "var(--text-light)",
                             fontSize: "0.8rem",
-                            marginBottom: "16px",
+                            marginBottom: isExpanded || showAllProgress ? "16px" : "0",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center"
                           }}
                         >
-                          ผู้ควบคุมงาน: {p.supervisor}
+                          <span>ผู้ควบคุมงาน: {p.supervisor}</span>
+                          <button
+                            onClick={toggleExpand}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              padding: "4px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#64748b",
+                            }}
+                            title={isExpanded || showAllProgress ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
+                          >
+                            {isExpanded || showAllProgress ? "▲" : "▼"}
+                          </button>
                         </div>
-                        {detailsContent}
+                        {getLatestRemarkDetail(p.remarks) && (
+                          <div style={{
+                            fontSize: "0.75rem",
+                            color: "#64748b",
+                            background: "#f8fafc",
+                            padding: "6px 10px",
+                            borderRadius: "6px",
+                            marginTop: "8px",
+                            marginBottom: isExpanded || showAllProgress ? "16px" : "0",
+                            borderLeft: "3px solid var(--pea-purple)",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px"
+                          }}>
+                            <span style={{ color: "var(--pea-purple)" }}>💬</span>
+                            {getLatestRemarkDetail(p.remarks)}
+                          </div>
+                        )}
+                        {(isExpanded || showAllProgress) && detailsContent}
                       </>
                     ) : (
                       <>
@@ -2169,11 +2491,33 @@ export default function UpdateStatus() {
                               justifyContent: "center",
                               color: "#64748b",
                             }}
+                            title={isExpanded || showAllProgress ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
                           >
-                            {isExpanded ? "▲" : "▼"}
+                            {isExpanded || showAllProgress ? "▲" : "▼"}
                           </button>
                         </div>
-                        {isExpanded && detailsContent}
+                        {getLatestRemarkDetail(p.remarks) && (
+                          <div style={{
+                            fontSize: "0.75rem",
+                            color: "#64748b",
+                            background: "#f8fafc",
+                            padding: "6px 10px",
+                            borderRadius: "6px",
+                            marginTop: "12px",
+                            marginBottom: isExpanded || showAllProgress ? "16px" : "0",
+                            borderLeft: "3px solid var(--pea-purple)",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px"
+                          }}>
+                            <span style={{ color: "var(--pea-purple)" }}>💬</span>
+                            {getLatestRemarkDetail(p.remarks)}
+                          </div>
+                        )}
+                        {(isExpanded || showAllProgress) && detailsContent}
                       </>
                     )}
                   </div>
@@ -2386,6 +2730,176 @@ export default function UpdateStatus() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {isScrapModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div className="card animation-fade-in" style={{ width: '100%', maxWidth: '500px', margin: 0, position: 'relative', background: '#ffffff', borderRadius: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+            <button
+              onClick={() => router.push('/update?step=2')}
+              style={{ position: 'absolute', top: '24px', right: '24px', background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b' }}
+            >
+              <span style={{ fontSize: '18px', fontWeight: 'bold' }}>X</span>
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#f5eff5', color: '#7e22ce', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '24px' }}>🧮</span>
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>โปรแกรมคำนวณเศษสายไฟฟ้า</h3>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>คำนวณน้ำหนักและความยาวของเศษสายได้อย่างรวดเร็ว</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>เลือกประเภทสาย / รหัสพัสดุ</label>
+                <select
+                  className="form-select"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #cbd5e1', background: '#f8fafc', outline: 'none', fontSize: '0.95rem', color: '#1e293b', fontWeight: '500' }}
+                  value={calcWireId}
+                  onChange={handleCalcWireChange}
+                >
+                  <option value="">-- เลือกสายไฟฟ้า --</option>
+                  {wireDataList.map(w => (
+                    <option key={w.id} value={w.id}>[{w.id}] {w.name} ({w.category})</option>
+                  ))}
+                </select>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '8px', height: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                  {selectedCalcWire ? (
+                    <>
+                      <span>น้ำหนักต่อเมตร: <span style={{ fontWeight: '600', color: '#3b82f6' }}>{selectedCalcWire.weightPerMeter}</span> กก./เมตร</span>
+                      <span style={{ color: '#94a3b8' }}>{selectedCalcWire.category}</span>
+                    </>
+                  ) : ""}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f1f5f9', padding: '16px', borderRadius: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>ความยาว (เมตร)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'length' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'length' && calcLength ? '700' : '500', fontSize: '1rem' }}
+                      value={calcLength}
+                      onChange={handleCalcLengthChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>ม.</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>น้ำหนัก (กิโลกรัม)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      style={{ width: '100%', padding: '10px 16px', paddingRight: '40px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: calcActiveInput === 'weight' ? '#0f172a' : '#ef4444', fontWeight: calcActiveInput !== 'weight' && calcWeight ? '700' : '500', fontSize: '1rem' }}
+                      value={calcWeight}
+                      onChange={handleCalcWeightChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>กก.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>% ค่าเผื่อสาย (เพื่อความยืดหยุ่น)</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <input
+                    type="range"
+                    min="0" max="120" step="1"
+                    style={{ flex: 1, accentColor: '#7e22ce' }}
+                    value={calcPercentage || "0"}
+                    onChange={(e) => handleCalcPercentageChange(e as any)}
+                    disabled={!selectedCalcWire}
+                  />
+                  <div style={{ position: 'relative', width: '80px' }}>
+                    <input
+                      type="number"
+                      style={{ width: '100%', padding: '8px 12px', paddingRight: '24px', borderRadius: '10px', border: '1px solid #cbd5e1', background: 'white', outline: 'none', color: '#0f172a', fontWeight: '600', fontSize: '0.95rem' }}
+                      value={calcPercentage}
+                      onChange={handleCalcPercentageChange}
+                      disabled={!selectedCalcWire}
+                    />
+                    <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: '600' }}>%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '32px' }}>
+                <button onClick={() => router.push('/update?step=2')} style={{ width: '100%', background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer' }}>ปิดหน้าต่างนี้</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox for full screen image view */}
+      {isLightboxOpen && previewUrl && (
+        <div
+          onClick={() => setIsLightboxOpen(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "zoom-out",
+          }}
+        >
+          <img
+            src={previewUrl}
+            alt="Fullscreen Preview"
+            style={{
+              maxWidth: "90%",
+              maxHeight: "85%",
+              objectFit: "contain",
+              borderRadius: "8px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.3)"
+            }}
+          />
+          {project?.image_url === previewUrl && project?.updated_at && (
+            <div style={{ color: "white", marginTop: "16px", fontSize: "16px", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+              อัพโหลดเมื่อวันที่ {new Date(project.updated_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.
+            </div>
+          )}
+          <button
+            onClick={() => setIsLightboxOpen(false)}
+            style={{
+              position: "absolute",
+              top: "30px",
+              right: "40px",
+              background: "rgba(255,255,255,0.2)",
+              border: "none",
+              color: "white",
+              fontSize: "30px",
+              width: "50px",
+              height: "50px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "background 0.2s ease"
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.4)")}
+            onMouseOut={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.2)")}
+          >
+            ×
+          </button>
         </div>
       )}
     </>

@@ -9,9 +9,25 @@ export const metadata = {
   }
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 import AuthWrapper from "./components/AuthWrapper";
 
 import ClientLayout from "./components/ClientLayout";
+
+
+import { Prompt } from 'next/font/google';
+
+const prompt = Prompt({
+  subsets: ['latin', 'thai'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-prompt',
+});
 
 export default function RootLayout({
   children,
@@ -19,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="th">
-      <body>
+    <html lang="th" className={prompt.variable}>
+      <body className={`${prompt.className} font-sans`}>
         <AuthWrapper>
           <ClientLayout>
             {children}

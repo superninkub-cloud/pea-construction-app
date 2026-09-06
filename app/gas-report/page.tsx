@@ -1,0 +1,695 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabaseClient";
+import TopBar from "../components/TopBar";
+import { driversList, driverTypes } from "../../lib/vehicleData";
+import "./GasReport.css";
+
+const thaiMonths = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+];
+
+export default function GasReportPage() {
+  const [activeTab, setActiveTab] = useState("form");
+  const [loading, setLoading] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+
+  // Form State
+  const [usageDate, setUsageDate] = useState("");
+  const [selectedPlate, setSelectedPlate] = useState("");
+  const [vehicleCode, setVehicleCode] = useState("");
+  const [driverName, setDriverName] = useState("");
+  const [supervisorName, setSupervisorName] = useState("");
+  const [workLocation, setWorkLocation] = useState("");
+  const [odoStart, setOdoStart] = useState("");
+  const [odoEnd, setOdoEnd] = useState("");
+  const [machineHours, setMachineHours] = useState("");
+  const [fuelType, setFuelType] = useState("");
+  const [fuelLiters, setFuelLiters] = useState("");
+  const [fuelCost, setFuelCost] = useState("");
+  const [repairDetails, setRepairDetails] = useState("");
+  const [repairCost, setRepairCost] = useState("");
+  const [notes, setNotes] = useState("");
+  const [personnelList, setPersonnelList] = useState<any[]>([]);
+
+  // Report State
+  const [reportMonth, setReportMonth] = useState(thaiMonths[new Date().getMonth()]);
+  const [reportYear, setReportYear] = useState((new Date().getFullYear() + 543).toString());
+  const [reportPlate, setReportPlate] = useState("");
+  const [reports, setReports] = useState<any[]>([]);
+  const [fetchingReports, setFetchingReports] = useState(false);
+
+  const [allHistory, setAllHistory] = useState<any[]>([]);
+  const [fetchingHistory, setFetchingHistory] = useState(false);
+
+  const fetchHistory = async () => {
+    setFetchingHistory(true);
+    try {
+      const { data, error } = await supabase
+        .from("gas_reports")
+        .select("*")
+        .order("usage_date", { ascending: false });
+      if (!error && data) {
+        setAllHistory(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setFetchingHistory(false);
+  };
+
+  const handleDeleteHistory = async (id: string) => {
+    if (!confirm("คุณต้องการลบข้อมูลนี้ใช่หรือไม่?")) return;
+    try {
+      const { error } = await supabase.from("gas_reports").delete().eq("id", id);
+      if (error) {
+        alert("เกิดข้อผิดพลาดในการลบข้อมูล: " + error.message);
+      } else {
+        alert("ลบข้อมูลสำเร็จ");
+        fetchHistory(); // refresh
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEditClick = (item: any) => {
+    setEditId(item.id);
+    setUsageDate(item.usage_date || "");
+    setSelectedPlate(item.license_plate || "");
+    setVehicleCode(item.vehicle_code || "");
+    setDriverName(item.driver_name || "");
+    setSupervisorName(item.supervisor_name || "");
+    setWorkLocation(item.work_location || "");
+    setOdoStart(item.odo_start !== null ? item.odo_start.toString() : "");
+    setOdoEnd(item.odo_end !== null ? item.odo_end.toString() : "");
+    setMachineHours(item.machine_hours !== null ? item.machine_hours.toString() : "");
+    setFuelType(item.fuel_type || "");
+    setFuelLiters(item.fuel_liters !== null ? item.fuel_liters.toString() : "");
+    setFuelCost(item.fuel_cost !== null ? item.fuel_cost.toString() : "");
+    setRepairDetails(item.repair_details || "");
+    setRepairCost(item.repair_cost !== null ? item.repair_cost.toString() : "");
+    setNotes(item.notes || "");
+    setActiveTab("form");
+  };
+
+  useEffect(() => {
+    if (activeTab === "history") {
+      fetchHistory();
+    }
+  }, [activeTab]);
+
+
+  useEffect(() => {
+    // When plate changes, auto-fill driver
+    if (selectedPlate) {
+      const v = driversList.find(d => d.plate === selectedPlate);
+      if (v) {
+        setDriverName(v.driver);
+      }
+    }
+  }, [selectedPlate]);
+
+  useEffect(() => {
+    setUserRole(sessionStorage.getItem("pea_role"));
+    const fetchPersonnel = async () => {
+      const { data, error } = await supabase.from("personnel").select("*").order("full_name", { ascending: true });
+      if (!error && data) {
+        setPersonnelList(data);
+      }
+    };
+    fetchPersonnel();
+  }, []);
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!usageDate || !selectedPlate || !driverName) {
+      alert("กรุณากรอกข้อมูล วันที่, ทะเบียนรถ และ ผู้ขับขี่");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const d = new Date(usageDate);
+      const monthName = thaiMonths[d.getMonth()];
+      const yearTh = (d.getFullYear() + 543).toString();
+
+      const payload = {
+        usage_date: usageDate,
+        month_name: monthName,
+        year_th: yearTh,
+        license_plate: selectedPlate,
+        vehicle_code: vehicleCode,
+        driver_name: driverName,
+        supervisor_name: supervisorName,
+        work_location: workLocation,
+        odo_start: odoStart ? parseFloat(odoStart) : null,
+        odo_end: odoEnd ? parseFloat(odoEnd) : null,
+        machine_hours: machineHours ? parseFloat(machineHours) : null,
+        fuel_type: fuelType,
+        fuel_liters: fuelLiters ? parseFloat(fuelLiters) : null,
+        fuel_cost: fuelCost ? parseFloat(fuelCost) : null,
+        repair_details: repairDetails,
+        repair_cost: repairCost ? parseFloat(repairCost) : null,
+        notes: notes
+      };
+
+      let error;
+      if (editId) {
+        const { error: updateError } = await supabase.from("gas_reports").update(payload).eq("id", editId);
+        error = updateError;
+      } else {
+        const { error: insertError } = await supabase.from("gas_reports").insert(payload);
+        error = insertError;
+      }
+
+      if (error) {
+        console.error(error);
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message);
+      } else {
+        // Send LINE Notification
+        try {
+          fetch('/api/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'gas_report',
+              payload
+            })
+          });
+        } catch (e) {
+          console.error("Failed to trigger notify API:", e);
+        }
+
+        alert(editId ? "อัปเดตข้อมูลเรียบร้อย" : "บันทึกข้อมูลเรียบร้อย");
+        setEditId(null);
+        // Reset some fields
+        setWorkLocation("");
+        setOdoStart("");
+        setOdoEnd("");
+        setMachineHours("");
+        setFuelLiters("");
+        setFuelCost("");
+        setRepairDetails("");
+        setRepairCost("");
+        setNotes("");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchReports = async () => {
+    if (!reportMonth || !reportYear || !reportPlate) {
+      alert("กรุณาเลือก เดือน, ปี และ ทะเบียนรถ ให้ครบถ้วน");
+      return;
+    }
+    
+    setFetchingReports(true);
+    try {
+      const { data, error } = await supabase
+        .from("gas_reports")
+        .select("*")
+        .eq("month_name", reportMonth)
+        .eq("year_th", reportYear)
+        .eq("license_plate", reportPlate)
+        .order("usage_date", { ascending: true });
+
+      if (error) {
+        console.error(error);
+        alert("ดึงข้อมูลล้มเหลว: " + error.message);
+      } else {
+        setReports(data || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFetchingReports(false);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const getDayOnly = (dateStr: string) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).getDate().toString();
+  };
+
+  return (
+    <>
+      <TopBar title="รายงานน้ำมัน (ยพ.6)" />
+      <div className="content-area" style={{ padding: "20px" }}>
+        <div className="gas-report-container">
+          <h2 className="no-print" style={{ marginBottom: "20px", color: "#1e293b" }}>รายงานการใช้น้ำมัน (ยพ.6)</h2>
+
+          <div className="gas-tabs no-print">
+            <div 
+              className={`gas-tab ${activeTab === "form" ? "active" : ""}`}
+              onClick={() => setActiveTab("form")}
+            >
+              บันทึกประจำวัน
+            </div>
+            <div 
+              className={`gas-tab ${activeTab === "report" ? "active" : ""}`}
+              onClick={() => setActiveTab("report")}
+            >
+              รายงาน (ยพ.6)
+            </div>
+            <div 
+              className={`gas-tab ${activeTab === "history" ? "active" : ""}`}
+              onClick={() => setActiveTab("history")}
+            >
+              ประวัติการรายงานน้ำมัน
+            </div>
+          </div>
+
+          
+          {activeTab === "history" && (
+            <div className="history-section no-print">
+              <h3 style={{ marginBottom: "15px", color: "#1e293b", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>ประวัติการรายงานน้ำมันทั้งหมด</span>
+                <button 
+                  onClick={fetchHistory} 
+                  disabled={fetchingHistory}
+                  style={{ padding: "6px 12px", background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: "6px", cursor: "pointer", fontSize: "14px" }}
+                >
+                  {fetchingHistory ? "กำลังโหลด..." : "รีเฟรชข้อมูล"}
+                </button>
+              </h3>
+              
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px", backgroundColor: "white", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", borderRadius: "8px", overflow: "hidden" }}>
+                  <thead style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+                    <tr>
+                      <th style={{ padding: "12px", textAlign: "left", color: "#475569" }}>วันที่ใช้งาน</th>
+                      <th style={{ padding: "12px", textAlign: "left", color: "#475569" }}>ทะเบียนรถ</th>
+                      <th style={{ padding: "12px", textAlign: "left", color: "#475569" }}>ผู้ขับขี่</th>
+                      <th style={{ padding: "12px", textAlign: "center", color: "#475569" }}>ระยะทางไป-กลับ</th>
+                      <th style={{ padding: "12px", textAlign: "center", color: "#475569" }}>ปริมาณน้ำมัน (ลิตร)</th>
+                      <th style={{ padding: "12px", textAlign: "center", color: "#475569" }}>จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allHistory.length > 0 ? (
+                      allHistory.map((item) => (
+                        <tr key={item.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                          <td style={{ padding: "12px" }}>{new Date(item.usage_date).toLocaleDateString("th-TH")}</td>
+                          <td style={{ padding: "12px", fontWeight: "bold", color: "#0f172a" }}>{item.license_plate}</td>
+                          <td style={{ padding: "12px", color: "#334155" }}>{item.driver_name}</td>
+                          <td style={{ padding: "12px", textAlign: "center" }}>{item.odo_start && item.odo_end ? (item.odo_end - item.odo_start).toLocaleString() : "-"}</td>
+                          <td style={{ padding: "12px", textAlign: "center" }}>{item.fuel_liters ? item.fuel_liters : "-"}</td>
+                          <td style={{ padding: "12px", textAlign: "center" }}>
+                            {(userRole === "admin" || userRole === "user") ? (
+                              <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                                <button
+                                  onClick={() => handleEditClick(item)}
+                                  style={{ padding: "6px 12px", background: "#e0f2fe", color: "#0284c7", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "bold" }}
+                                >
+                                  แก้ไข
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteHistory(item.id)}
+                                  style={{ padding: "6px 12px", background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "bold" }}
+                                >
+                                  ลบ
+                                </button>
+                              </div>
+                            ) : (
+                              <span style={{ color: "#94a3b8", fontSize: "12px" }}>(เฉพาะผู้มีสิทธิ์)</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} style={{ padding: "30px", textAlign: "center", color: "#94a3b8" }}>ไม่มีประวัติข้อมูลการใช้น้ำมัน</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "form" && (
+            <form onSubmit={handleSubmit} className="gas-form-grid">
+              <div className="gas-form-group">
+                <label>วันที่ *</label>
+                <input type="date" value={usageDate} onChange={e => setUsageDate(e.target.value)} required />
+              </div>
+
+              <div className="gas-form-group">
+                <label>ทะเบียนรถ *</label>
+                <select value={selectedPlate} onChange={e => setSelectedPlate(e.target.value)} required>
+                  <option value="">-- เลือกทะเบียน --</option>
+                  {driversList.map(v => (
+                    <option key={v.plate} value={v.plate}>{v.plate} - {v.desc}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="gas-form-group">
+                <label>ผู้ขับขี่ *</label>
+                <select value={driverName} onChange={e => setDriverName(e.target.value)} required>
+                  <option value="">-- เลือกผู้ขับขี่ --</option>
+                  {personnelList.filter(p => (!p.position || !p.position.includes("พนักงาน บ")) && !["ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(p.full_name)).map(p => (
+                    <option key={p.id} value={p.full_name}>{p.full_name}</option>
+                  ))}
+                  {/* Fallback to driversList if not in personnel */}
+                  {driversList.map(v => v.driver).filter((v, i, a) => v && a.indexOf(v) === i && !personnelList.find(p => p.full_name === v) && !["ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(v)).map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                  {/* Inject specific names if completely missing */}
+                  {!personnelList.find(p => p.full_name === "ธวัชชัย โต๊ะศรีสุข") && !driversList.find(v => v.driver === "ธวัชชัย โต๊ะศรีสุข") && (
+                    <option value="ธวัชชัย โต๊ะศรีสุข">ธวัชชัย โต๊ะศรีสุข</option>
+                  )}
+                  {!personnelList.find(p => p.full_name === "ณัฐพล พืชพันธ์") && !driversList.find(v => v.driver === "ณัฐพล พืชพันธ์") && (
+                    <option value="ณัฐพล พืชพันธ์">ณัฐพล พืชพันธ์</option>
+                  )}
+                </select>
+              </div>
+
+              <div className="gas-form-group">
+                <label>ผู้ควบคุมรถ *</label>
+                <select value={supervisorName} onChange={e => setSupervisorName(e.target.value)} required>
+                  <option value="">-- เลือกผู้ควบคุมรถ --</option>
+                  {personnelList.filter(p => (!p.position || !p.position.includes("พนักงาน บ")) && !["ธวัชชัย โต๊ะสีสุข", "ณัฐพล พีชพันธ์"].includes(p.full_name)).map(p => (
+                    <option key={p.id} value={p.full_name}>{p.full_name}</option>
+                  ))}
+                  {!personnelList.find(p => p.full_name === "ธวัชชัย โต๊ะศรีสุข") && (
+                    <option value="ธวัชชัย โต๊ะศรีสุข">ธวัชชัย โต๊ะศรีสุข</option>
+                  )}
+                  {!personnelList.find(p => p.full_name === "ณัฐพล พืชพันธ์") && (
+                    <option value="ณัฐพล พืชพันธ์">ณัฐพล พืชพันธ์</option>
+                  )}
+                </select>
+              </div>
+
+              <div className="gas-form-group">
+                <label>รหัสรถ / หมายเลข กฟภ.</label>
+                <input type="text" value={vehicleCode} onChange={e => setVehicleCode(e.target.value)} placeholder="ระบุถ้่ามี" />
+              </div>
+
+              <div className="gas-form-group" style={{ gridColumn: "1 / -1" }}>
+                <label>สถานที่ปฏิบัติงาน (ไป-กลับ)</label>
+                <input type="text" value={workLocation} onChange={e => setWorkLocation(e.target.value)} />
+              </div>
+
+              <div className="gas-form-group">
+                <label>เลขไมล์ (เริ่มต้น)</label>
+                <input type="number" step="0.1" value={odoStart} onChange={e => setOdoStart(e.target.value)} />
+              </div>
+
+              <div className="gas-form-group">
+                <label>เลขไมล์ (สิ้นสุด)</label>
+                <input type="number" step="0.1" value={odoEnd} onChange={e => setOdoEnd(e.target.value)} />
+              </div>
+
+              <div className="gas-form-group">
+                <label>ชั่วโมงการทำงาน (เครื่องจักร)</label>
+                <input type="number" step="0.1" value={machineHours} onChange={e => setMachineHours(e.target.value)} />
+              </div>
+
+              <div className="gas-form-group">
+                <label>ชนิดเชื้อเพลิง</label>
+                <select value={fuelType} onChange={e => setFuelType(e.target.value)}>
+                  <option value="">-- เลือกชนิดเชื้อเพลิง --</option>
+                  <option value="ดีเซล">ดีเซล</option>
+                  <option value="แก๊สโซฮอล์ 95">แก๊สโซฮอล์ 95</option>
+                  <option value="แก๊สโซฮอล์ 91">แก๊สโซฮอล์ 91</option>
+                  <option value="แก๊สโซฮอล์ E20">แก๊สโซฮอล์ E20</option>
+                  <option value="น้ำมันหล่อลื่น">น้ำมันหล่อลื่น</option>
+                </select>
+              </div>
+
+              <div className="gas-form-group">
+                <label>ปริมาณน้ำมัน (ลิตร)</label>
+                <input type="number" step="0.01" value={fuelLiters} onChange={e => setFuelLiters(e.target.value)} />
+              </div>
+
+              <div className="gas-form-group">
+                <label>จำนวนเงินค่าน้ำมัน (บาท)</label>
+                <input type="number" step="0.01" value={fuelCost} onChange={e => setFuelCost(e.target.value)} />
+              </div>
+
+              <div className="gas-form-group">
+                <label>รายการซ่อม</label>
+                <input type="text" value={repairDetails} onChange={e => setRepairDetails(e.target.value)} />
+              </div>
+
+              <div className="gas-form-group">
+                <label>ค่าซ่อม (บาท)</label>
+                <input type="number" step="0.01" value={repairCost} onChange={e => setRepairCost(e.target.value)} />
+              </div>
+
+              <div className="gas-form-group" style={{ gridColumn: "1 / -1" }}>
+                <label>หมายเหตุ (ใส่หมายเลขงาน WBS)</label>
+                <textarea rows={2} value={notes} onChange={e => setNotes(e.target.value)}></textarea>
+              </div>
+
+              <div style={{ gridColumn: "1 / -1", display: "flex", gap: "10px" }}>
+                <button type="submit" className="gas-submit-btn" disabled={loading} style={{ flex: 1 }}>
+                  {loading ? "กำลังบันทึก..." : (editId ? "อัปเดตข้อมูล" : "บันทึกข้อมูล")}
+                </button>
+                {editId && (
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setEditId(null);
+                      setWorkLocation("");
+                      setOdoStart("");
+                      setOdoEnd("");
+                      setMachineHours("");
+                      setFuelLiters("");
+                      setFuelCost("");
+                      setRepairDetails("");
+                      setRepairCost("");
+                      setNotes("");
+                    }} 
+                    style={{ flex: 1, background: "#94a3b8", color: "white", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "16px" }}>
+                    ยกเลิกการแก้ไข
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+
+          {activeTab === "report" && (
+            <div>
+              <div className="gas-report-header no-print">
+                <div className="gas-report-filters">
+                  <select value={reportMonth} onChange={e => setReportMonth(e.target.value)}>
+                    {thaiMonths.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                  
+                  <select value={reportYear} onChange={e => setReportYear(e.target.value)}>
+                    {Array.from({length: 5}).map((_, i) => {
+                      const y = (new Date().getFullYear() + 543 - i).toString();
+                      return <option key={y} value={y}>{y}</option>;
+                    })}
+                  </select>
+
+                  <select value={reportPlate} onChange={e => setReportPlate(e.target.value)}>
+                    <option value="">-- เลือกทะเบียน --</option>
+                    {driversList.map(v => (
+                      <option key={v.plate} value={v.plate}>{v.plate}</option>
+                    ))}
+                  </select>
+
+                  <button 
+                    onClick={fetchReports} 
+                    disabled={fetchingReports}
+                    style={{ background: "#3b82f6", color: "white", padding: "8px 16px", borderRadius: "6px", border: "none", cursor: "pointer" }}
+                  >
+                    {fetchingReports ? "กำลังดึงข้อมูล..." : "ค้นหา"}
+                  </button>
+                </div>
+                
+                <button className="print-btn" onClick={handlePrint} disabled={reports.length === 0}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  พิมพ์ / PDF
+                </button>
+              </div>
+
+              {reports.length > 0 ? (
+                <div id="printable-report">
+                  {Array.from({ length: Math.ceil(reports.length / 10) || 1 }).map((_, pageIndex) => {
+                    const chunk = reports.slice(pageIndex * 10, (pageIndex + 1) * 10);
+                    return (
+                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid', position: 'relative', height: '185mm', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
+                          <img src="/PEA-Logo.png" alt="PEA" style={{ width: '80px' }} onError={(e) => (e.currentTarget as any).style.display = 'none'} />
+                        </div>
+                        <div className="form-header text-center" style={{ marginBottom: '24px' }}>
+                          <div style={{ fontSize: '28px', marginBottom: '8px' }}>การไฟฟ้าส่วนภูมิภาค</div>
+                          <div style={{ fontSize: '24px' }}>แบบฟอร์มรายงานการใช้ยานพาหนะหรือเครื่องจักร</div>
+                        </div>
+
+                        <div className="form-body">
+                          <div className="form-row flex-between">
+                            <div className="flex-1 flex-start">
+                              <span style={{ width: '40px' }}>จาก</span>
+                              <span className="dotted-blank text-center" style={{ flex: 1, maxWidth: '250px' }}>ผกร.กรย.(ก3)</span>
+                            </div>
+                            <div className="flex-1 flex-start" style={{ marginLeft: '40px' }}>
+                              <span>ถึง (หัวหน้าหน่วยงาน)</span>
+                              <span className="dotted-blank text-center" style={{ flex: 1, maxWidth: '250px' }}>กรย.(ก3)</span>
+                            </div>
+                          </div>
+
+                          <div className="form-row flex-start">
+                            <span style={{ minWidth: '320px' }}>เรื่อง รายงานการใช้ยานพาหนะหรือเครื่องจักร</span>
+                            <span className="ml-4">วันที่</span>
+                            <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
+                            <span className="ml-2">เดือน</span>
+                            <span className="dotted-blank text-center" style={{ width: '150px' }}></span>
+                            <span className="ml-2">ปี</span>
+                            <span className="dotted-blank text-center" style={{ width: '120px' }}></span>
+                          </div>
+
+                          <div className="form-row flex-start">
+                            <span style={{ width: '40px' }}>เรียน</span>
+                            <span className="dotted-blank text-center" style={{ width: '400px' }}>อก.รย.(ก3)</span>
+                          </div>
+
+                          <div className="form-row flex-start flex-wrap">
+                            <span>รายงานการใช้ยานพาหนะหรือเครื่องจักร ประจำเดือน</span>
+                            <span className="dotted-blank text-center" style={{ width: '120px' }}>{reportMonth}</span>
+                            <span className="ml-2">พ.ศ.</span>
+                            <span className="dotted-blank text-center" style={{ width: '80px' }}>{reportYear}</span>
+                            <span className="ml-2">หมายเลขทะเบียน</span>
+                            <span className="dotted-blank text-center" style={{ width: '120px' }}>{reportPlate}</span>
+                            <span className="ml-2">รหัส</span>
+                            <span className="dotted-blank text-center" style={{ flex: 1, minWidth: '80px' }}></span>
+                          </div>
+                          <div className="form-row flex-start" style={{ marginTop: '4px', display: 'flex', width: '100%' }}>
+                            <span>ประเภท</span>
+                            <span className="dotted-blank text-center" style={{ width: '150px' }}></span>
+                            <span className="ml-2">ชนิด</span>
+                            <span className="dotted-blank text-center" style={{ flex: 1, minWidth: '80px' }}></span>
+                          </div>
+
+
+                          <div className="form-row flex-start flex-wrap fuel-checkboxes" style={{ marginTop: '16px' }}>
+                            <span style={{ marginRight: '8px' }}>ชนิดของเชื้อเพลิง</span>
+                            <label><input type="checkbox" /> แก๊สโซฮอล์ 95</label>
+                            <label><input type="checkbox" /> แก๊สโซฮอล์ 91</label>
+                            <label><input type="checkbox" /> แก๊สโซฮอล์ E20</label>
+                            <label><input type="checkbox" /> แก๊สโซฮอล์ E85</label>
+                            <label><input type="checkbox" /> ดีเซล</label>
+                            <label><input type="checkbox" /> น้ำมันหล่อลื่น จำนวน</label>
+                            <span className="dotted-blank" style={{ flex: 1, minWidth: '40px', maxWidth: '80px' }}></span>
+                            <span>ลิตร</span>
+                          </div>
+
+                          <div className="form-row flex-start">
+                            <span>อัตราการสิ้นเปลืองเชื้อเพลิงยานพาหนะ</span>
+                            <span className="dotted-blank" style={{ width: '200px' }}></span>
+                            <span>กิโลเมตร/ลิตร, เครื่องจักร</span>
+                            <span className="dotted-blank" style={{ width: '200px' }}></span>
+                            <span>ลิตร/ชั่วโมง</span>
+                          </div>
+                        </div>
+
+                        <table className="official-table" style={{ flex: 1, marginBottom: '8px' }}>
+                          <thead>
+                            <tr>
+                              <th rowSpan={2} style={{ width: '50px' }}>วันที่</th>
+                              <th rowSpan={2} style={{ width: '120px' }}>ชื่อผู้ขับ<br/>(ผู้ควบคุม)</th>
+                              <th rowSpan={2}>สถานที่ปฏิบัติงาน</th>
+                              <th colSpan={2} style={{ width: '120px' }}>เลขระยะทาง</th>
+                              <th rowSpan={2} style={{ width: '90px' }}>ชั่วโมงการทำงาน<br/>ของเครื่องจักร</th>
+                              <th rowSpan={2} style={{ width: '90px' }}>จำนวนเชื้อเพลิง<br/>ที่เติม (ลิตร)</th>
+                              <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
+                              <th rowSpan={2} style={{ width: '120px' }}>รายการซ่อม</th>
+                              <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
+                              <th rowSpan={2} style={{ width: '120px' }}>หมายเหตุ</th>
+                            </tr>
+                            <tr>
+                              <th style={{ width: '60px' }}>ไป</th>
+                              <th style={{ width: '60px' }}>กลับ</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {chunk.map((r, i) => (
+                              <tr key={r.id}>
+                                <td className="text-center">{getDayOnly(r.usage_date)}</td>
+                                <td className="text-center">{r.driver_name}</td>
+                                <td className="text-left">{r.work_location || ""}</td>
+                                <td className="text-center">{r.odo_start || ""}</td>
+                                <td className="text-center">{r.odo_end || ""}</td>
+                                <td className="text-center">{r.machine_hours || ""}</td>
+                                <td className="text-center">{r.fuel_liters || ""}</td>
+                                <td className="text-right">{r.fuel_cost ? r.fuel_cost.toFixed(2) : ""}</td>
+                                <td className="text-left">{r.repair_details || ""}</td>
+                                <td className="text-right">{r.repair_cost ? r.repair_cost.toFixed(2) : ""}</td>
+                                <td className="text-left" style={{ fontSize: '12px' }}>{r.notes || ""}</td>
+                              </tr>
+                            ))}
+                            {/* Fill up to exactly 10 rows per page */}
+                            {Array.from({ length: 10 - chunk.length }).map((_, i) => (
+                              <tr key={`empty-${i}`}>
+                                <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                              </tr>
+                            ))}
+                            {/* Total Row */}
+                            <tr>
+                              <td colSpan={6} className="text-right font-bold" style={{ paddingRight: '16px' }}>รวม</td>
+                              <td className="text-center font-bold">
+                                {chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0).toFixed(2) : ""}
+                              </td>
+                              <td className="text-right font-bold">
+                                {chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0).toFixed(2) : ""}
+                              </td>
+                              <td></td>
+                              <td className="text-right font-bold">
+                                {chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0).toFixed(2) : ""}
+                              </td>
+                              <td></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        
+                        <div style={{ marginTop: '4px', marginLeft: '40px', fontSize: '16px' }}>
+                          จึงเรียนมาเพื่อโปรดทราบ
+                        </div>
+
+                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '0px' }}>
+                          <div className="signature-section flex-between">
+                            <div className="signature-box" style={{ flex: 1 }}>
+                              <div>({reports[0]?.driver_name ? ` ${reports[0].driver_name} ` : "......................................................................................."})</div>
+                              <div className="font-bold mt-2">ผู้ขับยานพาหนะ</div>
+                            </div>
+                            <div className="signature-box" style={{ flex: 1 }}>
+                              <div>({reports[0]?.supervisor_name ? ` ${reports[0].supervisor_name} ` : "......................................................................................."})</div>
+                              <div className="font-bold mt-2">ผู้ควบคุม</div>
+                            </div>
+                          </div>
+                          <div className="form-code" style={{ position: 'absolute', bottom: '-15px', left: '0' }}>ยพ.6-ป.46</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "40px", color: "#64748b", background: "white", borderRadius: "8px" }}>
+                  {fetchingReports ? "กำลังโหลดข้อมูล..." : "ไม่มีข้อมูลรายงาน กรุณาเลือกตัวกรองแล้วกดปุ่มค้นหา"}
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
+      </div>
+    </>
+  );
+}

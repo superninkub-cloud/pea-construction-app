@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Plus, Trash2, Save, FileText, ArrowRight, ArrowRightLeft, UploadCloud, Loader2, HelpCircle, Lightbulb, ShieldCheck, FileType, Copy, Image as ImageIcon } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import dynamic from 'next/dynamic';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { Suspense, useEffect } from 'react';
 
 const Xarrow = dynamic(() => import('react-xarrows'), { ssr: false });
 
@@ -28,8 +30,28 @@ type TransferItem = {
   amount: number;
 };
 
-export default function BudgetTransferPage() {
-  const [currentStep, setCurrentStep] = useState(1);
+function BudgetTransferContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  
+  const [currentStep, setCurrentStepState] = useState(1);
+
+  // Sync state with URL parameter
+  useEffect(() => {
+    const stepParam = searchParams?.get('step');
+    if (stepParam) {
+      setCurrentStepState(Number(stepParam));
+    }
+  }, [searchParams]);
+
+  // Update URL when step changes internally
+  const setCurrentStep = (step: number) => {
+    setCurrentStepState(step);
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('step', step.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
   
   // Step 1 Form Data
   const [docNo, setDocNo] = useState('');
@@ -336,11 +358,7 @@ export default function BudgetTransferPage() {
         <meta charset='utf-8'>
         <title>Export</title>
         <style>
-          @font-family {
-            font-family: 'TH Sarabun New';
-            src: local('TH Sarabun New');
-          }
-          body { font-family: 'TH Sarabun New', 'Sarabun', sans-serif; font-size: 16pt; }
+          body { font-family: 'Prompt', sans-serif; font-size: 16pt; }
           table { width: 100%; border-collapse: collapse; }
           th, td { border: 1px solid black; padding: 4px; }
           .print-header { text-align: center; }
@@ -1399,3 +1417,4 @@ export default function BudgetTransferPage() {
     </div>
   );
 }
+export default function BudgetTransferPage() { return <Suspense fallback={<div>Loading...</div>}><BudgetTransferContent /></Suspense>; }
