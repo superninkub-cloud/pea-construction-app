@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import TopBar from "../components/TopBar";
 import "./SafetyHub.css";
-import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck } from "lucide-react";
+import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck, Save, Clock, PenSquare, Eye } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function SafetyHubPage() {
@@ -15,6 +15,37 @@ export default function SafetyHubPage() {
   const [dateStr, setDateStr] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  
+  // Tabs and History
+  const [activeTab, setActiveTab] = useState<'create' | 'history'>('create');
+  const [isSaving, setIsSaving] = useState(false);
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (activeTab === 'history') {
+      // We need to move fetchHistory up as well, or just declare it inside useEffect, or use supabase directly.
+      const fetchHistory = async () => {
+        setLoadingHistory(true);
+        try {
+          const { data, error } = await supabase
+            .from('safety_reports')
+            .select('*')
+            .order('report_date', { ascending: false });
+            
+          if (error) throw error;
+          setHistoryData(data || []);
+        } catch (err) {
+          console.error("Error fetching history:", err);
+        } finally {
+          setLoadingHistory(false);
+        }
+      };
+      
+      fetchHistory();
+    }
+  }, [activeTab]);
   // States for API scraping
   const [wesafeUrl, setWesafeUrl] = useState("");
   const [username, setUsername] = useState("504540"); // Default provided by user
@@ -153,10 +184,98 @@ export default function SafetyHubPage() {
     }
   };
 
+
+
+  const saveToHistory = async () => {
+    if (!collageRef.current) return;
+    
+    if (!projName || !location || !supervisor) {
+      if (!confirm("ข้อมูลบางช่องยังไม่ครบถ้วน ต้องการบันทึกประวัติหรือไม่?")) {
+        return;
+      }
+    }
+
+    setIsSaving(true);
+    try {
+      // 1. Generate Image and compress to JPEG
+      const canvas = await html2canvas(collageRef.current, { scale: 1.5, useCORS: true });
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.7); // Compress to 70% quality JPEG
+      
+      // Convert DataURL to Blob
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      
+      // 2. Upload to Supabase Storage
+      const fileName = `safety_hub_${new Date().getTime()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('project_images')
+        .upload(fileName, blob, { contentType: 'image/jpeg' });
+        
+      if (uploadError) throw uploadError;
+      
+      const { data: publicUrlData } = supabase.storage
+        .from('project_images')
+        .getPublicUrl(fileName);
+        
+      // 3. Save to database
+      const reportDate = new Date().toISOString().split('T')[0]; // Current date for sorting
+      
+      const { error: dbError } = await supabase
+        .from('safety_reports')
+        .insert({
+          report_date: reportDate,
+          date_str: dateStr,
+          project_name: projName,
+          location: location,
+          supervisor: supervisor,
+          report_text: generateReportText(),
+          image_url: publicUrlData.publicUrl
+        });
+        
+      if (dbError) throw dbError;
+      
+      alert("บันทึกประวัติเรียบร้อยแล้ว!");
+      setActiveTab('history'); // Switch to history tab
+      
+    } catch (err: any) {
+      console.error("Error saving history:", err);
+      alert("เกิดข้อผิดพลาดในการบันทึกประวัติ: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Group history by month
+  const groupedHistory = historyData.reduce((acc, curr) => {
+    const date = new Date(curr.report_date);
+    const monthYear = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    if (!acc[monthYear]) acc[monthYear] = [];
+    acc[monthYear].push(curr);
+    return acc;
+  }, {} as Record<string, any[]>);
+
   return (
     <>
       <TopBar title="ระบบรายงานความปลอดภัย (Safety Hub)" />
       <div className="safety-hub-container">
+        
+        <div className="safety-tabs">
+          <button 
+            className={`tab-btn ${activeTab === 'create' ? 'active' : ''}`}
+            onClick={() => setActiveTab('create')}
+          >
+            <PenSquare className="w-4 h-4 inline-block mr-2" /> สร้างรายงาน
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('history')}
+          >
+            <Clock className="w-4 h-4 inline-block mr-2" /> ประวัติรายงาน
+          </button>
+        </div>
+
+        {activeTab === 'create' && (
+          <>
         <div className="safety-header">
           <h1>Safety Hub Report <span className="text-sm md:text-base font-normal text-slate-500 ml-2 inline-block">(ต้องใช้งานผ่านเว็บและเครื่อง host เท่านั้น)</span></h1>
           <p>ระบบสร้างภาพรายงานความปลอดภัยและข้อความอัตโนมัติ สำหรับ ผกร.กรย.(ก3)</p>
@@ -278,9 +397,14 @@ export default function SafetyHubPage() {
             <div className="collage-container flex flex-col">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-slate-800">ตัวอย่างรูปรายงาน</h3>
-                <button onClick={downloadCollage} className="btn btn-primary">
-                  <Download className="w-4 h-4" /> บันทึกรูปภาพ
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={saveToHistory} className="btn btn-secondary bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100" disabled={isSaving}>
+                    {isSaving ? "กำลังบันทึก..." : <><Save className="w-4 h-4" /> บันทึกประวัติ</>}
+                  </button>
+                  <button onClick={downloadCollage} className="btn btn-primary">
+                    <Download className="w-4 h-4" /> บันทึกรูปลงเครื่อง
+                  </button>
+                </div>
               </div>
 
               {/* The actual element to capture */}
@@ -362,6 +486,83 @@ export default function SafetyHubPage() {
             </div>
           </div>
         </div>
+          </>
+        )}
+
+        {activeTab === 'history' && (
+          <div className="history-container">
+            <div className="safety-header mb-2">
+              <h1>ประวัติการรายงานความปลอดภัย</h1>
+              <p>คุณสามารถเรียกดูและคัดลอกรายงานย้อนหลังได้จากที่นี่</p>
+            </div>
+
+            {loadingHistory ? (
+              <div className="text-center py-10 text-slate-500">กำลังโหลดประวัติ...</div>
+            ) : Object.keys(groupedHistory).length === 0 ? (
+              <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                ยังไม่มีประวัติการรายงาน
+              </div>
+            ) : (
+              Object.entries(groupedHistory).map(([month, reports]) => (
+                <div key={month} className="history-month-section">
+                  <h2 className="history-month-title">{month}</h2>
+                  <div className="history-grid">
+                    {reports.map((report) => (
+                      <div key={report.id} className="history-card">
+                        <div className="history-card-img-wrapper cursor-pointer" onClick={() => setViewingImage(report.image_url)}>
+                          {report.image_url ? (
+                            <img src={report.image_url} alt="Safety Report" />
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-slate-400">ไม่มีรูปภาพ</div>
+                          )}
+                        </div>
+                        <div className="history-card-content">
+                          <div className="history-card-date">{report.date_str}</div>
+                          <div className="history-card-title">{report.project_name || 'ไม่ระบุชื่องาน'}</div>
+                          <div className="history-card-info">
+                            <MapPin className="inline w-3 h-3 mr-1" />{report.location || '-'} <br/>
+                            <User className="inline w-3 h-3 mr-1 mt-1" />{report.supervisor || '-'}
+                          </div>
+                          
+                          <div className="history-card-actions">
+                            <button 
+                              className="btn-view"
+                              onClick={() => setViewingImage(report.image_url)}
+                            >
+                              <Eye className="w-4 h-4" /> ดูรูป
+                            </button>
+                            <button 
+                              className="btn-copy-text"
+                              onClick={() => {
+                                navigator.clipboard.writeText(report.report_text);
+                                alert("คัดลอกข้อความแล้ว!");
+                              }}
+                            >
+                              <Copy className="w-4 h-4" /> ก๊อปข้อความ
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Full Image Viewer Modal */}
+        {viewingImage && (
+          <div className="image-modal-overlay" onClick={() => setViewingImage(null)}>
+            <div className="image-modal-content" onClick={e => e.stopPropagation()}>
+              <button className="image-modal-close" onClick={() => setViewingImage(null)}>
+                <X className="w-5 h-5" />
+              </button>
+              <img src={viewingImage} className="image-modal-img" alt="Full Report" />
+            </div>
+          </div>
+        )}
+
       </div>
     </>
   );
