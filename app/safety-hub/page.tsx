@@ -507,7 +507,7 @@ export default function SafetyHubPage() {
                 <div key={month} className="history-month-section">
                   <h2 className="history-month-title">{month}</h2>
                   <div className="history-grid">
-                    {reports.map((report) => (
+                    {(reports as any[]).map((report: any) => (
                       <div key={report.id} className="history-card">
                         <div className="history-card-img-wrapper cursor-pointer" onClick={() => setViewingImage(report.image_url)}>
                           {report.image_url ? (
