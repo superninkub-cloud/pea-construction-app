@@ -15,8 +15,6 @@ export default function SafetyHubPage() {
   const [dateStr, setDateStr] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-  const [personnelList, setPersonnelList] = useState<{full_name: string}[]>([]);
-
   // States for API scraping
   const [wesafeUrl, setWesafeUrl] = useState("");
   const [username, setUsername] = useState("504540"); // Default provided by user
@@ -40,14 +38,6 @@ export default function SafetyHubPage() {
     } catch (error) {
       setIsAuthorized(false);
     }
-
-    const fetchPersonnel = async () => {
-      const { data, error } = await supabase.from("personnel").select("full_name").order("full_name", { ascending: true });
-      if (!error && data) {
-        setPersonnelList(data);
-      }
-    };
-    fetchPersonnel();
   }, []);
 
   if (isAuthorized === false) {
@@ -185,12 +175,12 @@ export default function SafetyHubPage() {
               
               <div className="form-group">
                 <label>พื้นที่รับผิดชอบ</label>
-                <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น กฟจ.กาญจนบุรี" list="locations-list" />
+                <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น จ.กาญจนบุรี" list="locations-list" />
                 <datalist id="locations-list">
+                  <option value="จ.นครปฐม" />
+                  <option value="จ.สุพรรณบุรี" />
                   <option value="จ.กาญจนบุรี" />
-                  <option value="นครปฐม" />
-                  <option value="สุพรรณบุรี" />
-                  <option value="สมุทรสาคร" />
+                  <option value="จ.สมุทรสาคร" />
                 </datalist>
               </div>
               
@@ -198,9 +188,15 @@ export default function SafetyHubPage() {
                 <label>ผู้ควบคุมงาน (Supervisor)</label>
                 <input type="text" value={supervisor} onChange={e => setSupervisor(e.target.value)} placeholder="ชื่อผู้ควบคุมงาน" list="personnel-list" />
                 <datalist id="personnel-list">
-                  {personnelList.map((p, idx) => (
-                    <option key={idx} value={p.full_name} />
-                  ))}
+                  <option value="พิสันติ์ จิตต์ปลื้ม หผ.กร." />
+                  <option value="ชานินทร์ ศรีสวัสดิ์ ชผ.กร." />
+                  <option value="อุดมศักดิ์ จันทร์กลิ่น พชง.7" />
+                  <option value="ศราวุฒิ เกิดสีเล็ก พชง.6" />
+                  <option value="ศุภวิชญ์ เกาะลอย พชง.6" />
+                  <option value="วีรพัฒน์ นาคลมัย พชง.6" />
+                  <option value="ขวัญนคร ศรีจันทร์อินทร์ พชง.5" />
+                  <option value="กิตติพิชญ์ ประกอบทรัพย์ พชง.5" />
+                  <option value="นฤเบศ ยันตรีสิงห์ พชง.5" />
                 </datalist>
               </div>
               
