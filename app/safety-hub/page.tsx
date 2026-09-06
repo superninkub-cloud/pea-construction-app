@@ -100,8 +100,13 @@ export default function SafetyHubPage() {
       }
       
       if (data.images && data.images.length > 0) {
-        // Use direct WeSafe URLs - img tags don't need CORS headers
-        setImages(prev => [...prev, ...data.images].slice(0, 4));
+        // Proxy images to avoid CORS issue with html2canvas
+        const proxiedImages = data.images.map((imgUrl: string) => 
+           imgUrl.startsWith('https://wesafe.pea.co.th') 
+             ? `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`
+             : imgUrl
+        );
+        setImages(prev => [...prev, ...proxiedImages].slice(0, 4));
         alert(`ดึงรูปสำเร็จ ${data.images.length} รูป`);
       } else {
         const dbg = data.debug ? '\n\nDebug:\n' + data.debug.join('\n') : '';
@@ -334,7 +339,7 @@ export default function SafetyHubPage() {
                 <div className={`collage-photos-dynamic layout-${images.length || 0}`}>
                   {images.map((src, i) => (
                     <div key={i} className="photo-slot">
-                      <img src={src} alt={`Pic ${i+1}`} />
+                      <img src={src} alt={`Pic ${i+1}`} crossOrigin="anonymous" />
                     </div>
                   ))}
                   {images.length === 0 && (
