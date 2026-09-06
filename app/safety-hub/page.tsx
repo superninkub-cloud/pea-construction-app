@@ -316,6 +316,25 @@ export default function SafetyHubPage() {
     }
   };
 
+  const sendHistoryToLine = async (report: any) => {
+    try {
+      const notifyRes = await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'safety_report',
+          payload: { text: report.report_text, image_url: report.image_url }
+        })
+      });
+      
+      if (!notifyRes.ok) throw new Error("Failed to send LINE notification");
+      alert("ส่งแจ้งเตือนผ่าน LINE เรียบร้อยแล้ว!");
+    } catch (err: any) {
+      console.error("Error sending LINE:", err);
+      alert("เกิดข้อผิดพลาดในการส่ง LINE: " + err.message);
+    }
+  };
+
   const saveToHistory = async () => {
     if (!collageRef.current) return;
     
@@ -738,6 +757,12 @@ export default function SafetyHubPage() {
                               onClick={() => setViewingImage(report.image_url)}
                             >
                               <Eye className="w-4 h-4" /> ดูรูป
+                            </button>
+                            <button 
+                              className="btn-view text-green-600 border-green-200 hover:bg-green-50"
+                              onClick={() => sendHistoryToLine(report)}
+                            >
+                              <Send className="w-4 h-4" /> ส่งไลน์
                             </button>
                             <button 
                               className="btn-copy-text"
