@@ -151,19 +151,7 @@ export default function SafetyHubPage() {
     }
   }, []);
 
-  if (isAuthorized === false) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 p-8 h-screen">
-        <ShieldCheck size={64} className="text-red-500 mb-4" />
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">ไม่มีสิทธิ์เข้าถึง (Access Denied)</h1>
-        <p className="text-slate-600 text-lg">เมนู <b>รายงาน Safety Hub</b> สงวนไว้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น</p>
-      </div>
-    );
-  }
 
-  if (isAuthorized === null) {
-    return <div className="flex-1 bg-slate-50 h-screen"></div>;
-  }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -417,7 +405,7 @@ export default function SafetyHubPage() {
         {activeTab === 'create' && (
           <>
         <div className="safety-header">
-          <h1>Safety Hub Report <span className="text-sm md:text-base font-normal text-slate-500 ml-2 inline-block">(ต้องใช้งานผ่านเว็บและเครื่อง host เท่านั้น)</span></h1>
+          <h1>Safety Hub Report</h1>
           <p>ระบบสร้างภาพรายงานความปลอดภัยและข้อความอัตโนมัติ สำหรับ ผกร.กรย.(ก3)</p>
         </div>
 
@@ -704,20 +692,22 @@ export default function SafetyHubPage() {
                               <Copy className="w-4 h-4" /> ก๊อปข้อความ
                             </button>
                           </div>
-                          <div className="history-card-actions">
-                            <button 
-                              className="btn-view text-orange-600 border-orange-200 hover:bg-orange-50"
-                              onClick={() => setEditingReport(report)}
-                            >
-                              <Edit className="w-4 h-4" /> แก้ไข
-                            </button>
-                            <button 
-                              className="btn-copy-text text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                              onClick={() => handleDeleteHistory(report.id, report.image_url)}
-                            >
-                              <Trash2 className="w-4 h-4" /> ลบ
-                            </button>
-                          </div>
+                          {isAuthorized && (
+                            <div className="history-card-actions">
+                              <button 
+                                className="btn-view text-orange-600 border-orange-200 hover:bg-orange-50"
+                                onClick={() => setEditingReport(report)}
+                              >
+                                <Edit className="w-4 h-4" /> แก้ไข
+                              </button>
+                              <button 
+                                className="btn-copy-text text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                                onClick={() => handleDeleteHistory(report.id, report.image_url)}
+                              >
+                                <Trash2 className="w-4 h-4" /> ลบ
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
