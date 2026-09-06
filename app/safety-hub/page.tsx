@@ -119,7 +119,7 @@ export default function SafetyHubPage() {
 📢 กรย.(ก3) ดำเนินการกิจกรรม SafetyTalk ชี้แจงแผนงาน และพูดคุยเน้นย้ำความปลอดภัย
 👷 ผู้ควบคุมงาน: ${supervisor || "-"}
 📍 ชื่องาน: ${projName || "-"}
-🏢 ในพื้นที่: ${location || "-"}
+🏢 สถานที่ปฏิบัติงาน: ${location || "-"}
 ✅ การเตรียมความพร้อมก่อนปฏิบัติงาน:
 - ประชุมชี้แจงอันตรายก่อนปฏิบัติงาน (KYT)
 - เน้นย้ำผู้ปฏิบัติงานสวมใส่อุปกรณ์ PPE ครบถ้วน
@@ -174,7 +174,7 @@ export default function SafetyHubPage() {
               </div>
               
               <div className="form-group">
-                <label>พื้นที่รับผิดชอบ</label>
+                <label>สถานที่ปฏิบัติงาน</label>
                 <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น จ.กาญจนบุรี" list="locations-list" />
                 <datalist id="locations-list">
                   <option value="จ.นครปฐม" />
