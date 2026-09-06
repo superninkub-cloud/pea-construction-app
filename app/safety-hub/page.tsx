@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import TopBar from "../components/TopBar";
 import "./SafetyHub.css";
-import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck, Save, Clock, PenSquare, Eye } from "lucide-react";
+import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck, Save, Clock, PenSquare, Eye, Trash2, Edit } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
 export default function SafetyHubPage() {
@@ -22,6 +22,7 @@ export default function SafetyHubPage() {
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
+  const [editingReport, setEditingReport] = useState<any>(null);
 
   useEffect(() => {
     if (activeTab === 'history') {
@@ -240,6 +241,54 @@ export default function SafetyHubPage() {
     } catch (err: any) {
       console.error("Error saving history:", err);
       alert("เกิดข้อผิดพลาดในการบันทึกประวัติ: " + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteHistory = async (id: string, imageUrl: string) => {
+    if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบประวัตินี้?")) return;
+    try {
+      // Optionally delete from storage (extract filename from URL)
+      if (imageUrl) {
+        const urlParts = imageUrl.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        await supabase.storage.from('project_images').remove([fileName]);
+      }
+      
+      const { error } = await supabase.from('safety_reports').delete().eq('id', id);
+      if (error) throw error;
+      
+      setHistoryData(prev => prev.filter(r => r.id !== id));
+      alert("ลบประวัติสำเร็จ");
+    } catch (err: any) {
+      alert("เกิดข้อผิดพลาดในการลบ: " + err.message);
+    }
+  };
+
+  const handleUpdateHistory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingReport) return;
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('safety_reports')
+        .update({
+          date_str: editingReport.date_str,
+          project_name: editingReport.project_name,
+          location: editingReport.location,
+          supervisor: editingReport.supervisor,
+          report_text: editingReport.report_text
+        })
+        .eq('id', editingReport.id);
+        
+      if (error) throw error;
+      
+      setHistoryData(prev => prev.map(r => r.id === editingReport.id ? editingReport : r));
+      setEditingReport(null);
+      alert("แก้ไขประวัติสำเร็จ! (หมายเหตุ: การแก้ไขนี้จะไม่เปลี่ยนรูปภาพที่ถูกสร้างไปแล้ว)");
+    } catch (err: any) {
+      alert("เกิดข้อผิดพลาดในการแก้ไข: " + err.message);
     } finally {
       setIsSaving(false);
     }
@@ -524,7 +573,7 @@ export default function SafetyHubPage() {
                             <User className="inline w-3 h-3 mr-1 mt-1" />{report.supervisor || '-'}
                           </div>
                           
-                          <div className="history-card-actions">
+                          <div className="history-card-actions mb-2">
                             <button 
                               className="btn-view"
                               onClick={() => setViewingImage(report.image_url)}
@@ -539,6 +588,20 @@ export default function SafetyHubPage() {
                               }}
                             >
                               <Copy className="w-4 h-4" /> ก๊อปข้อความ
+                            </button>
+                          </div>
+                          <div className="history-card-actions">
+                            <button 
+                              className="btn-view text-orange-600 border-orange-200 hover:bg-orange-50"
+                              onClick={() => setEditingReport(report)}
+                            >
+                              <Edit className="w-4 h-4" /> แก้ไข
+                            </button>
+                            <button 
+                              className="btn-copy-text text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                              onClick={() => handleDeleteHistory(report.id, report.image_url)}
+                            >
+                              <Trash2 className="w-4 h-4" /> ลบ
                             </button>
                           </div>
                         </div>
@@ -564,6 +627,57 @@ export default function SafetyHubPage() {
         )}
 
       </div>
+
+        {/* Edit Report Modal */}
+        {editingReport && (
+          <div className="fixed inset-0 bg-slate-900/60 z-[1000] flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-slate-800">แก้ไขประวัติรายงาน</h2>
+                <button onClick={() => setEditingReport(null)} className="text-slate-400 hover:text-slate-600">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="bg-amber-50 text-amber-800 p-3 rounded-lg text-sm mb-6 border border-amber-200">
+                <b>หมายเหตุ:</b> การแก้ไขข้อมูลนี้จะอัปเดตเฉพาะข้อความเท่านั้น ไม่สามารถเปลี่ยนแปลงรายละเอียดในรูปภาพรายงานที่ถูกสร้างและฝังเนื้อหาไปแล้วได้
+              </div>
+
+              <form onSubmit={handleUpdateHistory} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">วันที่ (Date)</label>
+                  <input type="text" className="w-full p-2 border border-slate-300 rounded-md" value={editingReport.date_str} onChange={e => setEditingReport({...editingReport, date_str: e.target.value})} required />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">ชื่องาน (Project Name)</label>
+                  <input type="text" className="w-full p-2 border border-slate-300 rounded-md" value={editingReport.project_name || ''} onChange={e => setEditingReport({...editingReport, project_name: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">สถานที่ปฏิบัติงาน</label>
+                  <input type="text" className="w-full p-2 border border-slate-300 rounded-md" value={editingReport.location || ''} onChange={e => setEditingReport({...editingReport, location: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">ผู้ควบคุมงาน</label>
+                  <input type="text" className="w-full p-2 border border-slate-300 rounded-md" value={editingReport.supervisor || ''} onChange={e => setEditingReport({...editingReport, supervisor: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">ข้อความรายงาน (ที่ใช้ก๊อปปี้ส่งไลน์)</label>
+                  <textarea className="w-full p-2 border border-slate-300 rounded-md h-40" value={editingReport.report_text} onChange={e => setEditingReport({...editingReport, report_text: e.target.value})} required />
+                </div>
+                
+                <div className="flex justify-end gap-3 mt-8">
+                  <button type="button" onClick={() => setEditingReport(null)} className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50">
+                    ยกเลิก
+                  </button>
+                  <button type="submit" disabled={isSaving} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                    {isSaving ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
     </>
   );
 }
