@@ -58,6 +58,19 @@ export async function POST(request: Request) {
            previewImageUrl: image_url
          }
        ];
+    } else if (type === 'safety_report') {
+       const { text, image_url } = payload;
+       messages = [
+         {
+           type: 'text',
+           text: text
+         },
+         {
+           type: 'image',
+           originalContentUrl: image_url,
+           previewImageUrl: image_url
+         }
+       ];
     } else {
       return NextResponse.json({ error: 'Unknown notification type' }, { status: 400 });
     }
