@@ -152,6 +152,7 @@
 
 .collage-board {
   width: 800px;
+  min-width: 800px;
   min-height: 800px;
   background: #f4f7fb;
   position: relative;
