@@ -7,8 +7,10 @@ import "./SafetyHub.css";
 import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck, Save, Clock, PenSquare, Eye, Trash2, Edit } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
+type ReportImage = { id: string; src: string; panX: number; panY: number; };
+
 export default function SafetyHubPage() {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<ReportImage[]>([]);
   const [projName, setProjName] = useState("");
   const [location, setLocation] = useState("");
   const [supervisor, setSupervisor] = useState("");
@@ -23,6 +25,75 @@ export default function SafetyHubPage() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [editingReport, setEditingReport] = useState<any>(null);
+
+  // Drag and Drop (Reorder)
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+
+  // Pan (Focus)
+  const panningIdxRef = useRef<number | null>(null);
+  const lastMousePosRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('mousemove', handlePanMove);
+      window.removeEventListener('mouseup', handlePanEnd);
+    };
+  }, []);
+
+  const startPan = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    panningIdxRef.current = index;
+    lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+    window.addEventListener('mousemove', handlePanMove);
+    window.addEventListener('mouseup', handlePanEnd);
+  };
+
+  const handlePanMove = (e: MouseEvent) => {
+    if (panningIdxRef.current === null) return;
+    const deltaX = e.clientX - lastMousePosRef.current.x;
+    const deltaY = e.clientY - lastMousePosRef.current.y;
+    const sensitivity = 0.3; // 1 pixel = 0.3%
+    
+    setImages(prev => {
+      const newImgs = [...prev];
+      const idx = panningIdxRef.current!;
+      const img = newImgs[idx];
+      let newPanX = img.panX - (deltaX * sensitivity);
+      let newPanY = img.panY - (deltaY * sensitivity);
+      newPanX = Math.max(0, Math.min(100, newPanX));
+      newPanY = Math.max(0, Math.min(100, newPanY));
+      newImgs[idx] = { ...img, panX: newPanX, panY: newPanY };
+      return newImgs;
+    });
+    lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handlePanEnd = () => {
+    panningIdxRef.current = null;
+    window.removeEventListener('mousemove', handlePanMove);
+    window.removeEventListener('mouseup', handlePanEnd);
+  };
+
+  const onDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIdx(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const onDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIdx === null || draggedIdx === dropIndex) return;
+    setImages(prev => {
+      const newImgs = [...prev];
+      const [draggedItem] = newImgs.splice(draggedIdx, 1);
+      newImgs.splice(dropIndex, 0, draggedItem);
+      return newImgs;
+    });
+    setDraggedIdx(null);
+  };
 
   useEffect(() => {
     if (activeTab === 'history') {
@@ -88,7 +159,12 @@ export default function SafetyHubPage() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newImages = Array.from(e.target.files).map(file => URL.createObjectURL(file));
+      const newImages = Array.from(e.target.files).map(file => ({
+        id: Math.random().toString(36).substring(7),
+        src: URL.createObjectURL(file),
+        panX: 50,
+        panY: 50
+      }));
       setImages(prev => [...prev, ...newImages].slice(0, 4)); // Max 4 images
     }
   };
@@ -133,11 +209,14 @@ export default function SafetyHubPage() {
       
       if (data.images && data.images.length > 0) {
         // Proxy images to avoid CORS issue with html2canvas
-        const proxiedImages = data.images.map((imgUrl: string) => 
-           imgUrl.startsWith('https://wesafe.pea.co.th') 
+        const proxiedImages = data.images.map((imgUrl: string) => ({
+           id: Math.random().toString(36).substring(7),
+           src: imgUrl.startsWith('https://wesafe.pea.co.th') 
              ? `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`
-             : imgUrl
-        );
+             : imgUrl,
+           panX: 50,
+           panY: 50
+        }));
         setImages(prev => [...prev, ...proxiedImages].slice(0, 4));
         alert(`ดึงรูปสำเร็จ ${data.images.length} รูป`);
       } else {
@@ -432,9 +511,16 @@ export default function SafetyHubPage() {
 
               {images.length > 0 && (
                 <div className="image-preview-grid">
-                  {images.map((src, i) => (
-                    <div key={i} className="image-preview-item">
-                      <img src={src} alt={`upload-${i}`} />
+                  {images.map((img, i) => (
+                    <div 
+                      key={img.id} 
+                      className={`image-preview-item cursor-move ${draggedIdx === i ? 'opacity-50' : ''}`}
+                      draggable
+                      onDragStart={(e) => onDragStart(e, i)}
+                      onDragOver={onDragOver}
+                      onDrop={(e) => onDrop(e, i)}
+                    >
+                      <img src={img.src} alt={`upload-${i}`} draggable={false} />
                       <button onClick={() => removeImage(i)} className="remove-btn">
                         <X className="w-3 h-3" />
                       </button>
@@ -514,9 +600,20 @@ export default function SafetyHubPage() {
                 </div>
 
                 <div className={`collage-photos-dynamic layout-${images.length || 0}`}>
-                  {images.map((src, i) => (
-                    <div key={i} className="photo-slot">
-                      <img src={src} alt={`Pic ${i+1}`} crossOrigin="anonymous" />
+                  {images.map((img, i) => (
+                    <div 
+                      key={img.id} 
+                      className="photo-slot cursor-move"
+                      onMouseDown={(e) => startPan(e, i)}
+                      title="ลากเพื่อเลื่อนตำแหน่งรูปภาพ"
+                    >
+                      <img 
+                        src={img.src} 
+                        alt={`Pic ${i+1}`} 
+                        crossOrigin="anonymous" 
+                        draggable={false}
+                        style={{ objectPosition: `${img.panX}% ${img.panY}%` }}
+                      />
                     </div>
                   ))}
                   {images.length === 0 && (
