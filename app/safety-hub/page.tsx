@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import TopBar from "../components/TopBar";
 import "./SafetyHub.css";
-import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck, Save, Clock, PenSquare, Eye, Trash2, Edit } from "lucide-react";
+import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck, Save, Clock, PenSquare, Eye, Trash2, Edit, Send } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
 type ReportImage = { id: string; src: string; panX: number; panY: number; };
@@ -25,6 +25,7 @@ export default function SafetyHubPage() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [editingReport, setEditingReport] = useState<any>(null);
+  const [isSendingLine, setIsSendingLine] = useState(false);
 
   // Drag and Drop (Reorder)
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
@@ -261,6 +262,59 @@ export default function SafetyHubPage() {
   };
 
 
+
+  const sendLineNotification = async () => {
+    if (!collageRef.current) return;
+    
+    if (!projName || !location || !supervisor) {
+      if (!confirm("ข้อมูลบางช่องยังไม่ครบถ้วน ต้องการส่งแจ้งเตือนหรือไม่?")) {
+        return;
+      }
+    }
+
+    setIsSendingLine(true);
+    try {
+      // 1. Generate Image and compress to JPEG
+      const canvas = await html2canvas(collageRef.current, { scale: 1.5, useCORS: true });
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.7); 
+      
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      
+      // 2. Upload to Supabase Storage
+      const fileName = `safety_hub_${new Date().getTime()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('project_images')
+        .upload(fileName, blob, { contentType: 'image/jpeg' });
+        
+      if (uploadError) throw uploadError;
+      
+      const { data: publicUrlData } = supabase.storage
+        .from('project_images')
+        .getPublicUrl(fileName);
+        
+      const imageUrl = publicUrlData.publicUrl;
+      const reportText = generateReportText();
+      
+      // 3. Send to LINE
+      const notifyRes = await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'safety_report',
+          payload: { text: reportText, image_url: imageUrl }
+        })
+      });
+      
+      if (!notifyRes.ok) throw new Error("Failed to send LINE notification");
+      alert("ส่งแจ้งเตือนผ่าน LINE เรียบร้อยแล้ว!");
+    } catch (err: any) {
+      console.error("Error sending LINE:", err);
+      alert("เกิดข้อผิดพลาดในการส่ง LINE: " + err.message);
+    } finally {
+      setIsSendingLine(false);
+    }
+  };
 
   const saveToHistory = async () => {
     if (!collageRef.current) return;
@@ -536,6 +590,9 @@ export default function SafetyHubPage() {
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-slate-800">ตัวอย่างรูปรายงาน</h3>
                 <div className="flex gap-2">
+                  <button onClick={sendLineNotification} className="btn btn-secondary bg-green-50 text-green-700 border-green-200 hover:bg-green-100" disabled={isSendingLine}>
+                    {isSendingLine ? "กำลังส่ง..." : <><Send className="w-4 h-4" /> แจ้งเตือน LINE</>}
+                  </button>
                   <button onClick={saveToHistory} className="btn btn-secondary bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100" disabled={isSaving}>
                     {isSaving ? "กำลังบันทึก..." : <><Save className="w-4 h-4" /> บันทึกประวัติ</>}
                   </button>
