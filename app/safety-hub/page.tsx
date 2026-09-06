@@ -5,6 +5,7 @@ import html2canvas from "html2canvas";
 import TopBar from "../components/TopBar";
 import "./SafetyHub.css";
 import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck } from "lucide-react";
+import { supabase } from "../../lib/supabaseClient";
 
 export default function SafetyHubPage() {
   const [images, setImages] = useState<string[]>([]);
@@ -14,6 +15,7 @@ export default function SafetyHubPage() {
   const [dateStr, setDateStr] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [personnelList, setPersonnelList] = useState<{full_name: string}[]>([]);
 
   // States for API scraping
   const [wesafeUrl, setWesafeUrl] = useState("");
@@ -38,6 +40,14 @@ export default function SafetyHubPage() {
     } catch (error) {
       setIsAuthorized(false);
     }
+
+    const fetchPersonnel = async () => {
+      const { data, error } = await supabase.from("personnel").select("full_name").order("full_name", { ascending: true });
+      if (!error && data) {
+        setPersonnelList(data);
+      }
+    };
+    fetchPersonnel();
   }, []);
 
   if (isAuthorized === false) {
@@ -175,12 +185,23 @@ export default function SafetyHubPage() {
               
               <div className="form-group">
                 <label>พื้นที่รับผิดชอบ</label>
-                <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น กฟจ.กาญจนบุรี" />
+                <input type="text" value={location} onChange={e => setLocation(e.target.value)} placeholder="เช่น กฟจ.กาญจนบุรี" list="locations-list" />
+                <datalist id="locations-list">
+                  <option value="จ.กาญจนบุรี" />
+                  <option value="นครปฐม" />
+                  <option value="สุพรรณบุรี" />
+                  <option value="สมุทรสาคร" />
+                </datalist>
               </div>
               
               <div className="form-group">
                 <label>ผู้ควบคุมงาน (Supervisor)</label>
-                <input type="text" value={supervisor} onChange={e => setSupervisor(e.target.value)} placeholder="ชื่อผู้ควบคุมงาน" />
+                <input type="text" value={supervisor} onChange={e => setSupervisor(e.target.value)} placeholder="ชื่อผู้ควบคุมงาน" list="personnel-list" />
+                <datalist id="personnel-list">
+                  {personnelList.map((p, idx) => (
+                    <option key={idx} value={p.full_name} />
+                  ))}
+                </datalist>
               </div>
               
               </div>
