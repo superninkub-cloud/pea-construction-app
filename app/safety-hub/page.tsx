@@ -153,7 +153,7 @@ export default function SafetyHubPage() {
       <TopBar title="ระบบรายงานความปลอดภัย (Safety Hub)" />
       <div className="safety-hub-container">
         <div className="safety-header">
-          <h1>Safety Hub Report</h1>
+          <h1>Safety Hub Report <span className="text-sm md:text-base font-normal text-slate-500 ml-2 inline-block">(ต้องใช้งานผ่านเว็บและเครื่อง host เท่านั้น)</span></h1>
           <p>ระบบสร้างภาพรายงานความปลอดภัยและข้อความอัตโนมัติ สำหรับ ผกร.กรย.(ก3)</p>
         </div>
 
