@@ -58,8 +58,10 @@ export default function SafetyHubPage() {
       const newImgs = [...prev];
       const idx = panningIdxRef.current!;
       const img = newImgs[idx];
-      let newPanX = img.panX - (deltaX * sensitivity);
-      let newPanY = img.panY - (deltaY * sensitivity);
+      if (!img) return prev; // Avoid crash if image was removed while panning
+      
+      let newPanX = (img.panX || 50) - (deltaX * sensitivity);
+      let newPanY = (img.panY || 50) - (deltaY * sensitivity);
       newPanX = Math.max(0, Math.min(100, newPanX));
       newPanY = Math.max(0, Math.min(100, newPanY));
       newImgs[idx] = { ...img, panX: newPanX, panY: newPanY };
@@ -88,10 +90,16 @@ export default function SafetyHubPage() {
     if (draggedIdx === null || draggedIdx === dropIndex) return;
     setImages(prev => {
       const newImgs = [...prev];
-      const [draggedItem] = newImgs.splice(draggedIdx, 1);
-      newImgs.splice(dropIndex, 0, draggedItem);
+      const draggedItems = newImgs.splice(draggedIdx, 1);
+      if (draggedItems.length > 0) {
+        newImgs.splice(dropIndex, 0, draggedItems[0]);
+      }
       return newImgs;
     });
+    setDraggedIdx(null);
+  };
+
+  const onDragEnd = () => {
     setDraggedIdx(null);
   };
 
@@ -511,21 +519,24 @@ export default function SafetyHubPage() {
 
               {images.length > 0 && (
                 <div className="image-preview-grid">
-                  {images.map((img, i) => (
+                  {images.map((img, i) => {
+                    if (!img) return null;
+                    return (
                     <div 
-                      key={img.id} 
+                      key={img.id || i} 
                       className={`image-preview-item cursor-move ${draggedIdx === i ? 'opacity-50' : ''}`}
                       draggable
                       onDragStart={(e) => onDragStart(e, i)}
                       onDragOver={onDragOver}
                       onDrop={(e) => onDrop(e, i)}
+                      onDragEnd={onDragEnd}
                     >
                       <img src={img.src} alt={`upload-${i}`} draggable={false} />
                       <button onClick={() => removeImage(i)} className="remove-btn">
                         <X className="w-3 h-3" />
                       </button>
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
             </div>
@@ -599,10 +610,12 @@ export default function SafetyHubPage() {
                   <div className="polygon-deco"></div>
                 </div>
 
-                <div className={`collage-photos-dynamic layout-${images.length || 0}`}>
-                  {images.map((img, i) => (
+                <div className={`collage-photos-dynamic layout-${images.filter(Boolean).length || 0}`}>
+                  {images.map((img, i) => {
+                    if (!img) return null;
+                    return (
                     <div 
-                      key={img.id} 
+                      key={img.id || i} 
                       className="photo-slot cursor-move"
                       onMouseDown={(e) => startPan(e, i)}
                       title="ลากเพื่อเลื่อนตำแหน่งรูปภาพ"
@@ -612,11 +625,11 @@ export default function SafetyHubPage() {
                         alt={`Pic ${i+1}`} 
                         crossOrigin="anonymous" 
                         draggable={false}
-                        style={{ objectPosition: `${img.panX}% ${img.panY}%` }}
+                        style={{ objectPosition: `${img.panX || 50}% ${img.panY || 50}%` }}
                       />
                     </div>
-                  ))}
-                  {images.length === 0 && (
+                  )})}
+                  {images.filter(Boolean).length === 0 && (
                      <div className="photo-slot empty"><p>เพิ่มรูปภาพเพื่อแสดงผล (1-4 รูป)</p></div>
                   )}
                 </div>
