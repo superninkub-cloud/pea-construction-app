@@ -123,7 +123,7 @@ export default function SafetyPPEDashboard() {
   }, [groupedEquipment, activeTab]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col p-4 md:p-6 lg:p-8 w-full max-w-7xl mx-auto font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col p-4 md:p-6 lg:p-8 pb-20 lg:pb-32 w-full max-w-7xl mx-auto font-sans">
       
       {/* Header */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
