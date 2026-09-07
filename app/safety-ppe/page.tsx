@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Shield, Search, Bell, LogOut, Calendar, Users, List, Filter, AlertTriangle, CheckCircle, Package, ShoppingCart, TrendingUp, TrendingDown, FileEdit, Activity, Plus, BarChart as BarChartIcon } from 'lucide-react';
+import { Shield, Search, Bell, LogOut, Calendar, Users, List, Filter, AlertTriangle, CheckCircle, Package, ShoppingCart, TrendingUp, TrendingDown, FileEdit, Activity, Plus, X, BarChart as BarChartIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import { safetyData, getSafetyStats } from './data';
 
@@ -13,6 +13,27 @@ export default function SafetyPPEDashboard() {
   const [activeTab, setActiveTab] = useState('latest');
   const [showAllListItems, setShowAllListItems] = useState(false);
   const [showAllTableItems, setShowAllTableItems] = useState(false);
+  
+  // PR Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [prItem, setPrItem] = useState('');
+  const [prAmount, setPrAmount] = useState('');
+  const [prTeam, setPrTeam] = useState('');
+  const [prNote, setPrNote] = useState('');
+
+  const handleCreatePR = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prItem || !prAmount || !prTeam) {
+      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+      return;
+    }
+    alert(`สร้างคำขอจัดหา ${prItem} จำนวน ${prAmount} สำเร็จ (ระบบ Demo)`);
+    setIsModalOpen(false);
+    setPrItem('');
+    setPrAmount('');
+    setPrTeam('');
+    setPrNote('');
+  };
 
   const allTeams = useMemo(() => safetyData.map(t => t.name), []);
   const allCategories = useMemo(() => Array.from(new Set(safetyData.flatMap(t => t.equipment.map(e => e.category)))).sort(), []);
@@ -480,7 +501,7 @@ export default function SafetyPPEDashboard() {
             </h3>
             <div className="flex gap-2">
               <button 
-                onClick={() => alert('ฟีเจอร์สร้างคำขอจัดหาเข้าสู่ระบบ ERP กำลังอยู่ระหว่างการพัฒนา')}
+                onClick={() => setIsModalOpen(true)}
                 className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors"
               >
                 <Plus size={14} /> สร้างคำขอจัดหา
@@ -554,6 +575,109 @@ export default function SafetyPPEDashboard() {
 
 
 
+
+      {/* Spacer to fix bottom scrolling issue */}
+      <div className="h-24 md:h-32 flex-shrink-0 w-full"></div>
+
+      {/* PR Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Plus size={20} className="text-indigo-600" />
+                สร้างคำขอจัดหา PPE
+              </h3>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              <form id="pr-form" onSubmit={handleCreatePR} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">รายการอุปกรณ์ <span className="text-rose-500">*</span></label>
+                  <select 
+                    required
+                    value={prItem}
+                    onChange={(e) => setPrItem(e.target.value)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  >
+                    <option value="">-- เลือกอุปกรณ์ --</option>
+                    {allCategories.map(cat => (
+                      <optgroup key={cat} label={cat}>
+                        {Array.from(new Set(safetyData.flatMap(t => t.equipment.filter(e => e.category === cat).map(e => e.name)))).map(name => (
+                          <option key={name} value={name}>{name}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">จำนวนที่ขอ <span className="text-rose-500">*</span></label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      required
+                      value={prAmount}
+                      onChange={(e) => setPrAmount(e.target.value)}
+                      placeholder="เช่น 10"
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">หน่วยงาน <span className="text-rose-500">*</span></label>
+                    <select 
+                      required
+                      value={prTeam}
+                      onChange={(e) => setPrTeam(e.target.value)}
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                    >
+                      <option value="">-- เลือกทีม --</option>
+                      {allTeams.map(team => (
+                        <option key={team} value={team}>{team.replace('ชุดงาน ', '')}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">เหตุผล/หมายเหตุ</label>
+                  <textarea 
+                    value={prNote}
+                    onChange={(e) => setPrNote(e.target.value)}
+                    placeholder="เช่น อุปกรณ์เดิมชำรุดเสียหายจากการปฏิบัติงาน..."
+                    rows={3}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </form>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button 
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-colors"
+              >
+                ยกเลิก
+              </button>
+              <button 
+                type="submit"
+                form="pr-form"
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm"
+              >
+                บันทึกคำขอ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
