@@ -10,6 +10,7 @@ export default function SafetyPPEDashboard() {
   const [selectedTeam, setSelectedTeam] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [activeTab, setActiveTab] = useState('latest');
 
   const allTeams = useMemo(() => safetyData.map(t => t.name), []);
   const allCategories = useMemo(() => Array.from(new Set(safetyData.flatMap(t => t.equipment.map(e => e.category)))).sort(), []);
@@ -86,6 +87,38 @@ export default function SafetyPPEDashboard() {
   // Sort by highest missing + damaged
   missingDamagedList.sort((a, b) => (b.missing + b.damaged) - (a.missing + a.damaged));
   const topIssues = missingDamagedList.slice(0, 5);
+
+  const groupedEquipment = useMemo(() => {
+    const map = new Map();
+    filteredData.forEach(team => {
+      team.equipment.forEach(eq => {
+        if (!map.has(eq.name)) {
+          map.set(eq.name, { name: eq.name, standard: 0, actual: 0, missing: 0, damaged: 0 });
+        }
+        const g = map.get(eq.name);
+        g.standard += eq.standard;
+        g.actual += eq.actual;
+        g.missing += eq.missing;
+        g.damaged += eq.damaged;
+      });
+    });
+    return Array.from(map.values());
+  }, [filteredData]);
+
+  const listItems = useMemo(() => {
+    let items = [...groupedEquipment];
+    if (activeTab === 'missing') items = items.filter(i => i.missing > 0).sort((a, b) => b.missing - a.missing);
+    else if (activeTab === 'damaged') items = items.filter(i => i.damaged > 0).sort((a, b) => b.damaged - a.damaged);
+    else if (activeTab === 'pr') items = items.filter(i => i.missing > 0).sort((a, b) => b.missing - a.missing);
+    else {
+      items.sort((a, b) => {
+        const rateA = a.standard > 0 ? (a.actual - a.damaged) / a.standard : 0;
+        const rateB = b.standard > 0 ? (b.actual - b.damaged) / b.standard : 0;
+        return rateA - rateB;
+      });
+    }
+    return items.slice(0, 4);
+  }, [groupedEquipment, activeTab]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col p-4 md:p-6 lg:p-8 w-full max-w-7xl mx-auto font-sans">
@@ -359,76 +392,87 @@ export default function SafetyPPEDashboard() {
         {/* Left Side Lists */}
         <div className="w-full lg:w-2/5">
           <div className="flex items-center gap-4 border-b border-slate-200 mb-4 pb-2 overflow-x-auto">
-            <button className="text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 pb-2 whitespace-nowrap">การตรวจสภาพล่าสุด</button>
-            <button className="text-sm font-medium text-slate-500 hover:text-slate-700 pb-2 whitespace-nowrap">รายการขาดแคลน</button>
-            <button className="text-sm font-medium text-slate-500 hover:text-slate-700 pb-2 whitespace-nowrap">คำขอจัดหา (PR)</button>
-            <button className="text-sm font-medium text-slate-500 hover:text-slate-700 pb-2 whitespace-nowrap">อุปกรณ์ชำรุด</button>
+            <button 
+              onClick={() => setActiveTab('latest')}
+              className={`text-sm pb-2 whitespace-nowrap ${activeTab === 'latest' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
+              การตรวจสภาพล่าสุด
+            </button>
+            <button 
+              onClick={() => setActiveTab('missing')}
+              className={`text-sm pb-2 whitespace-nowrap ${activeTab === 'missing' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
+              รายการขาดแคลน
+            </button>
+            <button 
+              onClick={() => setActiveTab('pr')}
+              className={`text-sm pb-2 whitespace-nowrap ${activeTab === 'pr' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
+              คำขอจัดหา (PR)
+            </button>
+            <button 
+              onClick={() => setActiveTab('damaged')}
+              className={`text-sm pb-2 whitespace-nowrap ${activeTab === 'damaged' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
+              อุปกรณ์ชำรุด
+            </button>
           </div>
           
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-slate-800">รายการตรวจสภาพล่าสุด</h3>
+            <h3 className="font-bold text-slate-800">
+              {activeTab === 'latest' && 'รายการตรวจสภาพล่าสุด'}
+              {activeTab === 'missing' && 'รายการอุปกรณ์ขาดแคลน'}
+              {activeTab === 'pr' && 'รายการคำขอจัดหา (PR)'}
+              {activeTab === 'damaged' && 'รายการอุปกรณ์ชำรุด'}
+            </h3>
             <button className="text-xs text-indigo-600 hover:underline flex items-center gap-1">
               ดูทั้งหมด <TrendingUp size={12} className="rotate-45" />
             </button>
           </div>
 
           <div className="space-y-3">
-            {/* List Items */}
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 18h20"></path><path d="M12 2v8"></path><path d="m4.93 10.93 2.83-2.83"></path><path d="m16.24 8.1 2.83 2.83"></path><path d="M2 22h20"></path><path d="M12 10a6 6 0 0 0-6 6v2h12v-2a6 6 0 0 0-6-6Z"></path></svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-800 text-sm">หมวกนิรภัย</h4>
-                    <p className="text-xs text-slate-500">ตรวจเมื่อ 14 พ.ค. 2567</p>
-                  </div>
-                </div>
-                <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-md font-medium">ผ่าน</span>
+            {listItems.length === 0 ? (
+              <div className="text-center p-8 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm">
+                ไม่พบรายการในหมวดหมู่นี้
               </div>
-              <div className="mt-4">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-500">จำนวนที่ตรวจ <span className="font-bold text-slate-700">48 / 50</span></span>
-                  <span className="font-bold text-emerald-600">96%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-1.5 mb-3">
-                  <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: '96%' }}></div>
-                </div>
-                <button className="w-full py-1.5 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
-                  ดูรายละเอียด →
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>
+            ) : (
+              listItems.map((item, idx) => {
+                const passRate = item.standard > 0 ? Math.round(((item.actual - item.damaged) / item.standard) * 100) : 0;
+                const hasProblem = passRate < 100;
+                const isDanger = passRate <= 80;
+                
+                return (
+                  <div key={idx} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative overflow-hidden transition-all hover:shadow-md">
+                    <div className={`absolute top-0 left-0 w-1 h-full ${hasProblem ? (isDanger ? 'bg-rose-500' : 'bg-amber-400') : 'bg-emerald-500'}`}></div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${hasProblem ? (isDanger ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600') : 'bg-emerald-50 text-emerald-600'}`}>
+                          {hasProblem ? <AlertTriangle size={20} /> : <CheckCircle size={20} />}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm max-w-[200px] truncate">{item.name}</h4>
+                          <p className="text-xs text-slate-500">ผลรวมจาก {filteredData.length} ทีม</p>
+                        </div>
+                      </div>
+                      <span className={`text-[10px] px-2 py-1 rounded-md font-medium whitespace-nowrap ${hasProblem ? (isDanger ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700') : 'bg-emerald-100 text-emerald-700'}`}>
+                        {hasProblem ? (isDanger ? 'วิกฤต' : 'พบปัญหา') : 'พร้อมใช้'}
+                      </span>
+                    </div>
+                    <div className="mt-4">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-500">จำนวนที่พร้อมใช้ <span className="font-bold text-slate-700">{(item.actual - item.damaged)} / {item.standard}</span></span>
+                        <span className={`font-bold ${hasProblem ? (isDanger ? 'text-rose-600' : 'text-amber-500') : 'text-emerald-600'}`}>{passRate}%</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 mb-3">
+                        <div className={`h-1.5 rounded-full ${hasProblem ? (isDanger ? 'bg-rose-500' : 'bg-amber-400') : 'bg-emerald-500'}`} style={{ width: `${passRate}%` }}></div>
+                      </div>
+                      {(item.missing > 0 || item.damaged > 0) && (
+                        <div className="flex gap-4 text-xs mt-2 mb-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                          {item.missing > 0 && <span>ขาดแคลน: <strong className="text-rose-500">{item.missing}</strong></span>}
+                          {item.damaged > 0 && <span>ชำรุด: <strong className="text-amber-500">{item.damaged}</strong></span>}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-slate-800 text-sm">เสื้อกั๊กสะท้อนแสง</h4>
-                    <p className="text-xs text-slate-500">ตรวจเมื่อ 12 พ.ค. 2567</p>
-                  </div>
-                </div>
-                <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-md font-medium">พบปัญหา</span>
-              </div>
-              <div className="mt-4">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-slate-500">จำนวนที่ตรวจ <span className="font-bold text-slate-700">35 / 40</span></span>
-                  <span className="font-bold text-amber-500">87%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-1.5 mb-3">
-                  <div className="bg-amber-400 h-1.5 rounded-full" style={{ width: '87%' }}></div>
-                </div>
-                <button className="w-full py-1.5 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
-                  ดูรายละเอียด →
-                </button>
-              </div>
-            </div>
+                );
+              })
+            )}
           </div>
         </div>
 
