@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Shield, Search, Bell, LogOut, Calendar, Users, List, Filter, AlertTriangle, CheckCircle, Package, ShoppingCart, TrendingUp, TrendingDown, FileEdit, Activity, Plus } from 'lucide-react';
+import { Shield, Search, Bell, LogOut, Calendar, Users, List, Filter, AlertTriangle, CheckCircle, Package, ShoppingCart, TrendingUp, TrendingDown, FileEdit, Activity, Plus, BarChart as BarChartIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import { safetyData, getSafetyStats } from './data';
 
@@ -255,7 +255,7 @@ export default function SafetyPPEDashboard() {
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <BarChart size={20} className="text-indigo-600" /> 
+              <BarChartIcon size={20} className="text-indigo-600" /> 
               สรุปสถานะ PPE รายทีมงาน
             </h3>
             <select className="border border-slate-200 text-xs rounded-md px-2 py-1 bg-slate-50">
