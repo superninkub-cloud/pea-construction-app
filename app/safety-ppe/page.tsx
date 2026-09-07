@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Shield, Search, Bell, LogOut, Calendar, Users, List, Filter, AlertTriangle, CheckCircle, Package, ShoppingCart, TrendingUp, TrendingDown, FileEdit, Activity, Plus, X, BarChart as BarChartIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import { safetyData, getSafetyStats } from './data';
@@ -13,6 +13,70 @@ export default function SafetyPPEDashboard() {
   const [activeTab, setActiveTab] = useState('latest');
   const [showAllListItems, setShowAllListItems] = useState(false);
   const [showAllTableItems, setShowAllTableItems] = useState(false);
+  
+  const [localData, setLocalData] = useState(safetyData);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('pea_safety_data');
+    if (saved) {
+      setLocalData(JSON.parse(saved));
+    } else {
+      setLocalData(safetyData);
+      localStorage.setItem('pea_safety_data', JSON.stringify(safetyData));
+    }
+    setIsLoaded(true);
+  }, []);
+
+  const saveLocalData = (newData: any) => {
+    setLocalData(newData);
+    localStorage.setItem('pea_safety_data', JSON.stringify(newData));
+  };
+
+  // Update Modal State
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [updateItem, setUpdateItem] = useState<any>(null);
+  const [updateAction, setUpdateAction] = useState<'repair' | 'purchase'>('repair');
+  const [updateAmount, setUpdateAmount] = useState(1);
+
+  const handleOpenUpdate = (item: any, defaultAction: 'repair' | 'purchase' = 'repair') => {
+    setUpdateItem(item);
+    setUpdateAction(defaultAction);
+    setUpdateAmount(1);
+    setIsUpdateModalOpen(true);
+  };
+
+  const handleUpdateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!updateItem) return;
+
+    const newData = [...localData];
+    const teamIndex = newData.findIndex(t => t.name.includes(updateItem.teamName));
+    if (teamIndex >= 0) {
+      const eqIndex = newData[teamIndex].equipment.findIndex((e: any) => e.name === updateItem.itemName);
+      if (eqIndex >= 0) {
+        const eq = newData[teamIndex].equipment[eqIndex];
+        if (updateAction === 'repair') {
+          if (eq.damaged >= updateAmount) {
+            eq.damaged -= updateAmount;
+          } else {
+            eq.damaged = 0;
+          }
+        } else if (updateAction === 'purchase') {
+          if (eq.missing >= updateAmount) {
+            eq.missing -= updateAmount;
+          } else {
+            eq.missing = 0;
+          }
+          eq.actual += updateAmount;
+        }
+      }
+    }
+    
+    saveLocalData(newData);
+    setIsUpdateModalOpen(false);
+    setUpdateItem(null);
+  };
   
   // PR Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,11 +99,11 @@ export default function SafetyPPEDashboard() {
     setPrNote('');
   };
 
-  const allTeams = useMemo(() => safetyData.map(t => t.name), []);
-  const allCategories = useMemo(() => Array.from(new Set(safetyData.flatMap(t => t.equipment.map(e => e.category)))).sort(), []);
+  const allTeams = useMemo(() => localData.map(t => t.name), [localData]);
+  const allCategories = useMemo(() => Array.from(new Set(localData.flatMap(t => t.equipment.map(e => e.category)))).sort(), [localData]);
 
   const filteredData = useMemo(() => {
-    return safetyData.map(team => {
+    return localData.map(team => {
       if (selectedTeam !== 'all' && team.name !== selectedTeam) {
         return { ...team, equipment: [] };
       }
@@ -54,7 +118,7 @@ export default function SafetyPPEDashboard() {
       });
       return { ...team, equipment: filteredEquipment };
     }).filter(team => selectedTeam === 'all' || team.name === selectedTeam);
-  }, [searchQuery, selectedTeam, selectedCategory, selectedStatus]);
+  }, [searchQuery, selectedTeam, selectedCategory, selectedStatus, localData]);
 
   const stats = useMemo(() => getSafetyStats(filteredData), [filteredData]);
   
@@ -454,7 +518,7 @@ export default function SafetyPPEDashboard() {
             </h3>
             <button 
               onClick={() => setShowAllListItems(!showAllListItems)}
-              className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
+              className="text-xs text-indigo-600 hover:underline flex items-center gap-1 outline-none focus:outline-none"
             >
               {showAllListItems ? 'ดูน้อยลง' : 'ดูทั้งหมด'} <TrendingUp size={12} className={showAllListItems ? "-rotate-45" : "rotate-45"} />
             </button>
@@ -526,7 +590,7 @@ export default function SafetyPPEDashboard() {
               </button>
               <button 
                 onClick={() => setShowAllTableItems(!showAllTableItems)}
-                className="text-xs border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors"
+                className="text-xs border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors outline-none focus:outline-none"
               >
                 {showAllTableItems ? 'ดูน้อยลง ←' : 'ดูทั้งหมด →'}
               </button>
@@ -692,6 +756,60 @@ export default function SafetyPPEDashboard() {
               >
                 บันทึกคำขอ
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update/Repair Modal */}
+      {isUpdateModalOpen && updateItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <FileEdit size={20} className="text-indigo-600" /> อัปเดตรายการ
+              </h3>
+              <button onClick={() => setIsUpdateModalOpen(false)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors outline-none focus:outline-none">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100">
+                <p className="text-sm text-slate-500 mb-1">อุปกรณ์: <span className="font-bold text-slate-800">{updateItem.itemName}</span></p>
+                <p className="text-sm text-slate-500 mb-1">ทีมงาน: <span className="font-bold text-slate-800">{updateItem.teamName}</span></p>
+                <div className="flex gap-4 mt-2">
+                  <span className="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded">ขาดแคลน: {updateItem.missing}</span>
+                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">ชำรุด: {updateItem.damaged}</span>
+                </div>
+              </div>
+              <form id="update-form" onSubmit={handleUpdateSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ประเภทการอัปเดต</label>
+                  <select 
+                    value={updateAction} 
+                    onChange={(e) => setUpdateAction(e.target.value as any)}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="repair" disabled={updateItem.damaged === 0}>ซ่อมแซมเสร็จสิ้น (ลดชำรุด)</option>
+                    <option value="purchase" disabled={updateItem.missing === 0}>รับของจัดซื้อ (ลดขาดแคลน)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">จำนวนที่{updateAction === 'repair' ? 'ซ่อมแซมเสร็จ' : 'ได้รับของ'}</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    max={updateAction === 'repair' ? updateItem.damaged : updateItem.missing}
+                    value={updateAmount}
+                    onChange={(e) => setUpdateAmount(Number(e.target.value))}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </form>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button type="button" onClick={() => setIsUpdateModalOpen(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors outline-none focus:outline-none">ยกเลิก</button>
+              <button type="submit" form="update-form" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm outline-none focus:outline-none">บันทึกอัปเดต</button>
             </div>
           </div>
         </div>
