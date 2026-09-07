@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { Bell, MapPin, Calendar as CalendarIcon, Play, Edit3, ChevronDown, Check, FileText, Wrench, Camera, ClipboardList, AlertCircle, Phone, CheckCircle, ChevronRight, MessageSquareWarning, Megaphone } from 'lucide-react';
+import { Bell, MapPin, Calendar as CalendarIcon, Play, Edit3, ChevronDown, Check, FileText, Wrench, Camera, ClipboardList, AlertCircle, Phone, CheckCircle, ChevronRight, MessageSquareWarning, Megaphone, List } from 'lucide-react';
 import { mockTasks } from './data';
 
 export default function MyTasksDashboard() {
