@@ -489,22 +489,22 @@ export default function SafetyPPEDashboard() {
           <div className="flex items-center gap-4 border-b border-slate-200 mb-4 pb-2 overflow-x-auto">
             <button 
               onClick={() => setActiveTab('latest')}
-              className={`text-sm pb-2 whitespace-nowrap ${activeTab === 'latest' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
+              className={`text-sm pb-2 whitespace-nowrap outline-none focus:outline-none ${activeTab === 'latest' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
               การตรวจสภาพล่าสุด
             </button>
             <button 
               onClick={() => setActiveTab('missing')}
-              className={`text-sm pb-2 whitespace-nowrap ${activeTab === 'missing' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
+              className={`text-sm pb-2 whitespace-nowrap outline-none focus:outline-none ${activeTab === 'missing' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
               รายการขาดแคลน
             </button>
             <button 
               onClick={() => setActiveTab('pr')}
-              className={`text-sm pb-2 whitespace-nowrap ${activeTab === 'pr' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
+              className={`text-sm pb-2 whitespace-nowrap outline-none focus:outline-none ${activeTab === 'pr' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
               คำขอจัดหา (PR)
             </button>
             <button 
               onClick={() => setActiveTab('damaged')}
-              className={`text-sm pb-2 whitespace-nowrap ${activeTab === 'damaged' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
+              className={`text-sm pb-2 whitespace-nowrap outline-none focus:outline-none ${activeTab === 'damaged' ? 'font-semibold text-indigo-600 border-b-2 border-indigo-600' : 'font-medium text-slate-500 hover:text-slate-700'}`}>
               อุปกรณ์ชำรุด
             </button>
           </div>
@@ -632,13 +632,24 @@ export default function SafetyPPEDashboard() {
                     </td>
                     <td className="px-4 py-3 text-slate-600">{item.teamName}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-xs px-2.5 py-1 rounded-md font-medium ${
-                        item.action === 'เร่งดำเนินการ' 
-                          ? 'bg-rose-100 text-rose-700' 
-                          : 'bg-amber-100 text-amber-700'
-                      }`}>
-                        {item.action}
-                      </span>
+                      <div className="flex justify-center gap-2">
+                        {item.damaged > 0 && (
+                          <button 
+                            onClick={() => handleOpenUpdate(item, 'repair')}
+                            className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 px-3 py-1.5 rounded-md font-medium transition-colors outline-none focus:outline-none whitespace-nowrap"
+                          >
+                            แจ้งซ่อม
+                          </button>
+                        )}
+                        {item.missing > 0 && (
+                          <button 
+                            onClick={() => handleOpenUpdate(item, 'purchase')}
+                            className="text-xs bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-1.5 rounded-md font-medium transition-colors outline-none focus:outline-none whitespace-nowrap"
+                          >
+                            รับของ
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
