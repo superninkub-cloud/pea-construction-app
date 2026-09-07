@@ -442,11 +442,65 @@ export default function SafetyHubPage() {
     }
   };
 
+  // Helper to parse Thai date string into a sortable timestamp
+  const parseThaiDate = (dateStr: string) => {
+    if (!dateStr) return 0;
+    const parts = dateStr.trim().split(/\s+/);
+    if (parts.length >= 3) {
+      const day = parseInt(parts[0]);
+      const shortMonth = parts[1];
+      let year = parseInt(parts[parts.length - 1]);
+      if (year < 100) year += 2500; // handle 2-digit years like 69 -> 2569
+      
+      const monthIdx = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."].indexOf(shortMonth);
+      
+      if (monthIdx !== -1 && !isNaN(day) && !isNaN(year)) {
+        let gregYear = year;
+        if (gregYear > 2500) gregYear -= 543;
+        return new Date(gregYear, monthIdx, day).getTime();
+      }
+    }
+    return 0;
+  };
+
+  // Sort historyData by actual parsed date
+  const sortedHistory = [...(historyData || [])].sort((a, b) => {
+    const timeA = parseThaiDate(a.date_str) || new Date(a.report_date || 0).getTime();
+    const timeB = parseThaiDate(b.date_str) || new Date(b.report_date || 0).getTime();
+    return timeB - timeA; // descending
+  });
+
   // Group history by month
-  const groupedHistory = (historyData || []).reduce((acc, curr) => {
+  const groupedHistory = sortedHistory.reduce((acc, curr) => {
     try {
-      const date = curr.report_date ? new Date(curr.report_date) : new Date();
-      const monthYear = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+      let monthYear = "";
+      
+      // Try to parse from date_str first (format: "D MMM YYYY" like "31 ส.ค. 2569")
+      if (curr.date_str) {
+        const parts = curr.date_str.trim().split(/\s+/);
+        if (parts.length >= 3) {
+          const shortMonth = parts[1];
+          let year = parts[parts.length - 1]; 
+          if (year.length === 2) year = "25" + year; // handle 69 -> 2569
+          
+          const thaiMonthMap: Record<string, string> = {
+            "ม.ค.": "มกราคม", "ก.พ.": "กุมภาพันธ์", "มี.ค.": "มีนาคม", "เม.ย.": "เมษายน",
+            "พ.ค.": "พฤษภาคม", "มิ.ย.": "มิถุนายน", "ก.ค.": "กรกฎาคม", "ส.ค.": "สิงหาคม",
+            "ก.ย.": "กันยายน", "ต.ค.": "ตุลาคม", "พ.ย.": "พฤศจิกายน", "ธ.ค.": "ธันวาคม"
+          };
+          
+          if (thaiMonthMap[shortMonth]) {
+            monthYear = `${thaiMonthMap[shortMonth]} ${year}`;
+          }
+        }
+      }
+      
+      // Fallback to report_date
+      if (!monthYear) {
+        const date = curr.report_date ? new Date(curr.report_date) : new Date();
+        monthYear = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+      }
+
       if (!acc[monthYear]) acc[monthYear] = [];
       acc[monthYear].push(curr);
     } catch (e) {
