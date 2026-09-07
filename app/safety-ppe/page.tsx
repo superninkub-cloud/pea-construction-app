@@ -238,7 +238,10 @@ export default function SafetyPPEDashboard() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div 
+          onClick={() => { setSelectedStatus('all'); setSelectedTeam('all'); setSelectedCategory('all'); setActiveTab('latest'); }}
+          className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:border-indigo-300"
+        >
           <div className="flex justify-between items-start mb-2">
             <div className="text-slate-500 text-xs font-medium flex items-center gap-1.5">
               <FileEdit size={14} className="text-indigo-500" />
@@ -255,7 +258,10 @@ export default function SafetyPPEDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between border-b-4 border-b-emerald-400 hover:shadow-md transition-shadow">
+        <div 
+          onClick={() => { setSelectedStatus('ready'); setActiveTab('latest'); }}
+          className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between border-b-4 border-b-emerald-400 hover:shadow-md transition-all cursor-pointer hover:border-emerald-300"
+        >
           <div className="flex justify-between items-start mb-2">
             <div className="text-slate-500 text-xs font-medium flex items-center gap-1.5">
               <CheckCircle size={14} className="text-emerald-500" />
@@ -271,7 +277,10 @@ export default function SafetyPPEDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between border-b-4 border-b-rose-400 hover:shadow-md transition-shadow">
+        <div 
+          onClick={() => { setSelectedStatus('damaged'); setActiveTab('damaged'); }}
+          className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between border-b-4 border-b-rose-400 hover:shadow-md transition-all cursor-pointer hover:border-rose-300"
+        >
           <div className="flex justify-between items-start mb-2">
             <div className="text-slate-500 text-xs font-medium flex items-center gap-1.5">
               <AlertTriangle size={14} className="text-rose-500" />
@@ -288,7 +297,10 @@ export default function SafetyPPEDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between border-b-4 border-b-amber-400 hover:shadow-md transition-shadow">
+        <div 
+          onClick={() => { setSelectedStatus('missing'); setActiveTab('missing'); }}
+          className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between border-b-4 border-b-amber-400 hover:shadow-md transition-all cursor-pointer hover:border-amber-300"
+        >
           <div className="flex justify-between items-start mb-2">
             <div className="text-slate-500 text-xs font-medium flex items-center gap-1.5">
               <Package size={14} className="text-amber-500" />
@@ -305,7 +317,10 @@ export default function SafetyPPEDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div 
+          onClick={() => setActiveTab('pr')}
+          className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:border-blue-300"
+        >
           <div className="flex justify-between items-start mb-2">
             <div className="text-slate-500 text-xs font-medium flex items-center gap-1.5">
               <ShoppingCart size={14} className="text-blue-500" />
@@ -322,7 +337,10 @@ export default function SafetyPPEDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div 
+          onClick={() => setSelectedTeam('all')}
+          className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:border-indigo-300"
+        >
           <div className="flex justify-between items-start mb-2">
             <div className="text-slate-500 text-xs font-medium flex items-center gap-1.5">
               <Users size={14} className="text-indigo-500" />
