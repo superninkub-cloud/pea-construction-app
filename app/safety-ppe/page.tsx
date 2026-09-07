@@ -11,6 +11,8 @@ export default function SafetyPPEDashboard() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [activeTab, setActiveTab] = useState('latest');
+  const [showAllListItems, setShowAllListItems] = useState(false);
+  const [showAllTableItems, setShowAllTableItems] = useState(false);
 
   const allTeams = useMemo(() => safetyData.map(t => t.name), []);
   const allCategories = useMemo(() => Array.from(new Set(safetyData.flatMap(t => t.equipment.map(e => e.category)))).sort(), []);
@@ -86,7 +88,7 @@ export default function SafetyPPEDashboard() {
   
   // Sort by highest missing + damaged
   missingDamagedList.sort((a, b) => (b.missing + b.damaged) - (a.missing + a.damaged));
-  const topIssues = missingDamagedList.slice(0, 5);
+  const topIssues = missingDamagedList;
 
   const groupedEquipment = useMemo(() => {
     const map = new Map();
@@ -117,7 +119,7 @@ export default function SafetyPPEDashboard() {
         return rateA - rateB;
       });
     }
-    return items.slice(0, 4);
+    return items;
   }, [groupedEquipment, activeTab]);
 
   return (
@@ -421,8 +423,11 @@ export default function SafetyPPEDashboard() {
               {activeTab === 'pr' && 'รายการคำขอจัดหา (PR)'}
               {activeTab === 'damaged' && 'รายการอุปกรณ์ชำรุด'}
             </h3>
-            <button className="text-xs text-indigo-600 hover:underline flex items-center gap-1">
-              ดูทั้งหมด <TrendingUp size={12} className="rotate-45" />
+            <button 
+              onClick={() => setShowAllListItems(!showAllListItems)}
+              className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
+            >
+              {showAllListItems ? 'ดูน้อยลง' : 'ดูทั้งหมด'} <TrendingUp size={12} className={showAllListItems ? "-rotate-45" : "rotate-45"} />
             </button>
           </div>
 
@@ -432,7 +437,7 @@ export default function SafetyPPEDashboard() {
                 ไม่พบรายการในหมวดหมู่นี้
               </div>
             ) : (
-              listItems.map((item, idx) => {
+              (showAllListItems ? listItems : listItems.slice(0, 4)).map((item, idx) => {
                 const passRate = item.standard > 0 ? Math.round(((item.actual - item.damaged) / item.standard) * 100) : 0;
                 const hasProblem = passRate < 100;
                 const isDanger = passRate <= 80;
@@ -484,11 +489,17 @@ export default function SafetyPPEDashboard() {
               รายการ PPE ที่ขาดแคลน / ชำรุด
             </h3>
             <div className="flex gap-2">
-              <button className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors">
+              <button 
+                onClick={() => alert('ฟีเจอร์สร้างคำขอจัดหาเข้าสู่ระบบ ERP กำลังอยู่ระหว่างการพัฒนา')}
+                className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors"
+              >
                 <Plus size={14} /> สร้างคำขอจัดหา
               </button>
-              <button className="text-xs border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors">
-                ดูทั้งหมด →
+              <button 
+                onClick={() => setShowAllTableItems(!showAllTableItems)}
+                className="text-xs border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors"
+              >
+                {showAllTableItems ? 'ดูน้อยลง ←' : 'ดูทั้งหมด →'}
               </button>
             </div>
           </div>
@@ -507,7 +518,7 @@ export default function SafetyPPEDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {topIssues.map((item, index) => (
+                {(showAllTableItems ? topIssues : topIssues.slice(0, 5)).map((item, index) => (
                   <tr key={item.id} className="hover:bg-slate-50/50">
                     <td className="px-4 py-3 text-slate-500">{index + 1}</td>
                     <td className="px-4 py-3 font-medium text-slate-700">{item.itemName}</td>
@@ -551,25 +562,7 @@ export default function SafetyPPEDashboard() {
         </div>
       </div>
 
-      {/* Footer Banner */}
-      <div className="mt-8 bg-indigo-800 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between text-white relative overflow-hidden shadow-lg">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
-        
-        <div className="flex items-center gap-5 relative z-10">
-          <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20">
-            <Shield size={36} className="text-indigo-200" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold mb-1">&quot;ความปลอดภัย เริ่มต้นจากอุปกรณ์ที่พร้อมใช้งาน&quot;</h2>
-            <p className="text-indigo-200 text-sm">ตรวจสอบ PPE อย่างสม่ำเสมอ ใช้งานอย่างถูกต้อง และดูแลซึ่งกันและกัน เพื่อให้ทุกคนกลับบ้านอย่างปลอดภัย</p>
-          </div>
-        </div>
-        <div className="mt-4 md:mt-0 relative z-10 text-right">
-          <p className="text-sm font-medium text-indigo-200 italic">&quot;ใส่ใจความปลอดภัย<br/>ในทุกวัน ทำงานได้อย่างมั่นใจ&quot;</p>
-        </div>
-      </div>
+
 
     </div>
   );
