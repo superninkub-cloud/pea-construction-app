@@ -1,14 +1,14 @@
-export async function sendLinePushMessage(targetId: string, messages: any[]) {
+export async function sendLinePushMessage(targetId: string, messages: any[]): Promise<{success: boolean, error?: any}> {
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   
   if (!token) {
     console.error("LINE_CHANNEL_ACCESS_TOKEN is not defined");
-    return false;
+    return { success: false, error: "LINE_CHANNEL_ACCESS_TOKEN is not defined" };
   }
 
   if (!targetId) {
     console.error("LINE_TARGET_ID is not defined");
-    return false;
+    return { success: false, error: "LINE_TARGET_ID is not defined" };
   }
 
   try {
@@ -27,12 +27,12 @@ export async function sendLinePushMessage(targetId: string, messages: any[]) {
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Error sending LINE message:", errorData);
-      return false;
+      return { success: false, error: errorData };
     }
 
-    return true;
-  } catch (error) {
+    return { success: true };
+  } catch (error: any) {
     console.error("Failed to send LINE message:", error);
-    return false;
+    return { success: false, error: error.message };
   }
 }

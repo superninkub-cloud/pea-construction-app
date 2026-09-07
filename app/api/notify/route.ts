@@ -63,24 +63,26 @@ export async function POST(request: Request) {
        messages = [
          {
            type: 'text',
-           text: text
-         },
-         {
+           text: text || '-'
+         }
+       ];
+       if (image_url && image_url.startsWith('http')) {
+         messages.push({
            type: 'image',
            originalContentUrl: image_url,
            previewImageUrl: image_url
-         }
-       ];
+         });
+       }
     } else {
       return NextResponse.json({ error: 'Unknown notification type' }, { status: 400 });
     }
 
-    const success = await sendLinePushMessage(targetId, messages);
+    const result = await sendLinePushMessage(targetId, messages);
 
-    if (success) {
+    if (result && result.success) {
       return NextResponse.json({ success: true });
     } else {
-      return NextResponse.json({ error: 'Failed to send line message' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to send line message', details: result?.error }, { status: 500 });
     }
 
   } catch (error: any) {
