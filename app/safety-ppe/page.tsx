@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Shield, Search, Bell, LogOut, Calendar, Users, List, Filter, AlertTriangle, CheckCircle, Package, ShoppingCart, TrendingUp, TrendingDown, Edit, Activity, Plus } from 'lucide-react';
+import { Shield, Search, Bell, LogOut, Calendar, Users, List, Filter, AlertTriangle, CheckCircle, Package, ShoppingCart, TrendingUp, TrendingDown, FileEdit, Activity, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import { safetyData, getSafetyStats } from './data';
 
@@ -475,12 +475,12 @@ export default function SafetyPPEDashboard() {
             <Shield size={36} className="text-indigo-200" />
           </div>
           <div>
-            <h2 className="text-xl font-bold mb-1">"ความปลอดภัย เริ่มต้นจากอุปกรณ์ที่พร้อมใช้งาน"</h2>
+            <h2 className="text-xl font-bold mb-1">&quot;ความปลอดภัย เริ่มต้นจากอุปกรณ์ที่พร้อมใช้งาน&quot;</h2>
             <p className="text-indigo-200 text-sm">ตรวจสอบ PPE อย่างสม่ำเสมอ ใช้งานอย่างถูกต้อง และดูแลซึ่งกันและกัน เพื่อให้ทุกคนกลับบ้านอย่างปลอดภัย</p>
           </div>
         </div>
         <div className="mt-4 md:mt-0 relative z-10 text-right">
-          <p className="text-sm font-medium text-indigo-200 italic">"ใส่ใจความปลอดภัย<br/>ในทุกวัน ทำงานได้อย่างมั่นใจ"</p>
+          <p className="text-sm font-medium text-indigo-200 italic">&quot;ใส่ใจความปลอดภัย<br/>ในทุกวัน ทำงานได้อย่างมั่นใจ&quot;</p>
         </div>
       </div>
 
