@@ -72,6 +72,10 @@ export default function Sidebar() {
           <ShieldCheck size={20} />
           <span>งานความปลอดภัย</span>
         </Link>
+        <Link href="/safety-ppe" className={`nav-item ${pathname === "/safety-ppe" ? "active" : ""}`}>
+          <ShieldCheck size={20} />
+          <span>ศูนย์ความปลอดภัย PPE</span>
+        </Link>
         {userRole === 'admin' && (
           <Link href="/safety-hub" className={`nav-item ${pathname === "/safety-hub" ? "active" : ""}`}>
             <Camera size={20} />

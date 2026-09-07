@@ -525,7 +525,7 @@ export default function GasReportPage() {
                   {Array.from({ length: Math.ceil(reports.length / 10) || 1 }).map((_, pageIndex) => {
                     const chunk = reports.slice(pageIndex * 10, (pageIndex + 1) * 10);
                     return (
-                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid', position: 'relative', height: '185mm', display: 'flex', flexDirection: 'column' }}>
+                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
                           <img src="/PEA-Logo.png" alt="PEA" style={{ width: '80px' }} onError={(e) => (e.currentTarget as any).style.display = 'none'} />
                         </div>
@@ -569,15 +569,14 @@ export default function GasReportPage() {
                             <span className="ml-2">หมายเลขทะเบียน</span>
                             <span className="dotted-blank text-center" style={{ width: '120px' }}>{reportPlate}</span>
                             <span className="ml-2">รหัส</span>
-                            <span className="dotted-blank text-center" style={{ flex: 1, minWidth: '80px' }}></span>
-                          </div>
-                          <div className="form-row flex-start" style={{ marginTop: '4px', display: 'flex', width: '100%' }}>
-                            <span>ประเภท</span>
-                            <span className="dotted-blank text-center" style={{ width: '150px' }}></span>
+                            <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
+                            <span className="ml-2">ประเภท</span>
+                            <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
                             <span className="ml-2">ชนิด</span>
-                            <span className="dotted-blank text-center" style={{ flex: 1, minWidth: '80px' }}></span>
+                            <span className="dotted-blank text-center" style={{ width: '80px' }}></span>
                           </div>
-
+                          
+                          <div className="form-row dotted-line-full"></div>
 
                           <div className="form-row flex-start flex-wrap fuel-checkboxes" style={{ marginTop: '16px' }}>
                             <span style={{ marginRight: '8px' }}>ชนิดของเชื้อเพลิง</span>
@@ -587,7 +586,7 @@ export default function GasReportPage() {
                             <label><input type="checkbox" /> แก๊สโซฮอล์ E85</label>
                             <label><input type="checkbox" /> ดีเซล</label>
                             <label><input type="checkbox" /> น้ำมันหล่อลื่น จำนวน</label>
-                            <span className="dotted-blank" style={{ flex: 1, minWidth: '40px', maxWidth: '80px' }}></span>
+                            <span className="dotted-blank" style={{ width: '100px' }}></span>
                             <span>ลิตร</span>
                           </div>
 
@@ -600,7 +599,7 @@ export default function GasReportPage() {
                           </div>
                         </div>
 
-                        <table className="official-table" style={{ flex: 1, marginBottom: '8px' }}>
+                        <table className="official-table" style={{ flex: 1 }}>
                           <thead>
                             <tr>
                               <th rowSpan={2} style={{ width: '50px' }}>วันที่</th>
@@ -612,7 +611,6 @@ export default function GasReportPage() {
                               <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
                               <th rowSpan={2} style={{ width: '120px' }}>รายการซ่อม</th>
                               <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
-                              <th rowSpan={2} style={{ width: '120px' }}>หมายเหตุ</th>
                             </tr>
                             <tr>
                               <th style={{ width: '60px' }}>ไป</th>
@@ -632,13 +630,12 @@ export default function GasReportPage() {
                                 <td className="text-right">{r.fuel_cost ? r.fuel_cost.toFixed(2) : ""}</td>
                                 <td className="text-left">{r.repair_details || ""}</td>
                                 <td className="text-right">{r.repair_cost ? r.repair_cost.toFixed(2) : ""}</td>
-                                <td className="text-left" style={{ fontSize: '12px' }}>{r.notes || ""}</td>
                               </tr>
                             ))}
                             {/* Fill up to exactly 10 rows per page */}
                             {Array.from({ length: 10 - chunk.length }).map((_, i) => (
                               <tr key={`empty-${i}`}>
-                                <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                               </tr>
                             ))}
                             {/* Total Row */}
@@ -654,27 +651,26 @@ export default function GasReportPage() {
                               <td className="text-right font-bold">
                                 {chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0).toFixed(2) : ""}
                               </td>
-                              <td></td>
                             </tr>
                           </tbody>
                         </table>
                         
-                        <div style={{ marginTop: '4px', marginLeft: '40px', fontSize: '16px' }}>
+                        <div style={{ marginTop: '8px', marginLeft: '40px', fontSize: '16px' }}>
                           จึงเรียนมาเพื่อโปรดทราบ
                         </div>
 
-                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '0px' }}>
+                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '20px' }}>
                           <div className="signature-section flex-between">
                             <div className="signature-box" style={{ flex: 1 }}>
-                              <div>({reports[0]?.driver_name ? ` ${reports[0].driver_name} ` : "......................................................................................."})</div>
+                              <div>(.......................................................................................)</div>
                               <div className="font-bold mt-2">ผู้ขับยานพาหนะ</div>
                             </div>
                             <div className="signature-box" style={{ flex: 1 }}>
-                              <div>({reports[0]?.supervisor_name ? ` ${reports[0].supervisor_name} ` : "......................................................................................."})</div>
+                              <div>(.......................................................................................)</div>
                               <div className="font-bold mt-2">ผู้ควบคุม</div>
                             </div>
                           </div>
-                          <div className="form-code" style={{ position: 'absolute', bottom: '-15px', left: '0' }}>ยพ.6-ป.46</div>
+                          <div className="form-code" style={{ position: 'absolute', bottom: '0', left: '0' }}>ยพ.6-ป.46</div>
                         </div>
                       </div>
                     );
