@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import TopBar from "../components/TopBar";
 import "./SafetyHub.css";
-import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck, Save, Clock, PenSquare, Eye, Trash2, Edit, Send } from "lucide-react";
+import { Upload, X, Download, Copy, CheckCircle2, Calendar, MapPin, FileText, User, Camera, ShieldCheck, Save, Clock, PenSquare, Eye, Trash2, Edit, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 
 type ReportImage = { id: string; src: string; panX: number; panY: number; };
@@ -26,6 +26,12 @@ export default function SafetyHubPage() {
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [isSendingLine, setIsSendingLine] = useState(false);
+  
+  // Collapse Months
+  const [collapsedMonths, setCollapsedMonths] = useState<Record<string, boolean>>({});
+  const toggleMonth = (month: string) => {
+    setCollapsedMonths(prev => ({ ...prev, [month]: !prev[month] }));
+  };
 
   // Drag and Drop (Reorder)
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
@@ -786,8 +792,17 @@ export default function SafetyHubPage() {
             ) : (
               Object.entries(groupedHistory).map(([month, reports]) => (
                 <div key={month} className="history-month-section">
-                  <h2 className="history-month-title">{month}</h2>
-                  <div className="history-grid">
+                  <div 
+                    className="flex justify-between items-center mb-4 cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors" 
+                    onClick={() => toggleMonth(month)}
+                  >
+                    <h2 className="history-month-title !mb-0">{month}</h2>
+                    <button className="text-slate-500 p-1">
+                      {collapsedMonths[month] ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  {!collapsedMonths[month] && (
+                    <div className="history-grid">
                     {(reports as any[]).map((report: any) => (
                       <div key={report.id} className="history-card">
                         <div className="history-card-img-wrapper cursor-pointer" onClick={() => setViewingImage(report.image_url)}>
@@ -848,6 +863,7 @@ export default function SafetyHubPage() {
                       </div>
                     ))}
                   </div>
+                  )}
                 </div>
               ))
             )}
