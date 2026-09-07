@@ -1,15 +1,41 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Shield, Search, Bell, LogOut, Calendar, Users, List, Filter, AlertTriangle, CheckCircle, Package, ShoppingCart, TrendingUp, TrendingDown, FileEdit, Activity, Plus, BarChart as BarChartIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
 import { safetyData, getSafetyStats } from './data';
 
 export default function SafetyPPEDashboard() {
-  const stats = getSafetyStats();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+
+  const allTeams = useMemo(() => safetyData.map(t => t.name), []);
+  const allCategories = useMemo(() => Array.from(new Set(safetyData.flatMap(t => t.equipment.map(e => e.category)))).sort(), []);
+
+  const filteredData = useMemo(() => {
+    return safetyData.map(team => {
+      if (selectedTeam !== 'all' && team.name !== selectedTeam) {
+        return { ...team, equipment: [] };
+      }
+      const filteredEquipment = team.equipment.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+        let matchesStatus = true;
+        if (selectedStatus === 'ready') matchesStatus = (item.actual - item.damaged) > 0;
+        else if (selectedStatus === 'damaged') matchesStatus = item.damaged > 0;
+        else if (selectedStatus === 'missing') matchesStatus = item.missing > 0;
+        return matchesSearch && matchesCategory && matchesStatus;
+      });
+      return { ...team, equipment: filteredEquipment };
+    }).filter(team => selectedTeam === 'all' || team.name === selectedTeam);
+  }, [searchQuery, selectedTeam, selectedCategory, selectedStatus]);
+
+  const stats = useMemo(() => getSafetyStats(filteredData), [filteredData]);
   
   // Prepare data for the Bar Chart (Status per team)
-  const barChartData = safetyData.map(team => {
+  const barChartData = filteredData.map(team => {
     let ready = 0;
     let damaged = 0;
     let missing = 0;
@@ -41,7 +67,7 @@ export default function SafetyPPEDashboard() {
 
   // Prepare table data for missing/damaged
   const missingDamagedList: any[] = [];
-  safetyData.forEach(team => {
+  filteredData.forEach(team => {
     team.equipment.forEach(item => {
       if (item.missing > 0 || item.damaged > 0) {
         missingDamagedList.push({
@@ -82,6 +108,8 @@ export default function SafetyPPEDashboard() {
             <input 
               type="text" 
               placeholder="ค้นหาอุปกรณ์, รายงาน..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2 w-full md:w-64 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"
             />
           </div>
@@ -108,10 +136,15 @@ export default function SafetyPPEDashboard() {
           <label className="block text-xs font-medium text-slate-500 mb-1">หน่วยงาน / ทีมงาน</label>
           <div className="relative">
             <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <select className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded-lg text-sm appearance-none bg-slate-50">
-              <option>-- ทุกหน่วยงาน --</option>
-              <option>นายขวัญนคร</option>
-              <option>นายวีรพัฒน์</option>
+            <select 
+              className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded-lg text-sm appearance-none bg-slate-50"
+              value={selectedTeam}
+              onChange={(e) => setSelectedTeam(e.target.value)}
+            >
+              <option value="all">-- ทุกหน่วยงาน --</option>
+              {allTeams.map(team => (
+                <option key={team} value={team}>{team}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -119,10 +152,15 @@ export default function SafetyPPEDashboard() {
           <label className="block text-xs font-medium text-slate-500 mb-1">ประเภทอุปกรณ์</label>
           <div className="relative">
             <List className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <select className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded-lg text-sm appearance-none bg-slate-50">
-              <option>-- ทุกประเภท --</option>
-              <option>ป้องกันศีรษะ</option>
-              <option>ป้องกันมือและแขน</option>
+            <select 
+              className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded-lg text-sm appearance-none bg-slate-50"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="all">-- ทุกประเภท --</option>
+              {allCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -130,10 +168,15 @@ export default function SafetyPPEDashboard() {
           <label className="block text-xs font-medium text-slate-500 mb-1">สถานะ</label>
           <div className="relative">
             <Activity className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <select className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded-lg text-sm appearance-none bg-slate-50">
-              <option>-- ทุกสถานะ --</option>
-              <option>พร้อมใช้งาน</option>
-              <option>ชำรุด</option>
+            <select 
+              className="pl-9 pr-4 py-2 w-full border border-slate-200 rounded-lg text-sm appearance-none bg-slate-50"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+            >
+              <option value="all">-- ทุกสถานะ --</option>
+              <option value="ready">พร้อมใช้งาน</option>
+              <option value="missing">ขาดแคลน</option>
+              <option value="damaged">ชำรุด</option>
             </select>
           </div>
         </div>

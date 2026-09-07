@@ -217,13 +217,13 @@ export const safetyData: TeamPPE[] = [
   }
 ];
 
-export const getSafetyStats = () => {
+export const getSafetyStats = (data: TeamPPE[] = safetyData) => {
   let totalItems = 0;
   let readyItems = 0;
   let damagedItems = 0;
   let missingItems = 0;
 
-  safetyData.forEach(team => {
+  data.forEach(team => {
     team.equipment.forEach(item => {
       totalItems += item.standard;
       readyItems += (item.actual - item.damaged);
@@ -237,6 +237,6 @@ export const getSafetyStats = () => {
     readyItems,
     damagedItems,
     missingItems,
-    totalTeams: safetyData.length
+    totalTeams: data.length
   };
 };
