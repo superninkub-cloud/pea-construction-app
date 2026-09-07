@@ -312,7 +312,18 @@ export default function SafetyHubPage() {
         })
       });
       
-      if (!notifyRes.ok) throw new Error("Failed to send LINE notification");
+      if (!notifyRes.ok) {
+        let errMsg = "Failed to send LINE notification";
+        try {
+          const errData = await notifyRes.json();
+          if (errData.details) {
+            errMsg += ": " + JSON.stringify(errData.details);
+          } else if (errData.error) {
+            errMsg += ": " + errData.error;
+          }
+        } catch (e) {}
+        throw new Error(errMsg);
+      }
       alert("ส่งแจ้งเตือนผ่าน LINE เรียบร้อยแล้ว!");
     } catch (err: any) {
       console.error("Error sending LINE:", err);
@@ -333,7 +344,18 @@ export default function SafetyHubPage() {
         })
       });
       
-      if (!notifyRes.ok) throw new Error("Failed to send LINE notification");
+      if (!notifyRes.ok) {
+        let errMsg = "Failed to send LINE notification";
+        try {
+          const errData = await notifyRes.json();
+          if (errData.details) {
+            errMsg += ": " + JSON.stringify(errData.details);
+          } else if (errData.error) {
+            errMsg += ": " + errData.error;
+          }
+        } catch (e) {}
+        throw new Error(errMsg);
+      }
       alert("ส่งแจ้งเตือนผ่าน LINE เรียบร้อยแล้ว!");
     } catch (err: any) {
       console.error("Error sending LINE:", err);
