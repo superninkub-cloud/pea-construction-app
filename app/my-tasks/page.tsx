@@ -496,21 +496,7 @@ export default function MyTasksDashboard() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-4 h-full mt-auto">
-                <button className="flex flex-col items-center justify-center gap-1 bg-emerald-50 border border-emerald-100 text-emerald-700 hover:bg-emerald-100 py-3 rounded-xl font-bold shadow-sm transition-colors h-20">
-                  <div className="flex items-center gap-1.5">
-                    <Phone size={18} /> โทรหาหัวหน้า
-                  </div>
-                  <div className="text-[10px] font-normal text-emerald-600/70 block">ติดต่อหัวหน้าได้ทันที</div>
-                </button>
-                <button className="flex flex-col items-center justify-center gap-1 bg-rose-50 border border-rose-100 text-rose-700 hover:bg-rose-100 py-3 rounded-xl font-bold shadow-sm transition-colors h-20">
-                  <div className="flex items-center gap-1.5">
-                    <MessageSquareWarning size={18} /> แจ้งติดปัญหา
-                  </div>
-                  <div className="text-[10px] font-normal text-rose-600/70 block">หากมีปัญหาทำงาน</div>
-                </button>
-              </div>
+
             </div>
           )}
         </div>
@@ -592,23 +578,12 @@ export default function MyTasksDashboard() {
                   <input required value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} type="text" placeholder="เช่น ตรวจสอบมิเตอร์..." className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">สถานที่ <span className="text-rose-500">*</span></label>
-                  <input required value={newTask.location} onChange={e => setNewTask({...newTask, location: e.target.value})} type="text" placeholder="เช่น อาคาร C..." className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">กำหนดเวลาเริ่มต้น <span className="text-rose-500">*</span></label>
+                  <input required value={newTask.location} onChange={e => setNewTask({...newTask, location: e.target.value})} type="text" placeholder="เช่น 09:00 น." className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">เวลา <span className="text-rose-500">*</span></label>
-                    <input required value={newTask.time} onChange={e => setNewTask({...newTask, time: e.target.value})} type="text" placeholder="เช่น วันนี้ 15:00 น." className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">ประเภทงาน <span className="text-rose-500">*</span></label>
-                    <select value={newTask.type} onChange={e => setNewTask({...newTask, type: e.target.value as any})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
-                      <option value="maintenance">ซ่อมบำรุง</option>
-                      <option value="survey">สำรวจ</option>
-                      <option value="inspection">ตรวจสอบ</option>
-                      <option value="other">อื่นๆ</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">กำหนดเวลาแล้วเสร็จ <span className="text-rose-500">*</span></label>
+                  <input required value={newTask.time} onChange={e => setNewTask({...newTask, time: e.target.value})} type="text" placeholder="เช่น วันนี้ 15:00 น." className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">ผู้รับผิดชอบ <span className="text-rose-500">*</span></label>
