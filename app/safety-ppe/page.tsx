@@ -236,7 +236,9 @@ export default function SafetyPPEDashboard() {
             <div className="hidden sm:block text-left">
               <p className="text-sm font-bold text-slate-800 leading-tight">ADMIN</p>
             </div>
-            <LogOut size={18} className="text-rose-500 hover:text-rose-600 ml-2" title="ออกจากระบบ" />
+            <div title="ออกจากระบบ" className="flex items-center">
+              <LogOut size={18} className="text-rose-500 hover:text-rose-600 ml-2" />
+            </div>
           </div>
         </div>
       </header>
