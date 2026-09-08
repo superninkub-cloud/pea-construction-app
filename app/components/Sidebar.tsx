@@ -26,10 +26,10 @@ export default function Sidebar() {
   const SectionHeader = ({ id, title, isFirst = false }: { id: string, title: string, isFirst?: boolean }) => (
     <div 
       onClick={(e) => { e.stopPropagation(); toggleSection(id); }}
-      className={`px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex justify-between items-center cursor-pointer hover:text-slate-500 transition-colors group ${isFirst ? 'mt-4' : 'mt-6'}`}
+      className={`px-3 text-[14px] font-bold text-amber-700 mb-2 flex justify-between items-center cursor-pointer hover:text-amber-800 transition-colors group ${isFirst ? 'mt-4' : 'mt-6'}`}
     >
       <span>{title}</span>
-      {expanded[id] ? <ChevronDown size={14} className="opacity-50 group-hover:opacity-100" /> : <ChevronRight size={14} className="opacity-50 group-hover:opacity-100" />}
+      {expanded[id] ? <ChevronDown size={16} className="opacity-70 group-hover:opacity-100" /> : <ChevronRight size={16} className="opacity-70 group-hover:opacity-100" />}
     </div>
   );
 
