@@ -42,6 +42,19 @@ const formatThaiDateText = (dateString: string, prefix: string, includeTime: boo
   return `${prefix}วันที่ ${day} ${month} ${year}`;
 };
 
+const formatThaiDateShort = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  
+  const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = (date.getFullYear() + 543).toString().slice(-2);
+  
+  return `${day} ${month} ${year}`;
+};
+
 export default function MyTasksDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isManagerMode, setIsManagerMode] = useState(false);
@@ -296,17 +309,23 @@ export default function MyTasksDashboard() {
                             รับผิดชอบ: {task.assigneeName || 'ไม่ระบุ'}
                           </span>
                         </h3>
-                        <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
-                          <CalendarDays size={14} className="shrink-0" />
-                          <span className="truncate whitespace-normal">{formatThaiDateText(task.location, 'วันที่มอบหมายงาน', false)}</span>
+                        <div className="flex flex-col mt-2">
+                          <span className="text-[11px] text-slate-400 font-medium ml-0.5">วันที่มอบหมาย</span>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                            <CalendarDays size={13} className="shrink-0" />
+                            <span className="truncate whitespace-normal">{formatThaiDateShort(task.location)}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between xl:justify-end gap-4 md:gap-6 w-full xl:w-auto mt-2 xl:mt-0 shrink-0">
                       <div className="flex items-center gap-4 flex-wrap">
-                        <div className="flex items-center gap-1.5 text-sm font-medium text-slate-700 whitespace-nowrap bg-slate-100 px-3 py-1 rounded-md">
-                          <CalendarIcon size={14} className="text-rose-500 shrink-0" />
-                          {formatThaiDateText(task.time, 'กำหนดแล้วเสร็จ', true)}
+                        <div className="flex flex-col">
+                          <span className="text-[11px] text-rose-400 font-medium ml-1">กำหนดเสร็จ</span>
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-md whitespace-nowrap shrink-0 mt-0.5">
+                            <CalendarIcon size={13} className="shrink-0" />
+                            <span>{formatThaiDateShort(task.time)}</span>
+                          </div>
                         </div>
                         {getStatusBadge(task.status)}
                       </div>
@@ -381,16 +400,22 @@ export default function MyTasksDashboard() {
                               รับผิดชอบ: {task.assigneeName || 'ไม่ระบุ'}
                             </span>
                           </h3>
-                          <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
-                            <CalendarDays size={14} className="shrink-0" />
-                            <span className="truncate whitespace-normal">{formatThaiDateText(task.location, 'วันที่มอบหมายงาน', false)}</span>
+                          <div className="flex flex-col mt-2">
+                            <span className="text-[11px] text-slate-400 font-medium ml-0.5">วันที่มอบหมาย</span>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                              <CalendarDays size={13} className="shrink-0" />
+                              <span className="truncate whitespace-normal">{formatThaiDateShort(task.location)}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center justify-between xl:justify-end gap-4 md:gap-6 w-full xl:w-auto mt-2 xl:mt-0 shrink-0">
-                        <div className="flex items-center gap-1.5 text-sm font-medium text-rose-600 bg-rose-50 px-3 py-1 rounded-md whitespace-nowrap shrink-0">
-                          <CalendarIcon size={14} className="shrink-0" />
-                          {formatThaiDateText(task.time, 'กำหนดแล้วเสร็จ', true)}
+                        <div className="flex flex-col">
+                          <span className="text-[11px] text-rose-400 font-medium ml-1">กำหนดเสร็จ</span>
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-md whitespace-nowrap shrink-0 mt-0.5">
+                            <CalendarIcon size={13} className="shrink-0" />
+                            <span>{formatThaiDateShort(task.time)}</span>
+                          </div>
                         </div>
                         {getStatusBadge(task.status)}
                         
