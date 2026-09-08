@@ -457,7 +457,7 @@ export default function SafetyPPEDashboard() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left Side Lists */}
         <div className="w-full lg:w-2/5">
-          <div className="flex items-center gap-2 mb-4 pb-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex flex-wrap items-center gap-2 mb-4 pb-2">
             <button 
               onClick={() => setActiveTab('latest')}
               className={`text-sm px-4 py-2 rounded-full whitespace-nowrap outline-none focus:outline-none border-none transition-all ${activeTab === 'latest' ? 'bg-indigo-100 text-indigo-700 font-bold shadow-sm' : 'bg-transparent text-slate-500 hover:bg-slate-100'}`}>
