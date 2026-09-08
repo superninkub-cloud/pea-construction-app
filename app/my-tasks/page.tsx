@@ -293,7 +293,6 @@ export default function MyTasksDashboard() {
                           )}
                         </>
                       ) : (
-                      ) : (
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={() => handleToggleTrack(task.id)} 
@@ -518,7 +517,6 @@ export default function MyTasksDashboard() {
             </div>
             <div className="p-6 overflow-y-auto">
               <form id="update-form" onSubmit={handleUpdateTask} className="space-y-4">
-                <div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">สถานะงาน <span className="text-rose-500">*</span></label>
                   <div className="flex gap-4">
