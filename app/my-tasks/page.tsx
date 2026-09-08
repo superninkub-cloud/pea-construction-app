@@ -34,6 +34,7 @@ export default function MyTasksDashboard() {
   const [updateStatus, setUpdateStatus] = useState<'completed' | 'not_completed'>('completed');
   
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'today' | 'completed' | 'tracked'>('all');
   const [newTask, setNewTask] = useState<Partial<Task>>({
     title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false, assigneeName: ''
   });
@@ -61,8 +62,16 @@ export default function MyTasksDashboard() {
   const completedCount = tasks.filter(t => t.status === 'completed' || t.status === 'waiting_for_review').length;
   const trackedCount = tasks.filter(t => t.isTracked).length;
 
-  const normalTasks = tasks.filter(t => !t.isTracked);
-  const trackedTasks = tasks.filter(t => t.isTracked);
+  const filteredTasks = tasks.filter(t => {
+    if (filterStatus === 'all') return true;
+    if (filterStatus === 'today') return t.time.includes('วันนี้') && !t.isTracked;
+    if (filterStatus === 'completed') return t.status === 'completed' || t.status === 'waiting_for_review';
+    if (filterStatus === 'tracked') return t.isTracked;
+    return true;
+  });
+
+  const normalTasks = filteredTasks.filter(t => !t.isTracked);
+  const trackedTasks = filteredTasks.filter(t => t.isTracked);
 
   // Actions
   const handleStartTask = (id: string) => {
@@ -175,7 +184,7 @@ export default function MyTasksDashboard() {
             <div className="hidden md:flex flex-col items-end">
               <p className="text-sm font-bold text-slate-800 leading-tight">ADMIN</p>
             </div>
-            <button className="flex items-center gap-2 text-sm text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-md transition-colors border border-rose-100 font-medium ml-2">
+            <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 text-sm text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-md transition-colors border border-rose-100 font-medium ml-2">
               <LogOut size={16} />
               <span className="hidden sm:inline">ออกจากระบบ</span>
             </button>
@@ -186,8 +195,8 @@ export default function MyTasksDashboard() {
       <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full pb-24 lg:pb-32">
         
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 cursor-pointer">
+          <div onClick={() => setFilterStatus('all')} className={`p-4 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 ${filterStatus === 'all' ? 'bg-blue-100 border-2 border-blue-400 shadow-md' : 'bg-blue-50 border border-blue-100 shadow-sm'}`}>
             <div className="bg-blue-500 text-white p-3 rounded-xl shadow-sm">
               <ClipboardList size={28} />
             </div>
@@ -196,7 +205,7 @@ export default function MyTasksDashboard() {
               <p className="text-2xl md:text-3xl font-black text-slate-800 leading-none">{allTasksCount} <span className="text-xs md:text-sm font-normal text-slate-500">งาน</span></p>
             </div>
           </div>
-          <div className="bg-rose-50 border border-rose-100 p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div onClick={() => setFilterStatus('today')} className={`p-4 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 ${filterStatus === 'today' ? 'bg-rose-100 border-2 border-rose-400 shadow-md' : 'bg-rose-50 border border-rose-100 shadow-sm'}`}>
             <div className="bg-rose-500 text-white p-3 rounded-xl shadow-sm">
               <CalendarIcon size={28} />
             </div>
@@ -205,7 +214,7 @@ export default function MyTasksDashboard() {
               <p className="text-2xl md:text-3xl font-black text-slate-800 leading-none">{dueTodayCount} <span className="text-xs md:text-sm font-normal text-slate-500">งาน</span></p>
             </div>
           </div>
-          <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div onClick={() => setFilterStatus('completed')} className={`p-4 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 ${filterStatus === 'completed' ? 'bg-emerald-100 border-2 border-emerald-400 shadow-md' : 'bg-emerald-50 border border-emerald-100 shadow-sm'}`}>
             <div className="bg-emerald-500 text-white p-3 rounded-xl shadow-sm">
               <CheckCircle size={28} />
             </div>
@@ -214,7 +223,7 @@ export default function MyTasksDashboard() {
               <p className="text-2xl md:text-3xl font-black text-slate-800 leading-none">{completedCount} <span className="text-xs md:text-sm font-normal text-slate-500">งาน</span></p>
             </div>
           </div>
-          <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div onClick={() => setFilterStatus('tracked')} className={`p-4 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 ${filterStatus === 'tracked' ? 'bg-amber-100 border-2 border-amber-400 shadow-md' : 'bg-amber-50 border border-amber-100 shadow-sm'}`}>
             <div className="bg-amber-500 text-white p-3 rounded-xl shadow-sm">
               <AlertCircle size={28} />
             </div>
@@ -264,11 +273,9 @@ export default function MyTasksDashboard() {
                       <div>
                         <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                           {task.title}
-                          {isManagerMode && (
-                            <span className="text-xs font-normal text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
-                              รับผิดชอบ: สมชาย
-                            </span>
-                          )}
+                          <span className="text-xs font-normal text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                            รับผิดชอบ: {task.assigneeName || 'ไม่ระบุ'}
+                          </span>
                         </h3>
                         <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
                           <MapPin size={14} />
@@ -351,11 +358,9 @@ export default function MyTasksDashboard() {
                         <div>
                           <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                             {task.title}
-                            {isManagerMode && (
-                              <span className="text-xs font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-                                รับผิดชอบ: สมชาย
-                              </span>
-                            )}
+                            <span className="text-xs font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200">
+                              รับผิดชอบ: {task.assigneeName || 'ไม่ระบุ'}
+                            </span>
                           </h3>
                           <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
                             <MapPin size={14} />
