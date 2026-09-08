@@ -14,6 +14,7 @@ type AggregatedEquipment = {
   name: string;
   category: string;
   count: number;
+  standard: number;
   unit: string;
   userName: string;
   status: 'ready' | 'pending' | 'damaged';
@@ -119,6 +120,7 @@ export default function SafetyPPEDashboard() {
             name: item.name,
             category: item.category,
             count: readyCount,
+            standard: item.standard,
             unit: item.unit,
             userName: teamNameShort,
             status: 'ready',
@@ -138,6 +140,7 @@ export default function SafetyPPEDashboard() {
               name: item.name,
               category: item.category,
               count: pendingCount,
+              standard: item.standard,
               unit: item.unit,
               userName: teamNameShort,
               status: 'pending',
@@ -151,6 +154,7 @@ export default function SafetyPPEDashboard() {
               name: item.name,
               category: item.category,
               count: damagedCount,
+              standard: item.standard,
               unit: item.unit,
               userName: teamNameShort,
               status: 'damaged',
@@ -456,6 +460,8 @@ export default function SafetyPPEDashboard() {
                         <td className="px-5 py-3 text-slate-500">{item.category}</td>
                         <td className="px-5 py-3 text-center">
                           <span className="font-black text-slate-700 text-base">{item.count}</span>
+                          <span className="text-slate-400 mx-1">/</span>
+                          <span className="text-slate-500 font-medium">{item.standard}</span>
                           <span className="text-slate-400 text-xs ml-1">{item.unit}</span>
                         </td>
                         <td className="px-5 py-3 text-slate-700 font-medium">{item.userName}</td>
