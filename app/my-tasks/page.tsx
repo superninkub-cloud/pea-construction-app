@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Bell, MapPin, Calendar as CalendarIcon, Play, Edit3, ChevronDown, 
   Check, FileText, Wrench, Camera, ClipboardList, AlertCircle, Phone, 
-  CheckCircle, ChevronRight, MessageSquareWarning, Megaphone, Plus, X, List
+  CheckCircle, ChevronRight, MessageSquareWarning, Megaphone, Plus, X, List,
+  LogOut, Trash2
 } from 'lucide-react';
 import { mockTasks, Task, TaskStatus, TaskPriority } from './data';
 
@@ -16,6 +17,7 @@ export default function MyTasksDashboard() {
   // Modals state
   const [showUpdateModal, setShowUpdateModal] = useState<string | null>(null);
   const [updateNote, setUpdateNote] = useState('');
+  const [updateStatus, setUpdateStatus] = useState<'completed' | 'not_completed'>('completed');
   
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTask, setNewTask] = useState<Partial<Task>>({
@@ -56,9 +58,23 @@ export default function MyTasksDashboard() {
   const handleUpdateTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (showUpdateModal) {
-      setTasks(prev => prev.map(t => t.id === showUpdateModal ? { ...t, status: 'waiting_for_review' } : t));
+      if (updateStatus === 'not_completed' && !updateNote.trim()) {
+        alert('กรุณาชี้แจงสาเหตุที่ทำงานยังไม่เสร็จ');
+        return;
+      }
+      setTasks(prev => prev.map(t => 
+        t.id === showUpdateModal 
+          ? { ...t, status: updateStatus === 'completed' ? 'waiting_for_review' : 'in_progress', note: updateNote } 
+          : t
+      ));
       setShowUpdateModal(null);
       setUpdateNote('');
+    }
+  };
+
+  const handleDeleteTask = (id: string) => {
+    if (confirm('คุณต้องการลบงานนี้ใช่หรือไม่?')) {
+      setTasks(prev => prev.filter(t => t.id !== id));
     }
   };
 
@@ -140,17 +156,14 @@ export default function MyTasksDashboard() {
             <Bell size={20} className="text-slate-600" />
             <span className="absolute top-0 right-0 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">3</span>
           </button>
-          <div className="flex items-center gap-3 border border-slate-200 rounded-full p-1 pr-4 bg-white shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
-            <img 
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-              alt="Profile" 
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
-            />
-            <div className="hidden md:block">
-              <p className="text-sm font-bold text-slate-800 leading-tight">สิริวิชญ์ ภิรมย์มาก</p>
-              <p className="text-xs text-slate-500 leading-tight">{isManagerMode ? 'ผู้จัดการแผนก' : 'พนักงาน บ ประเภท 1'}</p>
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex flex-col items-end">
+              <p className="text-sm font-bold text-slate-800 leading-tight">ADMIN</p>
             </div>
-            <ChevronDown size={16} className="text-slate-400 ml-1 hidden md:block" />
+            <button className="flex items-center gap-2 text-sm text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-md transition-colors border border-rose-100 font-medium ml-2">
+              <LogOut size={16} />
+              <span className="hidden sm:inline">ออกจากระบบ</span>
+            </button>
           </div>
         </div>
       </div>
@@ -280,13 +293,22 @@ export default function MyTasksDashboard() {
                           )}
                         </>
                       ) : (
-                        <button 
-                          onClick={() => handleToggleTrack(task.id)} 
-                          className="flex items-center gap-1 text-amber-600 hover:bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
-                        >
-                          <Megaphone size={14} />
-                          ติดตามงาน
-                        </button>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => handleToggleTrack(task.id)} 
+                            className="flex items-center gap-1 text-amber-600 hover:bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                          >
+                            <Megaphone size={14} />
+                            ติดตามงาน
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteTask(task.id)} 
+                            className="flex items-center gap-1 text-rose-500 hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                          >
+                            <Trash2 size={14} /> ลบ
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -335,12 +357,20 @@ export default function MyTasksDashboard() {
                         {getStatusBadge(task.status)}
                         
                         {isManagerMode ? (
-                          <button 
-                            onClick={() => handleToggleTrack(task.id)} 
-                            className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                          >
-                            เลิกติดตาม
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => handleToggleTrack(task.id)} 
+                              className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                            >
+                              เลิกติดตาม
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteTask(task.id)} 
+                              className="flex items-center gap-1 text-rose-500 hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                            >
+                              <Trash2 size={14} /> ลบ
+                            </button>
+                          </div>
                         ) : (
                           <>
                             {task.status === 'in_progress' && (
@@ -489,12 +519,26 @@ export default function MyTasksDashboard() {
             <div className="p-6 overflow-y-auto">
               <form id="update-form" onSubmit={handleUpdateTask} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">ผลการดำเนินงาน / หมายเหตุ</label>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">สถานะงาน <span className="text-rose-500">*</span></label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-100 flex-1 justify-center transition-colors hover:bg-emerald-100">
+                      <input type="radio" name="status" value="completed" checked={updateStatus === 'completed'} onChange={() => setUpdateStatus('completed')} className="text-emerald-500 focus:ring-emerald-500 w-4 h-4" />
+                      <span className="text-sm font-bold text-emerald-700">เสร็จแล้ว</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer bg-rose-50 px-4 py-2 rounded-lg border border-rose-100 flex-1 justify-center transition-colors hover:bg-rose-100">
+                      <input type="radio" name="status" value="not_completed" checked={updateStatus === 'not_completed'} onChange={() => setUpdateStatus('not_completed')} className="text-rose-500 focus:ring-rose-500 w-4 h-4" />
+                      <span className="text-sm font-bold text-rose-700">ยังไม่เสร็จ</span>
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ผลการดำเนินงาน / ชี้แจงสาเหตุ <span className="text-rose-500">*</span></label>
                   <textarea 
-                    required
+                    required={updateStatus === 'not_completed'}
                     value={updateNote}
                     onChange={(e) => setUpdateNote(e.target.value)}
-                    placeholder="พิมพ์รายละเอียดการทำงาน หรือปัญหาที่พบ..."
+                    placeholder="พิมพ์รายละเอียดการทำงาน หรือปัญหาที่ทำให้งานยังไม่เสร็จ..."
                     rows={4}
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"
                   ></textarea>
