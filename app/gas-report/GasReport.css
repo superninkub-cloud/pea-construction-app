@@ -385,6 +385,6 @@
 }
 @media print {
   body, .official-form, .official-table, th, td, div, span {
-    font-family: 'Prompt', sans-serif !important;
+    font-family: 'TH Sarabun PSK', 'Sarabun', sans-serif !important;
   }
 }
