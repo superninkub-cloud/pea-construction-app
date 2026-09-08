@@ -263,7 +263,7 @@
   }
   
   .official-form {
-    transform: scale(0.92);
+    transform: scale(0.88);
     transform-origin: top center;
     color: #000 !important;
   }
@@ -347,7 +347,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .official-table th,

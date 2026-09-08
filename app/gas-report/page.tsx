@@ -614,8 +614,8 @@ export default function GasReportPage() {
                               <th rowSpan={2} style={{ width: '90px' }}>ชั่วโมงการทำงาน<br/>ของเครื่องจักร</th>
                               <th rowSpan={2} style={{ width: '90px' }}>จำนวนเชื้อเพลิง<br/>ที่เติม (ลิตร)</th>
                               <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
-                              <th rowSpan={2} style={{ width: '120px' }}>รายการซ่อม</th>
-                              <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
+                              <th rowSpan={2} style={{ width: '100px' }}>รายการซ่อม</th>
+                              <th rowSpan={2} style={{ width: '180px' }}>หมายเหตุ</th>
                             </tr>
                             <tr>
                               <th style={{ width: '60px' }}>ไป</th>
@@ -634,7 +634,7 @@ export default function GasReportPage() {
                                 <td className="text-center">{r.fuel_liters ? Number(r.fuel_liters).toLocaleString('en-US', { maximumFractionDigits: 3 }) : ""}</td>
                                 <td className="text-right">{r.fuel_cost ? Number(r.fuel_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}</td>
                                 <td className="text-left">{r.repair_details || ""}</td>
-                                <td className="text-right">{r.repair_cost ? Number(r.repair_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}</td>
+                                <td className="text-left" style={{ fontSize: '13px' }}>{r.notes || ""}</td>
                               </tr>
                             ))}
                             {/* Fill up to exactly 10 rows per page */}
@@ -653,18 +653,16 @@ export default function GasReportPage() {
                                 {chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0) > 0 ? Number(chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
                               </td>
                               <td></td>
-                              <td className="text-right font-bold">
-                                {chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0) > 0 ? Number(chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
-                              </td>
+                              <td></td>
                             </tr>
                           </tbody>
                         </table>
                         
-                        <div style={{ marginTop: '8px', marginLeft: '40px', fontSize: '16px' }}>
+                        <div style={{ marginTop: '4px', marginLeft: '40px', fontSize: '16px' }}>
                           จึงเรียนมาเพื่อโปรดทราบ
                         </div>
 
-                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '20px' }}>
+                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '10px' }}>
                           <div className="signature-section flex-between">
                             <div className="signature-box" style={{ flex: 1 }}>
                               <div>(.......................................................................................)</div>
