@@ -58,6 +58,7 @@ const formatThaiDateShort = (dateString: string) => {
 export default function MyTasksDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isManagerMode, setIsManagerMode] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Modals state
@@ -74,6 +75,12 @@ export default function MyTasksDashboard() {
   });
 
   useEffect(() => {
+    const role = sessionStorage.getItem("pea_role");
+    setUserRole(role);
+    if (role === 'admin') {
+      setIsManagerMode(true);
+    }
+
     // Load from local storage
     const saved = localStorage.getItem('pea_tasks');
     if (saved) {
@@ -199,36 +206,22 @@ export default function MyTasksDashboard() {
         </div>
         <div className="flex items-center gap-4 self-end sm:self-auto">
           {/* Mode Toggle */}
-          <div className="bg-slate-100 p-1 rounded-lg flex text-sm font-medium">
-            <button 
-              onClick={() => setIsManagerMode(false)}
-              className={`px-3 py-1.5 rounded-md transition-colors ${!isManagerMode ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              พนักงาน
-            </button>
-            <button 
-              onClick={() => setIsManagerMode(true)}
-              className={`px-3 py-1.5 rounded-md transition-colors ${isManagerMode ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              หัวหน้างาน
-            </button>
-          </div>
-
-          <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-
-          <button className="relative p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors hidden sm:block">
-            <Bell size={20} className="text-slate-600" />
-            <span className="absolute top-0 right-0 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">3</span>
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex flex-col items-end">
-              <p className="text-sm font-bold text-slate-800 leading-tight">ADMIN</p>
+          {userRole === 'admin' && (
+            <div className="bg-slate-100 p-1 rounded-lg flex text-sm font-medium">
+              <button 
+                onClick={() => setIsManagerMode(false)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${!isManagerMode ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                พนักงาน
+              </button>
+              <button 
+                onClick={() => setIsManagerMode(true)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${isManagerMode ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                หัวหน้างาน
+              </button>
             </div>
-            <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 text-sm text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-md transition-colors border border-rose-100 font-medium ml-2">
-              <LogOut size={16} />
-              <span className="hidden sm:inline">ออกจากระบบ</span>
-            </button>
-          </div>
+          )}
         </div>
       </div>
 

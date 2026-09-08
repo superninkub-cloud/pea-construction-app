@@ -7,6 +7,7 @@ export type EquipmentItem = {
   actual: number;
   missing: number;
   damaged: number;
+  pending?: number;
   remarks?: string;
 };
 
