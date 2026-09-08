@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, Plus, X, MoreVertical, HardHat, Calendar, ChevronDown, 
   List, Grid, ShieldAlert, CheckCircle, AlertTriangle, Box, RefreshCw,
-  XCircle, Filter, Edit3, Image as ImageIcon, ChevronLeft, ChevronRight
+  XCircle, Filter, Edit3, Image as ImageIcon, ChevronLeft, ChevronRight, Wrench
 } from 'lucide-react';
 import { safetyData } from './data';
 
