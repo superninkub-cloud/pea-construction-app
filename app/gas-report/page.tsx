@@ -623,13 +623,13 @@ export default function GasReportPage() {
                                 <td className="text-center">{getDayOnly(r.usage_date)}</td>
                                 <td className="text-center">{r.driver_name}</td>
                                 <td className="text-left">{r.work_location || ""}</td>
-                                <td className="text-center">{r.odo_start || ""}</td>
-                                <td className="text-center">{r.odo_end || ""}</td>
-                                <td className="text-center">{r.machine_hours || ""}</td>
-                                <td className="text-center">{r.fuel_liters || ""}</td>
-                                <td className="text-right">{r.fuel_cost ? r.fuel_cost.toFixed(2) : ""}</td>
+                                <td className="text-center">{r.odo_start ? Number(r.odo_start).toLocaleString('en-US') : ""}</td>
+                                <td className="text-center">{r.odo_end ? Number(r.odo_end).toLocaleString('en-US') : ""}</td>
+                                <td className="text-center">{r.machine_hours ? Number(r.machine_hours).toLocaleString('en-US') : ""}</td>
+                                <td className="text-center">{r.fuel_liters ? Number(r.fuel_liters).toLocaleString('en-US', { maximumFractionDigits: 3 }) : ""}</td>
+                                <td className="text-right">{r.fuel_cost ? Number(r.fuel_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}</td>
                                 <td className="text-left">{r.repair_details || ""}</td>
-                                <td className="text-right">{r.repair_cost ? r.repair_cost.toFixed(2) : ""}</td>
+                                <td className="text-right">{r.repair_cost ? Number(r.repair_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}</td>
                               </tr>
                             ))}
                             {/* Fill up to exactly 10 rows per page */}
@@ -642,14 +642,14 @@ export default function GasReportPage() {
                             <tr>
                               <td colSpan={6} className="text-right font-bold" style={{ paddingRight: '16px' }}>รวม</td>
                               <td className="text-center font-bold">
-                                {chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0).toFixed(2) : ""}
+                                {chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0) > 0 ? Number(chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0)).toLocaleString('en-US', { maximumFractionDigits: 3 }) : ""}
                               </td>
                               <td className="text-right font-bold">
-                                {chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0).toFixed(2) : ""}
+                                {chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0) > 0 ? Number(chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
                               </td>
                               <td></td>
                               <td className="text-right font-bold">
-                                {chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0).toFixed(2) : ""}
+                                {chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0) > 0 ? Number(chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
                               </td>
                             </tr>
                           </tbody>

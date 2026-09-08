@@ -383,3 +383,8 @@
   font-size: 12px;
   color: #666;
 }
+@media print {
+  body, .official-form, .official-table, th, td, div, span {
+    font-family: 'Prompt', sans-serif !important;
+  }
+}
