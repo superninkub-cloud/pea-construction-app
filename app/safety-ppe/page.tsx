@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, Plus, X, MoreVertical, HardHat, ChevronDown, 
   List, Grid, CheckCircle, AlertTriangle, Box, RefreshCw,
-  Filter, Edit3, ChevronLeft, ChevronRight, Wrench, LogOut, Check, Save
+  Filter, Edit3, ChevronLeft, ChevronRight, Wrench, LogOut, Check, Save, Trash2
 } from 'lucide-react';
 import { safetyData } from './data';
 
@@ -57,6 +57,10 @@ export default function SafetyPPEDashboard() {
   const [updateAmount, setUpdateAmount] = useState(1);
   const [updateTargetStatus, setUpdateTargetStatus] = useState<'ready' | 'damaged'>('ready');
 
+  // Edit Standard states
+  const [editStandardItem, setEditStandardItem] = useState<AggregatedEquipment | null>(null);
+  const [editStandardValue, setEditStandardValue] = useState<number | string>('');
+
   useEffect(() => {
     const saved = localStorage.getItem('pea_safety_data_v3');
     if (saved) {
@@ -108,6 +112,39 @@ export default function SafetyPPEDashboard() {
     
     saveLocalData(newData);
     setUpdateItem(null);
+  };
+
+  const handleOpenEditStandard = (item: AggregatedEquipment) => {
+    setEditStandardItem(item);
+    setEditStandardValue(item.standard);
+  };
+
+  const handleSaveStandard = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editStandardItem) return;
+    
+    const newData = [...localData];
+    const teamIndex = newData.findIndex((t: any) => t.id === editStandardItem.teamId);
+    if (teamIndex >= 0) {
+      const eqIndex = newData[teamIndex].equipment.findIndex((e: any) => e.id === editStandardItem.originalItemId);
+      if (eqIndex >= 0) {
+        const val = parseInt(editStandardValue.toString());
+        newData[teamIndex].equipment[eqIndex].standard = isNaN(val) ? 0 : val;
+        saveLocalData(newData);
+      }
+    }
+    setEditStandardItem(null);
+  };
+
+  const handleDeleteItem = (item: AggregatedEquipment) => {
+    if (window.confirm(`คุณต้องการลบอุปกรณ์ "${item.name}" ของ "${item.userName}" ใช่หรือไม่?`)) {
+      const newData = [...localData];
+      const teamIndex = newData.findIndex((t: any) => t.id === item.teamId);
+      if (teamIndex >= 0) {
+        newData[teamIndex].equipment = newData[teamIndex].equipment.filter((e: any) => e.id !== item.originalItemId);
+        saveLocalData(newData);
+      }
+    }
   };
 
   // Convert aggregated data into 1 row per equipment per person
@@ -422,12 +459,13 @@ export default function SafetyPPEDashboard() {
                   <th className="px-5 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
                   <th className="px-5 py-3.5 font-bold text-center">มีอยู่ / มาตรฐาน</th>
                   <th className="px-5 py-3.5 font-bold">สถานะ (คลิกเพื่ออัปเดต)</th>
+                  <th className="px-5 py-3.5 font-bold text-center">จัดการ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {currentData.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
                       ไม่มีข้อมูลที่ตรงกับตัวกรอง
                     </td>
                   </tr>
@@ -480,6 +518,24 @@ export default function SafetyPPEDashboard() {
                                 <AlertTriangle size={12} strokeWidth={3} /> ชำรุด: {item.damagedCount}
                               </button>
                             )}
+                          </div>
+                        </td>
+                        <td className="px-5 py-3 text-center">
+                          <div className="flex justify-center gap-2">
+                            <button 
+                              onClick={() => handleOpenEditStandard(item)}
+                              className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors"
+                              title="แก้ไขมาตรฐานต่อชุด"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteItem(item)}
+                              className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg transition-colors"
+                              title="ลบอุปกรณ์"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -612,6 +668,51 @@ export default function SafetyPPEDashboard() {
               <button type="button" onClick={() => setUpdateItem(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
               <button type="submit" form="update-form" className="px-6 py-2 text-sm font-bold text-white bg-[#1E88E5] hover:bg-blue-600 rounded-lg transition-colors shadow-sm flex items-center gap-2">
                 <Save size={16} /> บันทึกการอัปเดต
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Standard Modal */}
+      {editStandardItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <Edit3 size={18} className="text-indigo-600" /> แก้ไขมาตรฐานต่อชุด
+              </h3>
+              <button onClick={() => setEditStandardItem(null)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <h4 className="font-bold text-slate-800">{editStandardItem.name}</h4>
+                <p className="text-sm text-slate-500">ผู้ใช้งาน: {editStandardItem.userName}</p>
+              </div>
+
+              <form id="edit-standard-form" onSubmit={handleSaveStandard} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">มาตรฐานต่อชุด (กำหนดใหม่)</label>
+                  <input 
+                    type="number" 
+                    min={0}
+                    value={editStandardValue} 
+                    onChange={(e) => setEditStandardValue(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold"
+                    placeholder="ระบุจำนวนมาตรฐาน (ใส่ 0 หากไม่มี)"
+                  />
+                  <p className="text-xs text-slate-500 mt-2">ระบุ 0 หากไม่มีการบังคับมาตรฐานสำหรับอุปกรณ์นี้</p>
+                </div>
+              </form>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button type="button" onClick={() => setEditStandardItem(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
+              <button type="submit" form="edit-standard-form" className="px-6 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+                <Save size={16} /> บันทึกการแก้ไข
               </button>
             </div>
           </div>
