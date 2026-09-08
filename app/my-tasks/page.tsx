@@ -5,7 +5,7 @@ import {
   Bell, MapPin, Calendar as CalendarIcon, Play, Edit3, ChevronDown, 
   Check, FileText, Wrench, Camera, ClipboardList, AlertCircle, Phone, 
   CheckCircle, ChevronRight, MessageSquareWarning, Megaphone, Plus, X, List,
-  LogOut, Trash2
+  LogOut, Trash2, CalendarDays
 } from 'lucide-react';
 import { mockTasks, Task, TaskStatus, TaskPriority } from './data';
 
@@ -22,6 +22,22 @@ const ASSIGNEES = [
   "กิตติพิชญ์ พุ่มกำพล พนง.Office",
   "กมลวิทย์ สุนทรพรเจริญ พนง.Office"
 ];
+
+const formatThaiDateText = (dateString: string, prefix: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return `${prefix}: ${dateString}`;
+  
+  const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear() + 543;
+  
+  const hours = date.getHours().toString().padStart(2, '0');
+  const mins = date.getMinutes().toString().padStart(2, '0');
+  
+  return `${prefix}วันที่ ${day} ${month} ${year} เวลา ${hours}:${mins} น.`;
+};
 
 export default function MyTasksDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -278,8 +294,8 @@ export default function MyTasksDashboard() {
                           </span>
                         </h3>
                         <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
-                          <MapPin size={14} />
-                          {task.location}
+                          <CalendarDays size={14} />
+                          {formatThaiDateText(task.location, 'วันที่มอบหมายงาน')}
                         </div>
                       </div>
                     </div>
@@ -287,7 +303,7 @@ export default function MyTasksDashboard() {
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5 text-sm font-medium text-slate-700 whitespace-nowrap">
                           <CalendarIcon size={14} className="text-rose-500" />
-                          {task.time}
+                          {formatThaiDateText(task.time, 'กำหนดเวลาแล้วเสร็จ')}
                         </div>
                         {getStatusBadge(task.status)}
                       </div>
@@ -363,15 +379,15 @@ export default function MyTasksDashboard() {
                             </span>
                           </h3>
                           <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
-                            <MapPin size={14} />
-                            {task.location}
+                            <CalendarDays size={14} />
+                            {formatThaiDateText(task.location, 'วันที่มอบหมายงาน')}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center justify-between md:justify-end gap-4 md:gap-6 w-full md:w-auto mt-2 md:mt-0">
                         <div className="flex items-center gap-1.5 text-sm font-medium text-rose-600 bg-rose-50 px-3 py-1 rounded-md whitespace-nowrap">
                           <CalendarIcon size={14} />
-                          {task.time}
+                          {formatThaiDateText(task.time, 'กำหนดเวลาแล้วเสร็จ')}
                         </div>
                         {getStatusBadge(task.status)}
                         
