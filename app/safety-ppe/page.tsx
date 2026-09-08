@@ -61,6 +61,16 @@ export default function SafetyPPEDashboard() {
   const [editStandardItem, setEditStandardItem] = useState<AggregatedEquipment | null>(null);
   const [editStandardValue, setEditStandardValue] = useState<number | string>('');
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newEq, setNewEq] = useState({
+    teamId: '',
+    category: 'อุปกรณ์ความปลอดภัย (PPE)',
+    name: '',
+    unit: 'ชุด',
+    standard: 1,
+    actual: 1
+  });
+
   useEffect(() => {
     const saved = localStorage.getItem('pea_safety_data_v3');
     if (saved) {
@@ -139,6 +149,30 @@ export default function SafetyPPEDashboard() {
       }
     }
     setEditStandardItem(null);
+  };
+
+  const handleCreateEquipment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEq.teamId || !newEq.name) return alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+
+    const newData = [...localData];
+    const teamIndex = newData.findIndex((t: any) => t.id === newEq.teamId);
+    if (teamIndex >= 0) {
+      newData[teamIndex].equipment.push({
+        id: `eq_${Date.now()}`,
+        category: newEq.category,
+        name: newEq.name,
+        unit: newEq.unit,
+        standard: newEq.standard,
+        actual: newEq.actual,
+        missing: 0,
+        damaged: 0,
+        pending: 0
+      });
+      saveLocalData(newData);
+      setShowCreateModal(false);
+      setNewEq({ ...newEq, name: '', standard: 1, actual: 1 });
+    }
   };
 
   const handleDeleteItem = (item: AggregatedEquipment) => {
@@ -332,7 +366,10 @@ export default function SafetyPPEDashboard() {
           </div>
 
           <div className="flex flex-row lg:flex-col gap-2 shrink-0">
-            <button className="flex-1 flex items-center justify-center gap-2 bg-[#7C5EE4] hover:bg-[#6D53C9] text-white py-2.5 px-6 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="flex-1 flex items-center justify-center gap-2 bg-[#7C5EE4] hover:bg-[#6D53C9] text-white py-2.5 px-6 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap"
+            >
               <Plus size={18} /> เพิ่มอุปกรณ์ใหม่
             </button>
             <button 
@@ -429,18 +466,6 @@ export default function SafetyPPEDashboard() {
           {/* Table Toolbar */}
           <div className="px-4 pt-4 pb-0 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
             <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setActiveTab('by_equipment')}
-                className={`flex items-center gap-2 px-5 py-3 rounded-t-xl font-bold text-sm transition-all -mb-px border-b-2 ${activeTab === 'by_equipment' ? 'bg-[#1E88E5] text-white border-[#1E88E5]' : 'text-slate-600 bg-slate-50 border-transparent hover:bg-slate-100'}`}
-              >
-                <Grid size={18} /> ดูตามอุปกรณ์
-              </button>
-              <button 
-                onClick={() => setActiveTab('by_worker')}
-                className={`flex items-center gap-2 px-5 py-3 rounded-t-xl font-bold text-sm transition-all -mb-px border-b-2 ${activeTab === 'by_worker' ? 'bg-[#1E88E5] text-white border-[#1E88E5]' : 'text-slate-600 bg-slate-50 border-transparent hover:bg-slate-100'}`}
-              >
-                <HardHat size={18} /> ดูตามช่าง
-              </button>
             </div>
             
             <div className="flex items-center gap-2 mb-3">
@@ -722,6 +747,107 @@ export default function SafetyPPEDashboard() {
               <button type="button" onClick={() => setEditStandardItem(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
               <button type="submit" form="edit-standard-form" className="px-6 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm flex items-center gap-2">
                 <Save size={16} /> บันทึกการแก้ไข
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Plus size={20} className="text-indigo-600" /> เพิ่มอุปกรณ์ใหม่
+              </h3>
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              <form id="create-form" onSubmit={handleCreateEquipment} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">มอบหมายให้ช่าง/ทีม</label>
+                  <select 
+                    required
+                    value={newEq.teamId}
+                    onChange={(e) => setNewEq({...newEq, teamId: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">-- เลือกช่าง --</option>
+                    {localData.map((t: any) => (
+                      <option key={t.id} value={t.id}>{t.userName} ({t.teamName})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">หมวดหมู่</label>
+                  <select 
+                    value={newEq.category}
+                    onChange={(e) => setNewEq({...newEq, category: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    {allCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">ชื่ออุปกรณ์</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={newEq.name}
+                    onChange={(e) => setNewEq({...newEq, name: e.target.value})}
+                    placeholder="เช่น หมวกนิรภัย"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">หน่วย</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={newEq.unit}
+                      onChange={(e) => setNewEq({...newEq, unit: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">มาตรฐานต่อชุด</label>
+                    <input 
+                      type="number" 
+                      min={0}
+                      required
+                      value={newEq.standard}
+                      onChange={(e) => setNewEq({...newEq, standard: parseInt(e.target.value) || 0})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">จำนวนที่มีอยู่จริง (พร้อมใช้งาน)</label>
+                  <input 
+                    type="number" 
+                    min={0}
+                    required
+                    value={newEq.actual}
+                    onChange={(e) => setNewEq({...newEq, actual: parseInt(e.target.value) || 0})}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </form>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
+              <button type="submit" form="create-form" className="px-6 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+                <Save size={16} /> บันทึก
               </button>
             </div>
           </div>
