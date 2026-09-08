@@ -119,8 +119,8 @@ export default function SafetyPPEDashboard() {
         const teamNameShort = team.name.replace('ชุดงาน นาย', 'นาย');
         
         const readyCount = Math.max(0, item.actual - item.damaged);
-        const pendingCount = Math.floor(item.damaged / 2);
-        const damagedCount = item.damaged - pendingCount;
+        const pendingCount = 0;
+        const damagedCount = item.damaged;
         
         if (item.actual > 0 || item.standard > 0) {
           instances.push({
