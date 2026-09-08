@@ -5,7 +5,7 @@ import {
   Bell, MapPin, Calendar as CalendarIcon, Play, Edit3, ChevronDown, 
   Check, FileText, Wrench, Camera, ClipboardList, AlertCircle, Phone, 
   CheckCircle, ChevronRight, MessageSquareWarning, Megaphone, Plus, X, List,
-  LogOut, Trash2, CalendarDays
+  LogOut, Trash2, CalendarDays, Save
 } from 'lucide-react';
 import { mockTasks, Task, TaskStatus, TaskPriority } from './data';
 
