@@ -18,19 +18,19 @@ export default function SafetyPPEDashboard() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('pea_safety_data');
+    const saved = localStorage.getItem('pea_safety_data_v2');
     if (saved) {
       setLocalData(JSON.parse(saved));
     } else {
       setLocalData(safetyData);
-      localStorage.setItem('pea_safety_data', JSON.stringify(safetyData));
+      localStorage.setItem('pea_safety_data_v2', JSON.stringify(safetyData));
     }
     setIsLoaded(true);
   }, []);
 
   const saveLocalData = (newData: any) => {
     setLocalData(newData);
-    localStorage.setItem('pea_safety_data', JSON.stringify(newData));
+    localStorage.setItem('pea_safety_data_v2', JSON.stringify(newData));
   };
 
   // Update Modal State
