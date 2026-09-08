@@ -62,6 +62,7 @@ export default function SafetyPPEDashboard() {
   const [editStandardValue, setEditStandardValue] = useState<number | string>('');
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [newEq, setNewEq] = useState({
     teamId: '',
     category: 'อุปกรณ์ความปลอดภัย (PPE)',
@@ -72,6 +73,7 @@ export default function SafetyPPEDashboard() {
   });
 
   useEffect(() => {
+    setUserRole(sessionStorage.getItem("pea_role"));
     const saved = localStorage.getItem('pea_safety_data_v3');
     if (saved) {
       setLocalData(JSON.parse(saved));
@@ -283,19 +285,6 @@ export default function SafetyPPEDashboard() {
             <p className="text-sm text-slate-500">ผกร.กรย.(ก3)</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-xl transition-colors border border-transparent hover:border-slate-200">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-black flex items-center justify-center border border-indigo-200 shadow-sm">
-              AD
-            </div>
-            <div className="hidden sm:block text-left">
-              <p className="text-sm font-bold text-slate-800 leading-tight">ADMIN</p>
-            </div>
-            <div title="ออกจากระบบ" className="flex items-center">
-              <LogOut size={18} className="text-rose-500 hover:text-rose-600 ml-2" />
-            </div>
-          </div>
-        </div>
       </header>
 
       <main className="flex-1 p-4 md:p-6 max-w-[1600px] mx-auto w-full flex flex-col gap-6">
@@ -366,12 +355,14 @@ export default function SafetyPPEDashboard() {
           </div>
 
           <div className="flex flex-row lg:flex-col gap-2 shrink-0">
-            <button 
-              onClick={() => setShowCreateModal(true)}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#7C5EE4] hover:bg-[#6D53C9] text-white py-2.5 px-6 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap"
-            >
-              <Plus size={18} /> เพิ่มอุปกรณ์ใหม่
-            </button>
+            {userRole === 'admin' && (
+              <button 
+                onClick={() => setShowCreateModal(true)}
+                className="flex-1 flex items-center justify-center gap-2 bg-[#7C5EE4] hover:bg-[#6D53C9] text-white py-2.5 px-6 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap"
+              >
+                <Plus size={18} /> เพิ่มอุปกรณ์ใหม่
+              </button>
+            )}
             <button 
               onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedUser('all'); setSelectedStatus('all'); setCurrentPage(1); }}
               className="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-6 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap border border-slate-200"
@@ -488,7 +479,7 @@ export default function SafetyPPEDashboard() {
                   <th className="px-5 py-3.5 font-bold">หมวดหมู่</th>
                   <th className="px-5 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
                   <th className="px-5 py-3.5 font-bold text-center">มีอยู่ / มาตรฐาน</th>
-                  <th className="px-5 py-3.5 font-bold">สถานะ (คลิกเพื่ออัปเดต)</th>
+                  <th className="px-5 py-3.5 font-bold">สถานะ {userRole === 'admin' ? '(คลิกเพื่ออัปเดต)' : ''}</th>
                   <th className="px-5 py-3.5 font-bold text-center">จัดการ</th>
                 </tr>
               </thead>
@@ -523,27 +514,27 @@ export default function SafetyPPEDashboard() {
                           <div className="flex flex-wrap items-center gap-2">
                             {item.readyCount > 0 && (
                               <button 
-                                onClick={() => handleOpenUpdate(item, 'ready')}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] hover:bg-[#D1FAE5] transition-colors cursor-pointer"
-                                title="คลิกเพื่อแจ้งชำรุด"
+                                onClick={() => userRole === 'admin' && handleOpenUpdate(item, 'ready')}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] transition-colors ${userRole === 'admin' ? 'hover:bg-[#D1FAE5] cursor-pointer' : 'cursor-default'}`}
+                                title={userRole === 'admin' ? "คลิกเพื่อแจ้งชำรุด" : ""}
                               >
                                 <CheckCircle size={12} strokeWidth={3} /> พร้อมใช้งาน: {item.readyCount}
                               </button>
                             )}
                             {item.pendingCount > 0 && (
                               <button 
-                                onClick={() => handleOpenUpdate(item, 'pending')}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] hover:bg-[#FEF3C7] transition-colors cursor-pointer"
-                                title="คลิกเพื่ออัปเดต"
+                                onClick={() => userRole === 'admin' && handleOpenUpdate(item, 'pending')}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] transition-colors ${userRole === 'admin' ? 'hover:bg-[#FEF3C7] cursor-pointer' : 'cursor-default'}`}
+                                title={userRole === 'admin' ? "คลิกเพื่ออัปเดต" : ""}
                               >
                                 <Wrench size={12} strokeWidth={3} /> รอตรวจ/รอซ่อม: {item.pendingCount}
                               </button>
                             )}
                             {item.damagedCount > 0 && (
                               <button 
-                                onClick={() => handleOpenUpdate(item, 'damaged')}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] hover:bg-[#FEE2E2] transition-colors cursor-pointer"
-                                title="คลิกเพื่ออัปเดต"
+                                onClick={() => userRole === 'admin' && handleOpenUpdate(item, 'damaged')}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] transition-colors ${userRole === 'admin' ? 'hover:bg-[#FEE2E2] cursor-pointer' : 'cursor-default'}`}
+                                title={userRole === 'admin' ? "คลิกเพื่ออัปเดต" : ""}
                               >
                                 <AlertTriangle size={12} strokeWidth={3} /> ชำรุด: {item.damagedCount}
                               </button>
@@ -551,22 +542,24 @@ export default function SafetyPPEDashboard() {
                           </div>
                         </td>
                         <td className="px-5 py-3 text-center">
-                          <div className="flex justify-center gap-2">
-                            <button 
-                              onClick={() => handleOpenEditStandard(item)}
-                              className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors"
-                              title="แก้ไขมาตรฐานต่อชุด"
-                            >
-                              <Edit3 size={16} />
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteItem(item)}
-                              className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg transition-colors"
-                              title="ลบอุปกรณ์"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
+                          {userRole === 'admin' && (
+                            <div className="flex justify-center gap-2">
+                              <button 
+                                onClick={() => handleOpenEditStandard(item)}
+                                className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors"
+                                title="แก้ไขมาตรฐานต่อชุด"
+                              >
+                                <Edit3 size={16} />
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteItem(item)}
+                                className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1.5 rounded-lg transition-colors"
+                                title="ลบอุปกรณ์"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
