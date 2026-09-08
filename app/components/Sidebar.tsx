@@ -71,15 +71,12 @@ export default function Sidebar() {
               <Recycle size={20} />
               <span>สถานะการคืนเศษสาย</span>
             </Link>
+            <Link href="/my-tasks" className={`nav-item ${pathname === "/my-tasks" ? "active" : ""}`}>
+              <ClipboardList size={20} />
+              <span>มอบหมายและติดตามงาน</span>
+            </Link>
           </div>
         )}
-
-        <div onClick={closeSidebar}>
-          <Link href="/my-tasks" className={`nav-item ${pathname === "/my-tasks" ? "active" : ""}`} style={{ marginTop: '16px' }}>
-            <ClipboardList size={20} />
-            <span>มอบหมายและติดตามงาน</span>
-          </Link>
-        </div>
 
         <SectionHeader id="planning" title="บริหาร/วางแผนงานก่อสร้าง" />
         {expanded.planning && (
@@ -92,15 +89,12 @@ export default function Sidebar() {
               <AlertCircle size={20} />
               <span>ติดตามงานสำคัญ</span>
             </Link>
+            <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`}>
+              <CalendarDays size={20} />
+              <span>แผนงานระบบ / แผนใช้รถ</span>
+            </Link>
           </div>
         )}
-
-        <div onClick={closeSidebar}>
-          <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`} style={{ marginTop: '16px' }}>
-            <CalendarDays size={20} />
-            <span>แผนงานระบบ / แผนใช้รถ</span>
-          </Link>
-        </div>
 
         <SectionHeader id="docs" title="ตรวจสอบและเอกสาร" />
         {expanded.docs && (
