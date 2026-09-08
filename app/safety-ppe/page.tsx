@@ -305,7 +305,10 @@ export default function SafetyPPEDashboard() {
         {/* Stat Cards - Changed from 5 to 4 columns */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Total */}
-          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+          <div 
+            onClick={() => { setSelectedStatus('all'); setCurrentPage(1); }}
+            className={`p-5 rounded-2xl shadow-sm border flex items-center gap-4 cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md ${selectedStatus === 'all' ? 'bg-blue-50/50 border-blue-400 ring-2 ring-blue-400/20' : 'bg-white border-slate-200'}`}
+          >
             <div className="bg-blue-50 text-blue-500 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0">
               <Box size={28} strokeWidth={2} />
             </div>
@@ -319,7 +322,10 @@ export default function SafetyPPEDashboard() {
           </div>
 
           {/* Card 2: Ready */}
-          <div className="bg-[#F0FDF4] p-5 rounded-2xl shadow-sm border border-[#DCFCE7] flex items-center gap-4 relative overflow-hidden">
+          <div 
+            onClick={() => { setSelectedStatus('ready'); setCurrentPage(1); }}
+            className={`p-5 rounded-2xl shadow-sm border flex items-center gap-4 relative overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md ${selectedStatus === 'ready' ? 'bg-[#DCFCE7]/60 border-[#22C55E] ring-2 ring-[#22C55E]/20' : 'bg-[#F0FDF4] border-[#DCFCE7]'}`}
+          >
             <div className="bg-[#22C55E] text-white w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border-[3px] border-white">
               <CheckCircle size={26} strokeWidth={2.5} />
             </div>
@@ -336,7 +342,10 @@ export default function SafetyPPEDashboard() {
           </div>
 
           {/* Card 3: Pending */}
-          <div className="bg-[#FFFBEB] p-5 rounded-2xl shadow-sm border border-[#FEF3C7] flex items-center gap-4 relative overflow-hidden">
+          <div 
+            onClick={() => { setSelectedStatus('pending'); setCurrentPage(1); }}
+            className={`p-5 rounded-2xl shadow-sm border flex items-center gap-4 relative overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md ${selectedStatus === 'pending' ? 'bg-[#FEF3C7]/60 border-[#F59E0B] ring-2 ring-[#F59E0B]/20' : 'bg-[#FFFBEB] border-[#FEF3C7]'}`}
+          >
             <div className="bg-[#F59E0B] text-white w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border-[3px] border-white">
               <Wrench size={24} strokeWidth={2.5} />
             </div>
@@ -353,7 +362,10 @@ export default function SafetyPPEDashboard() {
           </div>
 
           {/* Card 4: Damaged */}
-          <div className="bg-[#FEF2F2] p-5 rounded-2xl shadow-sm border border-[#FEE2E2] flex items-center gap-4 relative overflow-hidden">
+          <div 
+            onClick={() => { setSelectedStatus('damaged'); setCurrentPage(1); }}
+            className={`p-5 rounded-2xl shadow-sm border flex items-center gap-4 relative overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md ${selectedStatus === 'damaged' ? 'bg-[#FEE2E2]/60 border-[#EF4444] ring-2 ring-[#EF4444]/20' : 'bg-[#FEF2F2] border-[#FEE2E2]'}`}
+          >
             <div className="bg-[#EF4444] text-white w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border-[3px] border-white">
               <AlertTriangle size={24} strokeWidth={2.5} />
             </div>
