@@ -13,11 +13,13 @@ type AggregatedEquipment = {
   instanceId: string;
   name: string;
   category: string;
-  count: number;
   standard: number;
+  totalActual: number;
+  readyCount: number;
+  pendingCount: number;
+  damagedCount: number;
   unit: string;
   userName: string;
-  status: 'ready' | 'pending' | 'damaged';
   teamId: string;
   originalItemId: string;
 };
@@ -51,6 +53,7 @@ export default function SafetyPPEDashboard() {
 
   // Modal states
   const [updateItem, setUpdateItem] = useState<AggregatedEquipment | null>(null);
+  const [updateSourceStatus, setUpdateSourceStatus] = useState<'ready' | 'pending' | 'damaged'>('ready');
   const [updateAmount, setUpdateAmount] = useState(1);
   const [updateTargetStatus, setUpdateTargetStatus] = useState<'ready' | 'damaged'>('ready');
 
@@ -70,11 +73,11 @@ export default function SafetyPPEDashboard() {
     localStorage.setItem('pea_safety_data_v2', JSON.stringify(newData));
   };
 
-  const handleOpenUpdate = (item: AggregatedEquipment) => {
+  const handleOpenUpdate = (item: AggregatedEquipment, sourceStatus: 'ready' | 'pending' | 'damaged') => {
     setUpdateItem(item);
+    setUpdateSourceStatus(sourceStatus);
     setUpdateAmount(1);
-    // If it's ready, default to moving to damaged. If damaged/pending, default to moving to ready.
-    setUpdateTargetStatus(item.status === 'ready' ? 'damaged' : 'ready');
+    setUpdateTargetStatus(sourceStatus === 'ready' ? 'damaged' : 'ready');
   };
 
   const handleSubmitUpdate = (e: React.FormEvent) => {
@@ -88,13 +91,16 @@ export default function SafetyPPEDashboard() {
       if (eqIndex >= 0) {
         const eq = newData[teamIndex].equipment[eqIndex];
         
-        const amount = Math.min(updateAmount, updateItem.count);
+        let maxAvailable = 0;
+        if (updateSourceStatus === 'ready') maxAvailable = updateItem.readyCount;
+        if (updateSourceStatus === 'pending') maxAvailable = updateItem.pendingCount;
+        if (updateSourceStatus === 'damaged') maxAvailable = updateItem.damagedCount;
         
-        if (updateItem.status === 'ready' && updateTargetStatus === 'damaged') {
-          // Move from ready to damaged
+        const amount = Math.min(updateAmount, maxAvailable);
+        
+        if (updateSourceStatus === 'ready' && updateTargetStatus === 'damaged') {
           eq.damaged += amount;
-        } else if ((updateItem.status === 'damaged' || updateItem.status === 'pending') && updateTargetStatus === 'ready') {
-          // Move from damaged to ready
+        } else if ((updateSourceStatus === 'damaged' || updateSourceStatus === 'pending') && updateTargetStatus === 'ready') {
           eq.damaged = Math.max(0, eq.damaged - amount);
         }
       }
@@ -104,7 +110,7 @@ export default function SafetyPPEDashboard() {
     setUpdateItem(null);
   };
 
-  // Convert aggregated data into rows based on status
+  // Convert aggregated data into 1 row per equipment per person
   const allInstances = useMemo(() => {
     const instances: AggregatedEquipment[] = [];
     
@@ -112,56 +118,25 @@ export default function SafetyPPEDashboard() {
       team.equipment.forEach((item: any) => {
         const teamNameShort = team.name.replace('ชุดงาน นาย', 'นาย');
         
-        // Ready items
         const readyCount = Math.max(0, item.actual - item.damaged);
-        if (readyCount > 0) {
+        const pendingCount = Math.floor(item.damaged / 2);
+        const damagedCount = item.damaged - pendingCount;
+        
+        if (item.actual > 0 || item.standard > 0) {
           instances.push({
-            instanceId: `${team.id}-${item.id}-ready`,
+            instanceId: `${team.id}-${item.id}`,
             name: item.name,
             category: item.category,
-            count: readyCount,
             standard: item.standard,
+            totalActual: item.actual,
+            readyCount,
+            pendingCount,
+            damagedCount,
             unit: item.unit,
             userName: teamNameShort,
-            status: 'ready',
             teamId: team.id,
             originalItemId: item.id
           });
-        }
-        
-        // Damaged items (we will split them into pending and damaged for UI purposes)
-        if (item.damaged > 0) {
-          const pendingCount = Math.floor(item.damaged / 2);
-          const damagedCount = item.damaged - pendingCount;
-          
-          if (pendingCount > 0) {
-            instances.push({
-              instanceId: `${team.id}-${item.id}-pending`,
-              name: item.name,
-              category: item.category,
-              count: pendingCount,
-              standard: item.standard,
-              unit: item.unit,
-              userName: teamNameShort,
-              status: 'pending',
-              teamId: team.id,
-              originalItemId: item.id
-            });
-          }
-          if (damagedCount > 0) {
-            instances.push({
-              instanceId: `${team.id}-${item.id}-damaged`,
-              name: item.name,
-              category: item.category,
-              count: damagedCount,
-              standard: item.standard,
-              unit: item.unit,
-              userName: teamNameShort,
-              status: 'damaged',
-              teamId: team.id,
-              originalItemId: item.id
-            });
-          }
         }
       });
     });
@@ -182,9 +157,9 @@ export default function SafetyPPEDashboard() {
       const matchUser = selectedUser === 'all' || item.userName === selectedUser;
       
       let matchStatus = true;
-      if (selectedStatus === 'ready') matchStatus = item.status === 'ready';
-      else if (selectedStatus === 'pending') matchStatus = item.status === 'pending';
-      else if (selectedStatus === 'damaged') matchStatus = item.status === 'damaged';
+      if (selectedStatus === 'ready') matchStatus = item.readyCount > 0;
+      else if (selectedStatus === 'pending') matchStatus = item.pendingCount > 0;
+      else if (selectedStatus === 'damaged') matchStatus = item.damagedCount > 0;
       
       return matchSearch && matchCat && matchUser && matchStatus;
     });
@@ -199,10 +174,10 @@ export default function SafetyPPEDashboard() {
     let total = 0, ready = 0, pending = 0, damaged = 0;
     
     allInstances.forEach(i => {
-      total += i.count;
-      if (i.status === 'ready') ready += i.count;
-      if (i.status === 'pending') pending += i.count;
-      if (i.status === 'damaged') damaged += i.count;
+      total += i.totalActual;
+      ready += i.readyCount;
+      pending += i.pendingCount;
+      damaged += i.damagedCount;
     });
     
     return {
@@ -432,16 +407,15 @@ export default function SafetyPPEDashboard() {
                   <th className="px-5 py-3.5 font-bold">รูปภาพ</th>
                   <th className="px-5 py-3.5 font-bold text-slate-800">ชื่ออุปกรณ์</th>
                   <th className="px-5 py-3.5 font-bold">หมวดหมู่</th>
-                  <th className="px-5 py-3.5 font-bold text-center">จำนวนรวม</th>
                   <th className="px-5 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
-                  <th className="px-5 py-3.5 font-bold">สถานะ</th>
-                  <th className="px-5 py-3.5 font-bold text-center">การดำเนินการ</th>
+                  <th className="px-5 py-3.5 font-bold text-center">มีอยู่ / มาตรฐาน</th>
+                  <th className="px-5 py-3.5 font-bold">สถานะ (คลิกเพื่ออัปเดต)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {currentData.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                       ไม่มีข้อมูลที่ตรงกับตัวกรอง
                     </td>
                   </tr>
@@ -458,23 +432,42 @@ export default function SafetyPPEDashboard() {
                         </td>
                         <td className="px-5 py-3 font-bold text-slate-800">{item.name}</td>
                         <td className="px-5 py-3 text-slate-500">{item.category}</td>
+                        <td className="px-5 py-3 text-slate-700 font-medium">{item.userName}</td>
                         <td className="px-5 py-3 text-center">
-                          <span className="font-black text-slate-700 text-base">{item.count}</span>
+                          <span className="font-black text-slate-700 text-base">{item.totalActual}</span>
                           <span className="text-slate-400 mx-1">/</span>
                           <span className="text-slate-500 font-medium">{item.standard}</span>
                           <span className="text-slate-400 text-xs ml-1">{item.unit}</span>
                         </td>
-                        <td className="px-5 py-3 text-slate-700 font-medium">{item.userName}</td>
                         <td className="px-5 py-3">
-                          {item.status === 'ready' && <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"><span className="w-2 h-2 rounded-full bg-[#10B981]"></span> พร้อมใช้งาน</span>}
-                          {item.status === 'pending' && <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]"><span className="w-2 h-2 rounded-full bg-[#F59E0B]"></span> รอตรวจ/รอซ่อม</span>}
-                          {item.status === 'damaged' && <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]"><span className="w-2 h-2 rounded-full bg-[#EF4444]"></span> ชำรุด</span>}
-                        </td>
-                        <td className="px-5 py-3 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            {item.status === 'ready' && <button onClick={() => handleOpenUpdate(item)} className="bg-[#1E88E5] hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8 flex items-center justify-center gap-1.5"><Edit3 size={14}/> อัปเดตสถานะ</button>}
-                            {item.status === 'damaged' && <button onClick={() => handleOpenUpdate(item)} className="bg-[#EF4444] hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8 flex items-center justify-center gap-1.5"><Wrench size={14}/> ดำเนินการ</button>}
-                            {item.status === 'pending' && <button onClick={() => handleOpenUpdate(item)} className="bg-[#FEF08A] hover:bg-[#FDE047] text-[#854D0E] px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8 flex items-center justify-center gap-1.5"><Check size={14}/> ตรวจสอบ</button>}
+                          <div className="flex flex-wrap items-center gap-2">
+                            {item.readyCount > 0 && (
+                              <button 
+                                onClick={() => handleOpenUpdate(item, 'ready')}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] hover:bg-[#D1FAE5] transition-colors cursor-pointer"
+                                title="คลิกเพื่อแจ้งชำรุด"
+                              >
+                                <CheckCircle size={12} strokeWidth={3} /> พร้อมใช้งาน: {item.readyCount}
+                              </button>
+                            )}
+                            {item.pendingCount > 0 && (
+                              <button 
+                                onClick={() => handleOpenUpdate(item, 'pending')}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A] hover:bg-[#FEF3C7] transition-colors cursor-pointer"
+                                title="คลิกเพื่ออัปเดต"
+                              >
+                                <Wrench size={12} strokeWidth={3} /> รอตรวจ/รอซ่อม: {item.pendingCount}
+                              </button>
+                            )}
+                            {item.damagedCount > 0 && (
+                              <button 
+                                onClick={() => handleOpenUpdate(item, 'damaged')}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] hover:bg-[#FEE2E2] transition-colors cursor-pointer"
+                                title="คลิกเพื่ออัปเดต"
+                              >
+                                <AlertTriangle size={12} strokeWidth={3} /> ชำรุด: {item.damagedCount}
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -557,27 +550,22 @@ export default function SafetyPPEDashboard() {
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-800">{updateItem.name}</h4>
-                  <p className="text-sm text-slate-500">มีอยู่ {updateItem.count} {updateItem.unit}</p>
+                  <p className="text-sm text-slate-500">
+                    เลือกอัปเดตสถานะจากยอด <span className="font-bold text-slate-700">{updateSourceStatus === 'ready' ? 'พร้อมใช้งาน' : updateSourceStatus === 'damaged' ? 'ชำรุด' : 'รอตรวจ/รอซ่อม'}</span> ที่มีอยู่ {updateSourceStatus === 'ready' ? updateItem.readyCount : updateSourceStatus === 'damaged' ? updateItem.damagedCount : updateItem.pendingCount} {updateItem.unit}
+                  </p>
                 </div>
               </div>
 
               <form id="update-form" onSubmit={handleSubmitUpdate} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">สถานะปัจจุบัน</label>
-                  <div className="px-4 py-2.5 bg-slate-100 rounded-lg text-sm text-slate-600 font-medium">
-                    {updateItem.status === 'ready' ? '✅ พร้อมใช้งาน' : updateItem.status === 'damaged' ? '❌ ชำรุด' : '⚠️ รอตรวจ / รอซ่อม'}
-                  </div>
-                </div>
-
-                <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">ต้องการเปลี่ยนเป็น <span className="text-rose-500">*</span></label>
                   <div className="grid grid-cols-2 gap-3">
-                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'ready' ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-200'}`}>
-                      <input type="radio" className="hidden" checked={updateTargetStatus === 'ready'} onChange={() => setUpdateTargetStatus('ready')} />
+                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'ready' ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-200'} ${updateSourceStatus === 'ready' ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <input type="radio" className="hidden" disabled={updateSourceStatus === 'ready'} checked={updateTargetStatus === 'ready'} onChange={() => setUpdateTargetStatus('ready')} />
                       <CheckCircle size={18} /> พร้อมใช้งาน
                     </label>
-                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'damaged' ? 'bg-rose-50 border-rose-500 text-rose-700' : 'bg-white border-slate-200 text-slate-600 hover:border-rose-200'}`}>
-                      <input type="radio" className="hidden" checked={updateTargetStatus === 'damaged'} onChange={() => setUpdateTargetStatus('damaged')} />
+                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'damaged' ? 'bg-rose-50 border-rose-500 text-rose-700' : 'bg-white border-slate-200 text-slate-600 hover:border-rose-200'} ${updateSourceStatus === 'damaged' ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <input type="radio" className="hidden" disabled={updateSourceStatus === 'damaged'} checked={updateTargetStatus === 'damaged'} onChange={() => setUpdateTargetStatus('damaged')} />
                       <AlertTriangle size={18} /> ชำรุด/ส่งซ่อม
                     </label>
                   </div>
@@ -590,14 +578,20 @@ export default function SafetyPPEDashboard() {
                     <input 
                       type="number" 
                       min={1} 
-                      max={updateItem.count} 
+                      max={updateSourceStatus === 'ready' ? updateItem.readyCount : updateSourceStatus === 'damaged' ? updateItem.damagedCount : updateItem.pendingCount} 
                       value={updateAmount} 
-                      onChange={(e) => setUpdateAmount(Math.max(1, Math.min(updateItem.count, parseInt(e.target.value) || 1)))}
+                      onChange={(e) => {
+                        const max = updateSourceStatus === 'ready' ? updateItem.readyCount : updateSourceStatus === 'damaged' ? updateItem.damagedCount : updateItem.pendingCount;
+                        setUpdateAmount(Math.max(1, Math.min(max, parseInt(e.target.value) || 1)));
+                      }}
                       className="w-full h-10 text-center border-y border-slate-300 font-bold text-slate-800 focus:outline-none"
                     />
-                    <button type="button" onClick={() => setUpdateAmount(Math.min(updateItem.count, updateAmount + 1))} className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-r-lg border border-slate-300 font-bold text-lg">+</button>
+                    <button type="button" onClick={() => {
+                        const max = updateSourceStatus === 'ready' ? updateItem.readyCount : updateSourceStatus === 'damaged' ? updateItem.damagedCount : updateItem.pendingCount;
+                        setUpdateAmount(Math.min(max, updateAmount + 1));
+                    }} className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-r-lg border border-slate-300 font-bold text-lg">+</button>
                   </div>
-                  <p className="text-xs text-slate-500 mt-2">ระบุจำนวนที่ต้องการเปลี่ยนสถานะ (สูงสุด {updateItem.count})</p>
+                  <p className="text-xs text-slate-500 mt-2">ระบุจำนวนที่ต้องการเปลี่ยนสถานะ (สูงสุด {updateSourceStatus === 'ready' ? updateItem.readyCount : updateSourceStatus === 'damaged' ? updateItem.damagedCount : updateItem.pendingCount})</p>
                 </div>
               </form>
             </div>
