@@ -2,21 +2,21 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Search, Plus, X, MoreVertical, HardHat, Calendar, ChevronDown, 
-  List, Grid, ShieldAlert, CheckCircle, AlertTriangle, Box, RefreshCw,
-  XCircle, Filter, Edit3, Image as ImageIcon, ChevronLeft, ChevronRight, Wrench
+  Search, Plus, X, MoreVertical, HardHat, ChevronDown, 
+  List, Grid, CheckCircle, AlertTriangle, Box, RefreshCw,
+  Filter, Edit3, ChevronLeft, ChevronRight, Wrench, LogOut, Check, Save
 } from 'lucide-react';
 import { safetyData } from './data';
 
 // --- Type Definitions ---
-type IndividualEquipment = {
+type AggregatedEquipment = {
   instanceId: string;
   name: string;
   category: string;
-  code: string;
+  count: number;
+  unit: string;
   userName: string;
-  lastChecked: string;
-  status: 'ready' | 'pending' | 'damaged' | 'disposed';
+  status: 'ready' | 'pending' | 'damaged';
   teamId: string;
   originalItemId: string;
 };
@@ -48,6 +48,11 @@ export default function SafetyPPEDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
 
+  // Modal states
+  const [updateItem, setUpdateItem] = useState<AggregatedEquipment | null>(null);
+  const [updateAmount, setUpdateAmount] = useState(1);
+  const [updateTargetStatus, setUpdateTargetStatus] = useState<'ready' | 'damaged'>('ready');
+
   useEffect(() => {
     const saved = localStorage.getItem('pea_safety_data_v2');
     if (saved) {
@@ -59,81 +64,105 @@ export default function SafetyPPEDashboard() {
     setIsLoaded(true);
   }, []);
 
-  // Explode aggregated data into individual items
-  const allInstances = useMemo(() => {
-    const instances: IndividualEquipment[] = [];
-    
-    // Seed for pseudo-random deterministic code generation based on item ID
-    const generateCode = (baseId: string, idx: number) => {
-      let hash = 0;
-      const str = baseId + idx;
-      for (let i = 0; i < str.length; i++) hash = Math.imul(31, hash) + str.charCodeAt(i) | 0;
-      return `PPE-${Math.abs(hash).toString().padStart(5, '0').substring(0, 5)}`;
-    };
+  const saveLocalData = (newData: any) => {
+    setLocalData(newData);
+    localStorage.setItem('pea_safety_data_v2', JSON.stringify(newData));
+  };
 
-    localData.forEach(team => {
-      // Mock random dates within last 30 days
-      const mockDates = ['8 ก.ย. 2568', '6 ก.ย. 2568', '5 ก.ย. 2568', '2 ก.ย. 2568', '1 ก.ย. 2568', '28 ส.ค. 2568', '25 ส.ค. 2568'];
-      
-      team.equipment.forEach(item => {
+  const handleOpenUpdate = (item: AggregatedEquipment) => {
+    setUpdateItem(item);
+    setUpdateAmount(1);
+    // If it's ready, default to moving to damaged. If damaged/pending, default to moving to ready.
+    setUpdateTargetStatus(item.status === 'ready' ? 'damaged' : 'ready');
+  };
+
+  const handleSubmitUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!updateItem) return;
+
+    const newData = [...localData];
+    const teamIndex = newData.findIndex((t: any) => t.id === updateItem.teamId);
+    if (teamIndex >= 0) {
+      const eqIndex = newData[teamIndex].equipment.findIndex((e: any) => e.id === updateItem.originalItemId);
+      if (eqIndex >= 0) {
+        const eq = newData[teamIndex].equipment[eqIndex];
+        
+        const amount = Math.min(updateAmount, updateItem.count);
+        
+        if (updateItem.status === 'ready' && updateTargetStatus === 'damaged') {
+          // Move from ready to damaged
+          eq.damaged += amount;
+        } else if ((updateItem.status === 'damaged' || updateItem.status === 'pending') && updateTargetStatus === 'ready') {
+          // Move from damaged to ready
+          eq.damaged = Math.max(0, eq.damaged - amount);
+        }
+      }
+    }
+    
+    saveLocalData(newData);
+    setUpdateItem(null);
+  };
+
+  // Convert aggregated data into rows based on status
+  const allInstances = useMemo(() => {
+    const instances: AggregatedEquipment[] = [];
+    
+    localData.forEach((team: any) => {
+      team.equipment.forEach((item: any) => {
         const teamNameShort = team.name.replace('ชุดงาน นาย', 'นาย');
         
         // Ready items
         const readyCount = Math.max(0, item.actual - item.damaged);
-        for (let i = 0; i < readyCount; i++) {
+        if (readyCount > 0) {
           instances.push({
-            instanceId: `${team.id}-${item.id}-r${i}`,
+            instanceId: `${team.id}-${item.id}-ready`,
             name: item.name,
             category: item.category,
-            code: generateCode(item.id, i),
+            count: readyCount,
+            unit: item.unit,
             userName: teamNameShort,
-            lastChecked: mockDates[i % mockDates.length],
             status: 'ready',
             teamId: team.id,
             originalItemId: item.id
           });
         }
         
-        // Damaged items
-        for (let i = 0; i < item.damaged; i++) {
-          instances.push({
-            instanceId: `${team.id}-${item.id}-d${i}`,
-            name: item.name,
-            category: item.category,
-            code: generateCode(item.id, 100 + i),
-            userName: teamNameShort,
-            lastChecked: mockDates[(i+3) % mockDates.length],
-            status: 'damaged',
-            teamId: team.id,
-            originalItemId: item.id
-          });
-        }
-        
-        // Missing (Disposed) items
-        for (let i = 0; i < item.missing; i++) {
-          instances.push({
-            instanceId: `${team.id}-${item.id}-m${i}`,
-            name: item.name,
-            category: item.category,
-            code: generateCode(item.id, 200 + i),
-            userName: teamNameShort,
-            lastChecked: '-',
-            status: 'disposed',
-            teamId: team.id,
-            originalItemId: item.id
-          });
+        // Damaged items (we will split them into pending and damaged for UI purposes)
+        if (item.damaged > 0) {
+          const pendingCount = Math.floor(item.damaged / 2);
+          const damagedCount = item.damaged - pendingCount;
+          
+          if (pendingCount > 0) {
+            instances.push({
+              instanceId: `${team.id}-${item.id}-pending`,
+              name: item.name,
+              category: item.category,
+              count: pendingCount,
+              unit: item.unit,
+              userName: teamNameShort,
+              status: 'pending',
+              teamId: team.id,
+              originalItemId: item.id
+            });
+          }
+          if (damagedCount > 0) {
+            instances.push({
+              instanceId: `${team.id}-${item.id}-damaged`,
+              name: item.name,
+              category: item.category,
+              count: damagedCount,
+              unit: item.unit,
+              userName: teamNameShort,
+              status: 'damaged',
+              teamId: team.id,
+              originalItemId: item.id
+            });
+          }
         }
       });
     });
     
-    // Convert some 'damaged' to 'pending' to match UI requirements mock
-    instances.forEach((inst, index) => {
-      if (inst.status === 'damaged' && index % 2 === 0) {
-        inst.status = 'pending';
-      }
-    });
-
-    return instances;
+    return instances.sort((a, b) => a.name.localeCompare(b.name));
   }, [localData]);
 
   // Derived filter options
@@ -144,7 +173,6 @@ export default function SafetyPPEDashboard() {
   const filteredInstances = useMemo(() => {
     return allInstances.filter(item => {
       const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.userName.toLowerCase().includes(searchQuery.toLowerCase());
       const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
       const matchUser = selectedUser === 'all' || item.userName === selectedUser;
@@ -153,7 +181,6 @@ export default function SafetyPPEDashboard() {
       if (selectedStatus === 'ready') matchStatus = item.status === 'ready';
       else if (selectedStatus === 'pending') matchStatus = item.status === 'pending';
       else if (selectedStatus === 'damaged') matchStatus = item.status === 'damaged';
-      else if (selectedStatus === 'disposed') matchStatus = item.status === 'disposed';
       
       return matchSearch && matchCat && matchUser && matchStatus;
     });
@@ -165,11 +192,14 @@ export default function SafetyPPEDashboard() {
 
   // Stats calculation
   const stats = useMemo(() => {
-    const total = allInstances.length;
-    const ready = allInstances.filter(i => i.status === 'ready').length;
-    const pending = allInstances.filter(i => i.status === 'pending').length;
-    const damaged = allInstances.filter(i => i.status === 'damaged').length;
-    const disposed = allInstances.filter(i => i.status === 'disposed').length;
+    let total = 0, ready = 0, pending = 0, damaged = 0;
+    
+    allInstances.forEach(i => {
+      total += i.count;
+      if (i.status === 'ready') ready += i.count;
+      if (i.status === 'pending') pending += i.count;
+      if (i.status === 'damaged') damaged += i.count;
+    });
     
     return {
       total,
@@ -179,8 +209,6 @@ export default function SafetyPPEDashboard() {
       damagedPct: total ? Math.round((damaged / total) * 100) : 0,
       pending,
       pendingPct: total ? Math.round((pending / total) * 100) : 0,
-      disposed,
-      disposedPct: total ? Math.round((disposed / total) * 100) : 0,
     };
   }, [allInstances]);
 
@@ -197,26 +225,18 @@ export default function SafetyPPEDashboard() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-tight">ระบบติดตามสถานะอุปกรณ์</h1>
-            <p className="text-sm text-slate-500">กฟย.(ก3) งานก่อสร้างและบำรุงรักษา ดูแลจ่าย ใช้งานได้จริง</p>
+            <p className="text-sm text-slate-500">ผกร.กรย.(ก3)</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2 text-slate-600 text-sm bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
-            <Calendar size={16} />
-            <span>วันจันทร์ที่ 8 กันยายน 2568</span>
-            <span className="text-slate-400">เวลา 10:24 น.</span>
-          </div>
-          <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 pr-3 rounded-full transition-colors border border-transparent hover:border-slate-200">
-            <img 
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-              alt="Profile" 
-              className="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200"
-            />
-            <div className="hidden sm:block text-left">
-              <p className="text-sm font-bold text-slate-800 leading-tight">นายธีรภัทร</p>
-              <p className="text-xs text-slate-500">หัวหน้าแผนก</p>
+          <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-xl transition-colors border border-transparent hover:border-slate-200">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-black flex items-center justify-center border border-indigo-200 shadow-sm">
+              AD
             </div>
-            <ChevronDown size={16} className="text-slate-400 ml-1 hidden sm:block" />
+            <div className="hidden sm:block text-left">
+              <p className="text-sm font-bold text-slate-800 leading-tight">ADMIN</p>
+            </div>
+            <LogOut size={18} className="text-rose-500 hover:text-rose-600 ml-2" title="ออกจากระบบ" />
           </div>
         </div>
       </header>
@@ -230,7 +250,7 @@ export default function SafetyPPEDashboard() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="text" 
-                placeholder="ค้นหาอุปกรณ์, รหัส, ชื่อช่าง ..." 
+                placeholder="ค้นหาอุปกรณ์, ชื่อช่าง ..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2.5 w-full border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1E88E5] bg-white shadow-sm transition-shadow hover:border-slate-300"
@@ -282,7 +302,6 @@ export default function SafetyPPEDashboard() {
                   <option value="ready">พร้อมใช้งาน</option>
                   <option value="pending">รอตรวจ / รอซ่อม</option>
                   <option value="damaged">ชำรุด</option>
-                  <option value="disposed">จำหน่าย / เลิกใช้งาน</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
               </div>
@@ -302,8 +321,8 @@ export default function SafetyPPEDashboard() {
           </div>
         </div>
 
-        {/* Stat Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Stat Cards - Changed from 5 to 4 columns */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Total */}
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
             <div className="bg-blue-50 text-blue-500 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0">
@@ -368,23 +387,6 @@ export default function SafetyPPEDashboard() {
               </div>
             </div>
           </div>
-
-          {/* Card 5: Disposed */}
-          <div className="bg-[#F8FAFC] p-5 rounded-2xl shadow-sm border border-[#E2E8F0] flex items-center gap-4 relative overflow-hidden">
-            <div className="bg-[#64748B] text-white w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border-[3px] border-white">
-              <XCircle size={26} strokeWidth={2.5} />
-            </div>
-            <div className="w-full relative z-10">
-              <p className="text-[13px] font-bold text-slate-800 mb-1">จำหน่าย / เลิกใช้งาน</p>
-              <div className="flex items-baseline justify-between w-full">
-                <div className="flex items-baseline gap-1.5">
-                  <p className="text-[32px] font-black text-slate-800 leading-none tracking-tight">{stats.disposed}</p>
-                  <p className="text-xs font-medium text-slate-400">รายการ</p>
-                </div>
-                <span className="bg-[#E2E8F0] text-[#334155] px-2 py-0.5 rounded-md text-xs font-bold">{stats.disposedPct}%</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Tabs & Table Container */}
@@ -424,9 +426,8 @@ export default function SafetyPPEDashboard() {
                   <th className="px-5 py-3.5 font-bold">รูปภาพ</th>
                   <th className="px-5 py-3.5 font-bold text-slate-800">ชื่ออุปกรณ์</th>
                   <th className="px-5 py-3.5 font-bold">หมวดหมู่</th>
-                  <th className="px-5 py-3.5 font-bold">รหัส/หมายเลข</th>
+                  <th className="px-5 py-3.5 font-bold text-center">จำนวนรวม</th>
                   <th className="px-5 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
-                  <th className="px-5 py-3.5 font-bold">ตรวจล่าสุด</th>
                   <th className="px-5 py-3.5 font-bold">สถานะ</th>
                   <th className="px-5 py-3.5 font-bold text-center">การดำเนินการ</th>
                 </tr>
@@ -434,7 +435,7 @@ export default function SafetyPPEDashboard() {
               <tbody className="divide-y divide-slate-100">
                 {currentData.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
                       ไม่มีข้อมูลที่ตรงกับตัวกรอง
                     </td>
                   </tr>
@@ -451,25 +452,21 @@ export default function SafetyPPEDashboard() {
                         </td>
                         <td className="px-5 py-3 font-bold text-slate-800">{item.name}</td>
                         <td className="px-5 py-3 text-slate-500">{item.category}</td>
-                        <td className="px-5 py-3 font-mono text-slate-600 font-medium">{item.code}</td>
+                        <td className="px-5 py-3 text-center">
+                          <span className="font-black text-slate-700 text-base">{item.count}</span>
+                          <span className="text-slate-400 text-xs ml-1">{item.unit}</span>
+                        </td>
                         <td className="px-5 py-3 text-slate-700 font-medium">{item.userName}</td>
-                        <td className="px-5 py-3 text-slate-500">{item.lastChecked}</td>
                         <td className="px-5 py-3">
                           {item.status === 'ready' && <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"><span className="w-2 h-2 rounded-full bg-[#10B981]"></span> พร้อมใช้งาน</span>}
                           {item.status === 'pending' && <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]"><span className="w-2 h-2 rounded-full bg-[#F59E0B]"></span> รอตรวจ/รอซ่อม</span>}
                           {item.status === 'damaged' && <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]"><span className="w-2 h-2 rounded-full bg-[#EF4444]"></span> ชำรุด</span>}
-                          {item.status === 'disposed' && <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-[#F1F5F9] text-[#475569] border border-[#E2E8F0]"><span className="w-2 h-2 rounded-full bg-[#64748B]"></span> เลิกใช้งาน</span>}
                         </td>
                         <td className="px-5 py-3 text-center">
                           <div className="flex items-center justify-center gap-2">
-                            {item.status === 'ready' && <button className="bg-[#1E88E5] hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8">อัปเดตสถานะ</button>}
-                            {item.status === 'damaged' && <button className="bg-[#EF4444] hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8">ดำเนินการ</button>}
-                            {item.status === 'pending' && <button className="bg-[#FEF08A] hover:bg-[#FDE047] text-[#854D0E] px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8">ดูรายละเอียด</button>}
-                            {item.status === 'disposed' && <button className="bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#334155] px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8">ประวัติ</button>}
-                            
-                            <button className="p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 rounded-md transition-colors h-8 w-8 flex items-center justify-center">
-                              <MoreVertical size={16} />
-                            </button>
+                            {item.status === 'ready' && <button onClick={() => handleOpenUpdate(item)} className="bg-[#1E88E5] hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8 flex items-center justify-center gap-1.5"><Edit3 size={14}/> อัปเดตสถานะ</button>}
+                            {item.status === 'damaged' && <button onClick={() => handleOpenUpdate(item)} className="bg-[#EF4444] hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8 flex items-center justify-center gap-1.5"><Wrench size={14}/> ดำเนินการ</button>}
+                            {item.status === 'pending' && <button onClick={() => handleOpenUpdate(item)} className="bg-[#FEF08A] hover:bg-[#FDE047] text-[#854D0E] px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors w-28 h-8 flex items-center justify-center gap-1.5"><Check size={14}/> ตรวจสอบ</button>}
                           </div>
                         </td>
                       </tr>
@@ -531,6 +528,82 @@ export default function SafetyPPEDashboard() {
         </div>
 
       </main>
+
+      {/* Update Modal */}
+      {updateItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Edit3 size={20} className="text-indigo-600" /> อัปเดตสถานะอุปกรณ์
+              </h3>
+              <button onClick={() => setUpdateItem(null)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl shadow-sm border border-slate-200 shrink-0">
+                  {getEmojiIcon(updateItem.category, updateItem.name)}
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800">{updateItem.name}</h4>
+                  <p className="text-sm text-slate-500">มีอยู่ {updateItem.count} {updateItem.unit}</p>
+                </div>
+              </div>
+
+              <form id="update-form" onSubmit={handleSubmitUpdate} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">สถานะปัจจุบัน</label>
+                  <div className="px-4 py-2.5 bg-slate-100 rounded-lg text-sm text-slate-600 font-medium">
+                    {updateItem.status === 'ready' ? '✅ พร้อมใช้งาน' : updateItem.status === 'damaged' ? '❌ ชำรุด' : '⚠️ รอตรวจ / รอซ่อม'}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">ต้องการเปลี่ยนเป็น <span className="text-rose-500">*</span></label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'ready' ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-200'}`}>
+                      <input type="radio" className="hidden" checked={updateTargetStatus === 'ready'} onChange={() => setUpdateTargetStatus('ready')} />
+                      <CheckCircle size={18} /> พร้อมใช้งาน
+                    </label>
+                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'damaged' ? 'bg-rose-50 border-rose-500 text-rose-700' : 'bg-white border-slate-200 text-slate-600 hover:border-rose-200'}`}>
+                      <input type="radio" className="hidden" checked={updateTargetStatus === 'damaged'} onChange={() => setUpdateTargetStatus('damaged')} />
+                      <AlertTriangle size={18} /> ชำรุด/ส่งซ่อม
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">จำนวน ({updateItem.unit}) <span className="text-rose-500">*</span></label>
+                  <div className="flex items-center">
+                    <button type="button" onClick={() => setUpdateAmount(Math.max(1, updateAmount - 1))} className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-l-lg border border-slate-300 font-bold text-lg">-</button>
+                    <input 
+                      type="number" 
+                      min={1} 
+                      max={updateItem.count} 
+                      value={updateAmount} 
+                      onChange={(e) => setUpdateAmount(Math.max(1, Math.min(updateItem.count, parseInt(e.target.value) || 1)))}
+                      className="w-full h-10 text-center border-y border-slate-300 font-bold text-slate-800 focus:outline-none"
+                    />
+                    <button type="button" onClick={() => setUpdateAmount(Math.min(updateItem.count, updateAmount + 1))} className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-r-lg border border-slate-300 font-bold text-lg">+</button>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">ระบุจำนวนที่ต้องการเปลี่ยนสถานะ (สูงสุด {updateItem.count})</p>
+                </div>
+              </form>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button type="button" onClick={() => setUpdateItem(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
+              <button type="submit" form="update-form" className="px-6 py-2 text-sm font-bold text-white bg-[#1E88E5] hover:bg-blue-600 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+                <Save size={16} /> บันทึกการอัปเดต
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
