@@ -422,7 +422,7 @@ export default function SafetyPPEDashboard() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 gap-6 mb-6">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -448,35 +448,6 @@ export default function SafetyPPEDashboard() {
                 <Bar dataKey="damaged" name="ชำรุด" stackId="a" fill="#f59e0b" />
                 <Bar dataKey="missing" name="ขาดแคลน" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
               </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <Shield size={20} className="text-indigo-600" /> 
-              แนวโน้มการตรวจสภาพอุปกรณ์
-            </h3>
-            <select className="border border-slate-200 text-xs rounded-md px-2 py-1 bg-slate-50">
-              <option>2567</option>
-            </select>
-          </div>
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={lineChartData}
-                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-                <RechartsTooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
-                <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '10px'}} />
-                <Line type="monotone" dataKey="total" name="ตรวจทั้งหมด" stroke="#8b5cf6" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
-                <Line type="monotone" dataKey="pass" name="ผ่านการตรวจ" stroke="#10b981" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} />
-                <Line type="monotone" dataKey="fail" name="ไม่ผ่าน (ต้องแก้ไข)" stroke="#f43f5e" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} />
-              </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
