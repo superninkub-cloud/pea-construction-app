@@ -11,12 +11,12 @@ export default function Sidebar() {
   const { isSidebarOpen, closeSidebar } = useSidebar();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    main: true,
-    planning: true,
-    docs: true,
-    safety: true,
-    personnel: true,
-    vehicle: true,
+    main: false,
+    planning: false,
+    docs: false,
+    safety: false,
+    personnel: false,
+    vehicle: false,
   });
 
   const toggleSection = (section: string) => {
@@ -26,7 +26,7 @@ export default function Sidebar() {
   const SectionHeader = ({ id, title, isFirst = false }: { id: string, title: string, isFirst?: boolean }) => (
     <div 
       onClick={(e) => { e.stopPropagation(); toggleSection(id); }}
-      className={`px-3 text-[14px] font-bold text-amber-700 mb-2 flex justify-between items-center cursor-pointer hover:text-amber-800 transition-colors group ${isFirst ? 'mt-4' : 'mt-6'}`}
+      className={`px-3 text-[14px] font-semibold text-amber-700 mb-2 flex justify-between items-center cursor-pointer hover:text-amber-800 transition-colors group ${isFirst ? 'mt-4' : 'mt-6'}`}
     >
       <span>{title}</span>
       {expanded[id] ? <ChevronDown size={16} className="opacity-70 group-hover:opacity-100" /> : <ChevronRight size={16} className="opacity-70 group-hover:opacity-100" />}
