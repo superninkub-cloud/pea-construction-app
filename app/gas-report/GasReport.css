@@ -264,21 +264,6 @@
   
   .official-form {
     transform: scale(0.92);
-    transform-origin: top center;
-    color: #000 !important;
-  }
-}
-
-/* === OFFICIAL FORM (PDF LAYOUT) === */
-.official-form {
-  font-family: 'Prompt', sans-serif;
-  color: #000;
-  background: white;
-  padding: 10px 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
@@ -385,6 +370,16 @@
 }
 @media print {
   body, .official-form, .official-table, th, td, div, span {
-    font-family: 'TH Sarabun PSK', 'Sarabun', sans-serif !important;
+    font-family: 'TH Sarabun PSK', 'THSarabunPSK', 'Sarabun', sans-serif !important;
   }
+}
+
+/* === OFFICIAL FORM (PDF LAYOUT) === */
+.official-form {
+  font-family: 'TH Sarabun PSK', 'THSarabunPSK', 'Sarabun', sans-serif;
+  color: #000;
+  background: white;
+  padding: 10px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
 }

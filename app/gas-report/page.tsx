@@ -586,9 +586,13 @@ export default function GasReportPage() {
                             <label><input type="checkbox" /> แก๊สโซฮอล์ E20</label>
                             <label><input type="checkbox" /> แก๊สโซฮอล์ E85</label>
                             <label><input type="checkbox" /> ดีเซล</label>
-                            <label><input type="checkbox" /> น้ำมันหล่อลื่น จำนวน</label>
-                            <span className="dotted-blank" style={{ width: '60px' }}></span>
-                            <span>ลิตร</span>
+                            <div className="flex-start" style={{ whiteSpace: 'nowrap' }}>
+                              <label style={{ margin: '0 0 0 12px', display: 'flex', alignItems: 'center' }}>
+                                <input type="checkbox" style={{ marginRight: '4px' }} /> น้ำมันหล่อลื่น จำนวน
+                              </label>
+                              <span className="dotted-blank" style={{ width: '40px' }}></span>
+                              <span>ลิตร</span>
+                            </div>
                           </div>
 
                           <div className="form-row flex-start">
