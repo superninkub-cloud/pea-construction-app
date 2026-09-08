@@ -58,19 +58,19 @@ export default function SafetyPPEDashboard() {
   const [updateTargetStatus, setUpdateTargetStatus] = useState<'ready' | 'damaged'>('ready');
 
   useEffect(() => {
-    const saved = localStorage.getItem('pea_safety_data_v2');
+    const saved = localStorage.getItem('pea_safety_data_v3');
     if (saved) {
       setLocalData(JSON.parse(saved));
     } else {
       setLocalData(safetyData);
-      localStorage.setItem('pea_safety_data_v2', JSON.stringify(safetyData));
+      localStorage.setItem('pea_safety_data_v3', JSON.stringify(safetyData));
     }
     setIsLoaded(true);
   }, []);
 
   const saveLocalData = (newData: any) => {
     setLocalData(newData);
-    localStorage.setItem('pea_safety_data_v2', JSON.stringify(newData));
+    localStorage.setItem('pea_safety_data_v3', JSON.stringify(newData));
   };
 
   const handleOpenUpdate = (item: AggregatedEquipment, sourceStatus: 'ready' | 'pending' | 'damaged') => {
