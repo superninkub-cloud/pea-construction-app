@@ -55,7 +55,7 @@ export default function SafetyPPEDashboard() {
   const [updateItem, setUpdateItem] = useState<AggregatedEquipment | null>(null);
   const [updateSourceStatus, setUpdateSourceStatus] = useState<'ready' | 'pending' | 'damaged'>('ready');
   const [updateAmount, setUpdateAmount] = useState(1);
-  const [updateTargetStatus, setUpdateTargetStatus] = useState<'ready' | 'damaged'>('ready');
+  const [updateTargetStatus, setUpdateTargetStatus] = useState<'ready' | 'damaged' | 'pending'>('ready');
 
   // Edit Standard states
   const [editStandardItem, setEditStandardItem] = useState<AggregatedEquipment | null>(null);
@@ -102,10 +102,15 @@ export default function SafetyPPEDashboard() {
         
         const amount = Math.min(updateAmount, maxAvailable);
         
-        if (updateSourceStatus === 'ready' && updateTargetStatus === 'damaged') {
-          eq.damaged += amount;
-        } else if ((updateSourceStatus === 'damaged' || updateSourceStatus === 'pending') && updateTargetStatus === 'ready') {
-          eq.damaged = Math.max(0, eq.damaged - amount);
+        if (updateSourceStatus === 'ready') {
+          if (updateTargetStatus === 'damaged') eq.damaged = (eq.damaged || 0) + amount;
+          if (updateTargetStatus === 'pending') eq.pending = (eq.pending || 0) + amount;
+        } else if (updateSourceStatus === 'damaged') {
+          eq.damaged = Math.max(0, (eq.damaged || 0) - amount);
+          if (updateTargetStatus === 'pending') eq.pending = (eq.pending || 0) + amount;
+        } else if (updateSourceStatus === 'pending') {
+          eq.pending = Math.max(0, (eq.pending || 0) - amount);
+          if (updateTargetStatus === 'damaged') eq.damaged = (eq.damaged || 0) + amount;
         }
       }
     }
@@ -155,9 +160,9 @@ export default function SafetyPPEDashboard() {
       team.equipment.forEach((item: any) => {
         const teamNameShort = team.name.replace('ชุดงาน นาย', 'นาย');
         
-        const readyCount = Math.max(0, item.actual - item.damaged);
-        const pendingCount = 0;
-        const damagedCount = item.damaged;
+        const pendingCount = item.pending || 0;
+        const damagedCount = item.damaged || 0;
+        const readyCount = Math.max(0, item.actual - damagedCount - pendingCount);
         
         if (item.actual > 0 || item.standard > 0) {
           instances.push({
@@ -627,14 +632,18 @@ export default function SafetyPPEDashboard() {
               <form id="update-form" onSubmit={handleSubmitUpdate} className="space-y-5">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">ต้องการเปลี่ยนเป็น <span className="text-rose-500">*</span></label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'ready' ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-200'} ${updateSourceStatus === 'ready' ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <div className="grid grid-cols-3 gap-3">
+                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-3 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'ready' ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-200'} ${updateSourceStatus === 'ready' ? 'opacity-50 cursor-not-allowed' : ''}`}>
                       <input type="radio" className="hidden" disabled={updateSourceStatus === 'ready'} checked={updateTargetStatus === 'ready'} onChange={() => setUpdateTargetStatus('ready')} />
                       <CheckCircle size={18} /> พร้อมใช้งาน
                     </label>
-                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'damaged' ? 'bg-rose-50 border-rose-500 text-rose-700' : 'bg-white border-slate-200 text-slate-600 hover:border-rose-200'} ${updateSourceStatus === 'damaged' ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-3 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'damaged' ? 'bg-rose-50 border-rose-500 text-rose-700' : 'bg-white border-slate-200 text-slate-600 hover:border-rose-200'} ${updateSourceStatus === 'damaged' ? 'opacity-50 cursor-not-allowed' : ''}`}>
                       <input type="radio" className="hidden" disabled={updateSourceStatus === 'damaged'} checked={updateTargetStatus === 'damaged'} onChange={() => setUpdateTargetStatus('damaged')} />
-                      <AlertTriangle size={18} /> ชำรุด/ส่งซ่อม
+                      <AlertTriangle size={18} /> ชำรุด
+                    </label>
+                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-3 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'pending' ? 'bg-amber-50 border-amber-500 text-amber-700' : 'bg-white border-slate-200 text-slate-600 hover:border-amber-200'} ${updateSourceStatus === 'pending' ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <input type="radio" className="hidden" disabled={updateSourceStatus === 'pending'} checked={updateTargetStatus === 'pending'} onChange={() => setUpdateTargetStatus('pending')} />
+                      <Wrench size={18} /> รอซ่อม
                     </label>
                   </div>
                 </div>

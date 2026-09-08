@@ -66,6 +66,8 @@ export default function MyTasksDashboard() {
   const [updateStatus, setUpdateStatus] = useState<'completed' | 'not_completed'>('completed');
   
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<string | null>(null);
+  const [editTaskData, setEditTaskData] = useState<Partial<Task>>({});
   const [filterStatus, setFilterStatus] = useState<'all' | 'today' | 'completed' | 'tracked'>('all');
   const [newTask, setNewTask] = useState<Partial<Task>>({
     title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false, assigneeName: ''
@@ -149,6 +151,12 @@ export default function MyTasksDashboard() {
     setTasks([task, ...tasks]);
     setShowCreateModal(false);
     setNewTask({ title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false, assigneeName: '' });
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setTasks(prev => prev.map(t => t.id === editTaskData.id ? { ...t, ...editTaskData } as Task : t));
+    setShowEditModal(null);
   };
 
   const handleToggleTrack = (id: string) => {
@@ -377,16 +385,16 @@ export default function MyTasksDashboard() {
 
             {/* Tracked Tasks */}
             {trackedTasks.length > 0 && (
-              <div className="bg-amber-50/50 border border-amber-200 rounded-2xl shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
-                <div className="px-6 py-4 border-b border-amber-100 flex justify-between items-center bg-amber-100/50">
-                  <h2 className="text-lg font-bold text-amber-900 flex items-center gap-2">
-                    <Megaphone size={22} className="text-amber-600" />
+              <div className="bg-purple-50/50 border border-purple-200 rounded-2xl shadow-sm relative overflow-hidden mb-6">
+                <div className="absolute top-0 left-0 w-2 h-full bg-purple-600"></div>
+                <div className="px-6 py-6 border-b border-purple-800 flex justify-between items-center bg-[#6B2169]">
+                  <h2 className="text-2xl font-bold text-amber-100 flex items-center gap-3">
+                    <Megaphone size={28} className="text-amber-200" />
                     งานที่หัวหน้ากำลังติดตาม
                   </h2>
-                  <span className="text-sm font-medium text-amber-700">{trackedTasks.length} งาน</span>
+                  <span className="text-base font-bold text-purple-200 bg-purple-800/50 px-3 py-1 rounded-lg border border-purple-700">{trackedTasks.length} งาน</span>
                 </div>
-                <div className="divide-y divide-amber-100">
+                <div className="divide-y divide-purple-100">
                   {trackedTasks.map(task => (
                     <div key={task.id} className="p-4 md:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white/60 hover:bg-white transition-colors">
                       <div className="flex gap-4 items-start flex-1 min-w-0">
@@ -421,6 +429,15 @@ export default function MyTasksDashboard() {
                         
                         {isManagerMode ? (
                           <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => {
+                                setEditTaskData(task);
+                                setShowEditModal(task.id);
+                              }}
+                              className="flex items-center gap-1 text-indigo-500 hover:bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                            >
+                              <Edit3 size={14} /> แก้ไข
+                            </button>
                             <button 
                               onClick={() => handleToggleTrack(task.id)} 
                               className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
@@ -652,6 +669,51 @@ export default function MyTasksDashboard() {
             <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
               <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
               <button type="submit" form="create-form" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">สร้างและมอบหมาย</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Edit Task Modal (Manager) */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Edit3 size={20} className="text-indigo-600" /> แก้ไขข้อมูลงาน
+              </h3>
+              <button onClick={() => setShowEditModal(null)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <form id="edit-form" onSubmit={handleSaveEdit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ชื่องาน <span className="text-rose-500">*</span></label>
+                  <input required value={editTaskData.title || ''} onChange={e => setEditTaskData({...editTaskData, title: e.target.value})} type="text" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">กำหนดเวลาเริ่มต้น <span className="text-rose-500">*</span></label>
+                  <input required value={editTaskData.location || ''} onChange={e => setEditTaskData({...editTaskData, location: e.target.value})} type="datetime-local" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">กำหนดเวลาแล้วเสร็จ <span className="text-rose-500">*</span></label>
+                  <input required value={editTaskData.time || ''} onChange={e => setEditTaskData({...editTaskData, time: e.target.value})} type="datetime-local" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ผู้รับผิดชอบ <span className="text-rose-500">*</span></label>
+                  <select required value={editTaskData.assigneeName || ''} onChange={e => setEditTaskData({...editTaskData, assigneeName: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="" disabled>-- เลือกผู้รับผิดชอบ --</option>
+                    {ASSIGNEES.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+              </form>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button type="button" onClick={() => setShowEditModal(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
+              <button type="submit" form="edit-form" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+                <Save size={16} /> บันทึกการแก้ไข
+              </button>
             </div>
           </div>
         </div>
