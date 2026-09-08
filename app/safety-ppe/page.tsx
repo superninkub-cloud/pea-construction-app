@@ -771,7 +771,7 @@ export default function SafetyPPEDashboard() {
                   >
                     <option value="">-- เลือกช่าง --</option>
                     {localData.map((t: any) => (
-                      <option key={t.id} value={t.id}>{t.userName} ({t.teamName})</option>
+                      <option key={t.id} value={t.id}>{t.name}</option>
                     ))}
                   </select>
                 </div>
