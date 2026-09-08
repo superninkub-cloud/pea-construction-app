@@ -10,6 +10,7 @@ export interface Task {
   priority: TaskPriority;
   isTracked: boolean;
   type: 'maintenance' | 'survey' | 'inspection' | 'other';
+  assigneeName?: string;
 }
 
 export const mockTasks: Task[] = [

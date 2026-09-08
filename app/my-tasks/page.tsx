@@ -9,6 +9,20 @@ import {
 } from 'lucide-react';
 import { mockTasks, Task, TaskStatus, TaskPriority } from './data';
 
+const ASSIGNEES = [
+  "ชานินทร์ ศรีสวัสดิ์ ชผ.กร.",
+  "อุดมศักดิ์ จันทร์กลิ่น พชง.7",
+  "ศราวุฒิ เกิดสีเล็ก พชง.6",
+  "ศุภวิชญ์ เกาะลอย พชง.6",
+  "วีรพัฒน์ นาคลมัย พชง.6",
+  "ขวัญนคร ศรีจันทร์อินทร์ พชง.5",
+  "กิตติพิชญ์ ประกอบทรัพย์ พชง.5",
+  "นฤเบศ ยันตรีสิงห์ พชง.5",
+  "สิริวัชญ์ ภิรมย์มาก พนง.Office",
+  "กิตติพิชญ์ พุ่มกำพล พนง.Office",
+  "กมลวิทย์ สุนทรพรเจริญ พนง.Office"
+];
+
 export default function MyTasksDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isManagerMode, setIsManagerMode] = useState(false);
@@ -21,7 +35,7 @@ export default function MyTasksDashboard() {
   
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTask, setNewTask] = useState<Partial<Task>>({
-    title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false
+    title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false, assigneeName: ''
   });
 
   useEffect(() => {
@@ -89,10 +103,11 @@ export default function MyTasksDashboard() {
       priority: newTask.priority || 'normal',
       isTracked: newTask.isTracked || false,
       type: newTask.type || 'other',
+      assigneeName: newTask.assigneeName || '',
     };
     setTasks([task, ...tasks]);
     setShowCreateModal(false);
-    setNewTask({ title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false });
+    setNewTask({ title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false, assigneeName: '' });
   };
 
   const handleToggleTrack = (id: string) => {
@@ -594,6 +609,13 @@ export default function MyTasksDashboard() {
                       <option value="other">อื่นๆ</option>
                     </select>
                   </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ผู้รับผิดชอบ <span className="text-rose-500">*</span></label>
+                  <select required value={newTask.assigneeName} onChange={e => setNewTask({...newTask, assigneeName: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="" disabled>-- เลือกผู้รับผิดชอบ --</option>
+                    {ASSIGNEES.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="flex items-center gap-2 cursor-pointer mt-2 p-3 border border-amber-200 bg-amber-50 rounded-lg">
