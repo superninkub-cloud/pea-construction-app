@@ -11,12 +11,12 @@ export default function Sidebar() {
   const { isSidebarOpen, closeSidebar } = useSidebar();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    main: false,
+    main: true,
     planning: false,
     docs: false,
     safety: false,
     personnel: false,
-    vehicle: false,
+    vehicle: true,
   });
 
   const toggleSection = (section: string) => {
