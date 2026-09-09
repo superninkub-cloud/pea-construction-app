@@ -586,11 +586,11 @@ export default function GasReportPage() {
                             <label><input type="checkbox" /> แก๊สโซฮอล์ E20</label>
                             <label><input type="checkbox" /> แก๊สโซฮอล์ E85</label>
                             <label><input type="checkbox" /> ดีเซล</label>
-                            <div className="flex-start" style={{ whiteSpace: 'nowrap' }}>
+                            <div className="flex-start" style={{ whiteSpace: 'nowrap', flex: 1 }}>
                               <label style={{ margin: '0 0 0 12px', display: 'flex', alignItems: 'center' }}>
                                 <input type="checkbox" style={{ marginRight: '4px' }} /> น้ำมันหล่อลื่น จำนวน
                               </label>
-                              <span className="dotted-blank" style={{ width: '40px' }}></span>
+                              <span className="dotted-blank" style={{ flex: 1, minWidth: '40px' }}></span>
                               <span>ลิตร</span>
                             </div>
                           </div>
@@ -599,7 +599,7 @@ export default function GasReportPage() {
                             <span>อัตราการสิ้นเปลืองเชื้อเพลิงยานพาหนะ</span>
                             <span className="dotted-blank" style={{ width: '200px' }}></span>
                             <span>กิโลเมตร/ลิตร, เครื่องจักร</span>
-                            <span className="dotted-blank" style={{ width: '200px' }}></span>
+                            <span className="dotted-blank" style={{ flex: 1, minWidth: '100px' }}></span>
                             <span>ลิตร/ชั่วโมง</span>
                           </div>
                         </div>
