@@ -59,10 +59,12 @@ export default function Sidebar() {
         <SectionHeader id="main" title="หน้าหลัก" isFirst={true} />
         {expanded.main && (
           <div onClick={closeSidebar}>
-            <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`}>
-              <LayoutDashboard size={20} />
-              <span>Dashboard งานก่อสร้าง</span>
-            </Link>
+            {userRole === 'admin' && (
+              <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`}>
+                <LayoutDashboard size={20} />
+                <span>Dashboard งานก่อสร้าง</span>
+              </Link>
+            )}
             <Link href="/update" className={`nav-item ${pathname === "/update" ? "active" : ""}`}>
               <FileEdit size={20} />
               <span>อัปเดตสถานะงาน</span>
@@ -74,6 +76,10 @@ export default function Sidebar() {
             <Link href="/my-tasks" className={`nav-item ${pathname === "/my-tasks" ? "active" : ""}`}>
               <ClipboardList size={20} />
               <span>มอบหมายและติดตามงาน</span>
+            </Link>
+            <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`}>
+              <CalendarDays size={20} />
+              <span>แผนงานระบบ / แผนใช้รถ</span>
             </Link>
           </div>
         )}
@@ -88,10 +94,6 @@ export default function Sidebar() {
             <Link href="/important" className={`nav-item ${pathname === "/important" ? "active" : ""}`}>
               <AlertCircle size={20} />
               <span>ติดตามงานสำคัญ</span>
-            </Link>
-            <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`}>
-              <CalendarDays size={20} />
-              <span>แผนงานระบบ / แผนใช้รถ</span>
             </Link>
           </div>
         )}

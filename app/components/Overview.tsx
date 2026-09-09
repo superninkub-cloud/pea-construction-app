@@ -129,6 +129,24 @@ export default function Overview() {
     );
   }
 
+  // Prevent non-admin access
+  const userRole = typeof window !== 'undefined' ? sessionStorage.getItem('pea_role') : null;
+  if (userRole !== 'admin') {
+    return (
+      <>
+        <TopBar title="Dashboard งานก่อสร้าง" />
+        <div className="content-area" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+          <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+            <AlertTriangle size={64} color="#f59e0b" style={{ margin: '0 auto 20px' }} />
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '12px' }}>จำกัดสิทธิ์การเข้าถึง</h2>
+            <p style={{ color: '#64748b', fontSize: '1.1rem' }}>หน้านี้สงวนไว้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น</p>
+            <p style={{ color: '#64748b', fontSize: '1rem', marginTop: '8px' }}>กรุณาเลือกเมนูอื่นจากแถบด้านซ้ายเพื่อใช้งานระบบ</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <TopBar title="ภาพรวมงานก่อสร้างของ ผกร.กรย.(ก3)" />
