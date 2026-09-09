@@ -658,7 +658,7 @@ export default function GasReportPage() {
                           </tbody>
                         </table>
                         
-                        <div style={{ marginTop: '10px', marginLeft: '40px', fontSize: '16px' }}>
+                        <div style={{ marginTop: '24px', marginLeft: '40px', fontSize: '16px' }}>
                           จึงเรียนมาเพื่อโปรดทราบ
                         </div>
 
