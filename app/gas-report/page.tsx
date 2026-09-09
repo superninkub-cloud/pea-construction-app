@@ -529,8 +529,8 @@ export default function GasReportPage() {
                         <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
                           <img src="/PEA-Logo.png" alt="PEA" style={{ width: '80px' }} onError={(e) => (e.currentTarget as any).style.display = 'none'} />
                         </div>
-                        <div className="form-header text-center" style={{ marginBottom: '24px' }}>
-                          <div style={{ fontSize: '28px', marginBottom: '8px' }}>การไฟฟ้าส่วนภูมิภาค</div>
+                        <div className="form-header text-center" style={{ marginBottom: '12px' }}>
+                          <div style={{ fontSize: '28px', marginBottom: '4px' }}>การไฟฟ้าส่วนภูมิภาค</div>
                           <div style={{ fontSize: '24px' }}>แบบฟอร์มรายงานการใช้ยานพาหนะหรือเครื่องจักร</div>
                         </div>
 
@@ -658,7 +658,7 @@ export default function GasReportPage() {
                           </tbody>
                         </table>
                         
-                        <div style={{ marginTop: '24px', marginLeft: '40px', fontSize: '16px' }}>
+                        <div style={{ marginTop: '10px', marginLeft: '40px', fontSize: '16px' }}>
                           จึงเรียนมาเพื่อโปรดทราบ
                         </div>
 
