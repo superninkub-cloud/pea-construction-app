@@ -61,7 +61,8 @@ export default function WireReturnPage() {
         setAllProjects(data);
         // Filter projects that have scrap wire info or are not finished
         const filtered = data.filter((p: any) => 
-          p.wbs !== "IMPORTANT_TASKS_2026" && (
+          p.wbs !== "IMPORTANT_TASKS_2026" && 
+          p.wbs !== "SAFETY_PLAN_2026" && (
             p.scrap_wire_type || 
             p.scrap_wire_length > 0 || 
             (p.status !== "ยกเลิก")
