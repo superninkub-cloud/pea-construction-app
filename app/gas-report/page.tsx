@@ -665,11 +665,13 @@ export default function GasReportPage() {
                         <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '10px' }}>
                           <div className="signature-section flex-between">
                             <div className="signature-box" style={{ flex: 1 }}>
-                              <div>(.......................................................................................)</div>
+                              <div style={{ display: 'inline-block', borderBottom: '1px dotted #000', width: '220px', height: '24px', marginBottom: '4px' }}></div>
+                              <div>( {chunk[0]?.driver_name || "........................................................"} )</div>
                               <div className="font-bold mt-2">ผู้ขับยานพาหนะ</div>
                             </div>
                             <div className="signature-box" style={{ flex: 1 }}>
-                              <div>(.......................................................................................)</div>
+                              <div style={{ display: 'inline-block', borderBottom: '1px dotted #000', width: '220px', height: '24px', marginBottom: '4px' }}></div>
+                              <div>( {chunk[0]?.supervisor_name || "........................................................"} )</div>
                               <div className="font-bold mt-2">ผู้ควบคุม</div>
                             </div>
                           </div>
