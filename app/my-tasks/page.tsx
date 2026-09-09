@@ -268,7 +268,7 @@ export default function MyTasksDashboard() {
         </div>
 
         {/* Controls */}
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 sticky top-[140px] sm:top-[80px] z-20 bg-slate-50 py-2 -mx-4 px-4 md:mx-0 md:px-0 shadow-sm md:shadow-none border-b border-slate-200 md:border-none md:bg-transparent">
           <button 
             onClick={() => {
               localStorage.setItem('pea_tasks', JSON.stringify(tasks));
