@@ -604,7 +604,7 @@ export default function GasReportPage() {
                           </div>
                         </div>
 
-                        <table className="official-table" style={{ flex: 1 }}>
+                        <table className="official-table">
                           <thead>
                             <tr>
                               <th rowSpan={2} style={{ width: '50px' }}>วันที่</th>
