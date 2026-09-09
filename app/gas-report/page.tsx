@@ -522,10 +522,11 @@ export default function GasReportPage() {
 
               {reports.length > 0 ? (
                 <div id="printable-report">
-                  {Array.from({ length: Math.ceil(reports.length / 7) || 1 }).map((_, pageIndex) => {
+                  {Array.from({ length: Math.ceil(reports.length / 7) || 1 }).map((_, pageIndex, arr) => {
                     const chunk = reports.slice(pageIndex * 7, (pageIndex + 1) * 7);
+                    const isLastPage = pageIndex === arr.length - 1;
                     return (
-                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: isLastPage ? 'auto' : 'always', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
                           <img src="/PEA-Logo.png" alt="PEA" style={{ width: '80px' }} onError={(e) => (e.currentTarget as any).style.display = 'none'} />
                         </div>
