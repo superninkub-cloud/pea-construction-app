@@ -267,9 +267,34 @@ export default function MyTasksDashboard() {
           </div>
         </div>
 
-        {/* Manager Mode Controls */}
-        {isManagerMode && (
-          <div className="flex justify-end">
+        {/* Controls */}
+        <div className="flex justify-end gap-3">
+          <button 
+            onClick={() => {
+              localStorage.setItem('pea_tasks', JSON.stringify(tasks));
+              alert('บันทึกข้อมูลล่าสุดลงในเครื่องเรียบร้อยแล้ว');
+            }}
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+          >
+            <Save size={18} />
+            บันทึกข้อมูล
+          </button>
+          
+          <button 
+            onClick={() => {
+              if (confirm('คุณต้องการโหลดข้อมูลตั้งต้นใหม่หรือไม่? (ข้อมูลที่แก้ไขไว้ในเครื่องนี้จะหายไป)')) {
+                setTasks(mockTasks);
+                localStorage.setItem('pea_tasks', JSON.stringify(mockTasks));
+                alert('โหลดข้อมูลใหม่เรียบร้อยแล้ว');
+              }
+            }}
+            className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            ดึงข้อมูลล่าสุด
+          </button>
+
+          {isManagerMode && (
             <button 
               onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
@@ -277,8 +302,8 @@ export default function MyTasksDashboard() {
               <Plus size={18} />
               มอบหมายงานใหม่
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
