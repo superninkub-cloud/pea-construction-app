@@ -11,6 +11,7 @@ export interface Task {
   isTracked: boolean;
   type: 'maintenance' | 'survey' | 'inspection' | 'other';
   assigneeName?: string;
+  note?: string;
 }
 
 export const mockTasks: Task[] = [

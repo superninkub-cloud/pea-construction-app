@@ -8,6 +8,7 @@ import {
   LogOut, Trash2, CalendarDays, Save
 } from 'lucide-react';
 import { mockTasks, Task, TaskStatus, TaskPriority } from './data';
+import { supabase } from '../../lib/supabaseClient';
 
 const ASSIGNEES = [
   "ชานินทร์ ศรีสวัสดิ์ ชผ.กร.",
@@ -81,22 +82,33 @@ export default function MyTasksDashboard() {
       setIsManagerMode(true);
     }
 
-    // Load from local storage
-    const saved = localStorage.getItem('pea_tasks');
-    if (saved) {
-      setTasks(JSON.parse(saved));
-    } else {
-      setTasks(mockTasks);
-      localStorage.setItem('pea_tasks', JSON.stringify(mockTasks));
-    }
-    setIsLoaded(true);
-  }, []);
+    const fetchTasks = async () => {
+      const { data, error } = await supabase.from('my_tasks').select('*').order('created_at', { ascending: false });
+      if (data && data.length > 0) {
+        const formattedTasks = data.map(d => ({
+          ...d,
+          isTracked: d.is_tracked,
+          assigneeName: d.assignee_name
+        }));
+        setTasks(formattedTasks as Task[]);
+      } else {
+        setTasks(mockTasks);
+      }
+      setIsLoaded(true);
+    };
 
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('pea_tasks', JSON.stringify(tasks));
-    }
-  }, [tasks, isLoaded]);
+    fetchTasks();
+
+    const channel = supabase.channel('schema-db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'my_tasks' }, (payload) => {
+        fetchTasks();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const allTasksCount = tasks.length;
   const dueTodayCount = tasks.filter(t => t.time.includes('วันนี้') && !t.isTracked).length;
@@ -115,34 +127,43 @@ export default function MyTasksDashboard() {
   const trackedTasks = filteredTasks.filter(t => t.isTracked);
 
   // Actions
-  const handleStartTask = (id: string) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'in_progress' } : t));
+  const updateTaskInDb = async (id: string, updates: Partial<any>) => {
+    const { error } = await supabase.from('my_tasks').update(updates).eq('id', id);
+    if (error) console.error('Error updating task:', error);
   };
 
-  const handleUpdateTask = (e: React.FormEvent) => {
+  const handleStartTask = async (id: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'in_progress' } : t));
+    await updateTaskInDb(id, { status: 'in_progress' });
+  };
+
+  const handleUpdateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (showUpdateModal) {
       if (updateStatus === 'not_completed' && !updateNote.trim()) {
         alert('กรุณาชี้แจงสาเหตุที่ทำงานยังไม่เสร็จ');
         return;
       }
+      const newStatus = updateStatus === 'completed' ? 'waiting_for_review' : 'in_progress';
       setTasks(prev => prev.map(t => 
         t.id === showUpdateModal 
-          ? { ...t, status: updateStatus === 'completed' ? 'waiting_for_review' : 'in_progress', note: updateNote } 
+          ? { ...t, status: newStatus, note: updateNote } 
           : t
       ));
+      await updateTaskInDb(showUpdateModal, { status: newStatus, note: updateNote });
       setShowUpdateModal(null);
       setUpdateNote('');
     }
   };
 
-  const handleDeleteTask = (id: string) => {
+  const handleDeleteTask = async (id: string) => {
     if (confirm('คุณต้องการลบงานนี้ใช่หรือไม่?')) {
       setTasks(prev => prev.filter(t => t.id !== id));
+      await supabase.from('my_tasks').delete().eq('id', id);
     }
   };
 
-  const handleCreateTask = (e: React.FormEvent) => {
+  const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     const task: Task = {
       id: `T-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
@@ -156,18 +177,50 @@ export default function MyTasksDashboard() {
       assigneeName: newTask.assigneeName || '',
     };
     setTasks([task, ...tasks]);
+    
+    await supabase.from('my_tasks').insert({
+      id: task.id,
+      title: task.title,
+      location: task.location,
+      time: task.time,
+      status: task.status,
+      priority: task.priority,
+      is_tracked: task.isTracked,
+      type: task.type,
+      assignee_name: task.assigneeName
+    });
+    
     setShowCreateModal(false);
     setNewTask({ title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false, assigneeName: '' });
   };
 
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTasks(prev => prev.map(t => t.id === editTaskData.id ? { ...t, ...editTaskData } as Task : t));
+    
+    if (editTaskData.id) {
+      await updateTaskInDb(editTaskData.id, {
+        title: editTaskData.title,
+        location: editTaskData.location,
+        time: editTaskData.time,
+        status: editTaskData.status,
+        priority: editTaskData.priority,
+        is_tracked: editTaskData.isTracked,
+        type: editTaskData.type,
+        assignee_name: editTaskData.assigneeName
+      });
+    }
+    
     setShowEditModal(null);
   };
 
-  const handleToggleTrack = (id: string) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, isTracked: !t.isTracked } : t));
+  const handleToggleTrack = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+      const newTrackedStatus = !task.isTracked;
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, isTracked: newTrackedStatus } : t));
+      await updateTaskInDb(id, { is_tracked: newTrackedStatus });
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -269,30 +322,39 @@ export default function MyTasksDashboard() {
 
         {/* Controls */}
         <div className="flex justify-end gap-3 sticky top-[140px] sm:top-[80px] z-20 bg-slate-50 py-2 -mx-4 px-4 md:mx-0 md:px-0 shadow-sm md:shadow-none border-b border-slate-200 md:border-none md:bg-transparent">
-          <button 
-            onClick={() => {
-              localStorage.setItem('pea_tasks', JSON.stringify(tasks));
-              alert('บันทึกข้อมูลล่าสุดลงในเครื่องเรียบร้อยแล้ว');
-            }}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
-          >
-            <Save size={18} />
-            บันทึกข้อมูล
-          </button>
-          
-          <button 
-            onClick={() => {
-              if (confirm('คุณต้องการโหลดข้อมูลตั้งต้นใหม่หรือไม่? (ข้อมูลที่แก้ไขไว้ในเครื่องนี้จะหายไป)')) {
-                setTasks(mockTasks);
-                localStorage.setItem('pea_tasks', JSON.stringify(mockTasks));
-                alert('โหลดข้อมูลใหม่เรียบร้อยแล้ว');
-              }
-            }}
-            className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-            ดึงข้อมูลล่าสุด
-          </button>
+          {userRole === 'admin' && (
+            <button 
+              onClick={async () => {
+                let success = true;
+                for (const task of tasks) {
+                  const { error } = await supabase.from('my_tasks').upsert({
+                    id: task.id,
+                    title: task.title,
+                    location: task.location,
+                    time: task.time,
+                    status: task.status,
+                    priority: task.priority,
+                    is_tracked: task.isTracked,
+                    type: task.type,
+                    assignee_name: task.assigneeName,
+                    note: task.note
+                  }, { onConflict: 'id' });
+                  
+                  if (error) success = false;
+                }
+                
+                if (success) {
+                  alert('บันทึกและซิงค์ข้อมูลกับฐานข้อมูลเรียบร้อยแล้ว');
+                } else {
+                  alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลบางส่วน');
+                }
+              }}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+            >
+              <Save size={18} />
+              บันทึกข้อมูล
+            </button>
+          )}
 
           {isManagerMode && (
             <button 
