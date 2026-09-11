@@ -35,6 +35,7 @@ export default function EstimationPage() {
   const [image2, setImage2] = useState<File | null>(null);
   const [image1Preview, setImage1Preview] = useState("");
   const [image2Preview, setImage2Preview] = useState("");
+  const [previewModalImg, setPreviewModalImg] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -525,7 +526,14 @@ export default function EstimationPage() {
                   onChange={(e) => handleImageChange(e, 1)}
                   className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer"
                 />
-                {image1Preview && <img src={image1Preview} alt="Preview 1" className="mt-4 h-48 w-full object-cover rounded-lg border border-gray-200 shadow-sm" />}
+                {image1Preview && (
+                  <img 
+                    src={image1Preview} 
+                    alt="Preview 1" 
+                    onClick={() => setPreviewModalImg(image1Preview)}
+                    className="mt-4 h-48 w-full object-cover rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" 
+                  />
+                )}
               </div>
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">📸 รูปเสาต้นที่ 2</label>
@@ -535,7 +543,14 @@ export default function EstimationPage() {
                   onChange={(e) => handleImageChange(e, 2)}
                   className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer"
                 />
-                {image2Preview && <img src={image2Preview} alt="Preview 2" className="mt-4 h-48 w-full object-cover rounded-lg border border-gray-200 shadow-sm" />}
+                {image2Preview && (
+                  <img 
+                    src={image2Preview} 
+                    alt="Preview 2" 
+                    onClick={() => setPreviewModalImg(image2Preview)}
+                    className="mt-4 h-48 w-full object-cover rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:opacity-90 transition-opacity" 
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -662,6 +677,29 @@ export default function EstimationPage() {
               เฉพาะ Admin เท่านั้นที่สามารถบันทึกข้อมูลได้
             </div>
           )}
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {previewModalImg && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animation-fade-in"
+          onClick={() => setPreviewModalImg(null)}
+        >
+          <div className="relative max-w-5xl w-full max-h-[90vh] flex items-center justify-center">
+            <button 
+              className="absolute top-0 right-0 md:-top-4 md:-right-4 bg-white/20 hover:bg-white/40 text-white rounded-full p-2 backdrop-blur-md transition-colors z-10"
+              onClick={(e) => { e.stopPropagation(); setPreviewModalImg(null); }}
+            >
+              <X size={24} />
+            </button>
+            <img 
+              src={previewModalImg} 
+              alt="Full Preview" 
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
       )}
 
