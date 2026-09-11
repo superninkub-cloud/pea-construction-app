@@ -39947,30 +39947,6 @@
     "assemblyName": "SS-SA-2 ASSEMBLY NO. 5213A",
     "items": [
       {
-        "code": "1010180100",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 24
-      },
-      {
-        "code": "1010180101",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 62X62X6 MM.HOLE DIA.22 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 6
-      },
-      {
-        "code": "1010180301",
-        "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
-        "unit": "ชิ้น",
-        "qty": 3
-      },
-      {
-        "code": "1010200009",
-        "name": "BRACE,ALLEY ARM 50x50x6 MM. 1,000 MM.LONG",
-        "unit": "ชิ้น",
-        "qty": 6
-      },
-      {
         "code": "1010000100",
         "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
         "unit": "ชิ้น",
