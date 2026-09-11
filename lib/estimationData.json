@@ -35853,72 +35853,6 @@
     "assemblyName": "SS-DD-3 ASSEMBLY NO. 5219",
     "items": [
       {
-        "code": "1010110301",
-        "name": "BOLT,MACHINE M.20x400 mm.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010120000",
-        "name": "BOLT,DOUBLE ARMING,M.16x400 mm.",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1010150001",
-        "name": "BOLT,OVAL EYE M.16X200 MM.",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1010180100",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 36
-      },
-      {
-        "code": "1010180101",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 62X62X6 MM.HOLE DIA.22 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 6
-      },
-      {
-        "code": "1010180301",
-        "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
-        "unit": "ชิ้น",
-        "qty": 2
-      },
-      {
-        "code": "1010200003",
-        "name": "BRACE,FLAT,FOR CROSSARM 50X10X1,950 MM.",
-        "unit": "ชิ้น",
-        "qty": 6
-      },
-      {
-        "code": "1020210109",
-        "name": "LINE GUARD,PREFORMED,AL 400MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1020570106",
-        "name": "CLIMP,TOP TYPE DOUBLE CONDUCTOR, AL 400 SQ.MM.FOR HORIZONTAL MOUNTING POST TYPE INSULATชOุดR 115",
-        "unit": "KV.",
-        "qty": 1
-      },
-      {
-        "code": "1030010204",
-        "name": "INSULATOR, POST TYPE 115 KV. HORIZONTAL MOUNTING",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1030140011",
-        "name": "CLEVIS,THIMBLE,FOR PREFORMED DEAD-END",
-        "unit": "ชิ้น",
-        "qty": 3
-      },
-      {
         "code": "1010000100",
         "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
         "unit": "ชิ้น",
@@ -35958,6 +35892,36 @@
         "code": "1010150100",
         "name": "BOLT,OVAL M.20X350 MM.",
         "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1010180002",
+        "name": "NET,EYE M.20",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1010180100",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 9
+      },
+      {
+        "code": "1010180101",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 62X62X6 MM.HOLE DIA.22 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 12
+      },
+      {
+        "code": "1010180301",
+        "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1010200002",
+        "name": "BRACE,FLAT,FOR CROSSARM 40x6x1,000 mm.",
+        "unit": "ชิ้น",
         "qty": 3
       }
     ]
