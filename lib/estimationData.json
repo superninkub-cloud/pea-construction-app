@@ -41772,60 +41772,6 @@
     "assemblyName": "SS-TG-2(WITH GROUND PLATE IN POLE) TANGENT STRUCTURE",
     "items": [
       {
-        "code": "1030020003",
-        "name": "INSULATOR,SUSPENSION,TYPE E (CLASS 52-8)TIS.354",
-        "unit": "ชิ้น",
-        "qty": 90
-      },
-      {
-        "code": "1030110103",
-        "name": "CLAMP,STRAIN,WITH CLAMPING KEEPER,FOR AL.CONDUCTOR 400 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 6
-      },
-      {
-        "code": "1030140001",
-        "name": "BALL-CLEVIS,ANSI TYPE K",
-        "unit": "ชุด",
-        "qty": 9
-      },
-      {
-        "code": "1030140003",
-        "name": "SOCKET-EYE",
-        "unit": "ชุด",
-        "qty": 6
-      },
-      {
-        "code": "1030140005",
-        "name": "BALL-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 18
-      },
-      {
-        "code": "1030140006",
-        "name": "SOCKET-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 12
-      },
-      {
-        "code": "1030140007",
-        "name": "SOCKET-CLEVIS,ANSI TYPE K",
-        "unit": "ชุด",
-        "qty": 9
-      },
-      {
-        "code": "1030140013",
-        "name": "SPACER,PLATE,FOR AL.400 SQ.MM.",
-        "unit": "ชิ้น",
-        "qty": 9
-      },
-      {
-        "code": "9090011007",
-        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
-        "unit": "ชิ้น",
-        "qty": 2
-      },
-      {
         "code": "1010000100",
         "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
         "unit": "ชิ้น",
@@ -41833,13 +41779,13 @@
       },
       {
         "code": "1010010004",
-        "name": "STEEL ANGLE,OVERHEAD GROUND WIRE BAYONET 65X65X6 MM. 2,500 MM.LONG",
+        "name": "STEEL ANGLE,OVERHEAD GROUND WIRE BAYONET 65X65X6 MM. 2,500 M",
         "unit": "ชิ้น",
         "qty": 1
       },
       {
         "code": "1010030006",
-        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
+        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DV",
         "unit": "ชิ้น",
         "qty": 1
       },
@@ -41851,7 +41797,7 @@
       },
       {
         "code": "1010110101",
-        "name": "BOLE,MACHINE M. 12X50 MM.",
+        "name": "BOLE,MACHINE M. 12x50 MM.",
         "unit": "ชุด",
         "qty": 1
       },
@@ -41878,6 +41824,78 @@
         "name": "BOLT,MACHINE M.20X350 MM.",
         "unit": "ชุด",
         "qty": 3
+      },
+      {
+        "code": "1010150000",
+        "name": "BOLT,OVAL EYE M.16X150 MM.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1010180100",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 18
+      },
+      {
+        "code": "1010180101",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 62X62X6 MM.HOLE DIA.22 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 6
+      },
+      {
+        "code": "1010180301",
+        "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1010200009",
+        "name": "BRACE,ALLEY ARM 50x50x6 MM. 1,000 MM.LONG",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1010230003",
+        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010230203",
+        "name": "GROUND WIRE SUPPORT AND CLAMP,FOR BAYONET",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1020230001",
+        "name": "ARMOR-GRIP,PREFORMED,AL 400 SQ.MM.",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1030020001",
+        "name": "INSULATOR,SUSPENSION,TYPE C (CLASS 52-3) TIS.354",
+        "unit": "ชิ้น",
+        "qty": 21
+      },
+      {
+        "code": "1030140003",
+        "name": "SOCKET-EYE",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1030140004",
+        "name": "Y-CLEVIS-BALL",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "9090011007",
+        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
+        "unit": "ชิ้น",
+        "qty": 1
       }
     ]
   },
