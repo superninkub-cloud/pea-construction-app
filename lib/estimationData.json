@@ -92,18 +92,6 @@
     "assemblyName": "COMPOSITE SUSPENSION INSULATOR ASSEMBLY D-19A",
     "items": [
       {
-        "code": "1030140005",
-        "name": "BALL-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140006",
-        "name": "SOCKET-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
         "code": "1020220109",
         "name": "ARMOR ROD,PREFORMED,FOR AL.OR AL-ALLOY CONDUCTOR 400 SQ.MM.",
         "unit": "ชุด",
@@ -111,8 +99,8 @@
       },
       {
         "code": "1030020100",
-        "name": "INSULATOR SUSPENSION COMPOSITE,FOR 115 KV.NOMINAL SECTION LENGHT 1,100-1,200 MM.TENSION , MชIิ้นN 110",
-        "unit": "KN.",
+        "name": "INSULATOR SUSPENSION COMPOSITE,FOR 115 KV.NOMINAL SECTION LEN",
+        "unit": "ชิ้น",
         "qty": 1
       },
       {
@@ -125,60 +113,6 @@
         "code": "1030140003",
         "name": "SOCKET-EYE",
         "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1020420302",
-        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.MM.",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1020430001",
-        "name": "CLAMP DEAD END,COMPRESSION,SINGLE LUG,FOR AL.CONDUCTOR 400 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030020101",
-        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENGHT 1,500-1,600 MM.TENSION LOชAิ้นD,MIN",
-        "unit": "110",
-        "qty": 1
-      },
-      {
-        "code": "1030140006",
-        "name": "SOCKET-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030020101",
-        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENGHT 1,500-1,600 MM.TENSION LOชAิ้นD,MIN",
-        "unit": "110",
-        "qty": 1
-      },
-      {
-        "code": "1030110103",
-        "name": "CLAMP,STRAIN,WITH CLAMPING KEEPER,FOR AL.CONDUCTOR 400 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140003",
-        "name": "SOCKET-EYE",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1020220109",
-        "name": "ARMOR ROD,PREFORMED,FOR AL.OR AL-ALLOY CONDUCTOR 400 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1030020100",
-        "name": "INSULATOR SUSPENSION COMPOSITE,FOR 115 KV.NOMINAL SECTION LENGHT 1,100-1,200 MM.TENSION , MชIิ้นN 110",
-        "unit": "KN.",
         "qty": 1
       }
     ]
@@ -280,6 +214,99 @@
         "code": "1030140007",
         "name": "SOCKET-CLEVIS,ANSI TYPE K",
         "unit": "ชุด",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "assemblyName": "COMPOSITE SUSPENSION INSULATOR ASSEMBLY D-19B",
+    "items": [
+      {
+        "code": "1020420302",
+        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.M",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1020430001",
+        "name": "CLAMP DEAD END,COMPRESSION,SINGLE LUG,FOR AL.CONDUCTOR 400 SC",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1030020101",
+        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENC",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1030140006",
+        "name": "SOCKET-CLEVIS,ANSI TYPE B",
+        "unit": "ชุด",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "assemblyName": "COMPOSITE SUSPENSION INSULATOR ASSEMBLY D-19C",
+    "items": [
+      {
+        "code": "1030020101",
+        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENC",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1030110103",
+        "name": "CLAMP,STRAIN,WITH CLAMPING KEEPER,FOR AL.CONDUCTOR 400 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1030140003",
+        "name": "SOCKET-EYE",
+        "unit": "ชุด",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "assemblyName": "COMPOSITE SUSPENSION INSULATOR ASSEMBLY D-19D",
+    "items": [
+      {
+        "code": "1020220109",
+        "name": "ARMOR ROD,PREFORMED,FOR AL.OR AL-ALLOY CONDUCTOR 400 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 2
+      },
+      {
+        "code": "1030020100",
+        "name": "INSULATOR SUSPENSION COMPOSITE,FOR 115 KV.NOMINAL SECTION LEN",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1030120002",
+        "name": "CLAMP,SUSPENSION,FOR AL 400 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 2
+      },
+      {
+        "code": "1030140000",
+        "name": "CLEVIS-EYE",
+        "unit": "ชุด",
+        "qty": 2
+      },
+      {
+        "code": "1030140006",
+        "name": "SOCKET-CLEVIS,ANSI TYPE B",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1030140013",
+        "name": "SPACER,PLATE,FOR AL.400 SQ.MM.",
+        "unit": "ชิ้น",
         "qty": 1
       }
     ]
@@ -27751,42 +27778,6 @@
     "assemblyName": "SD-TG-4 ASSEMBLY NO. 5267A",
     "items": [
       {
-        "code": "1010110300",
-        "name": "BOLT,MACHINE M.20X350 MM.",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1010150000",
-        "name": "BOLT,OVAL EYE M.16X150 MM.",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1010180100",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 12
-      },
-      {
-        "code": "1010180101",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 62X62X6 MM.HOLE DIA.22 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 6
-      },
-      {
-        "code": "1010180301",
-        "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
-        "unit": "ชิ้น",
-        "qty": 3
-      },
-      {
-        "code": "1010200009",
-        "name": "BRACE,ALLEY ARM 50x50x6 MM. 1,000 MM.LONG",
-        "unit": "ชิ้น",
-        "qty": 3
-      },
-      {
         "code": "1010000100",
         "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
         "unit": "ชิ้น",
@@ -27857,6 +27848,12 @@
         "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
         "unit": "ชิ้น",
         "qty": 3
+      },
+      {
+        "code": "1010200009",
+        "name": "BRACE,ALLEY ARM 50x50x6 MM. 1,000 MM.LONG",
+        "unit": "ชิ้น",
+        "qty": 6
       }
     ]
   },
@@ -37647,84 +37644,6 @@
         "name": "WASHER,LOCK,SPRING,SIZE 20 MM.,GENERAL PURPOSE,TIS.259",
         "unit": "ชิ้น",
         "qty": 6
-      },
-      {
-        "code": "1010000100",
-        "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
-        "unit": "ชิ้น",
-        "qty": 3
-      },
-      {
-        "code": "1010110200",
-        "name": "BOLT,MACHINE M.16x130 mm.",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1010110204",
-        "name": "BOLT,MACHINE M.16x300 mm.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010110205",
-        "name": "BOLT,MACHINE M.16x350 mm.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010110206",
-        "name": "BOLT,MACHINE M.16x400 mm.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010110300",
-        "name": "BOLT,MACHINE M.20X350 MM.",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1010110301",
-        "name": "BOLT,MACHINE M.20x400 mm.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010150000",
-        "name": "BOLT,OVAL EYE M.16X150 MM.",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1010150100",
-        "name": "BOLT,OVAL M.20X350 MM.",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1010150101",
-        "name": "BOLT,OVAL M.20X450 MM.",
-        "unit": "ชุด",
-        "qty": 4
-      },
-      {
-        "code": "1010180002",
-        "name": "NET,EYE M.20",
-        "unit": "ชิ้น",
-        "qty": 3
-      },
-      {
-        "code": "1010180100",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 18
-      },
-      {
-        "code": "1010180101",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 62X62X6 MM.HOLE DIA.22 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 18
       }
     ]
   },
@@ -45433,30 +45352,6 @@
     "assemblyName": "SUSPENSION INSULATOR ASSEMBLY D-12B",
     "items": [
       {
-        "code": "1030020001",
-        "name": "INSULATOR,SUSPENSION,TYPE C (CLASS 52-3) TIS.354",
-        "unit": "ชิ้น",
-        "qty": 7
-      },
-      {
-        "code": "1030120002",
-        "name": "CLAMP,SUSPENSION,FOR AL 400 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140002",
-        "name": "BALL-HOOK",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140003",
-        "name": "SOCKET-EYE",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
         "code": "1020220109",
         "name": "ARMOR ROD,PREFORMED,FOR AL.OR AL-ALLOY CONDUCTOR 400 SQ.MM.",
         "unit": "ชุด",
@@ -45497,42 +45392,6 @@
         "name": "SPACER,PLATE,FOR AL.400 SQ.MM.",
         "unit": "ชิ้น",
         "qty": 1
-      },
-      {
-        "code": "1020420302",
-        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.MM.",
-        "unit": "ชิ้น",
-        "qty": 2
-      },
-      {
-        "code": "1020430001",
-        "name": "CLAMP DEAD END,COMPRESSION,SINGLE LUG,FOR AL.CONDUCTOR 400 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1030020003",
-        "name": "INSULATOR,SUSPENSION,TYPE E (CLASS 52-8)TIS.354",
-        "unit": "ชิ้น",
-        "qty": 10
-      },
-      {
-        "code": "1030140001",
-        "name": "BALL-CLEVIS,ANSI TYPE K",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140005",
-        "name": "BALL-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1030140006",
-        "name": "SOCKET-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 2
       }
     ]
   },
