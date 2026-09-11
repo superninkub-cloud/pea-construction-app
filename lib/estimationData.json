@@ -42224,8 +42224,44 @@
     "assemblyName": "SS-TG-5 (WITH GROUND PLATE IN POLE) TANGENT STRUCTURE,ADJACENT TO DEADEND POLE",
     "items": [
       {
+        "code": "1010000100",
+        "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
+        "unit": "ชิ้น",
+        "qty": 6
+      },
+      {
+        "code": "1010010004",
+        "name": "STEEL ANGLE,OVERHEAD GROUND WIRE BAYONET 65X65X6 MM. 2,500 M",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010030002",
+        "name": "PLATE,STEEL 6X100X450 MM.",
+        "unit": "ชิ้น",
+        "qty": 6
+      },
+      {
+        "code": "1010030006",
+        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DV",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010050000",
+        "name": "ST. PIPE,SIZE 20, 100 MM.LONG W/O T.E.",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1010100003",
+        "name": "WIRE,STEEL STRANDED 35 SQ.MM.TIS.404",
+        "unit": "ม.",
+        "qty": 2.5
+      },
+      {
         "code": "1010110101",
-        "name": "BOLE,MACHINE M. 12X50 MM.",
+        "name": "BOLE,MACHINE M. 12x50 MM.",
         "unit": "ชุด",
         "qty": 1
       },
@@ -42239,7 +42275,7 @@
         "code": "1010110201",
         "name": "BOLT,MACHINE M.16x170 mm.",
         "unit": "ชุด",
-        "qty": 18
+        "qty": 6
       },
       {
         "code": "1010110204",
@@ -42260,10 +42296,16 @@
         "qty": 3
       },
       {
+        "code": "1010150000",
+        "name": "BOLT,OVAL EYE M.16X150 MM.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
         "code": "1010180100",
         "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
         "unit": "ชิ้น",
-        "qty": 48
+        "qty": 30
       },
       {
         "code": "1010180101",
@@ -42275,7 +42317,7 @@
         "code": "1010180301",
         "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
         "unit": "ชิ้น",
-        "qty": 6
+        "qty": 3
       },
       {
         "code": "1010200009",
@@ -42316,12 +42358,6 @@
       {
         "code": "1030140004",
         "name": "Y-CLEVIS-BALL",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1030140012",
-        "name": "BRACKET,CORNER SUSPENSION",
         "unit": "ชุด",
         "qty": 3
       },
