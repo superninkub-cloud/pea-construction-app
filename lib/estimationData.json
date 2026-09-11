@@ -38036,12 +38036,6 @@
     "assemblyName": "SS-LA-1 (WITH GROUND PLATE IN POLE) SINGLE POLE 90 DEG. ANGEL STRUCTURE, NO GUY",
     "items": [
       {
-        "code": "9090011007",
-        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
         "code": "1010000304",
         "name": "STEEL CHANNEL150X75X6.5 MM.2,500MM.",
         "unit": "ชิ้น",
@@ -38079,7 +38073,7 @@
       },
       {
         "code": "1010110101",
-        "name": "BOLE,MACHINE M. 12X50 MM.",
+        "name": "BOLE,MACHINE M. 12x50 MM.",
         "unit": "ชุด",
         "qty": 1
       },
@@ -38140,6 +38134,66 @@
       {
         "code": "1010210304",
         "name": "THIMBLE,GUY,FOR STEEL WIRE 50-95 sq.mm.",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010230000",
+        "name": "CLAMP,SINGLE U-BOLT,M.8 (WIRE ROPE CLIP)",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010230003",
+        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 4
+      },
+      {
+        "code": "1020420302",
+        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.MM.",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1020430001",
+        "name": "CLAMP DEAD END,COMPRESSION,SINGLE LUG,FOR AL.CONDUCTOR 400 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1030020001",
+        "name": "INSULATOR,SUSPENSION,TYPE C (CLASS 52-3) TIS.354",
+        "unit": "ชิ้น",
+        "qty": 60
+      },
+      {
+        "code": "1030110103",
+        "name": "CLAMP,STRAIN,WITH CLAMPING KEEPER,FOR AL.CONDUCTOR 400 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1030140003",
+        "name": "SOCKET-EYE",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1030140005",
+        "name": "BALL-CLEVIS,ANSI TYPE B",
+        "unit": "ชุด",
+        "qty": 6
+      },
+      {
+        "code": "1030140006",
+        "name": "SOCKET-CLEVIS,ANSI TYPE B",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "9090011007",
+        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
         "unit": "ชิ้น",
         "qty": 1
       }
