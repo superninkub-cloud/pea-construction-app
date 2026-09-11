@@ -41677,10 +41677,46 @@
     "assemblyName": "SS-TG-2 ASSEMBLY NO. 5212A",
     "items": [
       {
+        "code": "1010000100",
+        "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1010110200",
+        "name": "BOLT,MACHINE M.16x130 mm.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1010110204",
+        "name": "BOLT,MACHINE M.16x300 mm.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010110205",
+        "name": "BOLT,MACHINE M.16x350 mm.",
+        "unit": "ชุด",
+        "qty": 2
+      },
+      {
+        "code": "1010110300",
+        "name": "BOLT,MACHINE M.20X350 MM.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1010150000",
+        "name": "BOLT,OVAL EYE M.16X150 MM.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
         "code": "1010180100",
         "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
         "unit": "ชิ้น",
-        "qty": 16
+        "qty": 12
       },
       {
         "code": "1010180101",
@@ -41692,95 +41728,11 @@
         "code": "1010180301",
         "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
         "unit": "ชิ้น",
-        "qty": 6
-      },
-      {
-        "code": "1010180302",
-        "name": "WASHER,LOCK,SPRING,SIZE 20 MM.,GENERAL PURPOSE,TIS.259",
-        "unit": "ชิ้น",
         "qty": 3
       },
       {
-        "code": "1010230016",
-        "name": "CLAMP,CABLE STRAP FOR UG 1X800 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 12
-      },
-      {
-        "code": "1010230017",
-        "name": "CLAMP,CABLE STRAP (MADE OF WOOD) FOR UG CABLE 4X800 SQ.MM",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1020010007",
-        "name": "CONDUCTOR,AL,BARE 185 sq.mm.TIS.85",
-        "unit": "ม.",
-        "qty": 9
-      },
-      {
-        "code": "1020010009",
-        "name": "CONDUCTOR,AL,BARE,400 SQ.MM.TIS.85",
-        "unit": "ม.",
-        "qty": 65
-      },
-      {
-        "code": "1020150204",
-        "name": "115kV.TERMINATOR KIT,O/D,1x800,67-73mm",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1020210109",
-        "name": "LINE GUARD,PREFORMED,AL 400MM.",
-        "unit": "ชุด",
-        "qty": 6
-      },
-      {
-        "code": "1020420106",
-        "name": "CABLE LUG,NEMA HOLE,COMPRESSION TYPE,AL 185 SQ.MM.",
-        "unit": "ชิ้น",
-        "qty": 3
-      },
-      {
-        "code": "1020450001",
-        "name": "PLATE,AL,1mm THICK,PAINT COMP,4 SCREWS",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1020500005",
-        "name": "CONNECTOR,T-TYPE,FOR CONDUCTOR MAIN 400 SQ.MM. TO CONDUCTOR TAP 185-240 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1020570106",
-        "name": "CLIMP,TOP TYPE DOUBLE CONDUCTOR, AL 400 SQ.MM.FOR HORIZONTAL MOUNTING POST TYPE INSULATชOุดR 115",
-        "unit": "KV.",
-        "qty": 6
-      },
-      {
-        "code": "1030010204",
-        "name": "INSULATOR, POST TYPE 115 KV. HORIZONTAL MOUNTING",
-        "unit": "ชิ้น",
-        "qty": 6
-      },
-      {
-        "code": "1040000205",
-        "name": "S.A., 96 kV.10 kA. 3810 mm POLYMER",
-        "unit": "ชิ้น",
-        "qty": 3
-      },
-      {
-        "code": "1080050013",
-        "name": "CONDUIT,HDPE PN 6.3 SIZE 160 MM. TIS.982",
-        "unit": "ชิ้น",
-        "qty": 32
-      },
-      {
-        "code": "1010000100",
-        "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
+        "code": "1010200009",
+        "name": "BRACE,ALLEY ARM 50x50x6 MM. 1,000 MM.LONG",
         "unit": "ชิ้น",
         "qty": 3
       }
