@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import estimationDataRaw from "@/lib/estimationData.json";
 import { Assembly, EstimationItem } from "@/lib/estimationTypes";
-import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText, Zap, ShieldCheck, BarChart2, ArrowRight } from "lucide-react";
+import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText, Zap, ShieldCheck, BarChart2, ArrowRight, Package, Search } from "lucide-react";
 
 const estimationData = estimationDataRaw as Assembly[];
 
@@ -395,116 +395,187 @@ export default function EstimationPage() {
 
       {/* ---------------- MODE: PROJECT DETAILS ---------------- */}
       {mode === "PROJECT_DETAILS" && (
-        <>
-          <div className="mb-6">
-            <button 
-              onClick={() => { setMode("SELECT_PROJECT"); fetchProjects(); }}
-              className="flex items-center text-gray-500 hover:text-purple-600 mb-4 transition bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200 text-sm font-medium w-fit"
-            >
-              <ChevronLeft size={18} className="mr-1" /> กลับไปเลือกโครงการ
-            </button>
-            <h1 className="text-2xl font-bold text-gray-800">
-              โครงการ: <span className="text-purple-700">{selectedProject}</span>
-            </h1>
+        <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
+          {/* Header Section */}
+          <div className="relative bg-gradient-to-r from-purple-50 to-indigo-50 rounded-3xl p-8 border border-purple-100 shadow-sm overflow-hidden">
+            {/* Abstract Background Elements */}
+            <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-10 pointer-events-none flex items-end justify-end">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full object-cover">
+                <path fill="#4c1d95" d="M45.7,-76.3C58.9,-69.3,69.1,-55.3,77.4,-40.8C85.7,-26.3,92,-11.3,90.4,2.8C88.8,16.8,79.2,29.9,69.5,41.4C59.7,52.8,49.8,62.6,37.3,70.5C24.8,78.4,9.8,84.4,-5.2,84.4C-20.2,84.4,-35.3,78.4,-48.1,70.1C-60.8,61.8,-71.2,51.3,-78.9,38.8C-86.7,26.3,-91.7,11.9,-91.8,-2.6C-91.9,-17.1,-87.1,-31.6,-78.4,-43.3C-69.8,-55,-57.3,-63.9,-43.9,-70.7C-30.5,-77.5,-16.1,-82.2,0.1,-82.3C16.3,-82.5,32.6,-83.2,45.7,-76.3Z" transform="translate(100 100) scale(1.1)" />
+              </svg>
+            </div>
+            
+            <div className="relative z-10">
+              <button 
+                onClick={() => { setMode("SELECT_PROJECT"); fetchProjects(); }}
+                className="flex items-center text-gray-500 hover:text-purple-700 mb-6 transition bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200 text-sm font-semibold w-fit"
+              >
+                <ChevronLeft size={18} className="mr-1" /> กลับไปเลือกโครงการ
+              </button>
+              
+              <h1 className="text-3xl font-extrabold text-gray-800 mb-8 tracking-tight">
+                โครงการ: <span className="text-purple-700">{selectedProject}</span>
+              </h1>
+
+              <div className="flex flex-wrap gap-4">
+                <div className="bg-white p-4 rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex items-center gap-4 min-w-[240px]">
+                  <div className="bg-purple-100 text-purple-600 p-3 rounded-xl">
+                    <Zap size={24} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold mb-0.5">จำนวนเสาไฟทั้งหมด</p>
+                    <p className="text-xl font-bold text-gray-800">{projectPoles.length} <span className="text-sm font-medium text-gray-500">ต้น</span></p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex items-center gap-4 min-w-[240px]">
+                  <div className="bg-indigo-100 text-indigo-600 p-3 rounded-xl">
+                    <Package size={24} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-semibold mb-0.5">จำนวนพัสดุทั้งหมด</p>
+                    <p className="text-xl font-bold text-gray-800">{getAggregatedItems().length} <span className="text-sm font-medium text-gray-500">รายการ</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md shadow-gray-100 border border-gray-200 overflow-hidden">
-            <div className="flex border-b border-gray-200 bg-gray-50">
+          {/* Content Section */}
+          <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden flex flex-col min-h-[500px]">
+            {/* Tabs */}
+            <div className="flex border-b border-gray-100">
               <button 
                 onClick={() => setActiveTab("POLES")}
-                className={`flex-1 py-4 font-medium text-center flex justify-center items-center gap-2 transition ${activeTab === 'POLES' ? 'bg-white text-purple-700 border-b-2 border-purple-600 shadow-sm' : 'text-gray-500 hover:bg-gray-100'}`}
+                className={`flex-1 py-5 font-bold text-center flex justify-center items-center gap-2 transition-all ${activeTab === 'POLES' ? 'text-[#5b21b6] border-b-4 border-[#5b21b6] bg-purple-50/30' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
               >
-                <List size={18} /> รายการเสาไฟ ({projectPoles.length})
+                <List size={20} /> รายการเสาไฟ ({projectPoles.length})
               </button>
               <button 
                 onClick={() => setActiveTab("SUMMARY")}
-                className={`flex-1 py-4 font-medium text-center flex justify-center items-center gap-2 transition ${activeTab === 'SUMMARY' ? 'bg-white text-purple-700 border-b-2 border-purple-600 shadow-sm' : 'text-gray-500 hover:bg-gray-100'}`}
+                className={`flex-1 py-5 font-bold text-center flex justify-center items-center gap-2 transition-all ${activeTab === 'SUMMARY' ? 'text-[#5b21b6] border-b-4 border-[#5b21b6] bg-purple-50/30' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
               >
-                <FileText size={18} /> สรุปวัสดุรวมทั้งหมด
+                <FileText size={20} /> สรุปวัสดุรวมทั้งหมด
               </button>
             </div>
 
-            <div className="p-6 min-h-[400px]">
+            {/* Tab Content */}
+            <div className="p-8 flex-1 flex flex-col">
               {isLoading ? (
-                <div className="text-center py-20 text-gray-400 flex flex-col items-center">
-                  <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4"></div>
+                <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+                  <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4"></div>
                   กำลังโหลดข้อมูล...
                 </div>
               ) : activeTab === "POLES" ? (
-                <div className="animation-fade-in">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-lg font-semibold text-gray-700">เสาไฟในโครงการนี้</h2>
-                    <button 
-                      onClick={handleAddNewPole}
-                      className="bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-purple-700 text-sm font-medium shadow-md shadow-purple-200 transition-all active:scale-95"
-                    >
-                      <Plus size={16} /> เพิ่มเสาต้นใหม่
-                    </button>
+                <div className="animation-fade-in flex flex-col h-full">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-purple-100 text-purple-600 p-3 rounded-xl hidden sm:block">
+                        <Zap size={24} />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-800">เสาไฟในโครงการนี้</h2>
+                        <p className="text-sm text-gray-500">รายการเสาไฟทั้งหมดในโครงการ หรือตรวจสอบย่อยพัสดุและการดำเนินงาน</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                      <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input 
+                          type="text" 
+                          placeholder="ค้นหาเสาไฟ (เช่น P1, P2...)" 
+                          className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 outline-none text-sm transition-all bg-gray-50 hover:bg-gray-100/50 focus:bg-white"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                      <button 
+                        onClick={handleAddNewPole}
+                        className="bg-[#5b21b6] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-[#4c1d95] text-sm font-bold shadow-lg shadow-purple-500/30 transition-all active:scale-95 whitespace-nowrap"
+                      >
+                        <Plus size={18} strokeWidth={2.5} /> เพิ่มเสาไฟใหม่
+                      </button>
+                    </div>
                   </div>
                   
                   {projectPoles.length === 0 ? (
-                    <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                      <div className="bg-white p-4 rounded-full w-fit mx-auto mb-3 shadow-sm text-gray-400">
-                        <Plus size={32} />
+                    <div className="flex-1 flex flex-col items-center justify-center text-center py-10">
+                      <div className="bg-gray-50 rounded-full p-8 mb-6">
+                        <Package size={64} className="text-gray-300" strokeWidth={1.5} />
                       </div>
-                      <p className="text-gray-500 mb-2 font-medium">ยังไม่มีข้อมูลเสาในโครงการนี้</p>
-                      <button onClick={handleAddNewPole} className="text-purple-600 font-medium hover:underline text-sm">คลิกเพื่อเริ่มเพิ่มเสาต้นแรก</button>
+                      <h3 className="text-xl font-bold text-gray-700 mb-2">มีเสาไฟทั้งหมด 0 ต้น</h3>
+                      <p className="text-gray-500 text-sm">คลิก "เพิ่มเสาไฟใหม่" เพื่อเพิ่มรายการเสาไฟในโครงการ</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                      {projectPoles.map(pole => (
-                        <div key={pole.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative flex flex-col h-full group">
-                          <h3 className="font-bold text-gray-800 text-lg mb-1 group-hover:text-purple-700 transition-colors">{pole.pole_name}</h3>
-                          <p className="text-xs text-gray-500 mb-4 line-clamp-2" title={pole.assembly_type}>
-                            ชุดประกอบ: {pole.assembly_type || 'Custom'}
-                          </p>
-                          <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
-                            <span className="text-xs font-semibold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md border border-purple-100">
-                              พัสดุ {pole.items?.length || 0} รายการ
-                            </span>
-                            <div className="flex gap-1.5">
-                              <button onClick={() => handleEditPole(pole)} className="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition-colors border border-transparent hover:border-blue-100" title="แก้ไข">
-                                <Edit size={16} />
-                              </button>
-                              <button onClick={() => handleDeletePole(pole.id, pole.pole_name)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors border border-transparent hover:border-red-100" title="ลบ">
-                                <Trash2 size={16} />
-                              </button>
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                      {projectPoles.filter(p => p.pole_name.toLowerCase().includes(searchTerm.toLowerCase())).map(pole => (
+                        <div key={pole.id} className="bg-white p-5 rounded-2xl border-2 border-gray-50 shadow-sm hover:border-purple-100 hover:shadow-md transition-all flex gap-4 group">
+                          <div className="bg-purple-50 text-purple-600 p-4 rounded-xl h-fit flex-shrink-0">
+                            <Zap size={24} />
+                          </div>
+                          <div className="flex-1 flex flex-col">
+                            <div className="flex justify-between items-start mb-1">
+                              <h3 className="font-bold text-gray-800 text-lg group-hover:text-purple-700 transition-colors">{pole.pole_name}</h3>
+                              <ChevronLeft size={16} className="text-gray-300 rotate-180" />
+                            </div>
+                            <p className="text-xs text-gray-500 mb-4 line-clamp-2 leading-relaxed" title={pole.assembly_type}>
+                              อุปประกอบ: {pole.assembly_type || 'Custom'}
+                            </p>
+                            
+                            <div className="flex items-center justify-between mt-auto">
+                              <span className="flex items-center gap-1.5 text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1.5 rounded-lg">
+                                <Package size={14} /> พัสดุ {pole.items?.length || 0} รายการ
+                              </span>
+                              <div className="flex gap-2">
+                                <button onClick={() => handleEditPole(pole)} className="text-blue-500 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors" title="แก้ไข">
+                                  <Edit size={16} />
+                                </button>
+                                <button onClick={() => handleDeletePole(pole.id, pole.pole_name)} className="text-red-500 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors" title="ลบ">
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       ))}
+                      {projectPoles.filter(p => p.pole_name.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                         <div className="col-span-full py-10 text-center text-gray-400">ไม่พบเสาไฟที่ค้นหา</div>
+                      )}
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="animation-fade-in">
-                   <div className="flex justify-between items-center mb-4">
-                     <h2 className="text-lg font-semibold text-gray-700">สรุปจำนวนวัสดุทั้งหมดที่ต้องใช้ในโครงการ</h2>
-                     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                <div className="animation-fade-in flex flex-col h-full">
+                   <div className="flex justify-between items-center mb-6">
+                     <h2 className="text-xl font-bold text-gray-800">สรุปจำนวนวัสดุทั้งหมดที่ต้องใช้ในโครงการ</h2>
+                     <span className="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
                        รวมจาก {projectPoles.length} ต้น
                      </span>
                    </div>
-                   <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                   <div className="bg-white rounded-2xl border-2 border-gray-50 overflow-hidden shadow-sm flex-1">
                      <table className="w-full text-sm text-left">
-                       <thead className="text-xs text-gray-700 bg-gray-100 border-b">
+                       <thead className="text-xs text-gray-500 uppercase tracking-wider bg-gray-50 border-b-2 border-gray-100">
                          <tr>
-                           <th className="px-5 py-4 w-32">รหัสพัสดุ</th>
-                           <th className="px-5 py-4">ชื่อพัสดุ</th>
-                           <th className="px-5 py-4 text-right w-32">จำนวนรวม</th>
-                           <th className="px-5 py-4 w-24">หน่วย</th>
+                           <th className="px-6 py-4 font-bold w-32">รหัสพัสดุ</th>
+                           <th className="px-6 py-4 font-bold">ชื่อพัสดุ</th>
+                           <th className="px-6 py-4 font-bold text-right w-32">จำนวนรวม</th>
+                           <th className="px-6 py-4 font-bold w-24">หน่วย</th>
                          </tr>
                        </thead>
-                       <tbody className="divide-y divide-gray-100">
+                       <tbody className="divide-y divide-gray-50">
                          {getAggregatedItems().length === 0 ? (
-                            <tr><td colSpan={4} className="px-5 py-10 text-center text-gray-500">ไม่มีรายการวัสดุที่จะสรุป (โปรดเพิ่มเสาไฟก่อน)</td></tr>
+                            <tr><td colSpan={4} className="px-6 py-16 text-center text-gray-400 font-medium">ไม่มีรายการวัสดุที่จะสรุป (โปรดเพิ่มเสาไฟก่อน)</td></tr>
                          ) : getAggregatedItems().map((item, idx) => (
-                           <tr key={idx} className="hover:bg-purple-50/30 transition-colors">
-                             <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
-                             <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
-                             <td className="px-5 py-3 text-right font-bold text-purple-700 text-base bg-purple-50/50">
-                               {item.qty.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}
+                           <tr key={idx} className="hover:bg-purple-50/50 transition-colors group">
+                             <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.code}</td>
+                             <td className="px-6 py-4 font-medium text-gray-800 group-hover:text-purple-800">{item.name}</td>
+                             <td className="px-6 py-4 text-right">
+                               <span className="font-bold text-purple-700 text-base bg-purple-50 px-3 py-1 rounded-lg">
+                                 {item.qty.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}
+                               </span>
                              </td>
-                             <td className="px-5 py-3 text-gray-600">{item.unit}</td>
+                             <td className="px-6 py-4 text-gray-500 font-medium">{item.unit}</td>
                            </tr>
                          ))}
                        </tbody>
@@ -514,7 +585,7 @@ export default function EstimationPage() {
               )}
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* ---------------- MODE: EDIT POLE ---------------- */}
