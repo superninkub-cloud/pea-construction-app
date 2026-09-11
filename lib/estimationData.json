@@ -35323,24 +35323,6 @@
     "assemblyName": "SS-DD-1 (MP) (ASSEMBLY NO.5905)",
     "items": [
       {
-        "code": "1030140003",
-        "name": "SOCKET-EYE",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1030140012",
-        "name": "BRACKET,CORNER SUSPENSION",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "9090011007",
-        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
         "code": "1010000100",
         "name": "STEEL CHANNEL, 100x50x5 mm. 2,250 MM.LONG",
         "unit": "ชิ้น",
@@ -35348,7 +35330,7 @@
       },
       {
         "code": "1010010005",
-        "name": "STEEL ANGLE,OVERHEAD GROUND WIRE CORNER BAYONET 65X65X6 MM. 2,500 MM.LONG",
+        "name": "STEEL ANGLE,OVERHEAD GROUND WIRE CORNER BAYONET 65X65X6 MM.",
         "unit": "ชุด",
         "qty": 1
       },
@@ -35366,7 +35348,7 @@
       },
       {
         "code": "1010110101",
-        "name": "BOLE,MACHINE M. 12X50 MM.",
+        "name": "BOLE,MACHINE M. 12x50 MM.",
         "unit": "ชุด",
         "qty": 1
       },
@@ -35396,7 +35378,7 @@
       },
       {
         "code": "1010110300",
-        "name": "BOLT,MACHINE M.20X350 MM.",
+        "name": "BOLT,MACHINE M.20x350 mm.",
         "unit": "ชุด",
         "qty": 2
       },
@@ -35429,6 +35411,102 @@
         "name": "NET,EYE M.20",
         "unit": "ชิ้น",
         "qty": 3
+      },
+      {
+        "code": "1010180100",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 24
+      },
+      {
+        "code": "1010180101",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 62X62X6 MM.HOLE DIA.22 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 12
+      },
+      {
+        "code": "1010180301",
+        "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1010200009",
+        "name": "BRACE,ALLEY ARM 50x50x6 MM. 1,000 MM.LONG",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1010230003",
+        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010230203",
+        "name": "GROUND WIRE SUPPORT AND CLAMP,FOR BAYONET",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1020230001",
+        "name": "ARMOR-GRIP,PREFORMED,AL 400 SQ.MM.",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1020240000",
+        "name": "SPACER,HELICAL ROD,PREFORMED,FOR AL.400 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 6
+      },
+      {
+        "code": "1020420302",
+        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.MM.",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1020430001",
+        "name": "CLAMP DEAD END,COMPRESSION,SINGLE LUG,FOR AL.CONDUCTOR 400 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1030020100",
+        "name": "INSULATOR SUSPENSION COMPOSITE,FOR 115 KV.NOMINAL SECTION LENGHT 1,100-1,200 MM.TEN",
+        "unit": "ชิ้น",
+        "qty": 3
+      },
+      {
+        "code": "1030020101",
+        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENGHT 1,500-1,600 MM.TEN",
+        "unit": "ชิ้น",
+        "qty": 6
+      },
+      {
+        "code": "1030110103",
+        "name": "CLAMP,STRAIN,WITH CLAMPING KEEPER,FOR AL.CONDUCTOR 400 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1030140003",
+        "name": "SOCKET-EYE",
+        "unit": "ชุด",
+        "qty": 6
+      },
+      {
+        "code": "1030140006",
+        "name": "SOCKET-CLEVIS,ANSI TYPE B",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "9090011007",
+        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
+        "unit": "ชิ้น",
+        "qty": 1
       }
     ]
   },
