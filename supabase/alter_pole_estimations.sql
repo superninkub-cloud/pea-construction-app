@@ -1,0 +1,4 @@
+ALTER TABLE public.pole_estimations
+ADD COLUMN IF NOT EXISTS project_name TEXT,
+ADD COLUMN IF NOT EXISTS image1_url TEXT,
+ADD COLUMN IF NOT EXISTS image2_url TEXT;

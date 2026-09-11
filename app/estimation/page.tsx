@@ -10,7 +10,13 @@ const estimationData = estimationDataRaw as Assembly[];
 
 export default function EstimationPage() {
   const [selectedAssembly, setSelectedAssembly] = useState<string>("");
+  const [projectName, setProjectName] = useState("");
   const [poleName, setPoleName] = useState("");
+  const [image1, setImage1] = useState<File | null>(null);
+  const [image2, setImage2] = useState<File | null>(null);
+  const [image1Preview, setImage1Preview] = useState("");
+  const [image2Preview, setImage2Preview] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const [items, setItems] = useState<EstimationItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -23,6 +29,69 @@ export default function EstimationPage() {
       setIsAdmin(true);
     }
   }, []);
+
+  const compressImage = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() }));
+              } else {
+                resolve(file);
+              }
+            },
+            "image/jpeg",
+            0.7
+          );
+        };
+        img.onerror = (error) => reject(error);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, imageNumber: 1 | 2) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const compressedFile = await compressImage(file);
+      const previewUrl = URL.createObjectURL(compressedFile);
+      if (imageNumber === 1) {
+        setImage1(compressedFile);
+        setImage1Preview(previewUrl);
+      } else {
+        setImage2(compressedFile);
+        setImage2Preview(previewUrl);
+      }
+    }
+  };
 
   const handleAssemblyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const asmName = e.target.value;
@@ -61,6 +130,10 @@ export default function EstimationPage() {
   };
 
   const handleSave = async () => {
+    if (!projectName) {
+      alert("กรุณาระบุชื่อโครงการ");
+      return;
+    }
     if (!poleName) {
       alert("กรุณาระบุชื่อหรือเบอร์เสาไฟ");
       return;
@@ -70,21 +143,59 @@ export default function EstimationPage() {
       return;
     }
 
+    setIsSaving(true);
     try {
+      let img1Url = null;
+      let img2Url = null;
+
+      if (image1) {
+        const fileExt = image1.name.split(".").pop();
+        const fileName = `estimation_${Date.now()}_1.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from("project_images")
+          .upload(fileName, image1);
+        if (uploadError) throw uploadError;
+        const { data } = supabase.storage.from("project_images").getPublicUrl(fileName);
+        img1Url = data.publicUrl;
+      }
+
+      if (image2) {
+        const fileExt = image2.name.split(".").pop();
+        const fileName = `estimation_${Date.now()}_2.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from("project_images")
+          .upload(fileName, image2);
+        if (uploadError) throw uploadError;
+        const { data } = supabase.storage.from("project_images").getPublicUrl(fileName);
+        img2Url = data.publicUrl;
+      }
+
       const { error } = await supabase
         .from("pole_estimations")
         .insert({
+          project_name: projectName,
           pole_name: poleName,
           assembly_type: selectedAssembly || "Custom",
-          items: items
+          items: items,
+          image1_url: img1Url,
+          image2_url: img2Url
         });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       alert("บันทึกข้อมูลการประมาณการเรียบร้อยแล้ว");
+      setPoleName("");
+      setImage1(null);
+      setImage2(null);
+      setImage1Preview("");
+      setImage2Preview("");
     } catch (error: any) {
       console.error("Error saving estimation:", error);
-      alert("ไม่สามารถบันทึกข้อมูลได้: " + error.message);
+      alert("ไม่สามารถบันทึกข้อมูลได้ (ตรวจสอบว่ามีคอลัมน์ project_name ในฐานข้อมูลแล้วหรือยัง): " + error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -97,6 +208,19 @@ export default function EstimationPage() {
       <h1 className="text-2xl font-bold text-gray-800 mb-6">โปรแกรมประมาณการอุปกรณ์ (เสาไฟ)</h1>
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            ชื่อโครงการ <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+            placeholder="เช่น โครงการก่อสร้างระบบสายส่งรองรับ สฟ.กาญจนบุรี 5"
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             ชื่อหรือเบอร์เสาไฟ <span className="text-red-500">*</span>
@@ -126,6 +250,29 @@ export default function EstimationPage() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">รูปเสาต้นที่ 1</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e, 1)}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+            />
+            {image1Preview && <img src={image1Preview} alt="Preview 1" className="mt-3 h-40 w-full object-cover rounded-lg border border-gray-200 shadow-sm" />}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">รูปเสาต้นที่ 2</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e, 2)}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+            />
+            {image2Preview && <img src={image2Preview} alt="Preview 2" className="mt-3 h-40 w-full object-cover rounded-lg border border-gray-200 shadow-sm" />}
+          </div>
         </div>
       </div>
 
@@ -211,10 +358,13 @@ export default function EstimationPage() {
         <div className="flex justify-end">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-xl font-medium shadow-md shadow-purple-200 hover:bg-purple-700 transition-all active:scale-95"
+            disabled={isSaving}
+            className={`flex items-center gap-2 text-white px-6 py-3 rounded-xl font-medium shadow-md transition-all active:scale-95 ${
+              isSaving ? "bg-purple-400 cursor-not-allowed" : "bg-purple-600 shadow-purple-200 hover:bg-purple-700"
+            }`}
           >
             <Save size={18} />
-            บันทึกข้อมูล
+            {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </button>
         </div>
       )}
