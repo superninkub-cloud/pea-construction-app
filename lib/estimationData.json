@@ -40955,6 +40955,53 @@
     ]
   },
   {
+    "assemblyName": "SS-SW-2 ASSEMBLY (WITH AIR BREAK SWITCH 1200A)",
+    "items": [
+      {
+        "code": "1010110204",
+        "name": "BOLT,MACHINE M.16x300 mm.",
+        "unit": "ชุด",
+        "qty": 2
+      },
+      {
+        "code": "1010110207",
+        "name": "BOLT,MACHINE M.16x450 mm.",
+        "unit": "ชุด",
+        "qty": 7
+      },
+      {
+        "code": "1010110208",
+        "name": "BOLT,MACHINE M.16x500 mm.",
+        "unit": "ชุด",
+        "qty": 2
+      },
+      {
+        "code": "1010180100",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 11
+      },
+      {
+        "code": "1020000005",
+        "name": "COND.,CU,BARE 50 SQ.MM.TIS.64",
+        "unit": "ม.",
+        "qty": 10
+      },
+      {
+        "code": "1040060207",
+        "name": "AB SW.,3 POLE 115 KV 2,000 A 100 KA. HOR",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1080040001",
+        "name": "CONDUIT,PVC,RIGID,DIA. 20x2500 mm.TIS.216",
+        "unit": "ชิ้น",
+        "qty": 1
+      }
+    ]
+  },
+  {
     "assemblyName": "SS-SW-2 TRIPLE POLE AIR BREAK SWITCH INSTALLATION",
     "items": [
       {
