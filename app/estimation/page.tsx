@@ -505,7 +505,7 @@ export default function EstimationPage() {
                         <Package size={64} className="text-gray-300" strokeWidth={1.5} />
                       </div>
                       <h3 className="text-xl font-bold text-gray-700 mb-2">มีเสาไฟทั้งหมด 0 ต้น</h3>
-                      <p className="text-gray-500 text-sm">คลิก "เพิ่มเสาไฟใหม่" เพื่อเพิ่มรายการเสาไฟในโครงการ</p>
+                      <p className="text-gray-500 text-sm">คลิก &quot;เพิ่มเสาไฟใหม่&quot; เพื่อเพิ่มรายการเสาไฟในโครงการ</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
