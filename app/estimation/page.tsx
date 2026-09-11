@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import estimationDataRaw from "@/lib/estimationData.json";
 import { Assembly, EstimationItem } from "@/lib/estimationTypes";
-import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText } from "lucide-react";
+import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText, Zap, ShieldCheck, BarChart2, ArrowRight } from "lucide-react";
 
 const estimationData = estimationDataRaw as Assembly[];
 
@@ -287,65 +287,110 @@ export default function EstimationPage() {
       
       {/* ---------------- MODE: SELECT PROJECT ---------------- */}
       {mode === "SELECT_PROJECT" && (
-        <>
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">โปรแกรมประมาณการอุปกรณ์ (เสาไฟ)</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Create New Project */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between h-full">
-              <div>
-                <h2 className="text-lg font-semibold text-purple-700 mb-4 flex items-center gap-2">
-                  <Plus size={20} />
-                  สร้างโครงการใหม่
-                </h2>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อโครงการ</label>
-                <input
-                  type="text"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none mb-4 bg-gray-50 hover:bg-white transition"
-                  placeholder="เช่น ก่อสร้างสายส่ง สฟ.กาญจนบุรี 5"
-                  value={newProjectInput}
-                  onChange={e => setNewProjectInput(e.target.value)}
-                  onKeyDown={e => { if(e.key === 'Enter') handleCreateProject() }}
-                />
-              </div>
-              <button 
-                onClick={handleCreateProject}
-                disabled={!newProjectInput.trim()}
-                className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition disabled:bg-purple-300 shadow-md shadow-purple-100"
-              >
-                เริ่มสร้างรายการเสา
-              </button>
-            </div>
-
-            {/* Select Existing */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[350px] flex flex-col">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <List size={20} className="text-blue-500" />
-                โครงการที่บันทึกไว้แล้ว
-              </h2>
-              {projects.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
-                   <FileText size={48} className="mb-2 opacity-50" />
-                   <p className="text-sm">ยังไม่มีโครงการในระบบ</p>
-                </div>
-              ) : (
-                <div className="space-y-2 overflow-y-auto pr-2 flex-1 scrollbar-thin">
-                  {projects.map((p, idx) => (
-                    <div 
-                      key={idx} 
-                      onClick={() => handleSelectProject(p)}
-                      className="p-3 border border-gray-100 rounded-lg hover:border-purple-300 hover:shadow-md hover:bg-purple-50 cursor-pointer transition-all flex justify-between items-center group"
-                    >
-                      <span className="font-medium text-gray-700 group-hover:text-purple-700">{p}</span>
-                      <ChevronLeft size={18} className="text-gray-400 rotate-180 group-hover:text-purple-600" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
+        <div className="min-h-[80vh] flex flex-col items-center justify-center py-10 relative">
+          {/* Subtle background decoration */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[50%] rounded-full bg-purple-100/50 blur-[100px]"></div>
+             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[50%] rounded-full bg-indigo-100/50 blur-[100px]"></div>
           </div>
-        </>
+
+          <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-[#1e293b] mb-4 text-center tracking-tight">
+              โปรแกรมประมาณการอุปกรณ์ (เสาไฟ)
+            </h1>
+            <p className="text-[#64748b] text-lg mb-8 text-center max-w-2xl">
+              สร้างและจัดการโครงการประมาณการอุปกรณ์เสาไฟได้อย่างสะดวก รวดเร็ว และเป็นระบบ
+            </p>
+            
+            <div className="flex flex-wrap justify-center gap-6 mb-12">
+              <span className="flex items-center gap-2 text-sm font-medium text-purple-700 bg-purple-50 px-4 py-2 rounded-full"><Zap size={16} /> ใช้งานง่าย</span>
+              <span className="flex items-center gap-2 text-sm font-medium text-blue-700 bg-blue-50 px-4 py-2 rounded-full"><ShieldCheck size={16} /> ข้อมูลปลอดภัย</span>
+              <span className="flex items-center gap-2 text-sm font-medium text-indigo-700 bg-indigo-50 px-4 py-2 rounded-full"><BarChart2 size={16} /> จัดการโครงการได้อย่างมีประสิทธิภาพ</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+              
+              {/* Create New Project Card */}
+              <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col justify-between h-full hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
+                <div>
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="bg-purple-100 text-purple-600 p-4 rounded-2xl flex-shrink-0">
+                      <Plus size={32} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-800 mb-2">สร้างโครงการใหม่</h2>
+                      <p className="text-gray-500 text-sm leading-relaxed">
+                        เริ่มต้นสร้างโครงการประมาณการอุปกรณ์เสาไฟเพื่อจัดทำรายการเสาและอุปกรณ์ที่ต้องใช้
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-8 mt-4">
+                    <label className="block text-sm font-bold text-gray-700 mb-2">ชื่อโครงการ</label>
+                    <input
+                      type="text"
+                      className="w-full p-4 border-2 border-gray-100 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 outline-none text-gray-700 placeholder-gray-400 bg-gray-50/50 hover:bg-gray-50 transition-all text-base"
+                      placeholder="ก่อสร้างสายส่ง 115 เควี รองรับ สถานีไฟฟ้า ..."
+                      value={newProjectInput}
+                      onChange={e => setNewProjectInput(e.target.value)}
+                      onKeyDown={e => { if(e.key === 'Enter') handleCreateProject() }}
+                    />
+                  </div>
+                </div>
+                <button 
+                  onClick={handleCreateProject}
+                  disabled={!newProjectInput.trim()}
+                  className="w-full bg-[#5b21b6] hover:bg-[#4c1d95] text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-lg shadow-purple-500/30"
+                >
+                  เริ่มสร้างรายการเสา <ArrowRight size={20} />
+                </button>
+              </div>
+
+              {/* Select Existing Project Card */}
+              <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 h-[450px] flex flex-col hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="bg-blue-100 text-blue-600 p-4 rounded-2xl flex-shrink-0">
+                    <List size={32} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">โครงการที่บันทึกไว้แล้ว</h2>
+                    <p className="text-gray-500 text-sm leading-relaxed">
+                      เปิดดู แก้ไข หรือติดตามโครงการที่คุณเคยบันทึกไว้
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-hidden relative">
+                  {projects.length === 0 ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                       <div className="bg-gray-50 rounded-full p-8 mb-4">
+                         <FileText size={64} className="text-gray-300" strokeWidth={1.5} />
+                       </div>
+                       <h3 className="text-xl font-bold text-gray-700 mb-2">ยังไม่มีโครงการในระบบ</h3>
+                       <p className="text-gray-500 text-sm max-w-[200px]">เมื่อคุณสร้างโครงการแล้ว รายการจะปรากฏที่นี่</p>
+                    </div>
+                  ) : (
+                    <div className="h-full overflow-y-auto pr-2 space-y-3 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-50 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+                      {projects.map((p, idx) => (
+                        <div 
+                          key={idx} 
+                          onClick={() => handleSelectProject(p)}
+                          className="p-4 border-2 border-gray-50 rounded-xl hover:border-blue-200 hover:bg-blue-50 cursor-pointer transition-all flex justify-between items-center group"
+                        >
+                          <span className="font-semibold text-gray-700 group-hover:text-blue-700">{p}</span>
+                          <div className="bg-white p-1.5 rounded-full shadow-sm group-hover:bg-blue-600 group-hover:text-white text-gray-400 transition-colors">
+                            <ChevronLeft size={16} className="rotate-180" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ---------------- MODE: PROJECT DETAILS ---------------- */}
