@@ -101,6 +101,10 @@ export default function Sidebar() {
         <SectionHeader id="docs" title="ตรวจสอบและเอกสาร" />
         {expanded.docs && (
           <div onClick={closeSidebar}>
+            <Link href="/estimation" className={`nav-item ${pathname === "/estimation" ? "active" : ""}`}>
+              <ClipboardList size={20} />
+              <span>โปรแกรมประมาณการ</span>
+            </Link>
             <Link href="/budget-transfer" className={`nav-item ${pathname === "/budget-transfer" ? "active" : ""}`}>
               <ArrowRightLeft size={20} />
               <span>เอกสารใบขอเบิกค่าใช้จ่าย</span>
