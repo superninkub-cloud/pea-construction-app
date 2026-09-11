@@ -540,7 +540,7 @@ export default function EstimationPage() {
                         </div>
                       </div>
                       <h3 className="text-xl font-bold text-gray-700 mb-2">มีเสาไฟทั้งหมด 0 ต้น</h3>
-                      <p className="text-gray-500 text-sm">คลิก "เพิ่มเสาไฟใหม่" เพื่อเพิ่มรายการเสาไฟในโครงการ</p>
+                      <p className="text-gray-500 text-sm">คลิก &quot;เพิ่มเสาไฟใหม่&quot; เพื่อเพิ่มรายการเสาไฟในโครงการ</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-5 relative">
@@ -587,7 +587,7 @@ export default function EstimationPage() {
                              </div>
                            </div>
                            <h3 className="text-lg font-bold text-gray-700 mb-2">มีเสาไฟทั้งหมด {projectPoles.length} ต้น</h3>
-                           <p className="text-gray-500 text-sm max-w-[200px]">คลิก "เพิ่มเสาไฟใหม่" เพื่อเพิ่มรายการเสาไฟในโครงการ</p>
+                           <p className="text-gray-500 text-sm max-w-[200px]">คลิก &quot;เพิ่มเสาไฟใหม่&quot; เพื่อเพิ่มรายการเสาไฟในโครงการ</p>
                          </div>
                       )}
 
