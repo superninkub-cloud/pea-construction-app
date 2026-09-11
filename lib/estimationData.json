@@ -37745,7 +37745,7 @@
       },
       {
         "code": "1010030006",
-        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
+        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DV",
         "unit": "ชิ้น",
         "qty": 1
       },
@@ -37757,7 +37757,7 @@
       },
       {
         "code": "1010050010",
-        "name": "PIPE,STEEL,SIZE 20,TYPE 2, 250 mm LONG TIS.277 BUT WITHOUT THREADED END",
+        "name": "PIPE,STEEL,SIZE 20,TYPE 2, 250 mm LONG TIS.277 BUT WITHOUT THREAD",
         "unit": "ชิ้น",
         "qty": 1
       },
@@ -37769,7 +37769,7 @@
       },
       {
         "code": "1010110101",
-        "name": "BOLE,MACHINE M. 12x50 MM.",
+        "name": "BOLE,MACHINE M. 12X50 MM.",
         "unit": "ชุด",
         "qty": 1
       },
@@ -37859,19 +37859,19 @@
       },
       {
         "code": "1020420302",
-        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.MM.",
+        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.M",
         "unit": "ชิ้น",
         "qty": 6
       },
       {
         "code": "1020430101",
-        "name": "CLAMP,DEAD END,COMPRESSION,DOUBLE LUG,FOR AL.CONDUCTOR 400 SQ.MM.",
+        "name": "CLAMP,DEAD END,COMPRESSION,DOUBLE LUG,FOR AL.CONDUCTOR 400 S",
         "unit": "ชุด",
         "qty": 3
       },
       {
         "code": "1030020101",
-        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENGHT 1,500-1,600 MM.TEN",
+        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENC",
         "unit": "ชิ้น",
         "qty": 6
       },
