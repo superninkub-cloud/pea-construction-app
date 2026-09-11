@@ -14,7 +14,7 @@ export default function EstimationPage() {
   const [items, setItems] = useState<EstimationItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
-  const [newItem, setNewItem] = useState<EstimationItem>({ code: "", name: "", unit: "????", qty: 1 });
+  const [newItem, setNewItem] = useState<EstimationItem>({ code: "", name: "", unit: "ชิ้น", qty: 1 });
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -52,21 +52,21 @@ export default function EstimationPage() {
 
   const handleAddItem = () => {
     if (!newItem.code || !newItem.name) {
-      alert("???????????????????????????????????");
+      alert("กรุณากรอกรหัสและชื่อพัสดุให้ครบถ้วน");
       return;
     }
     setItems([...items, newItem]);
-    setNewItem({ code: "", name: "", unit: "????", qty: 1 });
+    setNewItem({ code: "", name: "", unit: "ชิ้น", qty: 1 });
     setIsAdding(false);
   };
 
   const handleSave = async () => {
     if (!poleName) {
-      alert("???????????????????????????");
+      alert("กรุณาระบุชื่อหรือเบอร์เสาไฟ");
       return;
     }
     if (items.length === 0) {
-      alert("?????????????????????????");
+      alert("ไม่มีรายการพัสดุให้บันทึก");
       return;
     }
 
@@ -81,10 +81,10 @@ export default function EstimationPage() {
 
       if (error) throw error;
 
-      alert("?????????????????????????????????????");
+      alert("บันทึกข้อมูลการประมาณการเรียบร้อยแล้ว");
     } catch (error: any) {
       console.error("Error saving estimation:", error);
-      alert("????????????????????????: " + error.message);
+      alert("ไม่สามารถบันทึกข้อมูลได้: " + error.message);
     }
   };
 
@@ -94,17 +94,17 @@ export default function EstimationPage() {
 
   return (
     <div className="p-4 max-w-4xl mx-auto pb-24">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">??????????????????????? (?????)</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">โปรแกรมประมาณการอุปกรณ์ (เสาไฟ)</h1>
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            ?????????????????? <span className="text-red-500">*</span>
+            ชื่อหรือเบอร์เสาไฟ <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-            placeholder="???? ????????? 1, Pole-A01"
+            placeholder="เช่น เสาต้นที่ 1, Pole-A01"
             value={poleName}
             onChange={(e) => setPoleName(e.target.value)}
           />
@@ -112,14 +112,14 @@ export default function EstimationPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            ????????????? (Assembly)
+            ชนิดชุดประกอบ (Assembly)
           </label>
           <select
             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
             value={selectedAssembly}
             onChange={handleAssemblyChange}
           >
-            <option value="">-- ?????????????????? --</option>
+            <option value="">-- เลือกชนิดชุดประกอบ --</option>
             {estimationData.map((asm, idx) => (
               <option key={idx} value={asm.assemblyName}>
                 {asm.assemblyName}
@@ -132,35 +132,35 @@ export default function EstimationPage() {
       {items.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
           <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
-            <h2 className="font-semibold text-gray-800">?????????????????????</h2>
+            <h2 className="font-semibold text-gray-800">รายการวัสดุที่ต้องใช้</h2>
             <button
               onClick={() => setIsAdding(!isAdding)}
               className="text-sm flex items-center gap-1 text-purple-600 hover:text-purple-700 font-medium"
             >
-              {isAdding ? <><X size={16} /> ??????</> : <><Plus size={16} /> ????????????????</>}
+              {isAdding ? <><X size={16} /> ยกเลิก</> : <><Plus size={16} /> เพิ่มรายการอื่นๆ</>}
             </button>
           </div>
 
           {isAdding && (
             <div className="p-4 border-b bg-purple-50 flex flex-wrap gap-3 items-end">
               <div className="flex-1 min-w-[120px]">
-                <label className="block text-xs text-gray-600 mb-1">?????????</label>
+                <label className="block text-xs text-gray-600 mb-1">รหัสพัสดุ</label>
                 <input type="text" className="w-full p-2 text-sm border rounded" value={newItem.code} onChange={e => setNewItem({...newItem, code: e.target.value})} />
               </div>
               <div className="flex-[2] min-w-[200px]">
-                <label className="block text-xs text-gray-600 mb-1">?????????</label>
+                <label className="block text-xs text-gray-600 mb-1">ชื่อพัสดุ</label>
                 <input type="text" className="w-full p-2 text-sm border rounded" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} />
               </div>
               <div className="w-20">
-                <label className="block text-xs text-gray-600 mb-1">?????</label>
+                <label className="block text-xs text-gray-600 mb-1">จำนวน</label>
                 <input type="number" min="1" step="0.01" className="w-full p-2 text-sm border rounded" value={newItem.qty} onChange={e => setNewItem({...newItem, qty: parseFloat(e.target.value) || 0})} />
               </div>
               <div className="w-20">
-                <label className="block text-xs text-gray-600 mb-1">?????</label>
+                <label className="block text-xs text-gray-600 mb-1">หน่วย</label>
                 <input type="text" className="w-full p-2 text-sm border rounded" value={newItem.unit} onChange={e => setNewItem({...newItem, unit: e.target.value})} />
               </div>
               <button onClick={handleAddItem} className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700">
-                ?????
+                เพิ่ม
               </button>
             </div>
           )}
@@ -169,11 +169,11 @@ export default function EstimationPage() {
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-gray-700 bg-gray-50 border-b">
                 <tr>
-                  <th className="px-4 py-3">?????????</th>
-                  <th className="px-4 py-3">?????????</th>
-                  <th className="px-4 py-3 text-right">?????</th>
-                  <th className="px-4 py-3">?????</th>
-                  <th className="px-4 py-3 text-center">??????</th>
+                  <th className="px-4 py-3">รหัสพัสดุ</th>
+                  <th className="px-4 py-3">ชื่อพัสดุ</th>
+                  <th className="px-4 py-3 text-right">จำนวน</th>
+                  <th className="px-4 py-3">หน่วย</th>
+                  <th className="px-4 py-3 text-center">จัดการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -214,13 +214,13 @@ export default function EstimationPage() {
             className="flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-xl font-medium shadow-md shadow-purple-200 hover:bg-purple-700 transition-all active:scale-95"
           >
             <Save size={18} />
-            ????????????
+            บันทึกข้อมูล
           </button>
         </div>
       )}
       {!isAdmin && items.length > 0 && (
         <div className="text-center text-gray-500 text-sm mt-4">
-          ????? Admin ????????????????????????????????
+          เฉพาะ Admin เท่านั้นที่สามารถบันทึกข้อมูลได้
         </div>
       )}
     </div>
