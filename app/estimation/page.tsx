@@ -3,32 +3,130 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import estimationDataRaw from "@/lib/estimationData.json";
-import { Assembly, EstimationItem, SavedEstimation } from "@/lib/estimationTypes";
-import { Save, Plus, Trash2, X } from "lucide-react";
+import { Assembly, EstimationItem } from "@/lib/estimationTypes";
+import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText } from "lucide-react";
 
 const estimationData = estimationDataRaw as Assembly[];
 
+type Mode = "SELECT_PROJECT" | "PROJECT_DETAILS" | "EDIT_POLE";
+type Tab = "POLES" | "SUMMARY";
+
 export default function EstimationPage() {
-  const [selectedAssembly, setSelectedAssembly] = useState<string>("");
-  const [projectName, setProjectName] = useState("");
+  const [mode, setMode] = useState<Mode>("SELECT_PROJECT");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Project Level
+  const [projects, setProjects] = useState<string[]>([]);
+  const [selectedProject, setSelectedProject] = useState("");
+  const [newProjectInput, setNewProjectInput] = useState("");
+  const [projectPoles, setProjectPoles] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<Tab>("POLES");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Pole Editor Level
+  const [editingPoleId, setEditingPoleId] = useState<number | null>(null);
   const [poleName, setPoleName] = useState("");
+  const [selectedAssembly, setSelectedAssembly] = useState<string>("");
+  const [items, setItems] = useState<EstimationItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [newItem, setNewItem] = useState<EstimationItem>({ code: "", name: "", unit: "ชิ้น", qty: 1 });
   const [image1, setImage1] = useState<File | null>(null);
   const [image2, setImage2] = useState<File | null>(null);
   const [image1Preview, setImage1Preview] = useState("");
   const [image2Preview, setImage2Preview] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [items, setItems] = useState<EstimationItem[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isAdding, setIsAdding] = useState(false);
-  const [newItem, setNewItem] = useState<EstimationItem>({ code: "", name: "", unit: "ชิ้น", qty: 1 });
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const role = sessionStorage.getItem("pea_role");
-    if (role === "admin") {
-      setIsAdmin(true);
-    }
+    if (role === "admin") setIsAdmin(true);
+    fetchProjects();
   }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("pole_estimations")
+        .select("project_name");
+      if (!error && data) {
+        const uniqueProjects = Array.from(new Set(data.map(d => d.project_name).filter(Boolean)));
+        setProjects(uniqueProjects as string[]);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const fetchProjectPoles = async (projectName: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("pole_estimations")
+        .select("*")
+        .eq("project_name", projectName)
+        .order("id", { ascending: true });
+      if (!error && data) {
+        setProjectPoles(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setIsLoading(false);
+  };
+
+  const handleSelectProject = (proj: string) => {
+    setSelectedProject(proj);
+    setMode("PROJECT_DETAILS");
+    setActiveTab("POLES");
+    fetchProjectPoles(proj);
+  };
+
+  const handleCreateProject = () => {
+    if (!newProjectInput.trim()) return;
+    setSelectedProject(newProjectInput.trim());
+    setProjectPoles([]);
+    setMode("PROJECT_DETAILS");
+    setActiveTab("POLES");
+  };
+
+  // --- Pole Editor Logic ---
+  const handleAddNewPole = () => {
+    setEditingPoleId(null);
+    setPoleName("");
+    setSelectedAssembly("");
+    setItems([]);
+    setImage1(null);
+    setImage2(null);
+    setImage1Preview("");
+    setImage2Preview("");
+    setMode("EDIT_POLE");
+  };
+
+  const handleEditPole = (pole: any) => {
+    setEditingPoleId(pole.id);
+    setPoleName(pole.pole_name);
+    setSelectedAssembly(pole.assembly_type === "Custom" ? "" : pole.assembly_type);
+    setItems(pole.items || []);
+    setImage1Preview(pole.image1_url || "");
+    setImage2Preview(pole.image2_url || "");
+    setImage1(null);
+    setImage2(null);
+    setMode("EDIT_POLE");
+  };
+
+  const handleDeletePole = async (id: number, poleNameStr: string) => {
+    if (!isAdmin) {
+      alert("เฉพาะ Admin เท่านั้นที่ลบได้");
+      return;
+    }
+    if (!confirm(`คุณแน่ใจหรือไม่ที่จะลบเสา: ${poleNameStr}?`)) return;
+    try {
+      await supabase.from("pole_estimations").delete().eq("id", id);
+      fetchProjectPoles(selectedProject);
+    } catch (error) {
+      alert("ลบล้มเหลว");
+    }
+  };
 
   const compressImage = async (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
@@ -62,11 +160,8 @@ export default function EstimationPage() {
 
           canvas.toBlob(
             (blob) => {
-              if (blob) {
-                resolve(new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() }));
-              } else {
-                resolve(file);
-              }
+              if (blob) resolve(new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() }));
+              else resolve(file);
             },
             "image/jpeg",
             0.7
@@ -96,7 +191,6 @@ export default function EstimationPage() {
   const handleAssemblyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const asmName = e.target.value;
     setSelectedAssembly(asmName);
-    
     if (asmName) {
       const found = estimationData.find(a => a.assemblyName === asmName);
       if (found) {
@@ -107,33 +201,7 @@ export default function EstimationPage() {
     }
   };
 
-  const handleQtyChange = (index: number, newQty: number) => {
-    const newItems = [...items];
-    newItems[index].qty = newQty;
-    setItems(newItems);
-  };
-
-  const handleRemoveItem = (index: number) => {
-    const newItems = [...items];
-    newItems.splice(index, 1);
-    setItems(newItems);
-  };
-
-  const handleAddItem = () => {
-    if (!newItem.code || !newItem.name) {
-      alert("กรุณากรอกรหัสและชื่อพัสดุให้ครบถ้วน");
-      return;
-    }
-    setItems([...items, newItem]);
-    setNewItem({ code: "", name: "", unit: "ชิ้น", qty: 1 });
-    setIsAdding(false);
-  };
-
-  const handleSave = async () => {
-    if (!projectName) {
-      alert("กรุณาระบุชื่อโครงการ");
-      return;
-    }
+  const handleSavePole = async () => {
     if (!poleName) {
       alert("กรุณาระบุชื่อหรือเบอร์เสาไฟ");
       return;
@@ -145,15 +213,13 @@ export default function EstimationPage() {
 
     setIsSaving(true);
     try {
-      let img1Url = null;
-      let img2Url = null;
+      let img1Url = image1Preview; 
+      let img2Url = image2Preview;
 
       if (image1) {
         const fileExt = image1.name.split(".").pop();
         const fileName = `estimation_${Date.now()}_1.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("project_images")
-          .upload(fileName, image1);
+        const { error: uploadError } = await supabase.storage.from("project_images").upload(fileName, image1);
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("project_images").getPublicUrl(fileName);
         img1Url = data.publicUrl;
@@ -162,217 +228,443 @@ export default function EstimationPage() {
       if (image2) {
         const fileExt = image2.name.split(".").pop();
         const fileName = `estimation_${Date.now()}_2.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
-          .from("project_images")
-          .upload(fileName, image2);
+        const { error: uploadError } = await supabase.storage.from("project_images").upload(fileName, image2);
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("project_images").getPublicUrl(fileName);
         img2Url = data.publicUrl;
       }
 
-      const { error } = await supabase
-        .from("pole_estimations")
-        .insert({
-          project_name: projectName,
-          pole_name: poleName,
-          assembly_type: selectedAssembly || "Custom",
-          items: items,
-          image1_url: img1Url,
-          image2_url: img2Url
-        });
+      const payload = {
+        project_name: selectedProject,
+        pole_name: poleName,
+        assembly_type: selectedAssembly || "Custom",
+        items: items,
+        image1_url: img1Url && img1Url.startsWith('blob:') ? null : img1Url, 
+        image2_url: img2Url && img2Url.startsWith('blob:') ? null : img2Url
+      };
 
-      if (error) {
-        throw error;
+      if (editingPoleId) {
+        const { error } = await supabase.from("pole_estimations").update(payload).eq("id", editingPoleId);
+        if (error) throw error;
+        alert("อัปเดตข้อมูลเสาเรียบร้อยแล้ว");
+      } else {
+        const { error } = await supabase.from("pole_estimations").insert(payload);
+        if (error) throw error;
+        alert("เพิ่มเสาต้นใหม่เรียบร้อยแล้ว");
       }
 
-      alert("บันทึกข้อมูลการประมาณการเรียบร้อยแล้ว");
-      setPoleName("");
-      setImage1(null);
-      setImage2(null);
-      setImage1Preview("");
-      setImage2Preview("");
+      fetchProjectPoles(selectedProject);
+      if (!projects.includes(selectedProject)) fetchProjects();
+      setMode("PROJECT_DETAILS");
+
     } catch (error: any) {
-      console.error("Error saving estimation:", error);
-      alert("ไม่สามารถบันทึกข้อมูลได้ (ตรวจสอบว่ามีคอลัมน์ project_name ในฐานข้อมูลแล้วหรือยัง): " + error.message);
+      console.error(error);
+      alert("ไม่สามารถบันทึกข้อมูลได้: " + error.message);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const filteredAssemblies = estimationData.filter(a => 
-    a.assemblyName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Aggregation
+  const getAggregatedItems = () => {
+    const summary: Record<string, EstimationItem> = {};
+    projectPoles.forEach(pole => {
+      if (pole.items && Array.isArray(pole.items)) {
+        pole.items.forEach((item: EstimationItem) => {
+          if (!summary[item.code]) {
+            summary[item.code] = { ...item, qty: 0 };
+          }
+          summary[item.code].qty += Number(item.qty) || 0;
+        });
+      }
+    });
+    return Object.values(summary).sort((a, b) => a.code.localeCompare(b.code));
+  };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto pb-24">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">โปรแกรมประมาณการอุปกรณ์ (เสาไฟ)</h1>
+    <div className="p-4 max-w-5xl mx-auto pb-24 animation-fade-in">
+      
+      {/* ---------------- MODE: SELECT PROJECT ---------------- */}
+      {mode === "SELECT_PROJECT" && (
+        <>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">โปรแกรมประมาณการอุปกรณ์ (เสาไฟ)</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Create New Project */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between h-full">
+              <div>
+                <h2 className="text-lg font-semibold text-purple-700 mb-4 flex items-center gap-2">
+                  <Plus size={20} />
+                  สร้างโครงการใหม่
+                </h2>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อโครงการ</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none mb-4 bg-gray-50 hover:bg-white transition"
+                  placeholder="เช่น ก่อสร้างสายส่ง สฟ.กาญจนบุรี 5"
+                  value={newProjectInput}
+                  onChange={e => setNewProjectInput(e.target.value)}
+                  onKeyDown={e => { if(e.key === 'Enter') handleCreateProject() }}
+                />
+              </div>
+              <button 
+                onClick={handleCreateProject}
+                disabled={!newProjectInput.trim()}
+                className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition disabled:bg-purple-300 shadow-md shadow-purple-100"
+              >
+                เริ่มสร้างรายการเสา
+              </button>
+            </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ชื่อโครงการ <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-            placeholder="เช่น โครงการก่อสร้างระบบสายส่งรองรับ สฟ.กาญจนบุรี 5"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-          />
-        </div>
+            {/* Select Existing */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[350px] flex flex-col">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <List size={20} className="text-blue-500" />
+                โครงการที่บันทึกไว้แล้ว
+              </h2>
+              {projects.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+                   <FileText size={48} className="mb-2 opacity-50" />
+                   <p className="text-sm">ยังไม่มีโครงการในระบบ</p>
+                </div>
+              ) : (
+                <div className="space-y-2 overflow-y-auto pr-2 flex-1 scrollbar-thin">
+                  {projects.map((p, idx) => (
+                    <div 
+                      key={idx} 
+                      onClick={() => handleSelectProject(p)}
+                      className="p-3 border border-gray-100 rounded-lg hover:border-purple-300 hover:shadow-md hover:bg-purple-50 cursor-pointer transition-all flex justify-between items-center group"
+                    >
+                      <span className="font-medium text-gray-700 group-hover:text-purple-700">{p}</span>
+                      <ChevronLeft size={18} className="text-gray-400 rotate-180 group-hover:text-purple-600" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ชื่อหรือเบอร์เสาไฟ <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-            placeholder="เช่น เสาต้นที่ 1, Pole-A01"
-            value={poleName}
-            onChange={(e) => setPoleName(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ชนิดชุดประกอบ (Assembly)
-          </label>
-          <select
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
-            value={selectedAssembly}
-            onChange={handleAssemblyChange}
-          >
-            <option value="">-- เลือกชนิดชุดประกอบ --</option>
-            {estimationData.map((asm, idx) => (
-              <option key={idx} value={asm.assemblyName}>
-                {asm.assemblyName}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">รูปเสาต้นที่ 1</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleImageChange(e, 1)}
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-            />
-            {image1Preview && <img src={image1Preview} alt="Preview 1" className="mt-3 h-40 w-full object-cover rounded-lg border border-gray-200 shadow-sm" />}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">รูปเสาต้นที่ 2</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleImageChange(e, 2)}
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-            />
-            {image2Preview && <img src={image2Preview} alt="Preview 2" className="mt-3 h-40 w-full object-cover rounded-lg border border-gray-200 shadow-sm" />}
-          </div>
-        </div>
-      </div>
+        </>
+      )}
 
-      {items.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-          <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
-            <h2 className="font-semibold text-gray-800">รายการวัสดุที่ต้องใช้</h2>
-            <button
-              onClick={() => setIsAdding(!isAdding)}
-              className="text-sm flex items-center gap-1 text-purple-600 hover:text-purple-700 font-medium"
+      {/* ---------------- MODE: PROJECT DETAILS ---------------- */}
+      {mode === "PROJECT_DETAILS" && (
+        <>
+          <div className="mb-6">
+            <button 
+              onClick={() => { setMode("SELECT_PROJECT"); fetchProjects(); }}
+              className="flex items-center text-gray-500 hover:text-purple-600 mb-4 transition bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200 text-sm font-medium w-fit"
             >
-              {isAdding ? <><X size={16} /> ยกเลิก</> : <><Plus size={16} /> เพิ่มรายการอื่นๆ</>}
+              <ChevronLeft size={18} className="mr-1" /> กลับไปเลือกโครงการ
             </button>
+            <h1 className="text-2xl font-bold text-gray-800">
+              โครงการ: <span className="text-purple-700">{selectedProject}</span>
+            </h1>
           </div>
 
-          {isAdding && (
-            <div className="p-4 border-b bg-purple-50 flex flex-wrap gap-3 items-end">
-              <div className="flex-1 min-w-[120px]">
-                <label className="block text-xs text-gray-600 mb-1">รหัสพัสดุ</label>
-                <input type="text" className="w-full p-2 text-sm border rounded" value={newItem.code} onChange={e => setNewItem({...newItem, code: e.target.value})} />
+          <div className="bg-white rounded-xl shadow-md shadow-gray-100 border border-gray-200 overflow-hidden">
+            <div className="flex border-b border-gray-200 bg-gray-50">
+              <button 
+                onClick={() => setActiveTab("POLES")}
+                className={`flex-1 py-4 font-medium text-center flex justify-center items-center gap-2 transition ${activeTab === 'POLES' ? 'bg-white text-purple-700 border-b-2 border-purple-600 shadow-sm' : 'text-gray-500 hover:bg-gray-100'}`}
+              >
+                <List size={18} /> รายการเสาไฟ ({projectPoles.length})
+              </button>
+              <button 
+                onClick={() => setActiveTab("SUMMARY")}
+                className={`flex-1 py-4 font-medium text-center flex justify-center items-center gap-2 transition ${activeTab === 'SUMMARY' ? 'bg-white text-purple-700 border-b-2 border-purple-600 shadow-sm' : 'text-gray-500 hover:bg-gray-100'}`}
+              >
+                <FileText size={18} /> สรุปวัสดุรวมทั้งหมด
+              </button>
+            </div>
+
+            <div className="p-6 min-h-[400px]">
+              {isLoading ? (
+                <div className="text-center py-20 text-gray-400 flex flex-col items-center">
+                  <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4"></div>
+                  กำลังโหลดข้อมูล...
+                </div>
+              ) : activeTab === "POLES" ? (
+                <div className="animation-fade-in">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-semibold text-gray-700">เสาไฟในโครงการนี้</h2>
+                    <button 
+                      onClick={handleAddNewPole}
+                      className="bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-purple-700 text-sm font-medium shadow-md shadow-purple-200 transition-all active:scale-95"
+                    >
+                      <Plus size={16} /> เพิ่มเสาต้นใหม่
+                    </button>
+                  </div>
+                  
+                  {projectPoles.length === 0 ? (
+                    <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                      <div className="bg-white p-4 rounded-full w-fit mx-auto mb-3 shadow-sm text-gray-400">
+                        <Plus size={32} />
+                      </div>
+                      <p className="text-gray-500 mb-2 font-medium">ยังไม่มีข้อมูลเสาในโครงการนี้</p>
+                      <button onClick={handleAddNewPole} className="text-purple-600 font-medium hover:underline text-sm">คลิกเพื่อเริ่มเพิ่มเสาต้นแรก</button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                      {projectPoles.map(pole => (
+                        <div key={pole.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative flex flex-col h-full group">
+                          <h3 className="font-bold text-gray-800 text-lg mb-1 group-hover:text-purple-700 transition-colors">{pole.pole_name}</h3>
+                          <p className="text-xs text-gray-500 mb-4 line-clamp-2" title={pole.assembly_type}>
+                            ชุดประกอบ: {pole.assembly_type || 'Custom'}
+                          </p>
+                          <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                            <span className="text-xs font-semibold bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md border border-purple-100">
+                              พัสดุ {pole.items?.length || 0} รายการ
+                            </span>
+                            <div className="flex gap-1.5">
+                              <button onClick={() => handleEditPole(pole)} className="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition-colors border border-transparent hover:border-blue-100" title="แก้ไข">
+                                <Edit size={16} />
+                              </button>
+                              <button onClick={() => handleDeletePole(pole.id, pole.pole_name)} className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors border border-transparent hover:border-red-100" title="ลบ">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="animation-fade-in">
+                   <div className="flex justify-between items-center mb-4">
+                     <h2 className="text-lg font-semibold text-gray-700">สรุปจำนวนวัสดุทั้งหมดที่ต้องใช้ในโครงการ</h2>
+                     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                       รวมจาก {projectPoles.length} ต้น
+                     </span>
+                   </div>
+                   <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                     <table className="w-full text-sm text-left">
+                       <thead className="text-xs text-gray-700 bg-gray-100 border-b">
+                         <tr>
+                           <th className="px-5 py-4 w-32">รหัสพัสดุ</th>
+                           <th className="px-5 py-4">ชื่อพัสดุ</th>
+                           <th className="px-5 py-4 text-right w-32">จำนวนรวม</th>
+                           <th className="px-5 py-4 w-24">หน่วย</th>
+                         </tr>
+                       </thead>
+                       <tbody className="divide-y divide-gray-100">
+                         {getAggregatedItems().length === 0 ? (
+                            <tr><td colSpan={4} className="px-5 py-10 text-center text-gray-500">ไม่มีรายการวัสดุที่จะสรุป (โปรดเพิ่มเสาไฟก่อน)</td></tr>
+                         ) : getAggregatedItems().map((item, idx) => (
+                           <tr key={idx} className="hover:bg-purple-50/30 transition-colors">
+                             <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
+                             <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
+                             <td className="px-5 py-3 text-right font-bold text-purple-700 text-base bg-purple-50/50">
+                               {item.qty.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}
+                             </td>
+                             <td className="px-5 py-3 text-gray-600">{item.unit}</td>
+                           </tr>
+                         ))}
+                       </tbody>
+                     </table>
+                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ---------------- MODE: EDIT POLE ---------------- */}
+      {mode === "EDIT_POLE" && (
+        <div className="animation-fade-in">
+          <div className="mb-6">
+            <button 
+              onClick={() => setMode("PROJECT_DETAILS")}
+              className="flex items-center text-gray-500 hover:text-purple-600 mb-4 transition bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-200 text-sm font-medium w-fit"
+            >
+              <ChevronLeft size={18} className="mr-1" /> ยกเลิก / กลับไปโครงการ
+            </button>
+            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              {editingPoleId ? <Edit className="text-blue-500" /> : <Plus className="text-purple-600" />}
+              {editingPoleId ? "แก้ไขข้อมูลเสาไฟ" : "เพิ่มเสาไฟต้นใหม่"}
+            </h1>
+            <p className="text-gray-500 text-sm mt-1">บันทึกภายใต้โครงการ: <span className="font-semibold">{selectedProject}</span></p>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                ชื่อหรือเบอร์เสาไฟ <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none bg-gray-50 focus:bg-white transition-colors"
+                placeholder="เช่น เสาต้นที่ 1, Pole-A01"
+                value={poleName}
+                onChange={(e) => setPoleName(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">ชนิดชุดประกอบ (Assembly)</label>
+              <select
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none bg-gray-50 focus:bg-white transition-colors cursor-pointer"
+                value={selectedAssembly}
+                onChange={handleAssemblyChange}
+              >
+                <option value="">-- กำหนดเอง (Custom) / เริ่มต้นว่างเปล่า --</option>
+                {estimationData.map((asm, idx) => (
+                  <option key={idx} value={asm.assemblyName}>{asm.assemblyName}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-3 border-t border-gray-100 mt-2">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">📸 รูปเสาต้นที่ 1</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e, 1)}
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer"
+                />
+                {image1Preview && <img src={image1Preview} alt="Preview 1" className="mt-4 h-48 w-full object-cover rounded-lg border border-gray-200 shadow-sm" />}
               </div>
-              <div className="flex-[2] min-w-[200px]">
-                <label className="block text-xs text-gray-600 mb-1">ชื่อพัสดุ</label>
-                <input type="text" className="w-full p-2 text-sm border rounded" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} />
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">📸 รูปเสาต้นที่ 2</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e, 2)}
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer"
+                />
+                {image2Preview && <img src={image2Preview} alt="Preview 2" className="mt-4 h-48 w-full object-cover rounded-lg border border-gray-200 shadow-sm" />}
               </div>
-              <div className="w-20">
-                <label className="block text-xs text-gray-600 mb-1">จำนวน</label>
-                <input type="number" min="1" step="0.01" className="w-full p-2 text-sm border rounded" value={newItem.qty} onChange={e => setNewItem({...newItem, qty: parseFloat(e.target.value) || 0})} />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+            <div className="p-4 bg-purple-50/50 border-b border-purple-100 flex justify-between items-center">
+              <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                <List size={18} className="text-purple-600" /> รายการวัสดุสำหรับเสาต้นนี้
+              </h2>
+              <button
+                onClick={() => setIsAdding(!isAdding)}
+                className="text-sm flex items-center gap-1 bg-white border border-purple-200 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100 font-medium transition-colors shadow-sm"
+              >
+                {isAdding ? <><X size={16} /> ปิดหน้าต่างเพิ่ม</> : <><Plus size={16} /> พิมพ์พัสดุเพิ่มเอง</>}
+              </button>
+            </div>
+
+            {isAdding && (
+              <div className="p-5 border-b border-gray-100 bg-gray-50 flex flex-wrap gap-4 items-end shadow-inner">
+                <div className="flex-1 min-w-[120px]">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">รหัสพัสดุ</label>
+                  <input type="text" className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none" value={newItem.code} onChange={e => setNewItem({...newItem, code: e.target.value})} placeholder="เช่น 1010110200" />
+                </div>
+                <div className="flex-[2] min-w-[200px]">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">ชื่อพัสดุ</label>
+                  <input type="text" className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none" value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} placeholder="ชื่ออุปกรณ์" />
+                </div>
+                <div className="w-24">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">จำนวน</label>
+                  <input type="number" min="1" step="0.01" className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none" value={newItem.qty} onChange={e => setNewItem({...newItem, qty: parseFloat(e.target.value) || 0})} />
+                </div>
+                <div className="w-24">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">หน่วย</label>
+                  <input type="text" className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 outline-none" value={newItem.unit} onChange={e => setNewItem({...newItem, unit: e.target.value})} placeholder="ชุด/ชิ้น" />
+                </div>
+                <button 
+                  onClick={() => {
+                    if (!newItem.code || !newItem.name) return alert("กรุณากรอกรหัสและชื่อพัสดุให้ครบถ้วน");
+                    setItems([...items, newItem]);
+                    setNewItem({ code: "", name: "", unit: "ชิ้น", qty: 1 });
+                    setIsAdding(false);
+                  }} 
+                  className="bg-purple-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-purple-700 shadow-md shadow-purple-200 transition-all active:scale-95"
+                >
+                  บันทึกรายการลงตาราง
+                </button>
               </div>
-              <div className="w-20">
-                <label className="block text-xs text-gray-600 mb-1">หน่วย</label>
-                <input type="text" className="w-full p-2 text-sm border rounded" value={newItem.unit} onChange={e => setNewItem({...newItem, unit: e.target.value})} />
-              </div>
-              <button onClick={handleAddItem} className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700">
-                เพิ่ม
+            )}
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-700 bg-white border-b border-gray-200">
+                  <tr>
+                    <th className="px-5 py-3 w-32">รหัสพัสดุ</th>
+                    <th className="px-5 py-3">ชื่อพัสดุ</th>
+                    <th className="px-5 py-3 text-right w-32">จำนวน</th>
+                    <th className="px-5 py-3 w-24">หน่วย</th>
+                    <th className="px-5 py-3 text-center w-20">ลบ</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {items.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
+                      <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
+                      <td className="px-5 py-3 text-right">
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          className="w-24 text-right border border-gray-300 rounded-md p-1.5 focus:ring-2 focus:ring-purple-500 outline-none font-semibold text-purple-700 bg-white shadow-inner"
+                          value={item.qty}
+                          onChange={(e) => {
+                            const newItems = [...items];
+                            newItems[idx].qty = parseFloat(e.target.value) || 0;
+                            setItems(newItems);
+                          }}
+                        />
+                      </td>
+                      <td className="px-5 py-3 text-gray-600">{item.unit}</td>
+                      <td className="px-5 py-3 text-center">
+                        <button 
+                          onClick={() => {
+                            const newItems = [...items];
+                            newItems.splice(idx, 1);
+                            setItems(newItems);
+                          }}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                          title="ลบรายการนี้"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {items.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="text-center py-12 text-gray-400 bg-gray-50/50">
+                        <p className="mb-2">ยังไม่มีรายการวัสดุ</p>
+                        <p className="text-xs text-gray-400 font-medium">กรุณาเลือกชนิดชุดประกอบ หรือเพิ่มรายการพัสดุเอง</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {(isAdmin || true) && (
+            <div className="flex justify-end mb-10 border-t border-gray-200 pt-6">
+              <button
+                onClick={handleSavePole}
+                disabled={isSaving}
+                className={`flex items-center gap-2 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-base ${
+                  isSaving ? "bg-purple-400 cursor-wait shadow-none" : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-purple-200 hover:shadow-purple-300"
+                }`}
+              >
+                <Save size={20} />
+                {isSaving ? "กำลังบันทึกข้อมูล..." : (editingPoleId ? "อัปเดตข้อมูลเสาต้นนี้" : "บันทึกเสาต้นใหม่")}
               </button>
             </div>
           )}
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-700 bg-gray-50 border-b">
-                <tr>
-                  <th className="px-4 py-3">รหัสพัสดุ</th>
-                  <th className="px-4 py-3">ชื่อพัสดุ</th>
-                  <th className="px-4 py-3 text-right">จำนวน</th>
-                  <th className="px-4 py-3">หน่วย</th>
-                  <th className="px-4 py-3 text-center">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={idx} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-600">{item.code}</td>
-                    <td className="px-4 py-3 font-medium text-gray-800">{item.name}</td>
-                    <td className="px-4 py-3 text-right">
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        className="w-20 text-right border rounded p-1"
-                        value={item.qty}
-                        onChange={(e) => handleQtyChange(idx, parseFloat(e.target.value) || 0)}
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{item.unit}</td>
-                    <td className="px-4 py-3 text-center">
-                      <button 
-                        onClick={() => handleRemoveItem(idx)}
-                        className="text-red-500 hover:text-red-700 p-1"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {!isAdmin && false && (
+            <div className="text-center text-red-500 text-sm mt-4 bg-red-50 py-3 rounded-lg border border-red-100">
+              เฉพาะ Admin เท่านั้นที่สามารถบันทึกข้อมูลได้
+            </div>
+          )}
         </div>
       )}
 
-      {isAdmin && items.length > 0 && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className={`flex items-center gap-2 text-white px-6 py-3 rounded-xl font-medium shadow-md transition-all active:scale-95 ${
-              isSaving ? "bg-purple-400 cursor-not-allowed" : "bg-purple-600 shadow-purple-200 hover:bg-purple-700"
-            }`}
-          >
-            <Save size={18} />
-            {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-          </button>
-        </div>
-      )}
-      {!isAdmin && items.length > 0 && (
-        <div className="text-center text-gray-500 text-sm mt-4">
-          เฉพาะ Admin เท่านั้นที่สามารถบันทึกข้อมูลได้
-        </div>
-      )}
     </div>
   );
 }
