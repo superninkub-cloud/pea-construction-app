@@ -67,7 +67,11 @@ export default function EstimationPage() {
         .eq("project_name", projectName)
         .order("id", { ascending: true });
       if (!error && data) {
-        setProjectPoles(data);
+        // Natural sort by pole_name so P2 comes before P15
+        const sortedData = data.sort((a, b) => 
+          (a.pole_name || "").localeCompare(b.pole_name || "", undefined, { numeric: true, sensitivity: 'base' })
+        );
+        setProjectPoles(sortedData);
       }
     } catch (e) {
       console.error(e);
