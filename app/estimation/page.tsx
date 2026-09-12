@@ -336,6 +336,13 @@ export default function EstimationPage() {
     return Object.values(summary).sort((a, b) => a.code.localeCompare(b.code));
   };
 
+  const totalPhysicalPoles = projectPoles.reduce((acc, pole) => {
+    if (pole.assembly_type && pole.assembly_type.startsWith("เสาคู่")) {
+      return acc + 2;
+    }
+    return acc + 1;
+  }, 0);
+
   return (
     <div className="p-4 max-w-5xl mx-auto pb-24 animation-fade-in">
       
@@ -493,7 +500,7 @@ export default function EstimationPage() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 font-semibold mb-0.5">จำนวนเสาไฟทั้งหมด</p>
-                    <p className="text-2xl font-bold text-gray-800">{projectPoles.length} <span className="text-sm font-medium text-gray-500">ต้น</span></p>
+                    <p className="text-2xl font-bold text-gray-800">{totalPhysicalPoles} <span className="text-sm font-medium text-gray-500">ต้น</span></p>
                   </div>
                 </div>
 
@@ -640,7 +647,7 @@ export default function EstimationPage() {
                                <svg width="40" height="20" viewBox="0 0 40 20" fill="none"><path d="M5 15L15 5M20 18L20 2M35 15L25 5" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
                              </div>
                            </div>
-                           <h3 className="text-lg font-bold text-gray-700 mb-2">มีเสาไฟทั้งหมด {projectPoles.length} ต้น</h3>
+                           <h3 className="text-lg font-bold text-gray-700 mb-2">มีเสาไฟทั้งหมด {totalPhysicalPoles} ต้น</h3>
                            <p className="text-gray-500 text-sm max-w-[200px]">คลิก &quot;เพิ่มเสาไฟใหม่&quot; เพื่อเพิ่มรายการเสาไฟในโครงการ</p>
                          </div>
                       )}
@@ -656,7 +663,7 @@ export default function EstimationPage() {
                    <div className="flex justify-between items-center mb-6">
                      <h2 className="text-xl font-bold text-gray-800">สรุปจำนวนวัสดุทั้งหมดที่ต้องใช้ในโครงการ</h2>
                      <span className="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                       รวมจาก {projectPoles.length} ต้น
+                       รวมจาก {totalPhysicalPoles} ต้น
                      </span>
                    </div>
                    <div className="bg-white rounded-2xl border-2 border-gray-50 overflow-hidden shadow-sm flex-1">
