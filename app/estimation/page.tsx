@@ -26,7 +26,9 @@ export default function EstimationPage() {
   // Pole Editor Level
   const [editingPoleId, setEditingPoleId] = useState<number | null>(null);
   const [poleName, setPoleName] = useState("");
-  const [selectedAssembly, setSelectedAssembly] = useState<string>("");
+  const [poleType, setPoleType] = useState<string>("เสาเดี่ยว");
+  const [selectedAssemblies, setSelectedAssemblies] = useState<string[]>([]);
+  const [assemblyToAdd, setAssemblyToAdd] = useState<string>("");
   const [items, setItems] = useState<EstimationItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -98,7 +100,9 @@ export default function EstimationPage() {
   const handleAddNewPole = () => {
     setEditingPoleId(null);
     setPoleName("");
-    setSelectedAssembly("");
+    setPoleType("เสาเดี่ยว");
+    setSelectedAssemblies([]);
+    setAssemblyToAdd("");
     setItems([]);
     setImage1(null);
     setImage2(null);
@@ -110,7 +114,25 @@ export default function EstimationPage() {
   const handleEditPole = (pole: any) => {
     setEditingPoleId(pole.id);
     setPoleName(pole.pole_name);
-    setSelectedAssembly(pole.assembly_type === "Custom" ? "" : pole.assembly_type);
+    
+    let pType = "เสาเดี่ยว";
+    let asmList: string[] = [];
+    
+    if (pole.assembly_type) {
+      if (pole.assembly_type.includes(" | ")) {
+        const parts = pole.assembly_type.split(" | ");
+        pType = parts[0] === "เสาคู่" ? "เสาคู่" : "เสาเดี่ยว";
+        if (parts[1] && parts[1] !== "Custom") {
+          asmList = parts[1].split(" + ");
+        }
+      } else {
+         if (pole.assembly_type !== "Custom") asmList = [pole.assembly_type];
+      }
+    }
+    
+    setPoleType(pType);
+    setSelectedAssemblies(asmList);
+    setAssemblyToAdd("");
     setItems(pole.items || []);
     setImage1Preview(pole.image1_url || "");
     setImage2Preview(pole.image2_url || "");
@@ -193,17 +215,43 @@ export default function EstimationPage() {
     }
   };
 
-  const handleAssemblyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const asmName = e.target.value;
-    setSelectedAssembly(asmName);
-    if (asmName) {
-      const found = estimationData.find(a => a.assemblyName === asmName);
-      if (found) {
-        setItems(JSON.parse(JSON.stringify(found.items)));
-      }
-    } else {
-      setItems([]);
+  const handleAddAssembly = () => {
+    if (!assemblyToAdd) return;
+    const found = estimationData.find(a => a.assemblyName === assemblyToAdd);
+    if (found) {
+      const newItems = [...items];
+      found.items.forEach(item => {
+        const existingIdx = newItems.findIndex(i => i.code === item.code);
+        if (existingIdx >= 0) {
+          newItems[existingIdx].qty += Number(item.qty);
+        } else {
+          newItems.push({ ...item, qty: Number(item.qty) });
+        }
+      });
+      setItems(newItems);
+      setSelectedAssemblies([...selectedAssemblies, assemblyToAdd]);
+      setAssemblyToAdd("");
     }
+  };
+
+  const handleRemoveAssembly = (idxToRemove: number, asmName: string) => {
+    const found = estimationData.find(a => a.assemblyName === asmName);
+    if (found) {
+      const newItems = [...items];
+      found.items.forEach(item => {
+        const existingIdx = newItems.findIndex(i => i.code === item.code);
+        if (existingIdx >= 0) {
+          newItems[existingIdx].qty -= Number(item.qty);
+          if (newItems[existingIdx].qty <= 0) {
+             newItems.splice(existingIdx, 1);
+          }
+        }
+      });
+      setItems(newItems);
+    }
+    const newAsmList = [...selectedAssemblies];
+    newAsmList.splice(idxToRemove, 1);
+    setSelectedAssemblies(newAsmList);
   };
 
   const handleSavePole = async () => {
@@ -239,10 +287,12 @@ export default function EstimationPage() {
         img2Url = data.publicUrl;
       }
 
+      const finalAssemblyType = `${poleType} | ${selectedAssemblies.length > 0 ? selectedAssemblies.join(" + ") : "Custom"}`;
+
       const payload = {
         project_name: selectedProject,
         pole_name: poleName,
-        assembly_type: selectedAssembly || "Custom",
+        assembly_type: finalAssemblyType,
         items: items,
         image1_url: img1Url && img1Url.startsWith('blob:') ? null : img1Url, 
         image2_url: img2Url && img2Url.startsWith('blob:') ? null : img2Url
@@ -676,17 +726,50 @@ export default function EstimationPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">ชนิดชุดประกอบ (Assembly)</label>
-              <select
-                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none bg-gray-50 focus:bg-white transition-colors cursor-pointer"
-                value={selectedAssembly}
-                onChange={handleAssemblyChange}
-              >
-                <option value="">-- กำหนดเอง (Custom) / เริ่มต้นว่างเปล่า --</option>
-                {estimationData.map((asm, idx) => (
-                  <option key={idx} value={asm.assemblyName}>{asm.assemblyName}</option>
-                ))}
-              </select>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">ประเภทเสาไฟ</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="poleType" value="เสาเดี่ยว" checked={poleType === 'เสาเดี่ยว'} onChange={() => setPoleType('เสาเดี่ยว')} className="w-4 h-4 text-purple-600 focus:ring-purple-500" />
+                  <span className="text-sm font-medium text-gray-700">เสาเดี่ยว 1 ต้น</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="poleType" value="เสาคู่" checked={poleType === 'เสาคู่'} onChange={() => setPoleType('เสาคู่')} className="w-4 h-4 text-purple-600 focus:ring-purple-500" />
+                  <span className="text-sm font-medium text-gray-700">เสาคู่ 2 ต้น</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">เพิ่มชนิดชุดประกอบ (Assembly)</label>
+              <div className="flex gap-2">
+                <select
+                  className="flex-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none bg-gray-50 focus:bg-white transition-colors cursor-pointer"
+                  value={assemblyToAdd}
+                  onChange={e => setAssemblyToAdd(e.target.value)}
+                >
+                  <option value="">-- เลือกชุดประกอบเพื่อเพิ่ม --</option>
+                  {estimationData.map((asm, idx) => (
+                    <option key={idx} value={asm.assemblyName}>{asm.assemblyName}</option>
+                  ))}
+                </select>
+                <button 
+                  onClick={handleAddAssembly}
+                  disabled={!assemblyToAdd}
+                  className="bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Plus size={18} /> เพิ่ม
+                </button>
+              </div>
+              {selectedAssemblies.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  {selectedAssemblies.map((asm, idx) => (
+                    <span key={idx} className="bg-white text-purple-700 border border-purple-200 text-sm font-semibold px-3 py-1.5 rounded-md flex items-center gap-2 shadow-sm">
+                      {asm}
+                      <button onClick={() => handleRemoveAssembly(idx, asm)} className="hover:text-red-500 text-gray-400 transition-colors"><X size={16} /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-3 border-t border-gray-100 mt-2">
