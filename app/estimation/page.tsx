@@ -39,6 +39,7 @@ export default function EstimationPage() {
   const [image2Preview, setImage2Preview] = useState("");
   const [previewModalImg, setPreviewModalImg] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [poleViewMode, setPoleViewMode] = useState<"GROUPED" | "AGGREGATED">("GROUPED");
 
   useEffect(() => {
     const role = sessionStorage.getItem("pea_role");
@@ -807,16 +808,33 @@ export default function EstimationPage() {
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-            <div className="p-4 bg-purple-50/50 border-b border-purple-100 flex justify-between items-center">
+            <div className="p-4 bg-purple-50/50 border-b border-purple-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <h2 className="font-semibold text-gray-800 flex items-center gap-2">
                 <List size={18} className="text-purple-600" /> รายการวัสดุสำหรับเสาต้นนี้
               </h2>
-              <button
-                onClick={() => setIsAdding(!isAdding)}
-                className="text-sm flex items-center gap-1 bg-white border border-purple-200 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100 font-medium transition-colors shadow-sm"
-              >
-                {isAdding ? <><X size={16} /> ปิดหน้าต่างเพิ่ม</> : <><Plus size={16} /> พิมพ์พัสดุเพิ่มเอง</>}
-              </button>
+              
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="bg-white p-1 rounded-lg flex text-sm font-semibold border border-purple-100 shadow-sm">
+                  <button 
+                    onClick={() => setPoleViewMode("GROUPED")}
+                    className={`px-3 py-1.5 rounded-md transition-all ${poleViewMode === 'GROUPED' ? 'bg-purple-100 text-purple-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    แยกตามชุดประกอบ
+                  </button>
+                  <button 
+                    onClick={() => setPoleViewMode("AGGREGATED")}
+                    className={`px-3 py-1.5 rounded-md transition-all ${poleViewMode === 'AGGREGATED' ? 'bg-purple-100 text-purple-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    รวมพัสดุ
+                  </button>
+                </div>
+                <button
+                  onClick={() => setIsAdding(!isAdding)}
+                  className="text-sm flex items-center gap-1 bg-white border border-purple-200 text-purple-600 px-3 py-1.5 rounded-lg hover:bg-purple-100 font-medium transition-colors shadow-sm"
+                >
+                  {isAdding ? <><X size={16} /> ปิดหน้าต่างเพิ่ม</> : <><Plus size={16} /> พิมพ์พัสดุเพิ่มเอง</>}
+                </button>
+              </div>
             </div>
 
             {isAdding && (
@@ -863,55 +881,81 @@ export default function EstimationPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {Object.entries(
-                    items.reduce((acc, item, idx) => {
-                      const group = item.assemblyGroup || 'อื่นๆ (พัสดุเพิ่มเติม)';
-                      if (!acc[group]) acc[group] = [];
-                      acc[group].push({ ...item, originalIdx: idx });
-                      return acc;
-                    }, {} as Record<string, (EstimationItem & { originalIdx: number })[]>)
-                  ).map(([group, groupItems]) => (
-                    <React.Fragment key={group}>
-                      <tr className="bg-purple-50/50">
-                        <td colSpan={5} className="px-5 py-3 font-bold text-purple-800 text-sm border-y border-purple-100">
-                          📦 {group === 'อื่นๆ (พัสดุเพิ่มเติม)' ? group : `ชนิดชุดประกอบ: ${group}`}
-                        </td>
-                      </tr>
-                      {groupItems.map((item) => (
-                        <tr key={item.originalIdx} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
-                          <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
-                          <td className="px-5 py-3 text-right">
-                            <input 
-                              type="number" 
-                              step="0.01"
-                              className="w-24 text-right border border-gray-300 rounded-md p-1.5 focus:ring-2 focus:ring-purple-500 outline-none font-semibold text-purple-700 bg-white shadow-inner"
-                              value={item.qty}
-                              onChange={(e) => {
-                                const newItems = [...items];
-                                newItems[item.originalIdx].qty = parseFloat(e.target.value) || 0;
-                                setItems(newItems);
-                              }}
-                            />
-                          </td>
-                          <td className="px-5 py-3 text-gray-600">{item.unit}</td>
-                          <td className="px-5 py-3 text-center">
-                            <button 
-                              onClick={() => {
-                                const newItems = [...items];
-                                newItems.splice(item.originalIdx, 1);
-                                setItems(newItems);
-                              }}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors border border-transparent hover:border-red-100"
-                              title="ลบรายการนี้"
-                            >
-                              <Trash2 size={18} />
-                            </button>
+                  {poleViewMode === "GROUPED" ? (
+                    Object.entries(
+                      items.reduce((acc, item, idx) => {
+                        const group = item.assemblyGroup || 'อื่นๆ (พัสดุเพิ่มเติม)';
+                        if (!acc[group]) acc[group] = [];
+                        acc[group].push({ ...item, originalIdx: idx });
+                        return acc;
+                      }, {} as Record<string, (EstimationItem & { originalIdx: number })[]>)
+                    ).map(([group, groupItems]) => (
+                      <React.Fragment key={group}>
+                        <tr className="bg-purple-50/50">
+                          <td colSpan={5} className="px-5 py-3 font-bold text-purple-800 text-sm border-y border-purple-100">
+                            📦 {group === 'อื่นๆ (พัสดุเพิ่มเติม)' ? group : `ชนิดชุดประกอบ: ${group}`}
                           </td>
                         </tr>
-                      ))}
-                    </React.Fragment>
-                  ))}
+                        {groupItems.map((item) => (
+                          <tr key={item.originalIdx} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
+                            <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
+                            <td className="px-5 py-3 text-right">
+                              <input 
+                                type="number" 
+                                step="0.01"
+                                className="w-24 text-right border border-gray-300 rounded-md p-1.5 focus:ring-2 focus:ring-purple-500 outline-none font-semibold text-purple-700 bg-white shadow-inner"
+                                value={item.qty}
+                                onChange={(e) => {
+                                  const newItems = [...items];
+                                  newItems[item.originalIdx].qty = parseFloat(e.target.value) || 0;
+                                  setItems(newItems);
+                                }}
+                              />
+                            </td>
+                            <td className="px-5 py-3 text-gray-600">{item.unit}</td>
+                            <td className="px-5 py-3 text-center">
+                              <button 
+                                onClick={() => {
+                                  const newItems = [...items];
+                                  newItems.splice(item.originalIdx, 1);
+                                  setItems(newItems);
+                                }}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                                title="ลบรายการนี้"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </React.Fragment>
+                    ))
+                  ) : (
+                    Object.values(
+                      items.reduce((acc, item) => {
+                        if (!acc[item.code]) {
+                          acc[item.code] = { ...item, qty: 0 };
+                        }
+                        acc[item.code].qty += Number(item.qty) || 0;
+                        return acc;
+                      }, {} as Record<string, EstimationItem>)
+                    )
+                    .sort((a, b) => a.code.localeCompare(b.code))
+                    .map((item, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50 transition-colors bg-purple-50/10">
+                        <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
+                        <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
+                        <td className="px-5 py-3 text-right font-bold text-purple-700">
+                          {item.qty}
+                        </td>
+                        <td className="px-5 py-3 text-gray-600">{item.unit}</td>
+                        <td className="px-5 py-3 text-center text-gray-400 text-xs">
+                          -
+                        </td>
+                      </tr>
+                    ))
+                  )}
                   {items.length === 0 && (
                     <tr>
                       <td colSpan={5} className="text-center py-12 text-gray-400 bg-gray-50/50">
