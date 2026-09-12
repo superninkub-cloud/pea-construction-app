@@ -3,6 +3,7 @@ export interface EstimationItem {
   name: string;
   unit: string;
   qty: number;
+  assemblyGroup?: string;
 }
 
 export interface Assembly {

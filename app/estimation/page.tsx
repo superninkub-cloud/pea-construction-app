@@ -221,11 +221,11 @@ export default function EstimationPage() {
     if (found) {
       const newItems = [...items];
       found.items.forEach(item => {
-        const existingIdx = newItems.findIndex(i => i.code === item.code);
+        const existingIdx = newItems.findIndex(i => i.code === item.code && i.assemblyGroup === found.assemblyName);
         if (existingIdx >= 0) {
           newItems[existingIdx].qty += Number(item.qty);
         } else {
-          newItems.push({ ...item, qty: Number(item.qty) });
+          newItems.push({ ...item, qty: Number(item.qty), assemblyGroup: found.assemblyName });
         }
       });
       setItems(newItems);
@@ -235,20 +235,9 @@ export default function EstimationPage() {
   };
 
   const handleRemoveAssembly = (idxToRemove: number, asmName: string) => {
-    const found = estimationData.find(a => a.assemblyName === asmName);
-    if (found) {
-      const newItems = [...items];
-      found.items.forEach(item => {
-        const existingIdx = newItems.findIndex(i => i.code === item.code);
-        if (existingIdx >= 0) {
-          newItems[existingIdx].qty -= Number(item.qty);
-          if (newItems[existingIdx].qty <= 0) {
-             newItems.splice(existingIdx, 1);
-          }
-        }
-      });
-      setItems(newItems);
-    }
+    const newItems = items.filter(item => item.assemblyGroup !== asmName);
+    setItems(newItems);
+
     const newAsmList = [...selectedAssemblies];
     newAsmList.splice(idxToRemove, 1);
     setSelectedAssemblies(newAsmList);
@@ -874,38 +863,54 @@ export default function EstimationPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {items.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
-                      <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
-                      <td className="px-5 py-3 text-right">
-                        <input 
-                          type="number" 
-                          step="0.01"
-                          className="w-24 text-right border border-gray-300 rounded-md p-1.5 focus:ring-2 focus:ring-purple-500 outline-none font-semibold text-purple-700 bg-white shadow-inner"
-                          value={item.qty}
-                          onChange={(e) => {
-                            const newItems = [...items];
-                            newItems[idx].qty = parseFloat(e.target.value) || 0;
-                            setItems(newItems);
-                          }}
-                        />
-                      </td>
-                      <td className="px-5 py-3 text-gray-600">{item.unit}</td>
-                      <td className="px-5 py-3 text-center">
-                        <button 
-                          onClick={() => {
-                            const newItems = [...items];
-                            newItems.splice(idx, 1);
-                            setItems(newItems);
-                          }}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors border border-transparent hover:border-red-100"
-                          title="ลบรายการนี้"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                    </tr>
+                  {Object.entries(
+                    items.reduce((acc, item, idx) => {
+                      const group = item.assemblyGroup || 'อื่นๆ (พัสดุเพิ่มเติม)';
+                      if (!acc[group]) acc[group] = [];
+                      acc[group].push({ ...item, originalIdx: idx });
+                      return acc;
+                    }, {} as Record<string, (EstimationItem & { originalIdx: number })[]>)
+                  ).map(([group, groupItems]) => (
+                    <React.Fragment key={group}>
+                      <tr className="bg-purple-50/50">
+                        <td colSpan={5} className="px-5 py-3 font-bold text-purple-800 text-sm border-y border-purple-100">
+                          📦 {group === 'อื่นๆ (พัสดุเพิ่มเติม)' ? group : `ชนิดชุดประกอบ: ${group}`}
+                        </td>
+                      </tr>
+                      {groupItems.map((item) => (
+                        <tr key={item.originalIdx} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
+                          <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
+                          <td className="px-5 py-3 text-right">
+                            <input 
+                              type="number" 
+                              step="0.01"
+                              className="w-24 text-right border border-gray-300 rounded-md p-1.5 focus:ring-2 focus:ring-purple-500 outline-none font-semibold text-purple-700 bg-white shadow-inner"
+                              value={item.qty}
+                              onChange={(e) => {
+                                const newItems = [...items];
+                                newItems[item.originalIdx].qty = parseFloat(e.target.value) || 0;
+                                setItems(newItems);
+                              }}
+                            />
+                          </td>
+                          <td className="px-5 py-3 text-gray-600">{item.unit}</td>
+                          <td className="px-5 py-3 text-center">
+                            <button 
+                              onClick={() => {
+                                const newItems = [...items];
+                                newItems.splice(item.originalIdx, 1);
+                                setItems(newItems);
+                              }}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                              title="ลบรายการนี้"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
                   ))}
                   {items.length === 0 && (
                     <tr>
