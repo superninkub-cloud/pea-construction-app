@@ -121,12 +121,6 @@
     "assemblyName": "COMPOSITE SUSPENSION INSULATOR ASSEMBLY D-19A (AGS)",
     "items": [
       {
-        "code": "1030140013",
-        "name": "SPACER,PLATE,FOR AL.400 SQ.MM.",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
         "code": "1020230001",
         "name": "ARMOR-GRIP,PREFORMED,AL 400 SQ.MM.",
         "unit": "ชิ้น",
@@ -134,85 +128,13 @@
       },
       {
         "code": "1030020100",
-        "name": "INSULATOR SUSPENSION COMPOSITE,FOR 115 KV.NOMINAL SECTION LENGHT 1,100-1,200 MM.TENSION , MชIิ้นN 110",
-        "unit": "KN.",
+        "name": "INSULATOR SUSPENSION COMPOSITE,FOR 115 KV.NOMINAL SECTION LEN",
+        "unit": "ชิ้น",
         "qty": 1
       },
       {
         "code": "1030140003",
         "name": "SOCKET-EYE",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1020230001",
-        "name": "ARMOR-GRIP,PREFORMED,AL 400 SQ.MM.",
-        "unit": "ชิ้น",
-        "qty": 2
-      },
-      {
-        "code": "1030020100",
-        "name": "INSULATOR SUSPENSION COMPOSITE,FOR 115 KV.NOMINAL SECTION LENGHT 1,100-1,200 MM.TENSION , MชIิ้นN 110",
-        "unit": "KN.",
-        "qty": 1
-      },
-      {
-        "code": "1030140000",
-        "name": "CLEVIS-EYE",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1030140006",
-        "name": "SOCKET-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140013",
-        "name": "SPACER,PLATE,FOR AL.400 SQ.MM.",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1020420302",
-        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.MM.",
-        "unit": "ชิ้น",
-        "qty": 2
-      },
-      {
-        "code": "1020430101",
-        "name": "CLAMP,DEAD END,COMPRESSION,DOUBLE LUG,FOR AL.CONDUCTOR 400 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1030020003",
-        "name": "INSULATOR,SUSPENSION,TYPE E (CLASS 52-8)TIS.354",
-        "unit": "ชิ้น",
-        "qty": 10
-      },
-      {
-        "code": "1030140001",
-        "name": "BALL-CLEVIS,ANSI TYPE K",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140005",
-        "name": "BALL-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1030140006",
-        "name": "SOCKET-CLEVIS,ANSI TYPE B",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "1030140007",
-        "name": "SOCKET-CLEVIS,ANSI TYPE K",
         "unit": "ชุด",
         "qty": 1
       }
@@ -223,19 +145,19 @@
     "items": [
       {
         "code": "1020420302",
-        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.M",
+        "name": "TERMINAL,COMPRESSION,15 DEGREE PAD,NEMA,4-HOLE,FOR AL. 400 SQ.MM",
         "unit": "ชิ้น",
         "qty": 1
       },
       {
         "code": "1020430001",
-        "name": "CLAMP DEAD END,COMPRESSION,SINGLE LUG,FOR AL.CONDUCTOR 400 SC",
+        "name": "CLAMP DEAD END,COMPRESSION,SINGLE LUG,FOR AL.CONDUCTOR 400 SQ",
         "unit": "ชุด",
         "qty": 1
       },
       {
         "code": "1030020101",
-        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENC",
+        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENG",
         "unit": "ชิ้น",
         "qty": 1
       },
@@ -252,7 +174,7 @@
     "items": [
       {
         "code": "1030020101",
-        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENC",
+        "name": "INSULATOR,SUSPENSION,COMPOSITE,FOR 115 KV.NOMINAL SELTION LENG",
         "unit": "ชิ้น",
         "qty": 1
       },
