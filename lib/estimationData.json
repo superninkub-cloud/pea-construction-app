@@ -15105,30 +15105,6 @@
     "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5I",
     "items": [
       {
-        "code": "1030110000",
-        "name": "CLAMP,STRAIN,STRAIGHT TYPE,AL 35-70 sq.mm.ACSR 35-50 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140000",
-        "name": "CLEVIS-EYE",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1030140003",
-        "name": "SOCKET-EYE",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "9090010035",
-        "name": "คอมปาวดชวยการสัมผัสทางไฟฟา",
-        "unit": "กก.",
-        "qty": 0.02
-      },
-      {
         "code": "1010010004",
         "name": "STEEL ANGLE,OVERHEAD GROUND WIRE BAYONET 65X65X6 MM. 2,500 MM.LONG",
         "unit": "ชิ้น",
@@ -15181,66 +15157,12 @@
         "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
         "unit": "ชิ้น",
         "qty": 1
-      },
-      {
-        "code": "1010010005",
-        "name": "STEEL ANGLE,OVERHEAD GROUND WIRE CORNER BAYONET 65X65X6 MM. 2,500 MM.LONG",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010030006",
-        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1010100003",
-        "name": "WIRE,STEEL STRANDED 35 SQ.MM.TIS.404",
-        "unit": "ม.",
-        "qty": 2.5
-      },
-      {
-        "code": "1010110101",
-        "name": "BOLE,MACHINE M. 12X50 MM.",
-        "unit": "ชุด",
-        "qty": 1
       }
     ]
   },
   {
     "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5K",
     "items": [
-      {
-        "code": "1010110204",
-        "name": "BOLT,MACHINE M.16x300 mm.",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1010180100",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 6
-      },
-      {
-        "code": "1010230003",
-        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010230203",
-        "name": "GROUND WIRE SUPPORT AND CLAMP,FOR BAYONET",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "9090011007",
-        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
       {
         "code": "1010030006",
         "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
@@ -15276,66 +15198,12 @@
         "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
         "unit": "ชิ้น",
         "qty": 1
-      },
-      {
-        "code": "1010030006",
-        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1010100003",
-        "name": "WIRE,STEEL STRANDED 35 SQ.MM.TIS.404",
-        "unit": "ม.",
-        "qty": 0.5
-      },
-      {
-        "code": "1010110101",
-        "name": "BOLE,MACHINE M. 12X50 MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010180001",
-        "name": "NUT,EYE M.16 DIN 582",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1010180100",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 2
-      },
-      {
-        "code": "1010210202",
-        "name": "BOLT,STRAND EYE,SINGLE 45 DEGREE M.16X350 MM.",
-        "unit": "ชุด",
-        "qty": 1
       }
     ]
   },
   {
     "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5M",
     "items": [
-      {
-        "code": "1010210304",
-        "name": "THIMBLE,GUY,FOR STEEL WIRE 50-95 sq.mm.",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1010230003",
-        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 2
-      },
-      {
-        "code": "9090011007",
-        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
       {
         "code": "1010000304",
         "name": "STEEL CHANNEL150X75X6.5 MM.2,500MM.",
@@ -15407,18 +15275,6 @@
         "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
         "unit": "ชิ้น",
         "qty": 1
-      },
-      {
-        "code": "1010000304",
-        "name": "STEEL CHANNEL150X75X6.5 MM.2,500MM.",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1010030006",
-        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
-        "unit": "ชิ้น",
-        "qty": 1
       }
     ]
   },
@@ -15426,72 +15282,6 @@
     "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5O",
     "items": [
       {
-        "code": "1010100003",
-        "name": "WIRE,STEEL STRANDED 35 SQ.MM.TIS.404",
-        "unit": "ม.",
-        "qty": 2.5
-      },
-      {
-        "code": "1010110101",
-        "name": "BOLE,MACHINE M. 12X50 MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010110204",
-        "name": "BOLT,MACHINE M.16x300 mm.",
-        "unit": "ชุด",
-        "qty": 3
-      },
-      {
-        "code": "1010140001",
-        "name": "BOLT, ROUNG EYE M 16X200 MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010180001",
-        "name": "NUT,EYE M.16 DIN 582",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
-        "code": "1010180100",
-        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
-        "unit": "ชิ้น",
-        "qty": 10
-      },
-      {
-        "code": "1010210202",
-        "name": "BOLT,STRAND EYE,SINGLE 45 DEGREE M.16X350 MM.",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010210304",
-        "name": "THIMBLE,GUY,FOR STEEL WIRE 50-95 sq.mm.",
-        "unit": "ชิ้น",
-        "qty": 2
-      },
-      {
-        "code": "1010230000",
-        "name": "CLAMP,SINGLE U-BOLT,M.8 (WIRE ROPE CLIP)",
-        "unit": "ชุด",
-        "qty": 1
-      },
-      {
-        "code": "1010230003",
-        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
-        "unit": "ชุด",
-        "qty": 4
-      },
-      {
-        "code": "9090011007",
-        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
-        "unit": "ชิ้น",
-        "qty": 1
-      },
-      {
         "code": "1010000304",
         "name": "STEEL CHANNEL150X75X6.5 MM.2,500MM.",
         "unit": "ชิ้น",
@@ -15532,12 +15322,7 @@
         "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
         "unit": "ชิ้น",
         "qty": 10
-      }
-    ]
-  },
-  {
-    "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5P",
-    "items": [
+      },
       {
         "code": "1010180301",
         "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
@@ -15573,7 +15358,12 @@
         "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
         "unit": "ชิ้น",
         "qty": 1
-      },
+      }
+    ]
+  },
+  {
+    "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5P",
+    "items": [
       {
         "code": "1010000304",
         "name": "STEEL CHANNEL150X75X6.5 MM.2,500MM.",
@@ -15645,12 +15435,7 @@
         "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
         "unit": "ชิ้น",
         "qty": 2
-      }
-    ]
-  },
-  {
-    "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5Q",
-    "items": [
+      },
       {
         "code": "1010210200",
         "name": "BOLT,STRAND EYE,SINGLE M.16X350 MM.",
@@ -15686,7 +15471,12 @@
         "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
         "unit": "ชิ้น",
         "qty": 1
-      },
+      }
+    ]
+  },
+  {
+    "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5Q",
+    "items": [
       {
         "code": "1010000304",
         "name": "STEEL CHANNEL150X75X6.5 MM.2,500MM.",
@@ -15758,6 +15548,36 @@
         "name": "WASHER,LOCK,SPRING,SIZE 16 mm.,GENERAL PURPOSE,TIS.259",
         "unit": "ชิ้น",
         "qty": 2
+      },
+      {
+        "code": "1010210200",
+        "name": "BOLT,STRAND EYE,SINGLE M.16X350 MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010210304",
+        "name": "THIMBLE,GUY,FOR STEEL WIRE 50-95 sq.mm.",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010230000",
+        "name": "CLAMP,SINGLE U-BOLT,M.8 (WIRE ROPE CLIP)",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010230003",
+        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 4
+      },
+      {
+        "code": "9090011007",
+        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
+        "unit": "ชิ้น",
+        "qty": 1
       }
     ]
   },
@@ -46483,6 +46303,207 @@
         "name": "BRACKET,CORNER SUSPENSION",
         "unit": "ชุด",
         "qty": 3
+      }
+    ]
+  },
+  {
+    "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5J",
+    "items": [
+      {
+        "code": "1010010005",
+        "name": "STEEL ANGLE,OVERHEAD GROUND WIRE CORNER BAYONET 65X65X6 MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010030006",
+        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010100003",
+        "name": "WIRE,STEEL STRANDED 35 SQ.MM.TIS.404",
+        "unit": "ม.",
+        "qty": 2.5
+      },
+      {
+        "code": "1010110101",
+        "name": "BOLE,MACHINE M. 12X50 MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010110204",
+        "name": "BOLT,MACHINE M.16x300 mm.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1010180100",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 6
+      },
+      {
+        "code": "1010230003",
+        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010230203",
+        "name": "GROUND WIRE SUPPORT AND CLAMP,FOR BAYONET",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "9090011007",
+        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
+        "unit": "ชิ้น",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5L",
+    "items": [
+      {
+        "code": "1010030006",
+        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010100003",
+        "name": "WIRE,STEEL STRANDED 35 SQ.MM.TIS.404",
+        "unit": "ม.",
+        "qty": 0.5
+      },
+      {
+        "code": "1010110101",
+        "name": "BOLE,MACHINE M. 12X50 MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010180001",
+        "name": "NUT,EYE M.16 DIN 582",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010180100",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 2
+      },
+      {
+        "code": "1010210202",
+        "name": "BOLT,STRAND EYE,SINGLE 45 DEGREE M.16X350 MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010210304",
+        "name": "THIMBLE,GUY,FOR STEEL WIRE 50-95 sq.mm.",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010230003",
+        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 2
+      },
+      {
+        "code": "9090011007",
+        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
+        "unit": "ชิ้น",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "assemblyName": "OVERHEAD GROUND WIRE ASSEMBLY D-5N",
+    "items": [
+      {
+        "code": "1010000304",
+        "name": "STEEL CHANNEL150X75X6.5 MM.2,500MM.",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010030006",
+        "name": "PLATE,STEEL,FOR OVERHEAD GROUND WIRE BAYONET,ACCORDING TO DWG.NO.SA3-015/44004",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010100003",
+        "name": "WIRE,STEEL STRANDED 35 SQ.MM.TIS.404",
+        "unit": "ม.",
+        "qty": 2.5
+      },
+      {
+        "code": "1010110101",
+        "name": "BOLE,MACHINE M. 12X50 MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010110204",
+        "name": "BOLT,MACHINE M.16x300 mm.",
+        "unit": "ชุด",
+        "qty": 3
+      },
+      {
+        "code": "1010140001",
+        "name": "BOLT, ROUNG EYE M 16X200 MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010180001",
+        "name": "NUT,EYE M.16 DIN 582",
+        "unit": "ชิ้น",
+        "qty": 1
+      },
+      {
+        "code": "1010180100",
+        "name": "WASHER,PLAIN,SQUARE,LARGE 52x52x4.5 mm.HOLE DIA. 18 MM. TIS.258",
+        "unit": "ชิ้น",
+        "qty": 10
+      },
+      {
+        "code": "1010210202",
+        "name": "BOLT,STRAND EYE,SINGLE 45 DEGREE M.16X350 MM.",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010210304",
+        "name": "THIMBLE,GUY,FOR STEEL WIRE 50-95 sq.mm.",
+        "unit": "ชิ้น",
+        "qty": 2
+      },
+      {
+        "code": "1010230000",
+        "name": "CLAMP,SINGLE U-BOLT,M.8 (WIRE ROPE CLIP)",
+        "unit": "ชุด",
+        "qty": 1
+      },
+      {
+        "code": "1010230003",
+        "name": "CLAMP,TRIPLE BOLTS FOR STEEL STRANDED WIRE 35 SQ.MM.",
+        "unit": "ชุด",
+        "qty": 4
+      },
+      {
+        "code": "9090011007",
+        "name": "WELDING POWDER, ST. WIRE 50 SQ.MM. TO GD",
+        "unit": "ชิ้น",
+        "qty": 1
       }
     ]
   }
