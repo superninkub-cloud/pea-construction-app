@@ -631,7 +631,7 @@ export default function EstimationPage() {
                               <ChevronLeft size={16} className="text-gray-300 rotate-180" />
                             </div>
                             <p className="text-xs text-gray-500 mb-4 line-clamp-2 leading-relaxed" title={pole.assembly_type}>
-                              อุปประกอบ: {pole.assembly_type || 'Custom'}
+                              อุปกรณ์ประกอบ: {pole.assembly_type || 'Custom'}
                             </p>
                             
                             <div className="flex items-center justify-between mt-auto">
