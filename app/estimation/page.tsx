@@ -4,11 +4,9 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import estimationDataRaw from "@/lib/estimationData.json";
 import { Assembly, EstimationItem } from "@/lib/estimationTypes";
-import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText, Zap, ShieldCheck, BarChart2, ArrowRight, Package, Search, Clock, Image as ImageIcon } from "lucide-react";
-import materialImagesRaw from "@/lib/materialImages.json";
+import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText, Zap, ShieldCheck, BarChart2, ArrowRight, Package, Search, Clock, Image as ImageIcon, Upload } from "lucide-react";
 
 const estimationData = estimationDataRaw as Assembly[];
-const materialImages = materialImagesRaw as Record<string, string>;
 
 type Mode = "SELECT_PROJECT" | "PROJECT_DETAILS" | "EDIT_POLE";
 type Tab = "POLES" | "SUMMARY";
@@ -43,12 +41,72 @@ export default function EstimationPage() {
   const [previewModalImg, setPreviewModalImg] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [poleViewMode, setPoleViewMode] = useState<"GROUPED" | "AGGREGATED">("GROUPED");
+  
+  // Material Images State
+  const [materialImages, setMaterialImages] = useState<Record<string, string>>({});
+  const [imageManagerItem, setImageManagerItem] = useState<{name: string, url: string | null} | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     const role = sessionStorage.getItem("pea_role");
     if (role === "admin") setIsAdmin(true);
     fetchProjects();
+    fetchMaterialImages();
   }, []);
+
+  const fetchMaterialImages = async () => {
+    try {
+      const { data, error } = await supabase.from("material_images").select("*");
+      if (!error && data) {
+        const mapping: Record<string, string> = {};
+        data.forEach(d => mapping[d.item_name] = d.image_url);
+        setMaterialImages(mapping);
+      }
+    } catch (e) {
+      console.error("Error fetching material images:", e);
+    }
+  };
+
+  // Compress image helper
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          const MAX = 1200;
+          if (width > height) {
+            if (width > MAX) {
+              height *= MAX / width;
+              width = MAX;
+            }
+          } else {
+            if (height > MAX) {
+              width *= MAX / height;
+              height = MAX;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() }));
+            } else {
+              reject(new Error("Canvas to Blob failed"));
+            }
+          }, "image/jpeg", 0.7);
+        };
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
   const fetchProjects = async () => {
     try {
@@ -359,6 +417,39 @@ export default function EstimationPage() {
     }
     return acc + 1;
   }, 0);
+
+  const handleUploadMaterialImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!imageManagerItem || !e.target.files || !e.target.files[0]) return;
+    const file = e.target.files[0];
+    
+    setIsUploadingImage(true);
+    try {
+      const compressedFile = await compressImage(file);
+      const safeName = imageManagerItem.name.replace(/[^a-zA-Z0-9\u0E00-\u0E7F]/g, '_').substring(0, 50);
+      const fileName = `materials/${safeName}_${Date.now()}.jpg`;
+      
+      const { error: uploadError } = await supabase.storage.from("project_images").upload(fileName, compressedFile, { upsert: true });
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage.from("project_images").getPublicUrl(fileName);
+      
+      const { error: dbError } = await supabase.from("material_images").upsert({
+        item_name: imageManagerItem.name,
+        image_url: publicUrl,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'item_name' });
+      
+      if (dbError) throw dbError;
+      
+      setMaterialImages(prev => ({ ...prev, [imageManagerItem.name]: publicUrl }));
+      setImageManagerItem({ name: imageManagerItem.name, url: publicUrl });
+    } catch (error: any) {
+      console.error(error);
+      alert("เกิดข้อผิดพลาดในการอัปโหลดรูป: " + error.message);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   return (
     <div className="p-4 max-w-5xl mx-auto pb-24 animation-fade-in">
@@ -700,12 +791,17 @@ export default function EstimationPage() {
                            <tr key={idx} className="hover:bg-purple-50/50 transition-colors group">
                              <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.code}</td>
                              <td className="px-6 py-4 font-medium text-gray-800 group-hover:text-purple-800">
-                               {item.name}
-                               {materialImages[item.code] && (
+                               <button 
+                                 onClick={() => setImageManagerItem({name: item.name, url: materialImages[item.name] || null})}
+                                 className="text-left hover:underline hover:text-purple-700 focus:outline-none transition-colors"
+                               >
+                                 {item.name}
+                               </button>
+                               {materialImages[item.name] && (
                                  <button 
-                                   onClick={() => setPreviewModalImg(materialImages[item.code])}
+                                   onClick={(e) => { e.stopPropagation(); setPreviewModalImg(materialImages[item.name]); }}
                                    className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
-                                   title="ดูรูปภาพพัสดุ"
+                                   title="ดูรูปภาพขยาย"
                                  >
                                    <ImageIcon size={12} /> รูป
                                  </button>
@@ -949,12 +1045,17 @@ export default function EstimationPage() {
                           <tr key={item.originalIdx} className="hover:bg-gray-50 transition-colors">
                             <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
                             <td className="px-5 py-3 font-medium text-gray-800">
-                              {item.name}
-                              {materialImages[item.code] && (
+                              <button 
+                                 onClick={() => setImageManagerItem({name: item.name, url: materialImages[item.name] || null})}
+                                 className="text-left hover:underline hover:text-purple-700 focus:outline-none transition-colors"
+                               >
+                                 {item.name}
+                               </button>
+                              {materialImages[item.name] && (
                                  <button 
-                                   onClick={() => setPreviewModalImg(materialImages[item.code])}
+                                   onClick={(e) => { e.stopPropagation(); setPreviewModalImg(materialImages[item.name]); }}
                                    className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
-                                   title="ดูรูปภาพพัสดุ"
+                                   title="ดูรูปภาพขยาย"
                                  >
                                    <ImageIcon size={12} /> รูป
                                  </button>
@@ -1006,12 +1107,17 @@ export default function EstimationPage() {
                       <tr key={idx} className="hover:bg-gray-50 transition-colors bg-purple-50/10">
                         <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
                         <td className="px-5 py-3 font-medium text-gray-800">
-                          {item.name}
-                          {materialImages[item.code] && (
+                          <button 
+                             onClick={() => setImageManagerItem({name: item.name, url: materialImages[item.name] || null})}
+                             className="text-left hover:underline hover:text-purple-700 focus:outline-none transition-colors"
+                           >
+                             {item.name}
+                           </button>
+                          {materialImages[item.name] && (
                                <button 
-                                 onClick={() => setPreviewModalImg(materialImages[item.code])}
+                                 onClick={(e) => { e.stopPropagation(); setPreviewModalImg(materialImages[item.name]); }}
                                  className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
-                                 title="ดูรูปภาพพัสดุ"
+                                 title="ดูรูปภาพขยาย"
                                >
                                  <ImageIcon size={12} /> รูป
                                </button>
@@ -1059,6 +1165,63 @@ export default function EstimationPage() {
               เฉพาะ Admin เท่านั้นที่สามารถบันทึกข้อมูลได้
             </div>
           )}
+        </div>
+      )}
+
+      {/* Material Image Manager Modal */}
+      {imageManagerItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animation-fade-in" onClick={() => setImageManagerItem(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 className="font-bold text-gray-800 text-lg flex items-center gap-2">
+                <ImageIcon className="text-purple-500" size={20} />
+                จัดการรูปภาพพัสดุ
+              </h3>
+              <button onClick={() => setImageManagerItem(null)} className="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-1.5 rounded-full transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <p className="text-sm font-medium text-gray-700 mb-4 pb-4 border-b border-gray-100 leading-relaxed">
+                {imageManagerItem.name}
+              </p>
+              
+              <div className="mb-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-2 flex flex-col items-center justify-center min-h-[200px] overflow-hidden">
+                {imageManagerItem.url ? (
+                  <img src={imageManagerItem.url} alt="Material" className="max-w-full max-h-[300px] object-contain rounded-lg shadow-sm" />
+                ) : (
+                  <div className="text-gray-400 flex flex-col items-center gap-2 my-10">
+                    <ImageIcon size={48} strokeWidth={1} className="opacity-50" />
+                    <span className="text-sm font-medium">ยังไม่มีรูปภาพสำหรับพัสดุชิ้นนี้</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <label className="relative flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-200 overflow-hidden">
+                  {isUploadingImage ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      กำลังอัปโหลด...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={18} />
+                      {imageManagerItem.url ? "อัปโหลดรูปภาพใหม่เพื่อแทนที่" : "เลือกรูปภาพเพื่ออัปโหลด"}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        onChange={handleUploadMaterialImage}
+                        disabled={isUploadingImage}
+                      />
+                    </>
+                  )}
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
