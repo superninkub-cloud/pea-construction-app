@@ -67,46 +67,7 @@ export default function EstimationPage() {
     }
   };
 
-  // Compress image helper
-  const compressImage = (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          let width = img.width;
-          let height = img.height;
-          const MAX = 1200;
-          if (width > height) {
-            if (width > MAX) {
-              height *= MAX / width;
-              width = MAX;
-            }
-          } else {
-            if (height > MAX) {
-              width *= MAX / height;
-              height = MAX;
-            }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx?.drawImage(img, 0, 0, width, height);
-          canvas.toBlob((blob) => {
-            if (blob) {
-              resolve(new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() }));
-            } else {
-              reject(new Error("Canvas to Blob failed"));
-            }
-          }, "image/jpeg", 0.7);
-        };
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
+
 
   const fetchProjects = async () => {
     try {
