@@ -752,21 +752,21 @@ export default function EstimationPage() {
                            <tr key={idx} className="hover:bg-purple-50/50 transition-colors group">
                              <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.code}</td>
                              <td className="px-6 py-4 font-medium text-gray-800 group-hover:text-purple-800">
-                               <button 
+                               <div 
                                  onClick={() => setImageManagerItem({name: item.name, url: materialImages[item.name] || null})}
-                                 className="text-left hover:underline hover:text-purple-700 focus:outline-none transition-colors"
+                                 className="cursor-pointer group/item inline-flex items-center"
                                >
-                                 {item.name}
-                               </button>
-                               {materialImages[item.name] && (
-                                 <button 
-                                   onClick={(e) => { e.stopPropagation(); setPreviewModalImg(materialImages[item.name]); }}
-                                   className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
-                                   title="ดูรูปภาพขยาย"
-                                 >
-                                   <ImageIcon size={12} /> รูป
-                                 </button>
-                               )}
+                                 <span className={`relative transition-colors duration-300 ${materialImages[item.name] ? 'text-purple-700 font-semibold group-hover/item:text-purple-900' : 'text-gray-800 group-hover/item:text-purple-700'}`}>
+                                   {item.name}
+                                   <span className={`absolute -bottom-0.5 left-0 w-full h-0.5 transform scale-x-0 group-hover/item:scale-x-100 transition-transform origin-left duration-300 rounded-full ${materialImages[item.name] ? 'bg-purple-500' : 'bg-gray-400'}`}></span>
+                                 </span>
+                                 {materialImages[item.name] && (
+                                   <span className="relative ml-2 flex h-2 w-2">
+                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                                   </span>
+                                 )}
+                               </div>
                              </td>
                              <td className="px-6 py-4 text-right">
                                <span className="font-bold text-purple-700 text-base bg-purple-50 px-3 py-1 rounded-lg">
@@ -1006,21 +1006,21 @@ export default function EstimationPage() {
                           <tr key={item.originalIdx} className="hover:bg-gray-50 transition-colors">
                             <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
                             <td className="px-5 py-3 font-medium text-gray-800">
-                              <button 
-                                 onClick={() => setImageManagerItem({name: item.name, url: materialImages[item.name] || null})}
-                                 className="text-left hover:underline hover:text-purple-700 focus:outline-none transition-colors"
-                               >
-                                 {item.name}
-                               </button>
-                              {materialImages[item.name] && (
-                                 <button 
-                                   onClick={(e) => { e.stopPropagation(); setPreviewModalImg(materialImages[item.name]); }}
-                                   className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
-                                   title="ดูรูปภาพขยาย"
-                                 >
-                                   <ImageIcon size={12} /> รูป
-                                 </button>
-                               )}
+                              <div 
+                                onClick={() => setImageManagerItem({name: item.name, url: materialImages[item.name] || null})}
+                                className="cursor-pointer group/item inline-flex items-center"
+                              >
+                                <span className={`relative transition-colors duration-300 ${materialImages[item.name] ? 'text-purple-700 font-semibold group-hover/item:text-purple-900' : 'text-gray-800 group-hover/item:text-purple-700'}`}>
+                                  {item.name}
+                                  <span className={`absolute -bottom-0.5 left-0 w-full h-0.5 transform scale-x-0 group-hover/item:scale-x-100 transition-transform origin-left duration-300 rounded-full ${materialImages[item.name] ? 'bg-purple-500' : 'bg-gray-400'}`}></span>
+                                </span>
+                                {materialImages[item.name] && (
+                                  <span className="relative ml-2 flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-5 py-3 text-right">
                               <input 
@@ -1068,21 +1068,21 @@ export default function EstimationPage() {
                       <tr key={idx} className="hover:bg-gray-50 transition-colors bg-purple-50/10">
                         <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
                         <td className="px-5 py-3 font-medium text-gray-800">
-                          <button 
-                             onClick={() => setImageManagerItem({name: item.name, url: materialImages[item.name] || null})}
-                             className="text-left hover:underline hover:text-purple-700 focus:outline-none transition-colors"
-                           >
-                             {item.name}
-                           </button>
-                          {materialImages[item.name] && (
-                               <button 
-                                 onClick={(e) => { e.stopPropagation(); setPreviewModalImg(materialImages[item.name]); }}
-                                 className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
-                                 title="ดูรูปภาพขยาย"
-                               >
-                                 <ImageIcon size={12} /> รูป
-                               </button>
-                             )}
+                          <div 
+                            onClick={() => setImageManagerItem({name: item.name, url: materialImages[item.name] || null})}
+                            className="cursor-pointer group/item inline-flex items-center"
+                          >
+                            <span className={`relative transition-colors duration-300 ${materialImages[item.name] ? 'text-purple-700 font-semibold group-hover/item:text-purple-900' : 'text-gray-800 group-hover/item:text-purple-700'}`}>
+                              {item.name}
+                              <span className={`absolute -bottom-0.5 left-0 w-full h-0.5 transform scale-x-0 group-hover/item:scale-x-100 transition-transform origin-left duration-300 rounded-full ${materialImages[item.name] ? 'bg-purple-500' : 'bg-gray-400'}`}></span>
+                            </span>
+                            {materialImages[item.name] && (
+                              <span className="relative ml-2 flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-5 py-3 text-right font-bold text-purple-700">
                           {item.qty}
