@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import estimationDataRaw from "@/lib/estimationData.json";
 import { Assembly, EstimationItem } from "@/lib/estimationTypes";
-import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText, Zap, ShieldCheck, BarChart2, ArrowRight, Package, Search, Clock } from "lucide-react";
+import { Save, Plus, Trash2, X, ChevronLeft, Edit, List, FileText, Zap, ShieldCheck, BarChart2, ArrowRight, Package, Search, Clock, Image as ImageIcon } from "lucide-react";
+import materialImagesRaw from "@/lib/materialImages.json";
 
 const estimationData = estimationDataRaw as Assembly[];
+const materialImages = materialImagesRaw as Record<string, string>;
 
 type Mode = "SELECT_PROJECT" | "PROJECT_DETAILS" | "EDIT_POLE";
 type Tab = "POLES" | "SUMMARY";
@@ -697,7 +699,18 @@ export default function EstimationPage() {
                          ) : getAggregatedItems().map((item, idx) => (
                            <tr key={idx} className="hover:bg-purple-50/50 transition-colors group">
                              <td className="px-6 py-4 text-gray-500 font-mono text-xs">{item.code}</td>
-                             <td className="px-6 py-4 font-medium text-gray-800 group-hover:text-purple-800">{item.name}</td>
+                             <td className="px-6 py-4 font-medium text-gray-800 group-hover:text-purple-800">
+                               {item.name}
+                               {materialImages[item.code] && (
+                                 <button 
+                                   onClick={() => setPreviewModalImg(materialImages[item.code])}
+                                   className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
+                                   title="ดูรูปภาพพัสดุ"
+                                 >
+                                   <ImageIcon size={12} /> รูป
+                                 </button>
+                               )}
+                             </td>
                              <td className="px-6 py-4 text-right">
                                <span className="font-bold text-purple-700 text-base bg-purple-50 px-3 py-1 rounded-lg">
                                  {item.qty.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}
@@ -935,7 +948,18 @@ export default function EstimationPage() {
                         {groupItems.map((item) => (
                           <tr key={item.originalIdx} className="hover:bg-gray-50 transition-colors">
                             <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
-                            <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
+                            <td className="px-5 py-3 font-medium text-gray-800">
+                              {item.name}
+                              {materialImages[item.code] && (
+                                 <button 
+                                   onClick={() => setPreviewModalImg(materialImages[item.code])}
+                                   className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
+                                   title="ดูรูปภาพพัสดุ"
+                                 >
+                                   <ImageIcon size={12} /> รูป
+                                 </button>
+                               )}
+                            </td>
                             <td className="px-5 py-3 text-right">
                               <input 
                                 type="number" 
@@ -981,7 +1005,18 @@ export default function EstimationPage() {
                     .map((item, idx) => (
                       <tr key={idx} className="hover:bg-gray-50 transition-colors bg-purple-50/10">
                         <td className="px-5 py-3 text-gray-600 font-mono text-xs">{item.code}</td>
-                        <td className="px-5 py-3 font-medium text-gray-800">{item.name}</td>
+                        <td className="px-5 py-3 font-medium text-gray-800">
+                          {item.name}
+                          {materialImages[item.code] && (
+                               <button 
+                                 onClick={() => setPreviewModalImg(materialImages[item.code])}
+                                 className="ml-2 inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-full transition-colors border border-purple-100 shadow-sm align-middle"
+                                 title="ดูรูปภาพพัสดุ"
+                               >
+                                 <ImageIcon size={12} /> รูป
+                               </button>
+                             )}
+                        </td>
                         <td className="px-5 py-3 text-right font-bold text-purple-700">
                           {item.qty}
                         </td>
