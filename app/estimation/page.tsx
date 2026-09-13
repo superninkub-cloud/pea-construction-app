@@ -14,6 +14,7 @@ type Tab = "POLES" | "SUMMARY";
 export default function EstimationPage() {
   const [mode, setMode] = useState<Mode>("SELECT_PROJECT");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
 
   // Project Level
   const [projects, setProjects] = useState<string[]>([]);
@@ -50,6 +51,7 @@ export default function EstimationPage() {
   useEffect(() => {
     const role = sessionStorage.getItem("pea_role");
     if (role === "admin") setIsAdmin(true);
+    if (role === "guest") setIsGuest(true);
     fetchProjects();
     fetchMaterialImages();
   }, []);
@@ -438,9 +440,10 @@ export default function EstimationPage() {
               <span className="flex items-center gap-2 text-sm font-medium text-indigo-700 bg-indigo-50 px-4 py-2 rounded-full"><BarChart2 size={16} /> จัดการโครงการได้อย่างมีประสิทธิภาพ</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+            <div className={`grid grid-cols-1 ${!isGuest ? 'md:grid-cols-2' : ''} gap-8 w-full max-w-4xl`}>
               
               {/* Create New Project Card */}
+              {!isGuest && (
               <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col justify-between h-full hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
                 <div>
                   <div className="flex items-start gap-4 mb-6">
@@ -475,6 +478,7 @@ export default function EstimationPage() {
                   เริ่มสร้างรายการเสา <ArrowRight size={20} />
                 </button>
               </div>
+              )}
 
               {/* Select Existing Project Card */}
               <div className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 h-[450px] flex flex-col hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
@@ -526,7 +530,6 @@ export default function EstimationPage() {
       {/* ---------------- MODE: PROJECT DETAILS ---------------- */}
       {mode === "PROJECT_DETAILS" && (
         <div className="w-full max-w-5xl mx-auto flex flex-col gap-6">
-          {/* Header Section */}
           {/* Header Section */}
           <div className="relative bg-[#f8f9ff] rounded-3xl p-8 border border-purple-100 shadow-sm overflow-hidden">
             {/* Background Pylons */}
@@ -692,14 +695,16 @@ export default function EstimationPage() {
                               <span className="flex items-center gap-1.5 text-xs font-bold text-[#5b21b6] bg-[#f3efff] px-3 py-1.5 rounded-lg">
                                 <Package size={14} /> พัสดุ {pole.items?.length || 0} รายการ
                               </span>
-                              <div className="flex gap-2">
-                                <button onClick={() => handleEditPole(pole)} className="text-blue-500 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors border border-blue-100" title="แก้ไข">
-                                  <Edit size={16} />
-                                </button>
-                                <button onClick={() => handleDeletePole(pole.id, pole.pole_name)} className="text-red-500 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors border border-red-100" title="ลบ">
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
+                              {!isGuest && (
+                                <div className="flex gap-2">
+                                  <button onClick={() => handleEditPole(pole)} className="text-blue-500 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors border border-blue-100" title="แก้ไข">
+                                    <Edit size={16} />
+                                  </button>
+                                  <button onClick={() => handleDeletePole(pole.id, pole.pole_name)} className="text-red-500 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors border border-red-100" title="ลบ">
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1107,7 +1112,7 @@ export default function EstimationPage() {
             </div>
           </div>
 
-          {(isAdmin || true) && (
+          {!isGuest && (
             <div className="flex justify-end mb-10 border-t border-gray-200 pt-6">
               <button
                 onClick={handleSavePole}
@@ -1159,28 +1164,30 @@ export default function EstimationPage() {
                 )}
               </div>
               
-              <div className="flex flex-col gap-3">
-                <label className="relative flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-200 overflow-hidden">
-                  {isUploadingImage ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      กำลังอัปโหลด...
-                    </>
-                  ) : (
-                    <>
-                      <Upload size={18} />
-                      {imageManagerItem.url ? "อัปโหลดรูปภาพใหม่เพื่อแทนที่" : "เลือกรูปภาพเพื่ออัปโหลด"}
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                        onChange={handleUploadMaterialImage}
-                        disabled={isUploadingImage}
-                      />
-                    </>
-                  )}
-                </label>
-              </div>
+              {!isGuest && (
+                <div className="flex flex-col gap-3">
+                  <label className="relative flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-xl cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-200 overflow-hidden">
+                    {isUploadingImage ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        กำลังอัปโหลด...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={18} />
+                        {imageManagerItem.url ? "อัปโหลดรูปภาพใหม่เพื่อแทนที่" : "เลือกรูปภาพเพื่ออัปโหลด"}
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                          onChange={handleUploadMaterialImage}
+                          disabled={isUploadingImage}
+                        />
+                      </>
+                    )}
+                  </label>
+                </div>
+              )}
             </div>
           </div>
         </div>
