@@ -29,6 +29,7 @@ export default function EstimationPage() {
   const [poleType, setPoleType] = useState<string>("เสาเดี่ยว");
   const [selectedAssemblies, setSelectedAssemblies] = useState<string[]>([]);
   const [assemblyToAdd, setAssemblyToAdd] = useState<string>("");
+  const [assemblyQuantity, setAssemblyQuantity] = useState<number>(1);
   const [items, setItems] = useState<EstimationItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -104,6 +105,7 @@ export default function EstimationPage() {
     setPoleType("เสาเดี่ยว");
     setSelectedAssemblies([]);
     setAssemblyToAdd("");
+    setAssemblyQuantity(1);
     setItems([]);
     setImage1(null);
     setImage2(null);
@@ -217,26 +219,49 @@ export default function EstimationPage() {
   };
 
   const handleAddAssembly = () => {
-    if (!assemblyToAdd) return;
+    if (!assemblyToAdd || assemblyQuantity < 1) return;
     const found = estimationData.find(a => a.assemblyName === assemblyToAdd);
     if (found) {
       const newItems = [...items];
       found.items.forEach(item => {
         const existingIdx = newItems.findIndex(i => i.code === item.code && i.assemblyGroup === found.assemblyName);
         if (existingIdx >= 0) {
-          newItems[existingIdx].qty += Number(item.qty);
+          newItems[existingIdx].qty += Number(item.qty) * assemblyQuantity;
         } else {
-          newItems.push({ ...item, qty: Number(item.qty), assemblyGroup: found.assemblyName });
+          newItems.push({ ...item, qty: Number(item.qty) * assemblyQuantity, assemblyGroup: found.assemblyName });
         }
       });
       setItems(newItems);
-      setSelectedAssemblies([...selectedAssemblies, assemblyToAdd]);
+      
+      const newSelected = [...selectedAssemblies];
+      for (let i = 0; i < assemblyQuantity; i++) {
+        newSelected.push(assemblyToAdd);
+      }
+      setSelectedAssemblies(newSelected);
+      
       setAssemblyToAdd("");
+      setAssemblyQuantity(1);
     }
   };
 
   const handleRemoveAssembly = (idxToRemove: number, asmName: string) => {
-    const newItems = items.filter(item => item.assemblyGroup !== asmName);
+    const found = estimationData.find(a => a.assemblyName === asmName);
+    let newItems = [...items];
+    
+    if (found) {
+        found.items.forEach(item => {
+           const existingIdx = newItems.findIndex(i => i.code === item.code && i.assemblyGroup === asmName);
+           if (existingIdx >= 0) {
+               newItems[existingIdx].qty -= Number(item.qty);
+               newItems[existingIdx].qty = Math.max(0, newItems[existingIdx].qty);
+           }
+        });
+        
+        newItems = newItems.filter(i => !(i.assemblyGroup === asmName && i.qty <= 0));
+    } else {
+        newItems = newItems.filter(item => item.assemblyGroup !== asmName);
+    }
+    
     setItems(newItems);
 
     const newAsmList = [...selectedAssemblies];
@@ -749,9 +774,20 @@ export default function EstimationPage() {
                     <option key={idx} value={asm.assemblyName}>{asm.assemblyName}</option>
                   ))}
                 </select>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-500 hidden sm:block">จำนวน</span>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    value={assemblyQuantity}
+                    onChange={e => setAssemblyQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-16 sm:w-20 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none text-center font-bold text-purple-700"
+                  />
+                  <span className="text-sm font-semibold text-gray-500 hidden sm:block mr-1">ชุด</span>
+                </div>
                 <button 
                   onClick={handleAddAssembly}
-                  disabled={!assemblyToAdd}
+                  disabled={!assemblyToAdd || assemblyQuantity < 1}
                   className="bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Plus size={18} /> เพิ่ม
