@@ -43,6 +43,10 @@ export default function EstimationPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [poleViewMode, setPoleViewMode] = useState<"GROUPED" | "AGGREGATED">("GROUPED");
   
+  // Print Mode State
+  const [isPrintMode, setIsPrintMode] = useState(false);
+  const [selectedForPrint, setSelectedForPrint] = useState<number[]>([]);
+  
   // Material Images State
   const [materialImages, setMaterialImages] = useState<Record<string, string>>({});
   const [imageManagerItem, setImageManagerItem] = useState<{name: string, url: string | null} | null>(null);
@@ -653,18 +657,59 @@ export default function EstimationPage() {
                           onChange={(e) => setSearchTerm(e.target.value)}
                         />
                       </div>
-                      <button 
-                        onClick={() => window.print()}
-                        className="bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-gray-50 text-sm font-bold shadow-sm transition-all active:scale-95 whitespace-nowrap"
-                      >
-                        <FileText size={18} strokeWidth={2.5} /> พิมพ์รายการ (PDF)
-                      </button>
-                      <button 
-                        onClick={handleAddNewPole}
-                        className="bg-[#5b21b6] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-[#4c1d95] text-sm font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap"
-                      >
-                        <Plus size={18} strokeWidth={2.5} /> เพิ่มเสาไฟใหม่
-                      </button>
+                      {isPrintMode ? (
+                        <>
+                          <button 
+                            onClick={() => {
+                              const filteredPoles = projectPoles.filter(p => p.pole_name.toLowerCase().includes(searchTerm.toLowerCase()));
+                              if (selectedForPrint.length === filteredPoles.length && filteredPoles.length > 0) {
+                                setSelectedForPrint([]);
+                              } else {
+                                setSelectedForPrint(filteredPoles.map(p => p.id));
+                              }
+                            }}
+                            className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all active:scale-95 whitespace-nowrap"
+                          >
+                            {selectedForPrint.length === projectPoles.filter(p => p.pole_name.toLowerCase().includes(searchTerm.toLowerCase())).length && projectPoles.filter(p => p.pole_name.toLowerCase().includes(searchTerm.toLowerCase())).length > 0 ? "ไม่เลือกเลย" : "เลือกทั้งหมด"}
+                          </button>
+                          <button 
+                            onClick={() => {
+                              if (selectedForPrint.length === 0) {
+                                alert("กรุณาเลือกเสาไฟที่ต้องการพิมพ์อย่างน้อย 1 ต้น");
+                                return;
+                              }
+                              window.print();
+                            }}
+                            className="bg-[#5b21b6] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-[#4c1d95] text-sm font-bold shadow-md transition-all active:scale-95 whitespace-nowrap"
+                          >
+                            <FileText size={18} strokeWidth={2.5} /> พิมพ์ที่เลือก ({selectedForPrint.length})
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setIsPrintMode(false);
+                              setSelectedForPrint([]);
+                            }}
+                            className="bg-red-50 text-red-600 px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-red-100 transition-all active:scale-95 whitespace-nowrap"
+                          >
+                            ยกเลิก
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button 
+                            onClick={() => setIsPrintMode(true)}
+                            className="bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-gray-50 text-sm font-bold shadow-sm transition-all active:scale-95 whitespace-nowrap"
+                          >
+                            <FileText size={18} strokeWidth={2.5} /> พิมพ์รายการ (PDF)
+                          </button>
+                          <button 
+                            onClick={handleAddNewPole}
+                            className="bg-[#5b21b6] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-[#4c1d95] text-sm font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap"
+                          >
+                            <Plus size={18} strokeWidth={2.5} /> เพิ่มเสาไฟใหม่
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                   
@@ -684,8 +729,22 @@ export default function EstimationPage() {
                   ) : (
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-8 gap-y-5 relative">
                       {projectPoles.filter(p => p.pole_name.toLowerCase().includes(searchTerm.toLowerCase())).map(pole => (
-                        <div key={pole.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:border-purple-200 hover:shadow-md transition-all flex gap-4 group">
-                          <div className="bg-[#f3efff] text-[#5b21b6] p-4 rounded-xl h-fit flex-shrink-0">
+                        <div key={pole.id} className={`bg-white p-5 rounded-2xl border shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all flex gap-4 group relative overflow-hidden ${isPrintMode ? 'cursor-pointer hover:border-[#5b21b6]' : 'hover:border-purple-200 hover:shadow-md border-gray-100'} ${isPrintMode && selectedForPrint.includes(pole.id) ? 'border-[#5b21b6] ring-1 ring-[#5b21b6]' : ''}`} onClick={() => {
+                          if (isPrintMode) {
+                            setSelectedForPrint(prev => prev.includes(pole.id) ? prev.filter(id => id !== pole.id) : [...prev, pole.id]);
+                          }
+                        }}>
+                          {isPrintMode && (
+                            <div className="absolute top-4 right-4 z-10">
+                              <input 
+                                type="checkbox" 
+                                checked={selectedForPrint.includes(pole.id)}
+                                onChange={() => {}} 
+                                className="w-5 h-5 rounded border-gray-300 text-[#5b21b6] focus:ring-[#5b21b6] cursor-pointer"
+                              />
+                            </div>
+                          )}
+                          <div className={`p-4 rounded-xl h-fit flex-shrink-0 transition-colors ${isPrintMode && selectedForPrint.includes(pole.id) ? 'bg-[#5b21b6] text-white' : 'bg-[#f3efff] text-[#5b21b6]'}`}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L12 22"/><path d="M8 22L16 22"/><path d="M10 2L14 2"/><path d="M12 7L6 10"/><path d="M12 7L18 10"/><path d="M12 13L4 17"/><path d="M12 13L20 17"/></svg>
                           </div>
                           <div className="flex-1 flex flex-col">
@@ -1225,15 +1284,16 @@ export default function EstimationPage() {
 
       {/* --- PRINTABLE VIEW --- */}
       {mode === "PROJECT_DETAILS" && projectPoles.length > 0 && (
-        <div className="hidden print:block w-full text-black bg-white">
-          {projectPoles.map((pole, index) => (
-            <div key={pole.id} className="break-after-page w-full min-h-[297mm] py-8 px-4 flex flex-col">
-              <div className="text-center mb-6">
-                <h1 className="text-xl font-bold mb-1">รายการประมาณการพัสดุ - ต้น {pole.pole_name}</h1>
-                <p className="text-xs text-gray-700">โครงการ: {selectedProject} | ชนิดเสาและชุดประกอบ: {pole.assembly_type}</p>
+        <div className="hidden print:block w-full text-black bg-white font-sans">
+          {(isPrintMode && selectedForPrint.length > 0 ? projectPoles.filter(p => selectedForPrint.includes(p.id)) : projectPoles).map((pole, index) => (
+            <div key={pole.id} className="break-after-page w-full py-8 px-4 flex flex-col items-center">
+              <div className="text-center mb-6 w-full border-b-2 border-black pb-4 max-w-4xl mx-auto">
+                <h1 className="text-2xl font-black mb-1 text-black">รายการประมาณการพัสดุ</h1>
+                <h2 className="text-xl font-bold mb-2 text-black">เสาต้นที่: {pole.pole_name}</h2>
+                <p className="text-sm font-bold text-gray-800">โครงการ: {selectedProject} | ชนิดเสาและชุดประกอบ: {pole.assembly_type}</p>
               </div>
               
-              <table className="w-full border-collapse border border-gray-800 text-[11px] mb-6">
+              <table className="w-full border-collapse border border-gray-800 text-[12px] mb-6 max-w-4xl mx-auto">
                 <thead>
                   <tr className="bg-gray-200 text-gray-900">
                     <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-12">ลำดับ</th>
