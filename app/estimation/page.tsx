@@ -801,9 +801,17 @@ export default function EstimationPage() {
                 <div className="animation-fade-in flex flex-col h-full">
                    <div className="flex justify-between items-center mb-6">
                      <h2 className="text-xl font-bold text-gray-800">สรุปจำนวนวัสดุทั้งหมดที่ต้องใช้ในโครงการ</h2>
-                     <span className="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                       รวมจาก {totalPhysicalPoles} ต้น
-                     </span>
+                     <div className="flex items-center gap-4">
+                       <span className="bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">
+                         รวมจาก {totalPhysicalPoles} ต้น
+                       </span>
+                       <button 
+                         onClick={() => window.print()}
+                         className="bg-[#5b21b6] text-white px-5 py-1.5 rounded-full flex items-center gap-2 hover:bg-[#4c1d95] text-sm font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap"
+                       >
+                         <FileText size={16} strokeWidth={2.5} /> พิมพ์ใบสรุป (PDF)
+                       </button>
+                     </div>
                    </div>
                    <div className="bg-white rounded-2xl border-2 border-gray-50 overflow-hidden shadow-sm flex-1">
                      <table className="w-full text-sm text-left">
@@ -1285,7 +1293,7 @@ export default function EstimationPage() {
       {/* --- PRINTABLE VIEW --- */}
       {mode === "PROJECT_DETAILS" && projectPoles.length > 0 && (
         <div className="hidden print:block w-full text-black bg-white font-sans">
-          {(isPrintMode && selectedForPrint.length > 0 ? projectPoles.filter(p => selectedForPrint.includes(p.id)) : projectPoles).map((pole, index) => {
+          {activeTab === "POLES" && (isPrintMode && selectedForPrint.length > 0 ? projectPoles.filter(p => selectedForPrint.includes(p.id)) : projectPoles).map((pole, index) => {
             const itemCount = pole.items?.length || 0;
             
             // Dynamic styling based on item count to fit 1 page perfectly
@@ -1358,6 +1366,44 @@ export default function EstimationPage() {
               </div>
             );
           })}
+
+          {activeTab === "SUMMARY" && (
+            <div className="w-full block pt-2 pb-4">
+              <div className="text-center w-full border-b-2 border-black pb-4 mb-6">
+                <h1 className="text-2xl font-bold text-black mb-2">สรุปรายการวัสดุรวม</h1>
+                <p className="text-lg">โครงการ: {selectedProject}</p>
+                <p className="text-base mt-1 text-gray-700">รวมปริมาณพัสดุจากเสาไฟทั้งหมด {totalPhysicalPoles} ต้น</p>
+              </div>
+              <table className="w-full border-collapse border border-gray-800 text-[11px] leading-relaxed mb-6">
+                <thead>
+                  <tr className="bg-gray-200 text-gray-900">
+                    <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-12">ลำดับ</th>
+                    <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-24">รหัสพัสดุ</th>
+                    <th className="border border-gray-800 px-2 py-1.5 text-left font-bold">ชื่อพัสดุ</th>
+                    <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-20">จำนวนรวม</th>
+                    <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-16">หน่วย</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getAggregatedItems().length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="border border-gray-800 px-2 py-4 text-center">ไม่มีรายการวัสดุ</td>
+                    </tr>
+                  ) : (
+                    getAggregatedItems().map((item, i) => (
+                      <tr key={i} className="border-b border-gray-800">
+                        <td className="border-x border-gray-800 px-2 py-1 text-center">{i + 1}</td>
+                        <td className="border-x border-gray-800 px-2 py-1 text-center font-mono">{item.code}</td>
+                        <td className="border-x border-gray-800 px-2 py-1 break-words">{item.name}</td>
+                        <td className="border-x border-gray-800 px-2 py-1 text-center font-bold">{item.qty.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}</td>
+                        <td className="border-x border-gray-800 px-2 py-1 text-center">{item.unit}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
