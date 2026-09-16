@@ -719,10 +719,21 @@ body {
   .print-only { display: block !important; }
   .no-print { display: none !important; }
   .sidebar, .topbar, .btn, .mobile-bottom-nav, .mobile-menu-btn { display: none !important; }
-  .main-wrapper { margin: 0; padding: 0; }
-  .content-area { padding: 0; overflow: visible; background: white; }
+  
+  /* Fix print truncation by forcing block layout and auto height on all wrappers */
+  html, body, .app-layout, .main-content, .content-area, .main-wrapper {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
   .card { box-shadow: none; border: none; padding: 0; margin-bottom: 16px; page-break-inside: avoid; }
-  body { background: white; }
   
   /* Make sure background colors and borders print */
   * {
