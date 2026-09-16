@@ -1285,52 +1285,79 @@ export default function EstimationPage() {
       {/* --- PRINTABLE VIEW --- */}
       {mode === "PROJECT_DETAILS" && projectPoles.length > 0 && (
         <div className="hidden print:block w-full text-black bg-white font-sans">
-          {(isPrintMode && selectedForPrint.length > 0 ? projectPoles.filter(p => selectedForPrint.includes(p.id)) : projectPoles).map((pole, index) => (
-            <div key={pole.id} className="break-after-page w-full block pt-2 pb-4">
-              <div className="text-center mb-2 w-full border-b-2 border-black pb-2">
-                <h1 className="text-xl font-bold text-black">เสาต้นที่ : {pole.pole_name}</h1>
-              </div>
-              
-              <table className="w-full border-collapse border border-gray-800 text-[9px] leading-[1.1] mb-2">
-                <thead>
-                  <tr className="bg-gray-200 text-gray-900">
-                    <th className="border border-gray-800 px-1 py-0.5 text-center font-bold w-8">ลำดับ</th>
-                    <th className="border border-gray-800 px-1 py-0.5 text-center font-bold w-16">รหัสพัสดุ</th>
-                    <th className="border border-gray-800 px-1 py-0.5 text-left font-bold">รายการ</th>
-                    <th className="border border-gray-800 px-1 py-0.5 text-center font-bold w-10">จำนวน</th>
-                    <th className="border border-gray-800 px-1 py-0.5 text-center font-bold w-10">หน่วย</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pole.items && Array.isArray(pole.items) && pole.items.length > 0 ? (
-                    pole.items.map((item: any, i: number) => (
-                      <tr key={i} className="border-b border-gray-800">
-                        <td className="border-x border-gray-800 px-1 py-0 text-center">{i + 1}</td>
-                        <td className="border-x border-gray-800 px-1 py-0 text-center">{item.code}</td>
-                        <td className="border-x border-gray-800 px-1 py-0 break-words">{item.name}</td>
-                        <td className="border-x border-gray-800 px-1 py-0 text-center font-bold">{item.qty}</td>
-                        <td className="border-x border-gray-800 px-1 py-0 text-center">{item.unit}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="border border-gray-800 px-1 py-1 text-center">ไม่มีรายการพัสดุ</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          {(isPrintMode && selectedForPrint.length > 0 ? projectPoles.filter(p => selectedForPrint.includes(p.id)) : projectPoles).map((pole, index) => {
+            const itemCount = pole.items?.length || 0;
+            
+            // Dynamic styling based on item count to fit 1 page perfectly
+            let s = {
+              table: "text-[9px] leading-[1.1]", th: "px-1 py-0.5", td: "px-1 py-0", 
+              imgCont: "mt-2 pt-2 h-32", hdr: "mb-2", hdrText: "text-lg", gap: "mb-2"
+            };
+            
+            if (itemCount <= 25) {
+              s = {
+                table: "text-sm leading-relaxed", th: "px-2 py-2", td: "px-2 py-1.5", 
+                imgCont: "mt-8 pt-4 h-56", hdr: "mb-6", hdrText: "text-3xl", gap: "mb-6"
+              };
+            } else if (itemCount <= 40) {
+              s = {
+                table: "text-xs leading-snug", th: "px-2 py-1.5", td: "px-2 py-1", 
+                imgCont: "mt-6 pt-4 h-48", hdr: "mb-4", hdrText: "text-2xl", gap: "mb-4"
+              };
+            } else if (itemCount <= 55) {
+              s = {
+                table: "text-[11px] leading-tight", th: "px-1.5 py-1", td: "px-1.5 py-0.5", 
+                imgCont: "mt-4 pt-3 h-40", hdr: "mb-3", hdrText: "text-xl", gap: "mb-3"
+              };
+            }
 
-              {(pole.image1_url || pole.image2_url) && (
-                <div className="mt-2 pt-2 border-t border-gray-300">
-                  <h4 className="font-bold text-[10px] mb-1 text-center">รูปภาพประกอบ</h4>
-                  <div className="flex gap-2 h-32 justify-center">
-                    {pole.image1_url && <img src={pole.image1_url} className="h-full object-contain max-w-[48%] border border-gray-400 p-0.5" />}
-                    {pole.image2_url && <img src={pole.image2_url} className="h-full object-contain max-w-[48%] border border-gray-400 p-0.5" />}
-                  </div>
+            return (
+              <div key={pole.id} className="break-after-page w-full block pt-2 pb-4">
+                <div className={`text-center w-full border-b-2 border-black pb-2 ${s.hdr}`}>
+                  <h1 className={`${s.hdrText} font-bold text-black`}>เสาต้นที่ : {pole.pole_name}</h1>
                 </div>
-              )}
-            </div>
-          ))}
+                
+                <table className={`w-full border-collapse border border-gray-800 ${s.table} ${s.gap}`}>
+                  <thead>
+                    <tr className="bg-gray-200 text-gray-900">
+                      <th className={`border border-gray-800 text-center font-bold w-12 ${s.th}`}>ลำดับ</th>
+                      <th className={`border border-gray-800 text-center font-bold w-24 ${s.th}`}>รหัสพัสดุ</th>
+                      <th className={`border border-gray-800 text-left font-bold ${s.th}`}>รายการ</th>
+                      <th className={`border border-gray-800 text-center font-bold w-16 ${s.th}`}>จำนวน</th>
+                      <th className={`border border-gray-800 text-center font-bold w-16 ${s.th}`}>หน่วย</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pole.items && Array.isArray(pole.items) && pole.items.length > 0 ? (
+                      pole.items.map((item: any, i: number) => (
+                        <tr key={i} className="border-b border-gray-800">
+                          <td className={`border-x border-gray-800 text-center ${s.td}`}>{i + 1}</td>
+                          <td className={`border-x border-gray-800 text-center ${s.td}`}>{item.code}</td>
+                          <td className={`border-x border-gray-800 break-words ${s.td}`}>{item.name}</td>
+                          <td className={`border-x border-gray-800 text-center font-bold ${s.td}`}>{item.qty}</td>
+                          <td className={`border-x border-gray-800 text-center ${s.td}`}>{item.unit}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className={`border border-gray-800 text-center py-4 ${s.td}`}>ไม่มีรายการพัสดุ</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+
+                {(pole.image1_url || pole.image2_url) && (
+                  <div className={`border-t border-gray-300 ${s.imgCont}`}>
+                    <h4 className="font-bold text-xs mb-2 text-center">รูปภาพประกอบ</h4>
+                    <div className="flex gap-4 h-full justify-center pb-4">
+                      {pole.image1_url && <img src={pole.image1_url} className="h-full object-contain max-w-[48%] border border-gray-400 p-1" />}
+                      {pole.image2_url && <img src={pole.image2_url} className="h-full object-contain max-w-[48%] border border-gray-400 p-1" />}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
