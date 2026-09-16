@@ -505,85 +505,126 @@ export default function MyTasksDashboard() {
                   </h2>
                   <span className="text-base font-bold text-purple-200 bg-purple-800/50 px-3 py-1 rounded-lg border border-purple-700">{trackedTasks.length} งาน</span>
                 </div>
-                <div className="divide-y divide-purple-100">
-                  {trackedTasks.map(task => (
-                    <div key={task.id} className="p-4 md:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white/60 hover:bg-white transition-colors">
-                      <div className="flex gap-4 items-start flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-sm shrink-0">
-                          <AlertCircle size={24} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-bold text-slate-800 text-base flex flex-wrap items-center gap-2">
-                            <span className="truncate whitespace-normal">{task.title}</span>
-                            <span className="text-xs font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
-                              รับผิดชอบ: {task.assigneeName || 'ไม่ระบุ'}
-                            </span>
-                          </h3>
-                          <div className="flex flex-col mt-2">
-                            <span className="text-[11px] text-slate-400 font-medium ml-0.5">วันที่มอบหมาย</span>
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-                              <CalendarDays size={13} className="shrink-0" />
-                              <span className="truncate whitespace-normal">{formatThaiDateShort(task.location)}</span>
+                <div className="flex flex-col gap-6 p-4 md:p-6 bg-slate-50/50">
+                  {[
+                    { 
+                      id: "not_finished",
+                      title: "งานที่ยังไม่เสร็จ / มีปัญหา", 
+                      tasks: trackedTasks.filter(t => t.status === 'not_started' || t.status === 'issue'),
+                      containerClass: "border-rose-200 shadow-sm",
+                      headerClass: "bg-rose-50 border-rose-100 text-rose-800",
+                      badgeClass: "bg-rose-100 text-rose-700",
+                      dividerClass: "divide-rose-100"
+                    },
+                    { 
+                      id: "in_progress",
+                      title: "งานที่กำลังทำอยู่", 
+                      tasks: trackedTasks.filter(t => t.status === 'in_progress'),
+                      containerClass: "border-amber-200 shadow-sm",
+                      headerClass: "bg-amber-50 border-amber-100 text-amber-800",
+                      badgeClass: "bg-amber-100 text-amber-700",
+                      dividerClass: "divide-amber-100"
+                    },
+                    { 
+                      id: "completed",
+                      title: "งานที่เสร็จแล้ว", 
+                      tasks: trackedTasks.filter(t => t.status === 'completed' || t.status === 'waiting_for_review'),
+                      containerClass: "border-emerald-200 shadow-sm",
+                      headerClass: "bg-emerald-50 border-emerald-100 text-emerald-800",
+                      badgeClass: "bg-emerald-100 text-emerald-700",
+                      dividerClass: "divide-emerald-100"
+                    }
+                  ].filter(g => g.tasks.length > 0).map(group => (
+                    <div key={group.id} className={`bg-white rounded-2xl border ${group.containerClass} overflow-hidden`}>
+                      <div className={`px-5 py-3 border-b font-bold flex justify-between items-center ${group.headerClass}`}>
+                        <span className="flex items-center gap-2">{group.title}</span>
+                        <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold ${group.badgeClass}`}>{group.tasks.length} งาน</span>
+                      </div>
+                      <div className={`divide-y ${group.dividerClass}`}>
+                        {group.tasks.map(task => (
+                          <div key={task.id} className="p-4 md:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white/60 hover:bg-white transition-colors">
+                            <div className="flex gap-4 items-start flex-1 min-w-0">
+                              <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center shadow-sm shrink-0 ${group.id === 'completed' ? 'bg-emerald-500' : group.id === 'in_progress' ? 'bg-amber-500' : 'bg-rose-500'}`}>
+                                {group.id === 'completed' ? <CheckCircle size={24} /> : group.id === 'in_progress' ? <AlertCircle size={24} /> : <AlertCircle size={24} />}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-bold text-slate-800 text-base flex flex-wrap items-center gap-2">
+                                  <span className="truncate whitespace-normal">{task.title}</span>
+                                  <span className="text-xs font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
+                                    รับผิดชอบ: {task.assigneeName || 'ไม่ระบุ'}
+                                  </span>
+                                </h3>
+                                <div className="flex flex-col mt-2">
+                                  <span className="text-[11px] text-slate-400 font-medium ml-0.5">วันที่มอบหมาย</span>
+                                  <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                                    <CalendarDays size={13} className="shrink-0" />
+                                    <span className="truncate whitespace-normal">{formatThaiDateShort(task.location)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between xl:justify-end gap-4 md:gap-6 w-full xl:w-auto mt-2 xl:mt-0 shrink-0">
+                              <div className="flex flex-col">
+                                <span className="text-[11px] text-rose-400 font-medium ml-1">กำหนดเสร็จ</span>
+                                <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-md whitespace-nowrap shrink-0 mt-0.5">
+                                  <CalendarIcon size={13} className="shrink-0" />
+                                  <span>{formatThaiDateShort(task.time)}</span>
+                                </div>
+                              </div>
+                              {getStatusBadge(task.status)}
+                              {task.note && (
+                                <button onClick={() => setShowHistoryModal(task)} className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-2 py-1 rounded-md text-xs font-medium transition-colors">
+                                  <List size={12} /> ประวัติ
+                                </button>
+                              )}
+                              
+                              {isManagerMode ? (
+                                <div className="flex items-center gap-2">
+                                  <button 
+                                    onClick={() => {
+                                      setEditTaskData(task);
+                                      setShowEditModal(task.id);
+                                    }}
+                                    className="flex items-center gap-1 text-indigo-500 hover:bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                                  >
+                                    <Edit3 size={14} /> แก้ไข
+                                  </button>
+                                  <button 
+                                    onClick={() => handleToggleTrack(task.id)} 
+                                    className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                                  >
+                                    เลิกติดตาม
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteTask(task.id)} 
+                                    className="flex items-center gap-1 text-rose-500 hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                                  >
+                                    <Trash2 size={14} /> ลบ
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  {task.status === 'in_progress' && (
+                                    <button onClick={() => setShowUpdateModal(task.id)} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
+                                      <Edit3 size={16} /> อัปเดตงาน
+                                    </button>
+                                  )}
+                                  {task.status === 'not_started' && (
+                                    <button onClick={() => handleStartTask(task.id)} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
+                                      <Play size={16} fill="currentColor" /> เริ่มงาน
+                                    </button>
+                                  )}
+                                </>
+                              )}
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between xl:justify-end gap-4 md:gap-6 w-full xl:w-auto mt-2 xl:mt-0 shrink-0">
-                        <div className="flex flex-col">
-                          <span className="text-[11px] text-rose-400 font-medium ml-1">กำหนดเสร็จ</span>
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-md whitespace-nowrap shrink-0 mt-0.5">
-                            <CalendarIcon size={13} className="shrink-0" />
-                            <span>{formatThaiDateShort(task.time)}</span>
-                          </div>
-                        </div>
-                        {getStatusBadge(task.status)}
-                        {task.note && (
-                          <button onClick={() => setShowHistoryModal(task)} className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-2 py-1 rounded-md text-xs font-medium transition-colors">
-                            <List size={12} /> ประวัติ
-                          </button>
-                        )}
-                        
-                        {isManagerMode ? (
-                          <div className="flex items-center gap-2">
-                            <button 
-                              onClick={() => {
-                                setEditTaskData(task);
-                                setShowEditModal(task.id);
-                              }}
-                              className="flex items-center gap-1 text-indigo-500 hover:bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                            >
-                              <Edit3 size={14} /> แก้ไข
-                            </button>
-                            <button 
-                              onClick={() => handleToggleTrack(task.id)} 
-                              className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                            >
-                              เลิกติดตาม
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteTask(task.id)} 
-                              className="flex items-center gap-1 text-rose-500 hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                            >
-                              <Trash2 size={14} /> ลบ
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            {task.status === 'in_progress' && (
-                              <button onClick={() => setShowUpdateModal(task.id)} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
-                                <Edit3 size={16} /> อัปเดตงาน
-                              </button>
-                            )}
-                            {task.status === 'not_started' && (
-                              <button onClick={() => handleStartTask(task.id)} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
-                                <Play size={16} fill="currentColor" /> เริ่มงาน
-                              </button>
-                            )}
-                          </>
-                        )}
+                        ))}
                       </div>
                     </div>
                   ))}
+                  {trackedTasks.length === 0 && (
+                    <div className="py-8 text-center text-slate-400 font-medium">ไม่มีงานที่กำลังติดตาม</div>
+                  )}
                 </div>
               </div>
             )}
