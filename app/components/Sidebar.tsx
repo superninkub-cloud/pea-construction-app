@@ -59,12 +59,10 @@ export default function Sidebar() {
         <SectionHeader id="main" title="หน้าหลัก" isFirst={true} />
         {expanded.main && (
           <div onClick={closeSidebar}>
-            {userRole === 'admin' && (
               <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`}>
                 <LayoutDashboard size={20} />
                 <span>Dashboard งานก่อสร้าง</span>
               </Link>
-            )}
             <Link href="/update" className={`nav-item ${pathname === "/update" ? "active" : ""}`}>
               <FileEdit size={20} />
               <span>อัปเดตสถานะงาน</span>
