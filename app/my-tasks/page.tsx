@@ -56,6 +56,44 @@ const formatThaiDateShort = (dateString: string) => {
   return `${day} ${month} ${year}`;
 };
 
+const isTaskOverdue = (dateString: string) => {
+  if (!dateString || dateString === 'วันนี้' || dateString === 'พรุ่งนี้') return false;
+  
+  const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const fullMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  
+  let d = new Date(dateString);
+  if (isNaN(d.getTime())) {
+    const match = dateString.trim().match(/^(\d{1,2})\s+(.+?)\s+(\d{2}|\d{4})$/);
+    if (match) {
+      const day = parseInt(match[1], 10);
+      const monthStr = match[2];
+      let year = parseInt(match[3], 10);
+      if (year < 100) year += 2500;
+      year -= 543;
+      
+      let monthIndex = months.findIndex(m => m === monthStr);
+      if (monthIndex === -1) {
+        monthIndex = fullMonths.findIndex(m => m === monthStr);
+      }
+      
+      if (monthIndex !== -1) {
+        d = new Date(year, monthIndex, day, 23, 59, 59);
+      }
+    }
+  } else {
+    if (!dateString.includes('T')) {
+      d.setHours(23, 59, 59, 999);
+    }
+  }
+  
+  if (!isNaN(d.getTime())) {
+    return d.getTime() < new Date().getTime();
+  }
+  
+  return false;
+};
+
 export default function MyTasksDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isManagerMode, setIsManagerMode] = useState(false);
@@ -509,8 +547,11 @@ export default function MyTasksDashboard() {
                   {[
                     { 
                       id: "not_finished",
-                      title: "งานที่ยังไม่เสร็จ / มีปัญหา", 
-                      tasks: trackedTasks.filter(t => t.status === 'not_started' || t.status === 'issue'),
+                      title: "งานที่ยังไม่เสร็จ / มีปัญหา / เลยกำหนด", 
+                      tasks: trackedTasks.filter(t => 
+                        (t.status === 'not_started' || t.status === 'issue') || 
+                        (t.status === 'in_progress' && isTaskOverdue(t.time))
+                      ),
                       containerClass: "border-rose-200 shadow-sm",
                       headerClass: "bg-rose-50 border-rose-100 text-rose-800",
                       badgeClass: "bg-rose-100 text-rose-700",
@@ -519,7 +560,7 @@ export default function MyTasksDashboard() {
                     { 
                       id: "in_progress",
                       title: "งานที่กำลังทำอยู่", 
-                      tasks: trackedTasks.filter(t => t.status === 'in_progress'),
+                      tasks: trackedTasks.filter(t => t.status === 'in_progress' && !isTaskOverdue(t.time)),
                       containerClass: "border-amber-200 shadow-sm",
                       headerClass: "bg-amber-50 border-amber-100 text-amber-800",
                       badgeClass: "bg-amber-100 text-amber-700",
