@@ -1,4 +1,4 @@
-export type TaskStatus = 'not_started' | 'in_progress' | 'completed' | 'waiting_for_review';
+export type TaskStatus = 'not_started' | 'in_progress' | 'completed' | 'waiting_for_review' | 'issue';
 export type TaskPriority = 'normal' | 'high' | 'urgent';
 
 export interface Task {
