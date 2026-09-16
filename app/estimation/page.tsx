@@ -415,8 +415,8 @@ export default function EstimationPage() {
   };
 
   return (
-    <div className="p-4 max-w-5xl mx-auto pb-24 animation-fade-in">
-      
+    <div className="p-4 max-w-5xl mx-auto pb-24 animation-fade-in print:p-0 print:m-0 print:max-w-none print:w-full">
+      <div className="print:hidden">
       {/* ---------------- MODE: SELECT PROJECT ---------------- */}
       {mode === "SELECT_PROJECT" && (
         <div className="min-h-[80vh] flex flex-col items-center justify-center py-10 relative">
@@ -653,6 +653,12 @@ export default function EstimationPage() {
                           onChange={(e) => setSearchTerm(e.target.value)}
                         />
                       </div>
+                      <button 
+                        onClick={() => window.print()}
+                        className="bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-gray-50 text-sm font-bold shadow-sm transition-all active:scale-95 whitespace-nowrap"
+                      >
+                        <FileText size={18} strokeWidth={2.5} /> พิมพ์รายการ (PDF)
+                      </button>
                       <button 
                         onClick={handleAddNewPole}
                         className="bg-[#5b21b6] text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-[#4c1d95] text-sm font-bold shadow-md shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap"
@@ -1213,6 +1219,60 @@ export default function EstimationPage() {
               onClick={(e) => e.stopPropagation()}
             />
           </div>
+        </div>
+      )}
+      </div>
+
+      {/* --- PRINTABLE VIEW --- */}
+      {mode === "PROJECT_DETAILS" && projectPoles.length > 0 && (
+        <div className="hidden print:block w-full text-black bg-white">
+          {projectPoles.map((pole, index) => (
+            <div key={pole.id} className="break-after-page w-full min-h-[297mm] py-8 px-4 flex flex-col">
+              <div className="text-center mb-6">
+                <h1 className="text-xl font-bold mb-1">รายการประมาณการพัสดุ - ต้น {pole.pole_name}</h1>
+                <p className="text-xs text-gray-700">โครงการ: {selectedProject} | ชนิดเสาและชุดประกอบ: {pole.assembly_type}</p>
+              </div>
+              
+              <table className="w-full border-collapse border border-gray-800 text-[11px] mb-6">
+                <thead>
+                  <tr className="bg-gray-200 text-gray-900">
+                    <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-12">ลำดับ</th>
+                    <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-24">รหัสพัสดุ</th>
+                    <th className="border border-gray-800 px-2 py-1.5 text-left font-bold">รายการ</th>
+                    <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-16">จำนวน</th>
+                    <th className="border border-gray-800 px-2 py-1.5 text-center font-bold w-16">หน่วย</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pole.items && Array.isArray(pole.items) && pole.items.length > 0 ? (
+                    pole.items.map((item: any, i: number) => (
+                      <tr key={i} className="border-b border-gray-800">
+                        <td className="border-x border-gray-800 px-2 py-1 text-center">{i + 1}</td>
+                        <td className="border-x border-gray-800 px-2 py-1 text-center">{item.code}</td>
+                        <td className="border-x border-gray-800 px-2 py-1">{item.name}</td>
+                        <td className="border-x border-gray-800 px-2 py-1 text-center font-bold">{item.qty}</td>
+                        <td className="border-x border-gray-800 px-2 py-1 text-center">{item.unit}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="border border-gray-800 px-2 py-4 text-center">ไม่มีรายการพัสดุ</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {(pole.image1_url || pole.image2_url) && (
+                <div className="mt-auto pt-4 border-t border-gray-300">
+                  <h4 className="font-bold text-xs mb-2 text-center">รูปภาพประกอบการประเมิน</h4>
+                  <div className="flex gap-4 h-48 justify-center">
+                    {pole.image1_url && <img src={pole.image1_url} className="h-full object-contain max-w-[48%] border border-gray-400 p-1" />}
+                    {pole.image2_url && <img src={pole.image2_url} className="h-full object-contain max-w-[48%] border border-gray-400 p-1" />}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
