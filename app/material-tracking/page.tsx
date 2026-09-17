@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Upload, Package, Wrench, AlertCircle, User, Loader2, ArrowRight, Briefcase } from "lucide-react";
+import { Upload, Package, Wrench, AlertCircle, User, Loader2, Briefcase, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 
@@ -22,11 +22,10 @@ export default function MaterialTracking() {
   const [activeProjects, setActiveProjects] = useState<Project[]>([]);
   const [technicians, setTechnicians] = useState<string[]>([]);
   
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadingWbs, setUploadingWbs] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadError, setUploadError] = useState("");
   const [selectedTechnician, setSelectedTechnician] = useState<string>("ทั้งหมด");
+  const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchBaseData();
@@ -67,21 +66,18 @@ export default function MaterialTracking() {
     localStorage.setItem("material_tracking_data", JSON.stringify(data));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-      setUploadError("");
-    }
+  const toggleProject = (wbs: string) => {
+    setExpandedProjects(prev => ({ ...prev, [wbs]: !prev[wbs] }));
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
-    setIsUploading(true);
-    setUploadError("");
+  const handleUploadForProject = async (e: React.ChangeEvent<HTMLInputElement>, targetWbs: string, targetSupervisor: string) => {
+    if (!e.target.files || !e.target.files[0]) return;
+    
+    const file = e.target.files[0];
+    setUploadingWbs(targetWbs);
 
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    formData.append("file", file);
 
     try {
       const response = await fetch("/api/extract-zpsr018-material", {
@@ -97,24 +93,11 @@ export default function MaterialTracking() {
 
       if (result.materials && result.materials.length > 0) {
         const newMaterials: Material[] = result.materials.map((m: any) => {
-          // Attempt to auto-assign technician using active projects base
-          let assignedTech = m.technician_name || "";
-          
-          if (!assignedTech && m.wbs) {
-            const cleanWbs = m.wbs.replace(/\s/g, "");
-            const matchedProject = activeProjects.find(p => 
-              p.wbs.replace(/\s/g, "").includes(cleanWbs) || 
-              cleanWbs.includes(p.wbs.replace(/\s/g, ""))
-            );
-            if (matchedProject && matchedProject.supervisor) {
-              assignedTech = matchedProject.supervisor;
-            }
-          }
-
           return {
             id: Math.random().toString(36).substring(2, 9),
-            wbs: m.wbs || "",
-            technician_name: assignedTech,
+            // Override with the specific project's WBS and Supervisor
+            wbs: targetWbs,
+            technician_name: targetSupervisor || "ยังไม่ระบุช่าง",
             material_code: m.material_code || "",
             material_name: m.material_name || "ไม่ระบุชื่อ",
             quantity: Number(m.quantity) || 0,
@@ -124,24 +107,31 @@ export default function MaterialTracking() {
           };
         });
 
+        // Filter out old materials for this WBS to avoid duplicates? 
+        // For now, let's just append. If they re-upload, it adds more.
         const updated = [...materials, ...newMaterials];
         saveToStorage(updated);
-        setSelectedFile(null);
-        alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการ\n(ระบบจับคู่ช่างให้อัตโนมัติจากฐานข้อมูลงานที่กำลังทำ)`);
+        
+        // Auto expand this project to show the new materials
+        setExpandedProjects(prev => ({ ...prev, [targetWbs]: true }));
+        alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการสำหรับงาน ${targetWbs}`);
       } else {
-        setUploadError("ไม่พบข้อมูลพัสดุในเอกสารนี้ (อาจเป็นโครงการสถานะ F4 ทั้งหมด)");
+        alert("ไม่พบข้อมูลพัสดุในเอกสารนี้ (อาจเป็นโครงการสถานะ F4 ทั้งหมด)");
       }
     } catch (err: any) {
       console.error(err);
-      setUploadError(err.message || "เกิดข้อผิดพลาดในการอ่านไฟล์");
+      alert(err.message || "เกิดข้อผิดพลาดในการอ่านไฟล์");
     } finally {
-      setIsUploading(false);
+      setUploadingWbs(null);
+      // Reset the file input
+      e.target.value = '';
     }
   };
 
-  const clearData = () => {
-    if (confirm("ต้องการล้างข้อมูลพัสดุทั้งหมดใช่หรือไม่?")) {
-      saveToStorage([]);
+  const clearDataForWbs = (wbs: string) => {
+    if (confirm(`ต้องการล้างข้อมูลพัสดุสำหรับงาน ${wbs} ใช่หรือไม่?`)) {
+      const updated = materials.filter(m => m.wbs !== wbs);
+      saveToStorage(updated);
     }
   };
 
@@ -150,7 +140,6 @@ export default function MaterialTracking() {
     saveToStorage(updated);
   };
 
-  // Ensure "ยังไม่ระบุช่าง" is included if there are materials without a tech
   const allTechsToDisplay = Array.from(new Set([
     ...technicians,
     ...materials.map(m => m.technician_name || "ยังไม่ระบุช่าง")
@@ -180,43 +169,12 @@ export default function MaterialTracking() {
           ติดตามพัสดุรายช่าง (ZPSR018)
         </h1>
         <p className="opacity-80 text-sm mt-1">
-          อ้างอิงฐานข้อมูลงานจากสถานะปัจจุบัน (ไม่รวม F4) เพื่อง่ายต่อการระบุช่างและติดตามพัสดุ
+          อ้างอิงฐานข้อมูลงานจากสถานะปัจจุบัน (ไม่รวม F4) เลือกระบุงานและนำเข้าพัสดุเป็นรายโครงการ
         </p>
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
         
-        {/* Upload Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Upload size={20} className="text-blue-600" />
-            นำเข้าข้อมูล ZPSR018 (PDF)
-          </h2>
-          
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-            <input 
-              type="file" 
-              accept=".pdf" 
-              onChange={handleFileChange}
-              className="block w-full text-sm text-slate-500
-                file:mr-4 file:py-2.5 file:px-4
-                file:rounded-xl file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100 cursor-pointer"
-            />
-            <button
-              onClick={handleUpload}
-              disabled={!selectedFile || isUploading}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors flex items-center gap-2 shrink-0"
-            >
-              {isUploading ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
-              {isUploading ? "กำลังวิเคราะห์และจับคู่ช่าง..." : "เริ่มดึงข้อมูล"}
-            </button>
-          </div>
-          {uploadError && <p className="text-red-500 text-sm mt-3 flex items-center gap-1"><AlertCircle size={14}/> {uploadError}</p>}
-        </div>
-
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center gap-3 w-full md:w-auto">
@@ -236,10 +194,12 @@ export default function MaterialTracking() {
           <div className="flex items-center gap-3 w-full md:w-auto">
             {materials.length > 0 && (
               <button 
-                onClick={clearData}
+                onClick={() => {
+                  if(confirm("ต้องการล้างรายการพัสดุทั้งหมดในระบบใช่หรือไม่?")) saveToStorage([]);
+                }}
                 className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors border border-red-100"
               >
-                ล้างรายการพัสดุ
+                ล้างรายการพัสดุทั้งหมด
               </button>
             )}
           </div>
@@ -250,8 +210,10 @@ export default function MaterialTracking() {
           {displayTechs.map(tech => {
             const techProjects = activeProjects.filter(p => p.supervisor === tech);
             const techMaterials = materials.filter(m => (m.technician_name || "ยังไม่ระบุช่าง") === tech);
-            const newMaterials = techMaterials.filter(m => m.part === "new");
-            const demolishMaterials = techMaterials.filter(m => m.part === "demolish");
+            
+            // Collect WBS that have materials but aren't in activeProjects
+            const activeWbsSet = new Set(techProjects.map(p => p.wbs));
+            const orphanWbs = Array.from(new Set(techMaterials.map(m => m.wbs))).filter(wbs => !activeWbsSet.has(wbs));
 
             return (
               <div key={tech} className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
@@ -261,140 +223,242 @@ export default function MaterialTracking() {
                     {tech}
                   </h3>
                   <div className="flex gap-2">
-                    {techProjects.length > 0 && (
-                      <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-medium">
-                        งานที่รับผิดชอบ {techProjects.length} งาน
-                      </span>
-                    )}
+                    <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-medium">
+                      งานที่รับผิดชอบ {techProjects.length} งาน
+                    </span>
                     {techMaterials.length > 0 && (
-                      <span className="bg-slate-700 px-3 py-1 rounded-full text-xs font-medium">
-                        พัสดุ {techMaterials.length} รายการ
+                      <span className="bg-emerald-600 px-3 py-1 rounded-full text-xs font-medium">
+                        พัสดุรวม {techMaterials.length} รายการ
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="p-6">
-                  {/* งานที่รับผิดชอบ (ฐานข้อมูลงาน) */}
-                  {techProjects.length > 0 && (
-                    <div className="mb-8">
-                      <h4 className="font-bold text-blue-700 flex items-center gap-2 pb-2 border-b border-blue-100 mb-4">
-                        <Briefcase size={18} />
-                        ฐานข้อมูลงานที่กำลังดำเนินการ (จากระบบอัปเดตสถานะงาน)
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {techProjects.map(p => (
-                          <div key={p.id} className="bg-blue-50/50 border border-blue-100 p-3 rounded-lg flex flex-col gap-1">
-                            <span className="text-xs font-bold text-blue-600">{p.wbs}</span>
-                            <span className="text-sm font-medium text-slate-700 line-clamp-2">{p.name}</span>
-                            <span className="text-xs bg-white border border-slate-200 px-2 py-0.5 rounded text-slate-500 self-start mt-1">
-                              สถานะ: {p.status}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                <div className="p-4 md:p-6 bg-slate-50">
+                  {techProjects.length === 0 && orphanWbs.length === 0 && (
+                    <div className="text-center p-6 border-2 border-dashed border-slate-300 rounded-xl">
+                      <p className="text-slate-500 text-sm">ไม่พบงานที่กำลังดำเนินการสำหรับช่างชุดนี้</p>
                     </div>
                   )}
 
-                  {techMaterials.length > 0 ? (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                      
-                      {/* พัสดุเบิกใหม่ */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-emerald-700 flex items-center gap-2 pb-2 border-b border-emerald-100">
-                          <Package size={18} />
-                          พัสดุเบิกใหม่ที่ตรวจพบ ({newMaterials.length})
-                        </h4>
-                        {newMaterials.length === 0 ? (
-                          <p className="text-sm text-slate-400 italic">ไม่มีพัสดุเบิกใหม่</p>
-                        ) : (
-                          <div className="space-y-3">
-                            {newMaterials.map(m => (
-                              <div key={m.id} className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
-                                <div className="flex justify-between items-start gap-4">
-                                  <div>
-                                    <p className="font-semibold text-slate-800 text-sm">{m.material_name}</p>
-                                    <p className="text-xs text-slate-500 mt-1">
-                                      รหัส: {m.material_code || "-"} | WBS: {m.wbs}
-                                    </p>
-                                    <p className="text-sm font-medium text-emerald-600 mt-2">
-                                      จำนวน: {m.quantity} {m.unit}
-                                    </p>
+                  <div className="space-y-4">
+                    {/* Active Projects */}
+                    {techProjects.map(p => {
+                      const projMaterials = materials.filter(m => m.wbs === p.wbs);
+                      const isExpanded = expandedProjects[p.wbs] || false;
+                      const isUploadingThis = uploadingWbs === p.wbs;
+
+                      return (
+                        <div key={p.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all">
+                          {/* Project Header (Clickable) */}
+                          <div 
+                            onClick={() => toggleProject(p.wbs)}
+                            className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50"
+                          >
+                            <div className="flex items-start gap-3 flex-1">
+                              <Briefcase className="text-blue-500 shrink-0 mt-1" size={20} />
+                              <div>
+                                <h4 className="font-bold text-slate-800 text-sm md:text-base">{p.wbs}</h4>
+                                <p className="text-sm text-slate-600 mt-1 line-clamp-2">{p.name}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className="text-xs bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 font-medium">
+                                    สถานะ: {p.status}
+                                  </span>
+                                  {projMaterials.length > 0 && (
+                                    <span className="text-xs bg-emerald-100 border border-emerald-200 text-emerald-700 px-2 py-0.5 rounded font-medium">
+                                      มีรายการพัสดุ ({projMaterials.length})
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="shrink-0 flex items-center justify-end">
+                              {isExpanded ? <ChevronUp className="text-slate-400" /> : <ChevronDown className="text-slate-400" />}
+                            </div>
+                          </div>
+
+                          {/* Expanded Content: Upload & Materials */}
+                          {isExpanded && (
+                            <div className="border-t border-slate-100 p-4 bg-slate-50/50">
+                              
+                              {/* Upload Action */}
+                              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50/50 p-4 rounded-lg border border-blue-100 mb-6">
+                                <div>
+                                  <h5 className="text-sm font-bold text-blue-800 flex items-center gap-2">
+                                    <Upload size={16} /> นำเข้าข้อมูล ZPSR018 สำหรับงานนี้
+                                  </h5>
+                                  <p className="text-xs text-blue-600/80 mt-1">อัปโหลดไฟล์ PDF ระบบจะดึงรายการพัสดุผูกกับรหัสงาน {p.wbs} อัตโนมัติ</p>
+                                </div>
+                                <div className="shrink-0 w-full sm:w-auto relative">
+                                  <input 
+                                    type="file" 
+                                    accept=".pdf"
+                                    onChange={(e) => handleUploadForProject(e, p.wbs, tech)}
+                                    disabled={isUploadingThis}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                  />
+                                  <button 
+                                    disabled={isUploadingThis}
+                                    className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                                  >
+                                    {isUploadingThis ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                    {isUploadingThis ? "กำลังวิเคราะห์..." : "เลือกไฟล์ ZPSR018"}
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Materials List for this Project */}
+                              {projMaterials.length > 0 ? (
+                                <div className="space-y-6">
+                                  <div className="flex justify-between items-center">
+                                    <h5 className="font-bold text-slate-700 text-sm">รายการพัสดุในงานนี้</h5>
+                                    <button 
+                                      onClick={() => clearDataForWbs(p.wbs)}
+                                      className="text-xs text-red-500 hover:text-red-700 underline"
+                                    >
+                                      ล้างพัสดุงานนี้
+                                    </button>
                                   </div>
-                                  <div className="shrink-0">
+
+                                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {/* พัสดุเบิกใหม่ */}
+                                    <div className="space-y-3">
+                                      <h6 className="font-bold text-emerald-700 flex items-center gap-2 pb-2 border-b border-emerald-100 text-sm">
+                                        <Package size={16} /> พัสดุเบิกใหม่
+                                      </h6>
+                                      {projMaterials.filter(m => m.part === 'new').map(m => (
+                                        <div key={m.id} className="bg-white p-3 rounded-lg border border-emerald-100 shadow-sm">
+                                          <p className="font-semibold text-slate-800 text-sm">{m.material_name}</p>
+                                          <div className="flex justify-between items-end mt-2">
+                                            <p className="text-sm font-medium text-emerald-600">
+                                              จำนวน: {m.quantity} {m.unit}
+                                            </p>
+                                            <select
+                                              value={m.status}
+                                              onChange={(e) => updateStatus(m.id, e.target.value)}
+                                              className={`text-xs font-bold px-2 py-1 rounded outline-none border cursor-pointer ${
+                                                m.status === "นำไปก่อสร้างแล้ว" 
+                                                  ? "bg-emerald-600 text-white border-emerald-700" 
+                                                  : "bg-slate-50 text-slate-600 border-slate-200"
+                                              }`}
+                                            >
+                                              <option value="ยังไม่ได้ก่อสร้าง">ยังไม่ได้ก่อสร้าง</option>
+                                              <option value="นำไปก่อสร้างแล้ว">นำไปก่อสร้างแล้ว</option>
+                                            </select>
+                                          </div>
+                                        </div>
+                                      ))}
+                                      {projMaterials.filter(m => m.part === 'new').length === 0 && <p className="text-xs text-slate-400">ไม่มีรายการ</p>}
+                                    </div>
+
+                                    {/* พัสดุรื้อถอน */}
+                                    <div className="space-y-3">
+                                      <h6 className="font-bold text-amber-700 flex items-center gap-2 pb-2 border-b border-amber-100 text-sm">
+                                        <Wrench size={16} /> พัสดุรื้อถอนค้างส่งคืน
+                                      </h6>
+                                      {projMaterials.filter(m => m.part === 'demolish').map(m => (
+                                        <div key={m.id} className="bg-white p-3 rounded-lg border border-amber-100 shadow-sm">
+                                          <p className="font-semibold text-slate-800 text-sm">{m.material_name}</p>
+                                          <div className="flex justify-between items-end mt-2">
+                                            <p className="text-sm font-medium text-amber-600">
+                                              จำนวน: {m.quantity} {m.unit}
+                                            </p>
+                                            <select
+                                              value={m.status}
+                                              onChange={(e) => updateStatus(m.id, e.target.value)}
+                                              className={`text-xs font-bold px-2 py-1 rounded outline-none border cursor-pointer ${
+                                                m.status === "ส่งคืนแล้ว" 
+                                                  ? "bg-emerald-600 text-white border-emerald-700" 
+                                                  : m.status === "รื้อถอนแล้วยังไม่ส่งคืน"
+                                                    ? "bg-amber-500 text-white border-amber-600"
+                                                    : "bg-slate-50 text-slate-600 border-slate-200"
+                                              }`}
+                                            >
+                                              <option value="ยังไม่ได้รื้อถอนและยังไม่ส่งคืน">ยังไม่ได้รื้อถอน</option>
+                                              <option value="รื้อถอนแล้วยังไม่ส่งคืน">รื้อแล้วรอส่งคืน</option>
+                                              <option value="ส่งคืนแล้ว">ส่งคืนแล้ว</option>
+                                            </select>
+                                          </div>
+                                        </div>
+                                      ))}
+                                      {projMaterials.filter(m => m.part === 'demolish').length === 0 && <p className="text-xs text-slate-400">ไม่มีรายการ</p>}
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-center py-6 text-slate-400 text-sm italic">
+                                  งานนี้ยังไม่ได้นำเข้าพัสดุ (อัปโหลดไฟล์ ZPSR018 ด้านบนเพื่อดึงรายการ)
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Orphan WBS (Materials that exist but project is missing/closed) */}
+                    {orphanWbs.map(wbs => {
+                      const projMaterials = materials.filter(m => m.wbs === wbs);
+                      const isExpanded = expandedProjects[wbs] || false;
+                      const isUploadingThis = uploadingWbs === wbs;
+
+                      return (
+                        <div key={wbs} className="bg-slate-50 border border-slate-200 rounded-xl shadow-sm overflow-hidden opacity-75">
+                          <div 
+                            onClick={() => toggleProject(wbs)}
+                            className="p-4 flex items-center justify-between gap-4 cursor-pointer"
+                          >
+                            <div className="flex items-center gap-3">
+                              <AlertCircle className="text-slate-400" size={20} />
+                              <div>
+                                <h4 className="font-bold text-slate-600 text-sm">{wbs}</h4>
+                                <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-medium mt-1 inline-block">
+                                  ไม่มีในฐานข้อมูลงานปัจจุบัน (แต่อาจมีพัสดุค้าง)
+                                </span>
+                              </div>
+                            </div>
+                            <div className="shrink-0 flex items-center justify-end">
+                              {isExpanded ? <ChevronUp className="text-slate-400" /> : <ChevronDown className="text-slate-400" />}
+                            </div>
+                          </div>
+
+                          {isExpanded && (
+                            <div className="border-t border-slate-200 p-4 bg-slate-100/50 space-y-6">
+                              <div className="flex justify-between items-center">
+                                <h5 className="font-bold text-slate-600 text-sm">รายการพัสดุที่ค้างอยู่</h5>
+                                <button 
+                                  onClick={() => clearDataForWbs(wbs)}
+                                  className="text-xs text-red-500 hover:text-red-700 underline"
+                                >
+                                  ล้างพัสดุงานนี้
+                                </button>
+                              </div>
+                              {/* Simplify rendering for orphans to save space */}
+                              <div className="space-y-2">
+                                {projMaterials.map(m => (
+                                  <div key={m.id} className="bg-white p-2 px-3 rounded flex justify-between items-center border border-slate-200">
+                                    <span className="text-sm text-slate-700">{m.material_name} ({m.quantity} {m.unit})</span>
                                     <select
                                       value={m.status}
                                       onChange={(e) => updateStatus(m.id, e.target.value)}
-                                      className={`text-xs font-bold px-3 py-1.5 rounded-lg outline-none border cursor-pointer ${
-                                        m.status === "นำไปก่อสร้างแล้ว" 
-                                          ? "bg-emerald-600 text-white border-emerald-700" 
-                                          : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
-                                      }`}
+                                      className="text-xs border rounded p-1"
                                     >
                                       <option value="ยังไม่ได้ก่อสร้าง">ยังไม่ได้ก่อสร้าง</option>
                                       <option value="นำไปก่อสร้างแล้ว">นำไปก่อสร้างแล้ว</option>
-                                    </select>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* พัสดุรื้อถอน */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-amber-700 flex items-center gap-2 pb-2 border-b border-amber-100">
-                          <Wrench size={18} />
-                          พัสดุรื้อถอนค้างส่งคืน ({demolishMaterials.length})
-                        </h4>
-                        {demolishMaterials.length === 0 ? (
-                          <p className="text-sm text-slate-400 italic">ไม่มีพัสดุรื้อถอน</p>
-                        ) : (
-                          <div className="space-y-3">
-                            {demolishMaterials.map(m => (
-                              <div key={m.id} className="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
-                                <div className="flex justify-between items-start gap-4">
-                                  <div>
-                                    <p className="font-semibold text-slate-800 text-sm">{m.material_name}</p>
-                                    <p className="text-xs text-slate-500 mt-1">
-                                      รหัส: {m.material_code || "-"} | WBS: {m.wbs}
-                                    </p>
-                                    <p className="text-sm font-medium text-amber-600 mt-2">
-                                      จำนวน: {m.quantity} {m.unit}
-                                    </p>
-                                  </div>
-                                  <div className="shrink-0 flex flex-col items-end gap-2">
-                                    <select
-                                      value={m.status}
-                                      onChange={(e) => updateStatus(m.id, e.target.value)}
-                                      className={`text-xs font-bold px-3 py-1.5 rounded-lg outline-none border cursor-pointer ${
-                                        m.status === "ส่งคืนแล้ว" 
-                                          ? "bg-emerald-600 text-white border-emerald-700" 
-                                          : m.status === "รื้อถอนแล้วยังไม่ส่งคืน"
-                                            ? "bg-amber-500 text-white border-amber-600"
-                                            : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
-                                      }`}
-                                    >
                                       <option value="ยังไม่ได้รื้อถอนและยังไม่ส่งคืน">ยังไม่ได้รื้อถอน</option>
                                       <option value="รื้อถอนแล้วยังไม่ส่งคืน">รื้อแล้วรอส่งคืน</option>
                                       <option value="ส่งคืนแล้ว">ส่งคืนแล้ว</option>
                                     </select>
                                   </div>
-                                </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
 
-                    </div>
-                  ) : (
-                    <div className="text-center p-6 border-2 border-dashed border-slate-200 rounded-xl">
-                      <p className="text-slate-500 text-sm">ยังไม่มีพัสดุระบุว่าเป็นของช่างชุดนี้ (ลองอัปโหลด ZPSR018 ที่มี WBS ตรงกับงานที่รับผิดชอบ)</p>
-                    </div>
-                  )}
-
+                  </div>
                 </div>
               </div>
             )
