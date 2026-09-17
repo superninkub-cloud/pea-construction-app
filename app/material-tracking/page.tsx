@@ -315,14 +315,18 @@ export default function MaterialTracking() {
                       const newMats = projMaterials.filter(m => m.part === 'new');
                       const demMats = projMaterials.filter(m => m.part === 'demolish');
 
-                      // ยอดรวม ZPSR018
-                      const totalNewEstimated = newMats.reduce((sum, m) => sum + (m.estimated_quantity || 0), 0);
-                      const totalNewDrawn = newMats.reduce((sum, m) => sum + (m.actual_quantity || 0), 0);
+                      // จำนวนรายการเบิกใหม่
+                      const totalNewItems = newMats.length;
+                      const drawnNewItems = newMats.filter(m => (m.actual_quantity || 0) >= (m.estimated_quantity || m.quantity || 1)).length;
                       
-                      const totalDemEstimated = demMats.reduce((sum, m) => sum + (m.estimated_quantity || 0), 0);
-                      const totalDemReturnedGood = demMats.reduce((sum, m) => sum + (m.actual_quantity || 0), 0);
-                      const totalDemReturnedDamaged = demMats.reduce((sum, m) => sum + (m.damaged_quantity || 0), 0);
-                      const totalDemReturnedTotal = totalDemReturnedGood + totalDemReturnedDamaged;
+                      // จำนวนรายการรื้อถอน (ไม่รวมรหัส 1-50...)
+                      const validDemMats = demMats.filter(m => !m.material_code.startsWith("1-50"));
+                      const totalDemItems = validDemMats.length;
+                      const returnedDemItems = validDemMats.filter(m => {
+                        const returned = (m.actual_quantity || 0) + (m.damaged_quantity || 0);
+                        const estimated = m.estimated_quantity || m.quantity || 1;
+                        return returned >= estimated;
+                      }).length;
 
                       return (
                         <div key={p.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all hover:border-blue-300">
@@ -346,33 +350,33 @@ export default function MaterialTracking() {
                                 {/* Summary Progress Bars (Only show when materials are loaded) */}
                                 {projMaterials.length > 0 && (
                                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-inner">
-                                    {/* New Materials ZPSR018 Summary */}
+                                    {/* New Materials Item Summary */}
                                     <div>
                                       <div className="flex justify-between text-xs mb-1.5">
                                         <span className="font-bold text-emerald-700 flex items-center gap-1">
-                                          <Package size={12}/> พัสดุเบิกใหม่ ({newMats.length} รายการ)
+                                          <Package size={12}/> พัสดุเบิกใหม่ ({totalNewItems} รายการ)
                                         </span>
                                         <span className="text-slate-500 font-medium">
-                                          เบิกคลัง <span className="text-emerald-600">{totalNewDrawn}</span> / ประมาณการ <span className="text-slate-700">{totalNewEstimated}</span>
+                                          เบิกครบ <span className="text-emerald-600">{drawnNewItems}</span> / ทั้งหมด <span className="text-slate-700">{totalNewItems}</span> รายการ
                                         </span>
                                       </div>
                                       <div className="w-full bg-slate-200 rounded-full h-2 flex overflow-hidden">
-                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalNewEstimated ? Math.min((totalNewDrawn/totalNewEstimated)*100, 100) : 0}%` }}></div>
+                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalNewItems ? Math.min((drawnNewItems/totalNewItems)*100, 100) : 0}%` }}></div>
                                       </div>
                                     </div>
 
-                                    {/* Demolish Materials ZPSR018 Summary */}
+                                    {/* Demolish Materials Item Summary */}
                                     <div>
                                       <div className="flex justify-between text-xs mb-1.5">
                                         <span className="font-bold text-amber-700 flex items-center gap-1">
-                                          <Wrench size={12}/> พัสดุรื้อถอน ({demMats.length} รายการ)
+                                          <Wrench size={12}/> พัสดุรื้อถอน ({totalDemItems} รายการหลัก)
                                         </span>
                                         <span className="text-slate-500 font-medium">
-                                          รวมคืนคลัง <span className="text-emerald-600">{totalDemReturnedTotal}</span> (ดี {totalDemReturnedGood}, ชำรุด {totalDemReturnedDamaged}) / ประมาณการรื้อ <span className="text-slate-700">{totalDemEstimated}</span>
+                                          ส่งคืนครบ <span className="text-emerald-600">{returnedDemItems}</span> / ทั้งหมด <span className="text-slate-700">{totalDemItems}</span> รายการ
                                         </span>
                                       </div>
                                       <div className="w-full bg-slate-200 rounded-full h-2 flex overflow-hidden">
-                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalDemEstimated ? Math.min((totalDemReturnedTotal/totalDemEstimated)*100, 100) : 0}%` }}></div>
+                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalDemItems ? Math.min((returnedDemItems/totalDemItems)*100, 100) : 0}%` }}></div>
                                       </div>
                                     </div>
                                   </div>
