@@ -697,8 +697,8 @@ export default function MaterialTracking() {
                                         const estimated = m.estimated_quantity || m.quantity || 0;
                                         const totalNotReturned = Math.max(0, estimated - totalReturned);
                                         
-                                        const pending = m.track_dem_pending ?? totalNotReturned;
-                                        const done_not_ret = m.track_dem_done_not_returned ?? 0;
+                                        const pending = m.track_dem_pending ?? 0;
+                                        const done_not_ret = m.track_dem_done_not_returned ?? totalNotReturned;
                                         const isAllDone = totalReturned >= estimated && estimated > 0;
 
                                         return (
