@@ -402,52 +402,68 @@ export default function MaterialTracking() {
                       <Package size={18} /> สต๊อกพัสดุหน้าแคมป์ (Camp Inventory)
                     </h4>
                     {campInventory.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {campInventory.map((item, idx) => {
-                          const photoKey = `${tech}_${item.code}_${item.name}`;
-                          const currentPhoto = photos[photoKey];
-                          return (
-                          <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                            <div>
-                              <p className="text-sm font-semibold text-slate-800 line-clamp-2" title={item.name}>{item.name}</p>
-                              <div className="mt-3 flex gap-2 text-xs">
-                                {item.newPending > 0 && (
-                                  <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-100 flex-1 text-center">
-                                    เบิกมารอติดตั้ง<br/><span className="text-base font-bold">{item.newPending}</span> {item.unit}
-                                  </div>
-                                )}
-                                {item.demWaiting > 0 && (
-                                  <div className="bg-amber-50 text-amber-700 px-2 py-1 rounded border border-amber-100 flex-1 text-center">
-                                    รื้อแล้วรอคืน<br/><span className="text-base font-bold">{item.demWaiting}</span> {item.unit}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            {/* Photo Section */}
-                            <div className="mt-3 pt-3 border-t border-slate-100">
-                              {currentPhoto ? (
-                                <div className="relative group rounded-lg overflow-hidden border border-slate-200 cursor-pointer" onClick={() => handleCaptureClick(photoKey)}>
-                                  <img src={currentPhoto} alt="Evidence" className="w-full h-28 object-cover" />
-                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button className="text-white text-xs font-bold flex items-center gap-1">
-                                      <Camera size={14} /> ถ่ายใหม่
-                                    </button>
-                                  </div>
+                      <div className="space-y-4">
+                        {/* Camp Photos Section */}
+                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                          <h5 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
+                            <Camera size={16} className="text-blue-500" /> ภาพถ่ายแคมป์และที่เก็บวัสดุ
+                          </h5>
+                          <div className="flex gap-3 overflow-x-auto pb-2">
+                            {[1, 2, 3].map((slot) => {
+                              const photoKey = `camp_photo_${tech}_${slot}`;
+                              const currentPhoto = photos[photoKey];
+                              return (
+                                <div key={slot} className="shrink-0 w-32 h-32 relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => handleCaptureClick(photoKey)}>
+                                  {currentPhoto ? (
+                                    <>
+                                      <img src={currentPhoto} alt={`Camp ${slot}`} className="w-full h-full object-cover" />
+                                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <span className="text-white text-xs font-bold flex flex-col items-center gap-1">
+                                          <Camera size={16} /> ถ่ายใหม่
+                                        </span>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="flex flex-col items-center text-slate-400 gap-2">
+                                      {isCapturing && activePhotoKey === photoKey ? <Loader2 size={24} className="animate-spin text-blue-500" /> : <Camera size={24} />}
+                                      <span className="text-xs font-medium px-2 text-center">
+                                        {isCapturing && activePhotoKey === photoKey ? 'ประมวลผล...' : `ถ่ายรูปที่ ${slot}`}
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
-                              ) : (
-                                <button 
-                                  onClick={() => handleCaptureClick(photoKey)}
-                                  disabled={isCapturing && activePhotoKey === photoKey}
-                                  className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-2"
-                                >
-                                  {isCapturing && activePhotoKey === photoKey ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
-                                  {isCapturing && activePhotoKey === photoKey ? 'กำลังประมวลผล...' : 'ถ่ายรูปหลักฐาน (GPS)'}
-                                </button>
-                              )}
-                            </div>
+                              );
+                            })}
                           </div>
-                        )})}
+                        </div>
+
+                        {/* Inventory List (Summarized) */}
+                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                          <table className="w-full text-sm text-left text-slate-600">
+                            <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase font-semibold text-slate-700">
+                              <tr>
+                                <th className="px-4 py-3">รายการพัสดุ</th>
+                                <th className="px-4 py-3 text-center w-24">รอติดตั้ง</th>
+                                <th className="px-4 py-3 text-center w-24">รอคืน</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {campInventory.map((item, idx) => (
+                                <tr key={idx} className="hover:bg-slate-50/50">
+                                  <td className="px-4 py-3">
+                                    <div className="font-semibold text-slate-800 line-clamp-2">{item.name}</div>
+                                  </td>
+                                  <td className="px-4 py-3 text-center">
+                                    {item.newPending > 0 ? <span className="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">{item.newPending} {item.unit}</span> : <span className="text-slate-300">-</span>}
+                                  </td>
+                                  <td className="px-4 py-3 text-center">
+                                    {item.demWaiting > 0 ? <span className="font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded">{item.demWaiting} {item.unit}</span> : <span className="text-slate-300">-</span>}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center p-6 bg-white rounded-xl border border-dashed border-slate-300 text-slate-500 text-sm">
