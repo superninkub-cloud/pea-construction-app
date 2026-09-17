@@ -37,6 +37,7 @@ export default function MaterialTracking() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTechnician, setSelectedTechnician] = useState<string>("ทั้งหมด");
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+  const [showCampInventory, setShowCampInventory] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchBaseData();
@@ -75,6 +76,13 @@ export default function MaterialTracking() {
 
   const toggleProject = (wbs: string) => {
     setExpandedProjects(prev => ({ ...prev, [wbs]: !prev[wbs] }));
+  };
+
+  const toggleCampInventory = (tech: string) => {
+    setShowCampInventory(prev => ({
+      ...prev,
+      [tech]: !prev[tech]
+    }));
   };
 
   const handleUploadForProject = async (e: React.ChangeEvent<HTMLInputElement>, targetWbs: string, targetSupervisor: string) => {
@@ -278,24 +286,87 @@ export default function MaterialTracking() {
             const activeWbsSet = new Set(techProjects.map(p => p.wbs));
             const orphanWbs = Array.from(new Set(techMaterials.map(m => m.wbs))).filter(wbs => !activeWbsSet.has(wbs));
 
+            // คำนวณคลังแคมป์ (Camp Inventory) สำหรับช่างคนนี้
+            const inventoryMap = new Map<string, { code: string, name: string, unit: string, newPending: number, demWaiting: number }>();
+            techMaterials.forEach(m => {
+              const key = `${m.material_code || 'no-code'}_${m.material_name}`;
+              if (!inventoryMap.has(key)) {
+                inventoryMap.set(key, { code: m.material_code || '', name: m.material_name, unit: m.unit, newPending: 0, demWaiting: 0 });
+              }
+              const stock = inventoryMap.get(key)!;
+              
+              if (m.part === 'new') {
+                const pending = m.track_new_pending ?? m.actual_quantity;
+                stock.newPending += pending;
+              } else if (m.part === 'demolish') {
+                const waitingToReturn = m.track_dem_done_not_returned ?? 0;
+                stock.demWaiting += waitingToReturn;
+              }
+            });
+            const campInventory = Array.from(inventoryMap.values()).filter(item => item.newPending > 0 || item.demWaiting > 0);
+            const isCampExpanded = showCampInventory[tech] || false;
+
             return (
               <div key={tech} className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                 <div className="bg-slate-800 text-white px-6 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                  <h3 className="font-bold text-lg flex items-center gap-2">
-                    <User size={20} className="text-blue-400" />
-                    {tech}
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-medium">
-                      งานที่รับผิดชอบ {techProjects.length} งาน
-                    </span>
-                    {techMaterials.length > 0 && (
-                      <span className="bg-emerald-600 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500">
-                        ดึงพัสดุแล้ว {Array.from(new Set(techMaterials.map(m=>m.wbs))).length} งาน
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                      <User size={20} className="text-blue-400" />
+                      {tech}
+                    </h3>
+                    <div className="hidden md:flex flex-wrap gap-2">
+                      <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-medium">
+                        งานที่รับผิดชอบ {techProjects.length} งาน
                       </span>
+                      {techMaterials.length > 0 && (
+                        <span className="bg-emerald-600 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500">
+                          ดึงพัสดุแล้ว {Array.from(new Set(techMaterials.map(m=>m.wbs))).length} งาน
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <button 
+                    onClick={() => toggleCampInventory(tech)}
+                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all border ${isCampExpanded ? 'bg-amber-500 text-slate-900 border-amber-400 shadow-md' : 'bg-slate-700 text-white border-slate-600 hover:bg-slate-600 shadow-sm'}`}
+                  >
+                    ⛺ คลังประจำแคมป์ {isCampExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+                </div>
+
+                {/* Camp Inventory Panel */}
+                {isCampExpanded && (
+                  <div className="p-4 md:p-6 bg-slate-100 border-b border-slate-200 shadow-inner">
+                    <h4 className="font-bold text-slate-700 flex items-center gap-2 mb-4">
+                      <Package size={18} /> สต๊อกพัสดุหน้าแคมป์ (Camp Inventory)
+                    </h4>
+                    {campInventory.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {campInventory.map((item, idx) => (
+                          <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <p className="text-sm font-semibold text-slate-800 line-clamp-2" title={item.name}>{item.name}</p>
+                            <div className="mt-3 flex gap-2 text-xs">
+                              {item.newPending > 0 && (
+                                <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-100 flex-1 text-center">
+                                  เบิกมารอติดตั้ง<br/><span className="text-base font-bold">{item.newPending}</span> {item.unit}
+                                </div>
+                              )}
+                              {item.demWaiting > 0 && (
+                                <div className="bg-amber-50 text-amber-700 px-2 py-1 rounded border border-amber-100 flex-1 text-center">
+                                  รื้อแล้วรอคืน<br/><span className="text-base font-bold">{item.demWaiting}</span> {item.unit}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center p-6 bg-white rounded-xl border border-dashed border-slate-300 text-slate-500 text-sm">
+                        ไม่มีพัสดุค้างอยู่ในสต๊อกแคมป์นี้
+                      </div>
                     )}
                   </div>
-                </div>
+                )}
 
                 <div className="p-4 md:p-6 bg-slate-50">
                   {techProjects.length === 0 && orphanWbs.length === 0 && (
