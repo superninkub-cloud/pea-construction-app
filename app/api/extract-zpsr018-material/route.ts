@@ -48,10 +48,10 @@ Return ONLY a valid JSON array of objects representing the valid materials. Each
 - "technician_name": Technician name if found, else "".
 - "material_code": Material code/number (if available, else "").
 - "material_name": The name/description of the material.
-- "estimated_quantity": The estimated quantity (ประมาณการ) as a number. If not found, use 0.
-- "actual_quantity": For "new" materials, this is the amount DRAWN (เบิกไปแล้ว). For "demolish" materials, this is the GOOD condition amount RETURNED (ส่งคืนคลังดี). Return as a number, if not found, use 0. If the material name contains "ชำรุด", its return value should go to damaged_quantity instead.
-- "damaged_quantity": For "demolish" materials, this is the DAMAGED amount RETURNED (จำนวนพัสดุชำรุด). Look strictly under the "ชำรุด" column. Note: If the material name contains the word "ชำรุด" (e.g. "เศษสายอลูมิเนียมเปลือยชำรุด"), the number is almost always the damaged quantity. Return as a number, if not found, use 0.
-- "unit": The unit of measure (e.g. "ม.", "กก.", "ต้น").
+- "estimated_quantity": The estimated quantity (จำนวนพัสดุ ตามประมาณการ) as a number. If blank or not found, use 0.
+- "actual_quantity": For "new" materials, this is the amount DRAWN (จำนวนพัสดุ เบิกจากคลัง). For "demolish" materials, this is the GOOD condition amount RETURNED (จำนวนพัสดุดี ส่งคืนคลัง). MUST strictly take the value from this column. Even if the material name contains the word "ชำรุด", if the value is in the "ส่งคืนคลัง" column, it goes here. Return as a number, if blank or not found, use 0.
+- "damaged_quantity": For "demolish" materials, this is the DAMAGED amount RETURNED (จำนวนพัสดุ ชำรุด). MUST strictly take the value from the "ชำรุด" column only. Return as a number, if blank or not found, use 0.
+- "unit": The unit of measure (e.g. "ม.", "กก.", "ต้น", "EA").
 - "part": Must be exactly "new" or "demolish".
 
 Example Output:
