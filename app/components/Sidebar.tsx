@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut, Recycle, ArrowRightLeft, Camera, ClipboardList, ChevronDown, ChevronRight } from "lucide-react";
+import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut, Recycle, ArrowRightLeft, Camera, ClipboardList, ChevronDown, ChevronRight, Package } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import { useEffect, useState } from "react";
 
@@ -70,6 +70,10 @@ export default function Sidebar() {
             <Link href="/wire-return" className={`nav-item ${pathname === "/wire-return" ? "active" : ""}`}>
               <Recycle size={20} />
               <span>สถานะการคืนเศษสาย</span>
+            </Link>
+            <Link href="/material-tracking" className={`nav-item ${pathname === "/material-tracking" ? "active" : ""}`}>
+              <Package size={20} />
+              <span>ติดตามพัสดุช่าง</span>
             </Link>
             <Link href="/my-tasks" className={`nav-item ${pathname === "/my-tasks" ? "active" : ""}`}>
               <ClipboardList size={20} />
