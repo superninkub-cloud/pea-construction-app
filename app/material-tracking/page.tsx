@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Upload, Package, Wrench, AlertCircle, User, Loader2, Briefcase, ChevronDown, ChevronUp, CheckCircle2, CircleDashed, Info, Camera, Users, BarChart3, Recycle } from "lucide-react";
+import { Upload, Package, Wrench, AlertCircle, User, Loader2, Briefcase, ChevronDown, ChevronUp, CheckCircle2, CircleDashed, Info, Camera } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import { savePhoto, loadAllPhotos } from "../../lib/photoIdb";
@@ -338,79 +338,7 @@ export default function MaterialTracking() {
           </div>
         </div>
 
-        {/* Overview Dashboard */}
-        {(() => {
-          const totalActiveTechs = displayTechs.length;
-          const totalActiveProjects = activeProjects.length;
-          
-          let globalNewPending = 0;
-          let globalDemWaiting = 0;
 
-          materials.forEach(m => {
-            if (m.part === 'new') {
-              const pending = m.track_new_pending ?? m.actual_quantity;
-              globalNewPending += pending;
-            } else if (m.part === 'demolish') {
-              const returnedGood = m.actual_quantity || 0;
-              const returnedDamaged = m.damaged_quantity || 0;
-              const totalReturned = returnedGood + returnedDamaged;
-              const estimated = m.estimated_quantity || m.quantity || 0;
-              const totalNotReturned = Math.max(0, estimated - totalReturned);
-              const waitingToReturn = m.track_dem_done_not_returned ?? totalNotReturned;
-              globalDemWaiting += waitingToReturn;
-            }
-          });
-
-          return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-                  <Users className="text-blue-600" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-500">ช่างทำงานอยู่</p>
-                  <p className="text-2xl font-bold text-slate-800">{totalActiveTechs} <span className="text-base font-normal text-slate-500">ชุด</span></p>
-                </div>
-              </div>
-              
-              <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
-                  <Briefcase className="text-indigo-600" size={24} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-500">งานที่กำลังเปิด (Active)</p>
-                  <p className="text-2xl font-bold text-slate-800">{totalActiveProjects} <span className="text-base font-normal text-slate-500">งาน</span></p>
-                </div>
-              </div>
-
-              <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:shadow-md transition-shadow relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-2 opacity-10">
-                  <Package size={64} />
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0 relative z-10">
-                  <BarChart3 className="text-emerald-600" size={24} />
-                </div>
-                <div className="relative z-10">
-                  <p className="text-sm font-medium text-slate-500">ยอดพัสดุรอติดตั้งรวม</p>
-                  <p className="text-2xl font-bold text-emerald-600">{globalNewPending.toLocaleString()} <span className="text-base font-normal text-slate-500">ชิ้น</span></p>
-                </div>
-              </div>
-
-              <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 hover:shadow-md transition-shadow relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-2 opacity-10">
-                  <Wrench size={64} />
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 relative z-10">
-                  <Recycle className="text-amber-600" size={24} />
-                </div>
-                <div className="relative z-10">
-                  <p className="text-sm font-medium text-slate-500">ยอดพัสดุรอคืนรวม</p>
-                  <p className="text-2xl font-bold text-amber-600">{globalDemWaiting.toLocaleString()} <span className="text-base font-normal text-slate-500">ชิ้น</span></p>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
 
         {/* Technician Groups */}
         <div className="space-y-8">
