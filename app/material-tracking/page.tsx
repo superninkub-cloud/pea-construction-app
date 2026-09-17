@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Upload, Package, Wrench, AlertCircle, User, Loader2, Briefcase, ChevronDown, ChevronUp } from "lucide-react";
+import { Upload, Package, Wrench, AlertCircle, User, Loader2, Briefcase, ChevronDown, ChevronUp, CheckCircle2, CircleDashed } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 
@@ -92,29 +92,34 @@ export default function MaterialTracking() {
       }
 
       if (result.materials && result.materials.length > 0) {
-        const newMaterials: Material[] = result.materials.map((m: any) => {
-          return {
-            id: Math.random().toString(36).substring(2, 9),
-            // Override with the specific project's WBS and Supervisor
-            wbs: targetWbs,
-            technician_name: targetSupervisor || "ยังไม่ระบุช่าง",
-            material_code: m.material_code || "",
-            material_name: m.material_name || "ไม่ระบุชื่อ",
-            quantity: Number(m.quantity) || 0,
-            unit: m.unit || "",
-            part: m.part === "demolish" ? "demolish" : "new",
-            status: m.part === "demolish" ? "ยังไม่ได้รื้อถอนและยังไม่ส่งคืน" : "ยังไม่ได้ก่อสร้าง"
-          };
-        });
+        const newMaterials: Material[] = result.materials
+          .filter((m: any) => {
+            // Apply User Rules: Exclude steel stranded wire
+            const name = (m.material_name || "").toLowerCase();
+            if (name.includes("ลวดเหล็กตีเกลียว") || name.includes("st. wire, stranded") || name.includes("เศษเหล็กและวัสดุ")) {
+              return false;
+            }
+            return true;
+          })
+          .map((m: any) => {
+            return {
+              id: Math.random().toString(36).substring(2, 9),
+              wbs: targetWbs,
+              technician_name: targetSupervisor || "ยังไม่ระบุช่าง",
+              material_code: m.material_code || "",
+              material_name: m.material_name || "ไม่ระบุชื่อ",
+              quantity: Number(m.quantity) || 0,
+              unit: m.unit || "",
+              part: m.part === "demolish" ? "demolish" : "new",
+              status: m.part === "demolish" ? "ยังไม่ได้รื้อถอนและยังไม่ส่งคืน" : "ยังไม่ได้ก่อสร้าง"
+            };
+          });
 
-        // Filter out old materials for this WBS to avoid duplicates? 
-        // For now, let's just append. If they re-upload, it adds more.
         const updated = [...materials, ...newMaterials];
         saveToStorage(updated);
         
-        // Auto expand this project to show the new materials
         setExpandedProjects(prev => ({ ...prev, [targetWbs]: true }));
-        alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการสำหรับงาน ${targetWbs}`);
+        alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการสำหรับงาน ${targetWbs}\n(ระบบได้ตัดลวดเหล็กตีเกลียวออกตามกฎแล้ว)`);
       } else {
         alert("ไม่พบข้อมูลพัสดุในเอกสารนี้ (อาจเป็นโครงการสถานะ F4 ทั้งหมด)");
       }
@@ -123,7 +128,6 @@ export default function MaterialTracking() {
       alert(err.message || "เกิดข้อผิดพลาดในการอ่านไฟล์");
     } finally {
       setUploadingWbs(null);
-      // Reset the file input
       e.target.value = '';
     }
   };
@@ -138,6 +142,13 @@ export default function MaterialTracking() {
   const updateStatus = (id: string, newStatus: string) => {
     const updated = materials.map(m => m.id === id ? { ...m, status: newStatus } : m);
     saveToStorage(updated);
+  };
+
+  const markAllStatus = (wbs: string, part: "new" | "demolish", newStatus: string) => {
+    if (confirm(`ต้องการอัปเดตสถานะทั้งหมดเป็น "${newStatus}" ใช่หรือไม่?`)) {
+      const updated = materials.map(m => (m.wbs === wbs && m.part === part) ? { ...m, status: newStatus } : m);
+      saveToStorage(updated);
+    }
   };
 
   const allTechsToDisplay = Array.from(new Set([
@@ -217,17 +228,17 @@ export default function MaterialTracking() {
 
             return (
               <div key={tech} className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-                <div className="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+                <div className="bg-slate-800 text-white px-6 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                   <h3 className="font-bold text-lg flex items-center gap-2">
                     <User size={20} className="text-blue-400" />
                     {tech}
                   </h3>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-medium">
                       งานที่รับผิดชอบ {techProjects.length} งาน
                     </span>
                     {techMaterials.length > 0 && (
-                      <span className="bg-emerald-600 px-3 py-1 rounded-full text-xs font-medium">
+                      <span className="bg-emerald-600 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500">
                         พัสดุรวม {techMaterials.length} รายการ
                       </span>
                     )}
@@ -248,28 +259,75 @@ export default function MaterialTracking() {
                       const isExpanded = expandedProjects[p.wbs] || false;
                       const isUploadingThis = uploadingWbs === p.wbs;
 
+                      // Summary Stats Calculation
+                      const newMats = projMaterials.filter(m => m.part === 'new');
+                      const newConstructed = newMats.filter(m => m.status === "นำไปก่อสร้างแล้ว").length;
+                      const newPending = newMats.length - newConstructed;
+
+                      const demMats = projMaterials.filter(m => m.part === 'demolish');
+                      const demReturned = demMats.filter(m => m.status === "ส่งคืนแล้ว").length;
+                      const demDemolished = demMats.filter(m => m.status === "รื้อถอนแล้วยังไม่ส่งคืน").length;
+                      const demPending = demMats.filter(m => m.status === "ยังไม่ได้รื้อถอนและยังไม่ส่งคืน").length;
+
                       return (
-                        <div key={p.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all">
+                        <div key={p.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all hover:border-blue-300">
                           {/* Project Header (Clickable) */}
                           <div 
                             onClick={() => toggleProject(p.wbs)}
-                            className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50"
+                            className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/80 transition-colors"
                           >
                             <div className="flex items-start gap-3 flex-1">
                               <Briefcase className="text-blue-500 shrink-0 mt-1" size={20} />
-                              <div>
+                              <div className="w-full pr-4">
                                 <h4 className="font-bold text-slate-800 text-sm md:text-base">{p.wbs}</h4>
                                 <p className="text-sm text-slate-600 mt-1 line-clamp-2">{p.name}</p>
-                                <div className="flex items-center gap-2 mt-2">
+                                
+                                <div className="flex flex-wrap items-center gap-2 mt-2">
                                   <span className="text-xs bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 font-medium">
                                     สถานะ: {p.status}
                                   </span>
                                   {projMaterials.length > 0 && (
-                                    <span className="text-xs bg-emerald-100 border border-emerald-200 text-emerald-700 px-2 py-0.5 rounded font-medium">
+                                    <span className="text-xs bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-0.5 rounded font-medium">
                                       มีรายการพัสดุ ({projMaterials.length})
                                     </span>
                                   )}
                                 </div>
+
+                                {/* Summary Progress Bars */}
+                                {projMaterials.length > 0 && (
+                                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                    {/* New Materials Progress */}
+                                    <div>
+                                      <div className="flex justify-between text-xs mb-1.5">
+                                        <span className="font-bold text-emerald-700 flex items-center gap-1">
+                                          <Package size={12}/> พัสดุเบิกใหม่ ({newMats.length})
+                                        </span>
+                                        <span className="text-slate-500 font-medium">
+                                          ใช้แล้ว <span className="text-emerald-600">{newConstructed}</span> / เหลือ <span className="text-slate-700">{newPending}</span>
+                                        </span>
+                                      </div>
+                                      <div className="w-full bg-slate-200 rounded-full h-2 flex overflow-hidden">
+                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${newMats.length ? (newConstructed/newMats.length)*100 : 0}%` }}></div>
+                                      </div>
+                                    </div>
+
+                                    {/* Demolish Materials Progress */}
+                                    <div>
+                                      <div className="flex justify-between text-xs mb-1.5">
+                                        <span className="font-bold text-amber-700 flex items-center gap-1">
+                                          <Wrench size={12}/> พัสดุรื้อถอน ({demMats.length})
+                                        </span>
+                                        <span className="text-slate-500 font-medium">
+                                          คืน <span className="text-emerald-600">{demReturned}</span> / รอคืน <span className="text-amber-600">{demDemolished}</span> / ยังไม่รื้อ <span className="text-slate-700">{demPending}</span>
+                                        </span>
+                                      </div>
+                                      <div className="w-full bg-slate-200 rounded-full h-2 flex overflow-hidden">
+                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${demMats.length ? (demReturned/demMats.length)*100 : 0}%` }}></div>
+                                        <div className="bg-amber-400 h-2 transition-all duration-500" style={{ width: `${demMats.length ? (demDemolished/demMats.length)*100 : 0}%` }}></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <div className="shrink-0 flex items-center justify-end">
@@ -282,27 +340,27 @@ export default function MaterialTracking() {
                             <div className="border-t border-slate-100 p-4 bg-slate-50/50">
                               
                               {/* Upload Action */}
-                              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50/50 p-4 rounded-lg border border-blue-100 mb-6">
+                              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm">
                                 <div>
                                   <h5 className="text-sm font-bold text-blue-800 flex items-center gap-2">
-                                    <Upload size={16} /> นำเข้าข้อมูล ZPSR018 สำหรับงานนี้
+                                    <Upload size={18} className="text-blue-600" /> นำเข้าข้อมูล ZPSR018 สำหรับงานนี้
                                   </h5>
-                                  <p className="text-xs text-blue-600/80 mt-1">อัปโหลดไฟล์ PDF ระบบจะดึงรายการพัสดุผูกกับรหัสงาน {p.wbs} อัตโนมัติ</p>
+                                  <p className="text-xs text-blue-600/80 mt-1">อัปโหลดไฟล์ PDF ระบบจะดึงรายการพัสดุผูกกับรหัสงานนี้อัตโนมัติ</p>
                                 </div>
-                                <div className="shrink-0 w-full sm:w-auto relative">
+                                <div className="shrink-0 w-full sm:w-auto relative group">
                                   <input 
                                     type="file" 
                                     accept=".pdf"
                                     onChange={(e) => handleUploadForProject(e, p.wbs, tech)}
                                     disabled={isUploadingThis}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
                                   />
                                   <button 
                                     disabled={isUploadingThis}
-                                    className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                                    className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 group-hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
                                   >
                                     {isUploadingThis ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                                    {isUploadingThis ? "กำลังวิเคราะห์..." : "เลือกไฟล์ ZPSR018"}
+                                    {isUploadingThis ? "กำลังวิเคราะห์ด้วย AI..." : "เลือกไฟล์ ZPSR018"}
                                   </button>
                                 </div>
                               </div>
@@ -310,36 +368,49 @@ export default function MaterialTracking() {
                               {/* Materials List for this Project */}
                               {projMaterials.length > 0 ? (
                                 <div className="space-y-6">
-                                  <div className="flex justify-between items-center">
-                                    <h5 className="font-bold text-slate-700 text-sm">รายการพัสดุในงานนี้</h5>
+                                  <div className="flex justify-between items-center bg-slate-100 p-3 rounded-lg border border-slate-200">
+                                    <h5 className="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                      <CheckCircle2 size={16} className="text-emerald-500" /> รายการพัสดุในงานนี้
+                                    </h5>
                                     <button 
                                       onClick={() => clearDataForWbs(p.wbs)}
-                                      className="text-xs text-red-500 hover:text-red-700 underline"
+                                      className="text-xs font-medium text-red-500 hover:text-white hover:bg-red-500 px-3 py-1.5 rounded border border-red-200 hover:border-red-500 transition-colors"
                                     >
-                                      ล้างพัสดุงานนี้
+                                      ล้างพัสดุงานนี้ทั้งหมด
                                     </button>
                                   </div>
 
                                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     {/* พัสดุเบิกใหม่ */}
                                     <div className="space-y-3">
-                                      <h6 className="font-bold text-emerald-700 flex items-center gap-2 pb-2 border-b border-emerald-100 text-sm">
-                                        <Package size={16} /> พัสดุเบิกใหม่
-                                      </h6>
-                                      {projMaterials.filter(m => m.part === 'new').map(m => (
-                                        <div key={m.id} className="bg-white p-3 rounded-lg border border-emerald-100 shadow-sm">
-                                          <p className="font-semibold text-slate-800 text-sm">{m.material_name}</p>
-                                          <div className="flex justify-between items-end mt-2">
-                                            <p className="text-sm font-medium text-emerald-600">
-                                              จำนวน: {m.quantity} {m.unit}
+                                      <div className="flex justify-between items-end pb-2 border-b border-emerald-100">
+                                        <h6 className="font-bold text-emerald-700 flex items-center gap-2 text-sm">
+                                          <Package size={16} /> พัสดุเบิกใหม่ ({newMats.length})
+                                        </h6>
+                                        {newMats.length > 0 && (
+                                          <button 
+                                            onClick={() => markAllStatus(p.wbs, "new", "นำไปก่อสร้างแล้ว")}
+                                            className="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 font-medium"
+                                          >
+                                            ติ๊กสร้างแล้วทั้งหมด
+                                          </button>
+                                        )}
+                                      </div>
+                                      
+                                      {newMats.map(m => (
+                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${m.status === 'นำไปก่อสร้างแล้ว' ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200'}`}>
+                                          <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
+                                          <div className="flex justify-between items-end mt-3">
+                                            <p className="text-sm font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                              {m.quantity} {m.unit}
                                             </p>
                                             <select
                                               value={m.status}
                                               onChange={(e) => updateStatus(m.id, e.target.value)}
-                                              className={`text-xs font-bold px-2 py-1 rounded outline-none border cursor-pointer ${
+                                              className={`text-xs font-bold px-3 py-1.5 rounded-lg outline-none border cursor-pointer transition-colors ${
                                                 m.status === "นำไปก่อสร้างแล้ว" 
-                                                  ? "bg-emerald-600 text-white border-emerald-700" 
-                                                  : "bg-slate-50 text-slate-600 border-slate-200"
+                                                  ? "bg-emerald-600 text-white border-emerald-700 shadow-sm" 
+                                                  : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
                                               }`}
                                             >
                                               <option value="ยังไม่ได้ก่อสร้าง">ยังไม่ได้ก่อสร้าง</option>
@@ -348,30 +419,46 @@ export default function MaterialTracking() {
                                           </div>
                                         </div>
                                       ))}
-                                      {projMaterials.filter(m => m.part === 'new').length === 0 && <p className="text-xs text-slate-400">ไม่มีรายการ</p>}
+                                      {newMats.length === 0 && (
+                                        <div className="flex flex-col items-center justify-center py-6 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                                          <CircleDashed size={24} className="mb-2 opacity-50" />
+                                          <p className="text-xs">ไม่มีรายการพัสดุเบิกใหม่</p>
+                                        </div>
+                                      )}
                                     </div>
 
                                     {/* พัสดุรื้อถอน */}
                                     <div className="space-y-3">
-                                      <h6 className="font-bold text-amber-700 flex items-center gap-2 pb-2 border-b border-amber-100 text-sm">
-                                        <Wrench size={16} /> พัสดุรื้อถอนค้างส่งคืน
-                                      </h6>
-                                      {projMaterials.filter(m => m.part === 'demolish').map(m => (
-                                        <div key={m.id} className="bg-white p-3 rounded-lg border border-amber-100 shadow-sm">
-                                          <p className="font-semibold text-slate-800 text-sm">{m.material_name}</p>
-                                          <div className="flex justify-between items-end mt-2">
-                                            <p className="text-sm font-medium text-amber-600">
-                                              จำนวน: {m.quantity} {m.unit}
+                                      <div className="flex justify-between items-end pb-2 border-b border-amber-100">
+                                        <h6 className="font-bold text-amber-700 flex items-center gap-2 text-sm">
+                                          <Wrench size={16} /> พัสดุรื้อถอน ({demMats.length})
+                                        </h6>
+                                        {demMats.length > 0 && (
+                                          <button 
+                                            onClick={() => markAllStatus(p.wbs, "demolish", "ส่งคืนแล้ว")}
+                                            className="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 font-medium"
+                                          >
+                                            ติ๊กส่งคืนแล้วทั้งหมด
+                                          </button>
+                                        )}
+                                      </div>
+
+                                      {demMats.map(m => (
+                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${m.status === 'ส่งคืนแล้ว' ? 'border-emerald-200 bg-emerald-50/30' : m.status === 'รื้อถอนแล้วยังไม่ส่งคืน' ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'}`}>
+                                          <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
+                                          <div className="flex justify-between items-end mt-3">
+                                            <p className="text-sm font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                              {m.quantity} {m.unit}
                                             </p>
                                             <select
                                               value={m.status}
                                               onChange={(e) => updateStatus(m.id, e.target.value)}
-                                              className={`text-xs font-bold px-2 py-1 rounded outline-none border cursor-pointer ${
+                                              className={`text-xs font-bold px-3 py-1.5 rounded-lg outline-none border cursor-pointer transition-colors ${
                                                 m.status === "ส่งคืนแล้ว" 
-                                                  ? "bg-emerald-600 text-white border-emerald-700" 
+                                                  ? "bg-emerald-600 text-white border-emerald-700 shadow-sm" 
                                                   : m.status === "รื้อถอนแล้วยังไม่ส่งคืน"
-                                                    ? "bg-amber-500 text-white border-amber-600"
-                                                    : "bg-slate-50 text-slate-600 border-slate-200"
+                                                    ? "bg-amber-500 text-white border-amber-600 shadow-sm"
+                                                    : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
                                               }`}
                                             >
                                               <option value="ยังไม่ได้รื้อถอนและยังไม่ส่งคืน">ยังไม่ได้รื้อถอน</option>
@@ -381,13 +468,18 @@ export default function MaterialTracking() {
                                           </div>
                                         </div>
                                       ))}
-                                      {projMaterials.filter(m => m.part === 'demolish').length === 0 && <p className="text-xs text-slate-400">ไม่มีรายการ</p>}
+                                      {demMats.length === 0 && (
+                                        <div className="flex flex-col items-center justify-center py-6 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                                          <CircleDashed size={24} className="mb-2 opacity-50" />
+                                          <p className="text-xs">ไม่มีรายการพัสดุรื้อถอน</p>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
                               ) : (
-                                <div className="text-center py-6 text-slate-400 text-sm italic">
-                                  งานนี้ยังไม่ได้นำเข้าพัสดุ (อัปโหลดไฟล์ ZPSR018 ด้านบนเพื่อดึงรายการ)
+                                <div className="text-center py-8 text-slate-500 text-sm">
+                                  งานนี้ยังไม่ได้นำเข้าพัสดุ (อัปโหลดไฟล์ ZPSR018 ในกล่องด้านบนเพื่อดึงรายการ)
                                 </div>
                               )}
                             </div>
@@ -400,7 +492,6 @@ export default function MaterialTracking() {
                     {orphanWbs.map(wbs => {
                       const projMaterials = materials.filter(m => m.wbs === wbs);
                       const isExpanded = expandedProjects[wbs] || false;
-                      const isUploadingThis = uploadingWbs === wbs;
 
                       return (
                         <div key={wbs} className="bg-slate-50 border border-slate-200 rounded-xl shadow-sm overflow-hidden opacity-75">
@@ -413,7 +504,7 @@ export default function MaterialTracking() {
                               <div>
                                 <h4 className="font-bold text-slate-600 text-sm">{wbs}</h4>
                                 <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-medium mt-1 inline-block">
-                                  ไม่มีในฐานข้อมูลงานปัจจุบัน (แต่อาจมีพัสดุค้าง)
+                                  ไม่มีในฐานข้อมูลงานปัจจุบัน (แต่อาจมีพัสดุค้างอยู่ {projMaterials.length} รายการ)
                                 </span>
                               </div>
                             </div>
@@ -433,7 +524,6 @@ export default function MaterialTracking() {
                                   ล้างพัสดุงานนี้
                                 </button>
                               </div>
-                              {/* Simplify rendering for orphans to save space */}
                               <div className="space-y-2">
                                 {projMaterials.map(m => (
                                   <div key={m.id} className="bg-white p-2 px-3 rounded flex justify-between items-center border border-slate-200">
