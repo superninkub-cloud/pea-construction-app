@@ -17,7 +17,15 @@ interface Material {
   damaged_quantity?: number; // ชำรุด
   unit: string;
   part: "new" | "demolish";
-  status: string;
+  status: string; // Legacy
+
+  // New tracking fields
+  track_new_done?: number; // นำไปก่อสร้างแล้ว
+  track_new_pending?: number; // ยังไม่ได้ก่อสร้าง
+  track_dem_pending?: number; // ยังไม่รื้อ
+  track_dem_done_not_returned?: number; // รื้อแล้วยังไม่คืน
+  track_dem_returned_good?: number; // คืนดี
+  track_dem_returned_damaged?: number; // คืนชำรุด
 }
 
 export default function MaterialTracking() {
@@ -99,9 +107,22 @@ export default function MaterialTracking() {
             const totalReturned = actual + damaged;
             
             let initialStatus = "";
+            
+            let track_new_pending = 0;
+            let track_new_done = 0;
+            let track_dem_pending = 0;
+            let track_dem_done_not_returned = 0;
+            let track_dem_returned_good = 0;
+            let track_dem_returned_damaged = 0;
+
             if (m.part === "new") {
               initialStatus = "ยังไม่ได้ก่อสร้าง"; 
+              track_new_pending = estimated;
             } else {
+              track_dem_returned_good = actual;
+              track_dem_returned_damaged = damaged;
+              track_dem_pending = Math.max(0, estimated - actual - damaged);
+
               if (totalReturned > 0 && totalReturned >= estimated) {
                 initialStatus = "ส่งคืนแล้ว";
               } else if (totalReturned > 0) {
@@ -123,7 +144,13 @@ export default function MaterialTracking() {
               damaged_quantity: damaged,
               unit: m.unit || "",
               part: m.part === "demolish" ? "demolish" : "new",
-              status: initialStatus
+              status: initialStatus,
+              track_new_done,
+              track_new_pending,
+              track_dem_pending,
+              track_dem_done_not_returned,
+              track_dem_returned_good,
+              track_dem_returned_damaged
             };
           });
 
@@ -156,9 +183,23 @@ export default function MaterialTracking() {
     saveToStorage(updated);
   };
 
+  const updateMaterialTracking = (id: string, updates: Partial<Material>) => {
+    const updated = materials.map(m => m.id === id ? { ...m, ...updates } : m);
+    saveToStorage(updated);
+  };
+
   const markAllStatus = (wbs: string, part: "new" | "demolish", newStatus: string) => {
-    if (confirm(`ต้องการอัปเดตสถานะทั้งหมดเป็น "${newStatus}" ใช่หรือไม่?`)) {
-      const updated = materials.map(m => (m.wbs === wbs && m.part === part) ? { ...m, status: newStatus } : m);
+    if (confirm(part === "new" ? `ต้องการติ๊ก "นำไปก่อสร้างแล้ว" ทั้งหมดใช่หรือไม่?` : `ต้องการติ๊ก "รื้อถอนและส่งคืนทั้งหมด" ใช่หรือไม่?`)) {
+      const updated = materials.map(m => {
+        if (m.wbs === wbs && m.part === part) {
+          if (part === "new") {
+            return { ...m, track_new_pending: 0, track_new_done: m.estimated_quantity || m.quantity };
+          } else {
+            return { ...m, track_dem_pending: 0, track_dem_done_not_returned: 0, track_dem_returned_good: m.estimated_quantity || m.quantity, track_dem_returned_damaged: 0 };
+          }
+        }
+        return m;
+      });
       saveToStorage(updated);
     }
   };
@@ -410,12 +451,16 @@ export default function MaterialTracking() {
                                         )}
                                       </div>
                                       
-                                      {newMats.map(m => (
-                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${m.status === 'นำไปก่อสร้างแล้ว' ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200'}`}>
+                                      {newMats.map(m => {
+                                        const pending = m.track_new_pending ?? m.estimated_quantity;
+                                        const done = m.track_new_done ?? 0;
+                                        const isAllDone = done >= (m.estimated_quantity || m.quantity) && (m.estimated_quantity || m.quantity) > 0;
+                                        return (
+                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200'}`}>
                                           <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
-                                          <div className="mt-3 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
+                                          <div className="mt-3 flex flex-col gap-3">
                                             
-                                            <div className="flex items-center gap-2 text-xs">
+                                            <div className="flex flex-wrap items-center gap-2 text-xs">
                                               <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
                                                 ประเมิน: <span className="font-bold">{m.estimated_quantity || m.quantity} {m.unit}</span>
                                               </span>
@@ -424,21 +469,20 @@ export default function MaterialTracking() {
                                               </span>
                                             </div>
 
-                                            <select
-                                              value={m.status}
-                                              onChange={(e) => updateStatus(m.id, e.target.value)}
-                                              className={`shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg outline-none border cursor-pointer transition-colors ${
-                                                m.status === "นำไปก่อสร้างแล้ว" 
-                                                  ? "bg-emerald-600 text-white border-emerald-700 shadow-sm" 
-                                                  : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
-                                              }`}
-                                            >
-                                              <option value="ยังไม่ได้ก่อสร้าง">สถานะ: ยังไม่ได้ก่อสร้าง</option>
-                                              <option value="นำไปก่อสร้างแล้ว">สถานะ: นำไปก่อสร้างแล้ว</option>
-                                            </select>
+                                            <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
+                                              <span className="font-medium text-slate-600 w-full sm:w-auto">ระบุจำนวน (EA):</span>
+                                              <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
+                                                <span className="text-slate-500 whitespace-nowrap">ยังไม่ก่อสร้าง</span>
+                                                <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_new_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                              </div>
+                                              <div className="flex items-center gap-1.5 bg-white border border-emerald-300 px-2 py-1 rounded-md">
+                                                <span className="text-emerald-700 whitespace-nowrap">ก่อสร้างแล้ว</span>
+                                                <input type="number" min="0" value={done} onChange={(e) => updateMaterialTracking(m.id, { track_new_done: Number(e.target.value) })} className="w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold" />
+                                              </div>
+                                            </div>
                                           </div>
                                         </div>
-                                      ))}
+                                      )})}
                                       {newMats.length === 0 && (
                                         <div className="flex flex-col items-center justify-center py-6 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                                           <CircleDashed size={24} className="mb-2 opacity-50" />
@@ -470,36 +514,47 @@ export default function MaterialTracking() {
                                         const isReturned = (m.actual_quantity + (m.damaged_quantity || 0)) > 0;
                                         const isFullyReturned = (m.actual_quantity + (m.damaged_quantity || 0)) >= (m.estimated_quantity || m.quantity);
 
+                                        const pending = m.track_dem_pending ?? Math.max(0, m.estimated_quantity - m.actual_quantity - (m.damaged_quantity || 0));
+                                        const done_not_ret = m.track_dem_done_not_returned ?? 0;
+                                        const ret_good = m.track_dem_returned_good ?? m.actual_quantity;
+                                        const ret_damaged = m.track_dem_returned_damaged ?? (m.damaged_quantity || 0);
+                                        const totalReturned = ret_good + ret_damaged;
+                                        const isAllDone = totalReturned >= (m.estimated_quantity || m.quantity) && (m.estimated_quantity || m.quantity) > 0;
+
                                         return (
-                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${m.status === 'ส่งคืนแล้ว' ? 'border-emerald-200 bg-emerald-50/30' : m.status === 'รื้อถอนแล้วยังไม่ส่งคืน' ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'}`}>
+                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : done_not_ret > 0 ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'}`}>
                                           <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
                                           
-                                          <div className="mt-3 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
+                                          <div className="mt-3 flex flex-col gap-3">
                                             <div className="flex flex-wrap items-center gap-2 text-xs">
                                               <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
                                                 ประเมินรื้อ: <span className="font-bold">{m.estimated_quantity || m.quantity}</span> {m.unit}
                                               </span>
                                               <div className={`flex items-center divide-x px-2 py-1 rounded border font-medium ${isReturned ? (isFullyReturned ? 'bg-emerald-100 text-emerald-800 border-emerald-200 divide-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-200 divide-amber-300') : 'bg-red-50 text-red-600 border-red-100 divide-red-200'}`}>
-                                                <span className="pr-2">คืนดี: <span className="font-bold">{m.actual_quantity}</span></span>
-                                                <span className="pl-2">ชำรุด: <span className="font-bold">{m.damaged_quantity || 0}</span></span>
+                                                <span className="pr-2 text-slate-500">ZPSR คืนดี: <span className="font-bold">{m.actual_quantity}</span></span>
+                                                <span className="pl-2 text-slate-500">ZPSR ชำรุด: <span className="font-bold">{m.damaged_quantity || 0}</span></span>
                                               </div>
                                             </div>
 
-                                            <select
-                                              value={m.status}
-                                              onChange={(e) => updateStatus(m.id, e.target.value)}
-                                              className={`shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg outline-none border cursor-pointer transition-colors ${
-                                                m.status === "ส่งคืนแล้ว" 
-                                                  ? "bg-emerald-600 text-white border-emerald-700 shadow-sm" 
-                                                  : m.status === "รื้อถอนแล้วยังไม่ส่งคืน"
-                                                    ? "bg-amber-500 text-white border-amber-600 shadow-sm"
-                                                    : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
-                                              }`}
-                                            >
-                                              <option value="ยังไม่ได้รื้อถอนและยังไม่ส่งคืน">สถานะ: ยังไม่ได้รื้อถอน</option>
-                                              <option value="รื้อถอนแล้วยังไม่ส่งคืน">สถานะ: รื้อแล้วรอส่งคืน</option>
-                                              <option value="ส่งคืนแล้ว">สถานะ: ส่งคืนแล้ว</option>
-                                            </select>
+                                            <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
+                                              <span className="font-medium text-slate-600 w-full xl:w-auto">ระบุจำนวน:</span>
+                                              <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
+                                                <span className="text-slate-500 whitespace-nowrap">ยังไม่รื้อ</span>
+                                                <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_dem_pending: Number(e.target.value) })} className="w-10 sm:w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                              </div>
+                                              <div className="flex items-center gap-1.5 bg-white border border-amber-300 px-2 py-1 rounded-md">
+                                                <span className="text-amber-700 whitespace-nowrap">รื้อรอคืน</span>
+                                                <input type="number" min="0" value={done_not_ret} onChange={(e) => updateMaterialTracking(m.id, { track_dem_done_not_returned: Number(e.target.value) })} className="w-10 sm:w-12 text-center outline-none bg-amber-50 focus:bg-white focus:ring-1 ring-amber-400 rounded text-amber-800 font-bold" />
+                                              </div>
+                                              <div className="flex items-center gap-1.5 bg-white border border-emerald-300 px-2 py-1 rounded-md">
+                                                <span className="text-emerald-700 whitespace-nowrap">คืนดี</span>
+                                                <input type="number" min="0" value={ret_good} onChange={(e) => updateMaterialTracking(m.id, { track_dem_returned_good: Number(e.target.value) })} className="w-10 sm:w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold" />
+                                              </div>
+                                              <div className="flex items-center gap-1.5 bg-white border border-red-300 px-2 py-1 rounded-md">
+                                                <span className="text-red-700 whitespace-nowrap">ชำรุด</span>
+                                                <input type="number" min="0" value={ret_damaged} onChange={(e) => updateMaterialTracking(m.id, { track_dem_returned_damaged: Number(e.target.value) })} className="w-10 sm:w-12 text-center outline-none bg-red-50 focus:bg-white focus:ring-1 ring-red-400 rounded text-red-800 font-bold" />
+                                              </div>
+                                            </div>
                                           </div>
                                         </div>
                                       )})}
@@ -563,17 +618,9 @@ export default function MaterialTracking() {
                                 {projMaterials.map(m => (
                                   <div key={m.id} className="bg-white p-2 px-3 rounded flex justify-between items-center border border-slate-200">
                                     <span className="text-sm text-slate-700">{m.material_name} </span>
-                                    <select
-                                      value={m.status}
-                                      onChange={(e) => updateStatus(m.id, e.target.value)}
-                                      className="text-xs border rounded p-1"
-                                    >
-                                      <option value="ยังไม่ได้ก่อสร้าง">ยังไม่ได้ก่อสร้าง</option>
-                                      <option value="นำไปก่อสร้างแล้ว">นำไปก่อสร้างแล้ว</option>
-                                      <option value="ยังไม่ได้รื้อถอนและยังไม่ส่งคืน">ยังไม่ได้รื้อถอน</option>
-                                      <option value="รื้อถอนแล้วยังไม่ส่งคืน">รื้อแล้วรอส่งคืน</option>
-                                      <option value="ส่งคืนแล้ว">ส่งคืนแล้ว</option>
-                                    </select>
+                                    <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
+                                      {m.part === 'new' ? 'พัสดุเบิกใหม่' : 'พัสดุรื้อถอน'}
+                                    </span>
                                   </div>
                                 ))}
                               </div>
