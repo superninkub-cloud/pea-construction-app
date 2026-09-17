@@ -12,8 +12,9 @@ interface Material {
   material_code: string;
   material_name: string;
   quantity: number; // Fallback legacy
-  estimated_quantity: number; // ใหม่: ประมาณการ
-  actual_quantity: number; // ใหม่: เบิกจริง หรือ คืนจริง
+  estimated_quantity: number; // ประมาณการ
+  actual_quantity: number; // เบิกจริง หรือ คืนจริง
+  damaged_quantity?: number; // ชำรุด
   unit: string;
   part: "new" | "demolish";
   status: string;
@@ -93,6 +94,7 @@ export default function MaterialTracking() {
         const newMaterials: Material[] = result.materials
           .filter((m: any) => {
             const name = (m.material_name || "").toLowerCase();
+            // กฎจากผู้ใช้: ตัดลวดเหล็กตีเกลียวออก
             if (name.includes("ลวดเหล็กตีเกลียว") || name.includes("st. wire, stranded") || name.includes("เศษเหล็กและวัสดุ")) {
               return false;
             }
@@ -101,17 +103,16 @@ export default function MaterialTracking() {
           .map((m: any) => {
             const estimated = Number(m.estimated_quantity) || Number(m.quantity) || 0;
             const actual = Number(m.actual_quantity) || 0;
+            const damaged = Number(m.damaged_quantity) || 0;
+            const totalReturned = actual + damaged;
             
-            // การตั้งค่าเริ่มต้นสถานะเพื่อให้ทำงานง่ายขึ้น
-            // ถ้าของใหม่ เบิกมาแล้วครบ จะ default เป็นยังไม่ได้ก่อสร้าง (ให้ช่างไปอัปเดตต่อ)
-            // ถ้ารื้อถอน คืนครบแล้ว จะ default เป็นส่งคืนแล้ว
             let initialStatus = "";
             if (m.part === "new") {
               initialStatus = "ยังไม่ได้ก่อสร้าง"; 
             } else {
-              if (actual > 0 && actual >= estimated) {
+              if (totalReturned > 0 && totalReturned >= estimated) {
                 initialStatus = "ส่งคืนแล้ว";
-              } else if (actual > 0) {
+              } else if (totalReturned > 0) {
                 initialStatus = "รื้อถอนแล้วยังไม่ส่งคืน";
               } else {
                 initialStatus = "ยังไม่ได้รื้อถอนและยังไม่ส่งคืน";
@@ -127,6 +128,7 @@ export default function MaterialTracking() {
               quantity: estimated, // Fallback legacy
               estimated_quantity: estimated,
               actual_quantity: actual,
+              damaged_quantity: damaged,
               unit: m.unit || "",
               part: m.part === "demolish" ? "demolish" : "new",
               status: initialStatus
@@ -137,7 +139,7 @@ export default function MaterialTracking() {
         saveToStorage(updated);
         
         setExpandedProjects(prev => ({ ...prev, [targetWbs]: true }));
-        alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการสำหรับงาน ${targetWbs}\n(ระบบจะแสดงยอด เบิก/คืน จาก ZPSR018 ให้คุณใช้ตรวจสอบและจัดการสถานะงานต่อ)`);
+        alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการสำหรับงาน ${targetWbs}\n(ระบบจัดการแยกพัสดุดี/ชำรุดให้อัตโนมัติ พร้อมตัดเศษเหล็ก/ลวดตีเกลียวออกตามกฎแล้ว)`);
       } else {
         alert("ไม่พบข้อมูลพัสดุในเอกสารนี้ (อาจเป็นโครงการสถานะ F4 ทั้งหมด หรือไม่มีรายการที่ดึงได้)");
       }
@@ -198,7 +200,7 @@ export default function MaterialTracking() {
           ติดตามพัสดุรายช่าง (ZPSR018)
         </h1>
         <p className="opacity-80 text-sm mt-1">
-          เปรียบเทียบยอดประมาณการและยอดเบิก-คืนจากคลัง (ZPSR018) เพื่อใช้ติดตามการจัดการพัสดุของช่าง
+          เปรียบเทียบยอดประมาณการและยอดเบิก-คืนจากคลัง (แยกพัสดุดี/ชำรุด) เพื่อใช้ติดตามการจัดการพัสดุของช่าง
         </p>
       </div>
 
@@ -278,18 +280,16 @@ export default function MaterialTracking() {
 
                       // Summary Stats Calculation
                       const newMats = projMaterials.filter(m => m.part === 'new');
-                      const newConstructed = newMats.filter(m => m.status === "นำไปก่อสร้างแล้ว").length;
-                      
                       const demMats = projMaterials.filter(m => m.part === 'demolish');
-                      const demReturned = demMats.filter(m => m.status === "ส่งคืนแล้ว").length;
-                      const demDemolished = demMats.filter(m => m.status === "รื้อถอนแล้วยังไม่ส่งคืน").length;
 
                       // ยอดรวม ZPSR018
                       const totalNewEstimated = newMats.reduce((sum, m) => sum + (m.estimated_quantity || 0), 0);
                       const totalNewDrawn = newMats.reduce((sum, m) => sum + (m.actual_quantity || 0), 0);
                       
                       const totalDemEstimated = demMats.reduce((sum, m) => sum + (m.estimated_quantity || 0), 0);
-                      const totalDemReturnedReal = demMats.reduce((sum, m) => sum + (m.actual_quantity || 0), 0);
+                      const totalDemReturnedGood = demMats.reduce((sum, m) => sum + (m.actual_quantity || 0), 0);
+                      const totalDemReturnedDamaged = demMats.reduce((sum, m) => sum + (m.damaged_quantity || 0), 0);
+                      const totalDemReturnedTotal = totalDemReturnedGood + totalDemReturnedDamaged;
 
                       return (
                         <div key={p.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all hover:border-blue-300">
@@ -335,11 +335,11 @@ export default function MaterialTracking() {
                                           <Wrench size={12}/> พัสดุรื้อถอน ({demMats.length} รายการ)
                                         </span>
                                         <span className="text-slate-500 font-medium">
-                                          คืนคลัง <span className="text-emerald-600">{totalDemReturnedReal}</span> / ประมาณการรื้อ <span className="text-slate-700">{totalDemEstimated}</span>
+                                          รวมคืนคลัง <span className="text-emerald-600">{totalDemReturnedTotal}</span> (ดี {totalDemReturnedGood}, ชำรุด {totalDemReturnedDamaged}) / ประมาณการรื้อ <span className="text-slate-700">{totalDemEstimated}</span>
                                         </span>
                                       </div>
                                       <div className="w-full bg-slate-200 rounded-full h-2 flex overflow-hidden">
-                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalDemEstimated ? Math.min((totalDemReturnedReal/totalDemEstimated)*100, 100) : 0}%` }}></div>
+                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalDemEstimated ? Math.min((totalDemReturnedTotal/totalDemEstimated)*100, 100) : 0}%` }}></div>
                                       </div>
                                     </div>
                                   </div>
@@ -362,7 +362,7 @@ export default function MaterialTracking() {
                                     <Upload size={18} className="text-blue-600" /> นำเข้ายอดจากระบบ (ZPSR018) สำหรับงานนี้
                                   </h5>
                                   <p className="text-xs text-blue-600/80 mt-1">
-                                    ใช้อัปเดตข้อมูล &quot;ยอดเบิกจริง&quot; และ &quot;ยอดคืนจริง&quot; ในระบบ เพื่อเทียบกับยอดประมาณการ
+                                    ใช้อัปเดตข้อมูล &quot;ยอดเบิกจริง&quot; และ &quot;ยอดคืนจริง&quot; (แบบแยกชำรุด) ในระบบ
                                   </p>
                                 </div>
                                 <div className="shrink-0 w-full sm:w-auto relative group">
@@ -398,7 +398,7 @@ export default function MaterialTracking() {
                                     </button>
                                   </div>
 
-                                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                                     {/* พัสดุเบิกใหม่ */}
                                     <div className="space-y-3">
                                       <div className="flex justify-between items-end pb-2 border-b border-emerald-100">
@@ -462,7 +462,7 @@ export default function MaterialTracking() {
                                           <h6 className="font-bold text-amber-700 flex items-center gap-2 text-sm">
                                             <Wrench size={16} /> พัสดุรื้อถอน 
                                           </h6>
-                                          <p className="text-[11px] text-slate-500 mt-1">จัดการสถานะการนำพัสดุมาส่งคืนเข้าคลัง</p>
+                                          <p className="text-[11px] text-slate-500 mt-1">แยกรายการส่งคืนแบบ พัสดุดี และ พัสดุชำรุด</p>
                                         </div>
                                         {demMats.length > 0 && (
                                           <button 
@@ -474,18 +474,23 @@ export default function MaterialTracking() {
                                         )}
                                       </div>
 
-                                      {demMats.map(m => (
+                                      {demMats.map(m => {
+                                        const isReturned = (m.actual_quantity + (m.damaged_quantity || 0)) > 0;
+                                        const isFullyReturned = (m.actual_quantity + (m.damaged_quantity || 0)) >= (m.estimated_quantity || m.quantity);
+
+                                        return (
                                         <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${m.status === 'ส่งคืนแล้ว' ? 'border-emerald-200 bg-emerald-50/30' : m.status === 'รื้อถอนแล้วยังไม่ส่งคืน' ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'}`}>
                                           <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
                                           
                                           <div className="mt-3 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
-                                            <div className="flex items-center gap-2 text-xs">
+                                            <div className="flex flex-wrap items-center gap-2 text-xs">
                                               <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
-                                                ประเมินรื้อ: <span className="font-bold">{m.estimated_quantity || m.quantity} {m.unit}</span>
+                                                ประเมินรื้อ: <span className="font-bold">{m.estimated_quantity || m.quantity}</span> {m.unit}
                                               </span>
-                                              <span className={`px-2 py-1 rounded border font-medium ${m.actual_quantity > 0 ? (m.actual_quantity >= (m.estimated_quantity || m.quantity) ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200') : 'bg-red-50 text-red-600 border-red-100'}`}>
-                                                คืนคลัง: <span className="font-bold">{m.actual_quantity} {m.unit}</span>
-                                              </span>
+                                              <div className={`flex items-center divide-x px-2 py-1 rounded border font-medium ${isReturned ? (isFullyReturned ? 'bg-emerald-100 text-emerald-800 border-emerald-200 divide-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-200 divide-amber-300') : 'bg-red-50 text-red-600 border-red-100 divide-red-200'}`}>
+                                                <span className="pr-2">คืนดี: <span className="font-bold">{m.actual_quantity}</span></span>
+                                                <span className="pl-2">ชำรุด: <span className="font-bold">{m.damaged_quantity || 0}</span></span>
+                                              </div>
                                             </div>
 
                                             <select
@@ -505,7 +510,7 @@ export default function MaterialTracking() {
                                             </select>
                                           </div>
                                         </div>
-                                      ))}
+                                      )})}
                                       {demMats.length === 0 && (
                                         <div className="flex flex-col items-center justify-center py-6 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                                           <CircleDashed size={24} className="mb-2 opacity-50" />
@@ -526,7 +531,7 @@ export default function MaterialTracking() {
                       );
                     })}
 
-                    {/* Orphan WBS (Materials that exist but project is missing/closed) */}
+                    {/* Orphan WBS */}
                     {orphanWbs.map(wbs => {
                       const projMaterials = materials.filter(m => m.wbs === wbs);
                       const isExpanded = expandedProjects[wbs] || false;
