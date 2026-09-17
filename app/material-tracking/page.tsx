@@ -511,15 +511,15 @@ export default function MaterialTracking() {
                                       </div>
 
                                       {demMats.map(m => {
-                                        const isReturned = (m.actual_quantity + (m.damaged_quantity || 0)) > 0;
-                                        const isFullyReturned = (m.actual_quantity + (m.damaged_quantity || 0)) >= (m.estimated_quantity || m.quantity);
-
-                                        const pending = m.track_dem_pending ?? Math.max(0, m.estimated_quantity - m.actual_quantity - (m.damaged_quantity || 0));
+                                        const returnedGood = m.actual_quantity || 0;
+                                        const returnedDamaged = m.damaged_quantity || 0;
+                                        const totalReturned = returnedGood + returnedDamaged;
+                                        const estimated = m.estimated_quantity || m.quantity || 0;
+                                        const totalNotReturned = Math.max(0, estimated - totalReturned);
+                                        
+                                        const pending = m.track_dem_pending ?? totalNotReturned;
                                         const done_not_ret = m.track_dem_done_not_returned ?? 0;
-                                        const ret_good = m.track_dem_returned_good ?? m.actual_quantity;
-                                        const ret_damaged = m.track_dem_returned_damaged ?? (m.damaged_quantity || 0);
-                                        const totalReturned = ret_good + ret_damaged;
-                                        const isAllDone = totalReturned >= (m.estimated_quantity || m.quantity) && (m.estimated_quantity || m.quantity) > 0;
+                                        const isAllDone = totalReturned >= estimated && estimated > 0;
 
                                         return (
                                         <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : done_not_ret > 0 ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'}`}>
@@ -528,33 +528,32 @@ export default function MaterialTracking() {
                                           <div className="mt-3 flex flex-col gap-3">
                                             <div className="flex flex-wrap items-center gap-2 text-xs">
                                               <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
-                                                ประเมินรื้อ: <span className="font-bold">{m.estimated_quantity || m.quantity}</span> {m.unit}
+                                                ประเมินรื้อ: <span className="font-bold">{estimated}</span> {m.unit}
                                               </span>
-                                              <div className={`flex items-center divide-x px-2 py-1 rounded border font-medium ${isReturned ? (isFullyReturned ? 'bg-emerald-100 text-emerald-800 border-emerald-200 divide-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-200 divide-amber-300') : 'bg-red-50 text-red-600 border-red-100 divide-red-200'}`}>
-                                                <span className="pr-2 text-slate-500">ZPSR คืนดี: <span className="font-bold">{m.actual_quantity}</span></span>
-                                                <span className="pl-2 text-slate-500">ZPSR ชำรุด: <span className="font-bold">{m.damaged_quantity || 0}</span></span>
+                                              
+                                              <div className={`flex items-center px-2 py-1 rounded border font-medium ${totalNotReturned > 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                                                ยังไม่ส่งคืน: <span className="font-bold ml-1">{totalNotReturned}</span>
+                                              </div>
+
+                                              <div className={`flex items-center divide-x px-2 py-1 rounded border font-medium ${totalReturned > 0 ? (totalReturned >= estimated ? 'bg-emerald-100 text-emerald-800 border-emerald-200 divide-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-200 divide-amber-300') : 'bg-slate-100 text-slate-500 border-slate-200 divide-slate-300'}`}>
+                                                <span className="pr-2">คืนดี ZPSR: <span className="font-bold">{returnedGood}</span></span>
+                                                <span className="pl-2">ชำรุด ZPSR: <span className="font-bold">{returnedDamaged}</span></span>
                                               </div>
                                             </div>
 
-                                            <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
-                                              <span className="font-medium text-slate-600 w-full xl:w-auto">ระบุจำนวน:</span>
-                                              <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
-                                                <span className="text-slate-500 whitespace-nowrap">ยังไม่รื้อ</span>
-                                                <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_dem_pending: Number(e.target.value) })} className="w-10 sm:w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                            {totalNotReturned > 0 && (
+                                              <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
+                                                <span className="font-medium text-slate-600 w-full sm:w-auto">แบ่งยอดที่ยังไม่ส่งคืน ({totalNotReturned} EA):</span>
+                                                <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
+                                                  <span className="text-slate-500 whitespace-nowrap">ยังไม่รื้อ</span>
+                                                  <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_dem_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                                </div>
+                                                <div className="flex items-center gap-1.5 bg-white border border-amber-300 px-2 py-1 rounded-md">
+                                                  <span className="text-amber-700 whitespace-nowrap">รื้อรอคืน</span>
+                                                  <input type="number" min="0" value={done_not_ret} onChange={(e) => updateMaterialTracking(m.id, { track_dem_done_not_returned: Number(e.target.value) })} className="w-12 text-center outline-none bg-amber-50 focus:bg-white focus:ring-1 ring-amber-400 rounded text-amber-800 font-bold" />
+                                                </div>
                                               </div>
-                                              <div className="flex items-center gap-1.5 bg-white border border-amber-300 px-2 py-1 rounded-md">
-                                                <span className="text-amber-700 whitespace-nowrap">รื้อรอคืน</span>
-                                                <input type="number" min="0" value={done_not_ret} onChange={(e) => updateMaterialTracking(m.id, { track_dem_done_not_returned: Number(e.target.value) })} className="w-10 sm:w-12 text-center outline-none bg-amber-50 focus:bg-white focus:ring-1 ring-amber-400 rounded text-amber-800 font-bold" />
-                                              </div>
-                                              <div className="flex items-center gap-1.5 bg-white border border-emerald-300 px-2 py-1 rounded-md">
-                                                <span className="text-emerald-700 whitespace-nowrap">คืนดี</span>
-                                                <input type="number" min="0" value={ret_good} onChange={(e) => updateMaterialTracking(m.id, { track_dem_returned_good: Number(e.target.value) })} className="w-10 sm:w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold" />
-                                              </div>
-                                              <div className="flex items-center gap-1.5 bg-white border border-red-300 px-2 py-1 rounded-md">
-                                                <span className="text-red-700 whitespace-nowrap">ชำรุด</span>
-                                                <input type="number" min="0" value={ret_damaged} onChange={(e) => updateMaterialTracking(m.id, { track_dem_returned_damaged: Number(e.target.value) })} className="w-10 sm:w-12 text-center outline-none bg-red-50 focus:bg-white focus:ring-1 ring-red-400 rounded text-red-800 font-bold" />
-                                              </div>
-                                            </div>
+                                            )}
                                           </div>
                                         </div>
                                       )})}

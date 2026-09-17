@@ -40,7 +40,8 @@ Your task is to extract material tracking data based STRICTLY on the following r
 3. For non-F4 projects, extract the materials. There are 2 parts of materials:
    - "new" (พัสดุเบิกใหม่): Materials for construction. Look for departments with "-C-E" or "แผนกก่อสร้าง" (e.g., HT-C-E, LT-C-E, TL-C-E, TR-C-E).
    - "demolish" (พัสดุรื้อถอน): Materials from demolition that need to be returned. Look for departments with "-R-E" or "แผนกรื้อถอน" (e.g., HT-R-E, LT-R-E, TL-R-E, TR-R-E). NOTE: Even if the main table header says "ก่อสร้าง" (Construction), if the sub-header specifies a demolition department like "-R-E" or "แผนกรื้อถอน", ALL items under that sub-header MUST be classified as "demolish" (รื้อถอน).
-4. If technician name (ชื่อช่าง) is mentioned in the document, extract it. Otherwise, set it to an empty string "".
+4. EXTRACT ALL materials listed under these departments. DO NOT skip any material even if its drawn quantity, returned quantity, or damaged quantity is 0 (i.e. it hasn't been drawn or returned yet).
+5. If technician name (ชื่อช่าง) is mentioned in the document, extract it. Otherwise, set it to an empty string "".
 
 Return ONLY a valid JSON array of objects representing the valid materials. Each object must have the following keys:
 - "wbs": The WBS element.
