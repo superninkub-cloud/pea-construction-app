@@ -32,12 +32,11 @@ export default function MaterialTracking() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [activeProjects, setActiveProjects] = useState<Project[]>([]);
   const [technicians, setTechnicians] = useState<string[]>([]);
-  
+
   const [uploadingWbs, setUploadingWbs] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTechnician, setSelectedTechnician] = useState<string>("ทั้งหมด");
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
-  const [showCampInventory, setShowCampInventory] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchBaseData();
@@ -78,16 +77,9 @@ export default function MaterialTracking() {
     setExpandedProjects(prev => ({ ...prev, [wbs]: !prev[wbs] }));
   };
 
-  const toggleCampInventory = (tech: string) => {
-    setShowCampInventory(prev => ({
-      ...prev,
-      [tech]: !prev[tech]
-    }));
-  };
-
   const handleUploadForProject = async (e: React.ChangeEvent<HTMLInputElement>, targetWbs: string, targetSupervisor: string) => {
     if (!e.target.files || !e.target.files[0]) return;
-    
+
     const file = e.target.files[0];
     setUploadingWbs(targetWbs);
 
@@ -113,9 +105,9 @@ export default function MaterialTracking() {
             const actual = Number(m.actual_quantity) || 0;
             const damaged = Number(m.damaged_quantity) || 0;
             const totalReturned = actual + damaged;
-            
+
             let initialStatus = "";
-            
+
             let track_new_pending = 0;
             let track_new_done = 0;
             let track_dem_pending = 0;
@@ -124,7 +116,7 @@ export default function MaterialTracking() {
             let track_dem_returned_damaged = 0;
 
             if (m.part === "new") {
-              initialStatus = "ยังไม่ได้ก่อสร้าง"; 
+              initialStatus = "ยังไม่ได้ก่อสร้าง";
               track_new_pending = estimated;
             } else {
               track_dem_returned_good = actual;
@@ -164,7 +156,7 @@ export default function MaterialTracking() {
 
         const updated = [...materials, ...newMaterials];
         saveToStorage(updated);
-        
+
         setExpandedProjects(prev => ({ ...prev, [targetWbs]: true }));
         alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการสำหรับงาน ${targetWbs}\n(ระบบจัดการแยกพัสดุดี/ชำรุดให้อัตโนมัติ พร้อมตัดเศษเหล็ก/ลวดตีเกลียวออกตามกฎแล้ว)`);
       } else {
@@ -217,8 +209,8 @@ export default function MaterialTracking() {
     ...materials.map(m => m.technician_name || "ยังไม่ระบุช่าง")
   ])).sort();
 
-  const displayTechs = selectedTechnician === "ทั้งหมด" 
-    ? allTechsToDisplay 
+  const displayTechs = selectedTechnician === "ทั้งหมด"
+    ? allTechsToDisplay
     : [selectedTechnician];
 
   if (isLoading) {
@@ -246,13 +238,13 @@ export default function MaterialTracking() {
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-        
+
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center gap-3 w-full md:w-auto">
             <label className="text-sm font-medium text-slate-600 shrink-0">เลือกช่างชุด:</label>
-            <select 
-              value={selectedTechnician} 
+            <select
+              value={selectedTechnician}
               onChange={(e) => setSelectedTechnician(e.target.value)}
               className="w-full md:w-64 p-2 border border-slate-300 rounded-lg text-sm bg-slate-50 outline-none focus:border-blue-500 font-medium"
             >
@@ -265,9 +257,9 @@ export default function MaterialTracking() {
 
           <div className="flex items-center gap-3 w-full md:w-auto">
             {materials.length > 0 && (
-              <button 
+              <button
                 onClick={() => {
-                  if(confirm("ต้องการล้างรายการพัสดุทั้งหมดในระบบใช่หรือไม่?")) saveToStorage([]);
+                  if (confirm("ต้องการล้างรายการพัสดุทั้งหมดในระบบใช่หรือไม่?")) saveToStorage([]);
                 }}
                 className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors border border-red-100"
               >
@@ -282,91 +274,28 @@ export default function MaterialTracking() {
           {displayTechs.map(tech => {
             const techProjects = activeProjects.filter(p => p.supervisor === tech);
             const techMaterials = materials.filter(m => (m.technician_name || "ยังไม่ระบุช่าง") === tech);
-            
+
             const activeWbsSet = new Set(techProjects.map(p => p.wbs));
             const orphanWbs = Array.from(new Set(techMaterials.map(m => m.wbs))).filter(wbs => !activeWbsSet.has(wbs));
-
-            // คำนวณคลังแคมป์ (Camp Inventory) สำหรับช่างคนนี้
-            const inventoryMap = new Map<string, { code: string, name: string, unit: string, newPending: number, demWaiting: number }>();
-            techMaterials.forEach(m => {
-              const key = `${m.material_code || 'no-code'}_${m.material_name}`;
-              if (!inventoryMap.has(key)) {
-                inventoryMap.set(key, { code: m.material_code || '', name: m.material_name, unit: m.unit, newPending: 0, demWaiting: 0 });
-              }
-              const stock = inventoryMap.get(key)!;
-              
-              if (m.part === 'new') {
-                const pending = m.track_new_pending ?? m.actual_quantity;
-                stock.newPending += pending;
-              } else if (m.part === 'demolish') {
-                const waitingToReturn = m.track_dem_done_not_returned ?? 0;
-                stock.demWaiting += waitingToReturn;
-              }
-            });
-            const campInventory = Array.from(inventoryMap.values()).filter(item => item.newPending > 0 || item.demWaiting > 0);
-            const isCampExpanded = showCampInventory[tech] || false;
 
             return (
               <div key={tech} className="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                 <div className="bg-slate-800 text-white px-6 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-bold text-lg flex items-center gap-2">
-                      <User size={20} className="text-blue-400" />
-                      {tech}
-                    </h3>
-                    <div className="hidden md:flex flex-wrap gap-2">
-                      <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-medium">
-                        งานที่รับผิดชอบ {techProjects.length} งาน
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <User size={20} className="text-blue-400" />
+                    {tech}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-medium">
+                      งานที่รับผิดชอบ {techProjects.length} งาน
+                    </span>
+                    {techMaterials.length > 0 && (
+                      <span className="bg-emerald-600 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500">
+                        ดึงพัสดุแล้ว {Array.from(new Set(techMaterials.map(m => m.wbs))).length} งาน
                       </span>
-                      {techMaterials.length > 0 && (
-                        <span className="bg-emerald-600 px-3 py-1 rounded-full text-xs font-medium border border-emerald-500">
-                          ดึงพัสดุแล้ว {Array.from(new Set(techMaterials.map(m=>m.wbs))).length} งาน
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <button 
-                    onClick={() => toggleCampInventory(tech)}
-                    className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all border ${isCampExpanded ? 'bg-amber-500 text-slate-900 border-amber-400 shadow-md' : 'bg-slate-700 text-white border-slate-600 hover:bg-slate-600 shadow-sm'}`}
-                  >
-                    ⛺ คลังประจำแคมป์ {isCampExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  </button>
-                </div>
-
-                {/* Camp Inventory Panel */}
-                {isCampExpanded && (
-                  <div className="p-4 md:p-6 bg-slate-100 border-b border-slate-200 shadow-inner">
-                    <h4 className="font-bold text-slate-700 flex items-center gap-2 mb-4">
-                      <Package size={18} /> สต๊อกพัสดุหน้าแคมป์ (Camp Inventory)
-                    </h4>
-                    {campInventory.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {campInventory.map((item, idx) => (
-                          <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                            <p className="text-sm font-semibold text-slate-800 line-clamp-2" title={item.name}>{item.name}</p>
-                            <div className="mt-3 flex gap-2 text-xs">
-                              {item.newPending > 0 && (
-                                <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-100 flex-1 text-center">
-                                  เบิกมารอติดตั้ง<br/><span className="text-base font-bold">{item.newPending}</span> {item.unit}
-                                </div>
-                              )}
-                              {item.demWaiting > 0 && (
-                                <div className="bg-amber-50 text-amber-700 px-2 py-1 rounded border border-amber-100 flex-1 text-center">
-                                  รื้อแล้วรอคืน<br/><span className="text-base font-bold">{item.demWaiting}</span> {item.unit}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center p-6 bg-white rounded-xl border border-dashed border-slate-300 text-slate-500 text-sm">
-                        ไม่มีพัสดุค้างอยู่ในสต๊อกแคมป์นี้
-                      </div>
                     )}
                   </div>
-                )}
+                </div>
 
                 <div className="p-4 md:p-6 bg-slate-50">
                   {techProjects.length === 0 && orphanWbs.length === 0 && (
@@ -389,7 +318,7 @@ export default function MaterialTracking() {
                       // จำนวนรายการเบิกใหม่
                       const totalNewItems = newMats.length;
                       const drawnNewItems = newMats.filter(m => (m.actual_quantity || 0) >= (m.estimated_quantity || m.quantity || 1)).length;
-                      
+
                       // จำนวนรายการรื้อถอน (ไม่รวมรหัส 1-50...)
                       const validDemMats = demMats.filter(m => !m.material_code.startsWith("1-50"));
                       const totalDemItems = validDemMats.length;
@@ -402,7 +331,7 @@ export default function MaterialTracking() {
                       return (
                         <div key={p.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden transition-all hover:border-blue-300">
                           {/* Project Header (Clickable) */}
-                          <div 
+                          <div
                             onClick={() => toggleProject(p.wbs)}
                             className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/80 transition-colors"
                           >
@@ -411,7 +340,7 @@ export default function MaterialTracking() {
                               <div className="w-full pr-4">
                                 <h4 className="font-bold text-slate-800 text-sm md:text-base">{p.wbs}</h4>
                                 <p className="text-sm text-slate-600 mt-1 line-clamp-2">{p.name}</p>
-                                
+
                                 <div className="flex flex-wrap items-center gap-2 mt-2">
                                   <span className="text-xs bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 font-medium">
                                     สถานะงาน: {p.status}
@@ -425,14 +354,14 @@ export default function MaterialTracking() {
                                     <div>
                                       <div className="flex justify-between text-xs mb-1.5">
                                         <span className="font-bold text-emerald-700 flex items-center gap-1">
-                                          <Package size={12}/> พัสดุเบิกใหม่ ({totalNewItems} รายการ)
+                                          <Package size={12} /> พัสดุเบิกใหม่ ({totalNewItems} รายการ)
                                         </span>
                                         <span className="text-slate-500 font-medium">
                                           เบิกครบ <span className="text-emerald-600">{drawnNewItems}</span> / ทั้งหมด <span className="text-slate-700">{totalNewItems}</span> รายการ
                                         </span>
                                       </div>
                                       <div className="w-full bg-slate-200 rounded-full h-2 flex overflow-hidden">
-                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalNewItems ? Math.min((drawnNewItems/totalNewItems)*100, 100) : 0}%` }}></div>
+                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalNewItems ? Math.min((drawnNewItems / totalNewItems) * 100, 100) : 0}%` }}></div>
                                       </div>
                                     </div>
 
@@ -440,14 +369,14 @@ export default function MaterialTracking() {
                                     <div>
                                       <div className="flex justify-between text-xs mb-1.5">
                                         <span className="font-bold text-amber-700 flex items-center gap-1">
-                                          <Wrench size={12}/> พัสดุรื้อถอน ({totalDemItems} รายการหลัก)
+                                          <Wrench size={12} /> พัสดุรื้อถอน ({totalDemItems} รายการหลัก)
                                         </span>
                                         <span className="text-slate-500 font-medium">
                                           ส่งคืนครบ <span className="text-emerald-600">{returnedDemItems}</span> / ทั้งหมด <span className="text-slate-700">{totalDemItems}</span> รายการ
                                         </span>
                                       </div>
                                       <div className="w-full bg-slate-200 rounded-full h-2 flex overflow-hidden">
-                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalDemItems ? Math.min((returnedDemItems/totalDemItems)*100, 100) : 0}%` }}></div>
+                                        <div className="bg-emerald-500 h-2 transition-all duration-500" style={{ width: `${totalDemItems ? Math.min((returnedDemItems / totalDemItems) * 100, 100) : 0}%` }}></div>
                                       </div>
                                     </div>
                                   </div>
@@ -462,7 +391,7 @@ export default function MaterialTracking() {
                           {/* Expanded Content: Upload & Materials */}
                           {isExpanded && (
                             <div className="border-t border-slate-100 p-4 bg-slate-50/50">
-                              
+
                               {/* Upload Action */}
                               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm">
                                 <div>
@@ -474,14 +403,14 @@ export default function MaterialTracking() {
                                   </p>
                                 </div>
                                 <div className="shrink-0 w-full sm:w-auto relative group">
-                                  <input 
-                                    type="file" 
+                                  <input
+                                    type="file"
                                     accept=".pdf"
                                     onChange={(e) => handleUploadForProject(e, p.wbs, tech)}
                                     disabled={isUploadingThis}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
                                   />
-                                  <button 
+                                  <button
                                     disabled={isUploadingThis}
                                     className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 group-hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
                                   >
@@ -498,7 +427,7 @@ export default function MaterialTracking() {
                                     <h5 className="font-bold text-slate-700 text-sm flex items-center gap-2">
                                       <CheckCircle2 size={16} className="text-emerald-500" /> รายการพัสดุในงานนี้ (ข้อมูลจากการดึงล่าสุด)
                                     </h5>
-                                    <button 
+                                    <button
                                       onClick={() => clearDataForWbs(p.wbs)}
                                       className="text-xs font-medium text-red-500 hover:text-white hover:bg-red-500 px-3 py-1.5 rounded border border-red-200 hover:border-red-500 transition-colors"
                                     >
@@ -512,12 +441,12 @@ export default function MaterialTracking() {
                                       <div className="flex justify-between items-end pb-2 border-b border-emerald-100">
                                         <div>
                                           <h6 className="font-bold text-emerald-700 flex items-center gap-2 text-sm">
-                                            <Package size={16} /> พัสดุเบิกใหม่ 
+                                            <Package size={16} /> พัสดุเบิกใหม่
                                           </h6>
                                           <p className="text-[11px] text-slate-500 mt-1">จัดการสถานะเพื่ออัปเดตการนำไปใช้งานจริง</p>
                                         </div>
                                         {newMats.length > 0 && (
-                                          <button 
+                                          <button
                                             onClick={() => markAllStatus(p.wbs, "new", "นำไปก่อสร้างแล้ว")}
                                             className="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 font-medium"
                                           >
@@ -525,39 +454,40 @@ export default function MaterialTracking() {
                                           </button>
                                         )}
                                       </div>
-                                      
+
                                       {newMats.map(m => {
                                         const pending = m.track_new_pending ?? m.estimated_quantity;
                                         const done = m.track_new_done ?? 0;
                                         const isAllDone = done >= (m.estimated_quantity || m.quantity) && (m.estimated_quantity || m.quantity) > 0;
                                         return (
-                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200'}`}>
-                                          <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
-                                          <div className="mt-3 flex flex-col gap-3">
-                                            
-                                            <div className="flex flex-wrap items-center gap-2 text-xs">
-                                              <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
-                                                ประเมิน: <span className="font-bold">{m.estimated_quantity || m.quantity} {m.unit}</span>
-                                              </span>
-                                              <span className={`px-2 py-1 rounded border font-medium ${m.actual_quantity > 0 ? (m.actual_quantity >= (m.estimated_quantity || m.quantity) ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200') : 'bg-red-50 text-red-600 border-red-100'}`}>
-                                                เบิกคลัง: <span className="font-bold">{m.actual_quantity} {m.unit}</span>
-                                              </span>
-                                            </div>
+                                          <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200'}`}>
+                                            <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
+                                            <div className="mt-3 flex flex-col gap-3">
 
-                                            <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
-                                              <span className="font-medium text-slate-600 w-full sm:w-auto">ระบุจำนวน (EA):</span>
-                                              <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
-                                                <span className="text-slate-500 whitespace-nowrap">ยังไม่ก่อสร้าง</span>
-                                                <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_new_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                              <div className="flex flex-wrap items-center gap-2 text-xs">
+                                                <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
+                                                  ประเมิน: <span className="font-bold">{m.estimated_quantity || m.quantity} {m.unit}</span>
+                                                </span>
+                                                <span className={`px-2 py-1 rounded border font-medium ${m.actual_quantity > 0 ? (m.actual_quantity >= (m.estimated_quantity || m.quantity) ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200') : 'bg-red-50 text-red-600 border-red-100'}`}>
+                                                  เบิกคลัง: <span className="font-bold">{m.actual_quantity} {m.unit}</span>
+                                                </span>
                                               </div>
-                                              <div className="flex items-center gap-1.5 bg-white border border-emerald-300 px-2 py-1 rounded-md">
-                                                <span className="text-emerald-700 whitespace-nowrap">ก่อสร้างแล้ว</span>
-                                                <input type="number" min="0" value={done} onChange={(e) => updateMaterialTracking(m.id, { track_new_done: Number(e.target.value) })} className="w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold" />
+
+                                              <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
+                                                <span className="font-medium text-slate-600 w-full sm:w-auto">ระบุจำนวน (EA):</span>
+                                                <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
+                                                  <span className="text-slate-500 whitespace-nowrap">ยังไม่ก่อสร้าง</span>
+                                                  <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_new_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                                </div>
+                                                <div className="flex items-center gap-1.5 bg-white border border-emerald-300 px-2 py-1 rounded-md">
+                                                  <span className="text-emerald-700 whitespace-nowrap">ก่อสร้างแล้ว</span>
+                                                  <input type="number" min="0" value={done} onChange={(e) => updateMaterialTracking(m.id, { track_new_done: Number(e.target.value) })} className="w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold" />
+                                                </div>
                                               </div>
                                             </div>
                                           </div>
-                                        </div>
-                                      )})}
+                                        )
+                                      })}
                                       {newMats.length === 0 && (
                                         <div className="flex flex-col items-center justify-center py-6 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                                           <CircleDashed size={24} className="mb-2 opacity-50" />
@@ -571,12 +501,12 @@ export default function MaterialTracking() {
                                       <div className="flex justify-between items-end pb-2 border-b border-amber-100">
                                         <div>
                                           <h6 className="font-bold text-amber-700 flex items-center gap-2 text-sm">
-                                            <Wrench size={16} /> พัสดุรื้อถอน 
+                                            <Wrench size={16} /> พัสดุรื้อถอน
                                           </h6>
                                           <p className="text-[11px] text-slate-500 mt-1">แยกรายการส่งคืนแบบ พัสดุดี และ พัสดุชำรุด</p>
                                         </div>
                                         {demMats.length > 0 && (
-                                          <button 
+                                          <button
                                             onClick={() => markAllStatus(p.wbs, "demolish", "ส่งคืนแล้ว")}
                                             className="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 font-medium"
                                           >
@@ -591,47 +521,48 @@ export default function MaterialTracking() {
                                         const totalReturned = returnedGood + returnedDamaged;
                                         const estimated = m.estimated_quantity || m.quantity || 0;
                                         const totalNotReturned = Math.max(0, estimated - totalReturned);
-                                        
+
                                         const pending = m.track_dem_pending ?? totalNotReturned;
                                         const done_not_ret = m.track_dem_done_not_returned ?? 0;
                                         const isAllDone = totalReturned >= estimated && estimated > 0;
 
                                         return (
-                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : done_not_ret > 0 ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'}`}>
-                                          <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
-                                          
-                                          <div className="mt-3 flex flex-col gap-3">
-                                            <div className="flex flex-wrap items-center gap-2 text-xs">
-                                              <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
-                                                ประเมินรื้อ: <span className="font-bold">{estimated}</span> {m.unit}
-                                              </span>
-                                              
-                                              <div className={`flex items-center px-2 py-1 rounded border font-medium ${totalNotReturned > 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                                                ยังไม่ส่งคืน: <span className="font-bold ml-1">{totalNotReturned}</span>
+                                          <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : done_not_ret > 0 ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200'}`}>
+                                            <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
+
+                                            <div className="mt-3 flex flex-col gap-3">
+                                              <div className="flex flex-wrap items-center gap-2 text-xs">
+                                                <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
+                                                  ประเมินรื้อ: <span className="font-bold">{estimated}</span> {m.unit}
+                                                </span>
+
+                                                <div className={`flex items-center px-2 py-1 rounded border font-medium ${totalNotReturned > 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                                                  ยังไม่ส่งคืน: <span className="font-bold ml-1">{totalNotReturned}</span>
+                                                </div>
+
+                                                <div className={`flex items-center divide-x px-2 py-1 rounded border font-medium ${totalReturned > 0 ? (totalReturned >= estimated ? 'bg-emerald-100 text-emerald-800 border-emerald-200 divide-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-200 divide-amber-300') : 'bg-slate-100 text-slate-500 border-slate-200 divide-slate-300'}`}>
+                                                  <span className="pr-2">คืนดี ZPSR: <span className="font-bold">{returnedGood}</span></span>
+                                                  <span className="pl-2">ชำรุด ZPSR: <span className="font-bold">{returnedDamaged}</span></span>
+                                                </div>
                                               </div>
 
-                                              <div className={`flex items-center divide-x px-2 py-1 rounded border font-medium ${totalReturned > 0 ? (totalReturned >= estimated ? 'bg-emerald-100 text-emerald-800 border-emerald-200 divide-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-200 divide-amber-300') : 'bg-slate-100 text-slate-500 border-slate-200 divide-slate-300'}`}>
-                                                <span className="pr-2">คืนดี ZPSR: <span className="font-bold">{returnedGood}</span></span>
-                                                <span className="pl-2">ชำรุด ZPSR: <span className="font-bold">{returnedDamaged}</span></span>
-                                              </div>
+                                              {totalNotReturned > 0 && (
+                                                <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
+                                                  <span className="font-medium text-slate-600 w-full sm:w-auto">แบ่งยอดที่ยังไม่ส่งคืน ({totalNotReturned} EA):</span>
+                                                  <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
+                                                    <span className="text-slate-500 whitespace-nowrap">ยังไม่รื้อ</span>
+                                                    <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_dem_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                                  </div>
+                                                  <div className="flex items-center gap-1.5 bg-white border border-amber-300 px-2 py-1 rounded-md">
+                                                    <span className="text-amber-700 whitespace-nowrap">รื้อรอคืน</span>
+                                                    <input type="number" min="0" value={done_not_ret} onChange={(e) => updateMaterialTracking(m.id, { track_dem_done_not_returned: Number(e.target.value) })} className="w-12 text-center outline-none bg-amber-50 focus:bg-white focus:ring-1 ring-amber-400 rounded text-amber-800 font-bold" />
+                                                  </div>
+                                                </div>
+                                              )}
                                             </div>
-
-                                            {totalNotReturned > 0 && (
-                                              <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
-                                                <span className="font-medium text-slate-600 w-full sm:w-auto">แบ่งยอดที่ยังไม่ส่งคืน ({totalNotReturned} EA):</span>
-                                                <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
-                                                  <span className="text-slate-500 whitespace-nowrap">ยังไม่รื้อ</span>
-                                                  <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_dem_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
-                                                </div>
-                                                <div className="flex items-center gap-1.5 bg-white border border-amber-300 px-2 py-1 rounded-md">
-                                                  <span className="text-amber-700 whitespace-nowrap">รื้อรอคืน</span>
-                                                  <input type="number" min="0" value={done_not_ret} onChange={(e) => updateMaterialTracking(m.id, { track_dem_done_not_returned: Number(e.target.value) })} className="w-12 text-center outline-none bg-amber-50 focus:bg-white focus:ring-1 ring-amber-400 rounded text-amber-800 font-bold" />
-                                                </div>
-                                              </div>
-                                            )}
                                           </div>
-                                        </div>
-                                      )})}
+                                        )
+                                      })}
                                       {demMats.length === 0 && (
                                         <div className="flex flex-col items-center justify-center py-6 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
                                           <CircleDashed size={24} className="mb-2 opacity-50" />
@@ -659,7 +590,7 @@ export default function MaterialTracking() {
 
                       return (
                         <div key={wbs} className="bg-slate-50 border border-slate-200 rounded-xl shadow-sm overflow-hidden opacity-75">
-                          <div 
+                          <div
                             onClick={() => toggleProject(wbs)}
                             className="p-4 flex items-center justify-between gap-4 cursor-pointer"
                           >
@@ -681,7 +612,7 @@ export default function MaterialTracking() {
                             <div className="border-t border-slate-200 p-4 bg-slate-100/50 space-y-6">
                               <div className="flex justify-between items-center">
                                 <h5 className="font-bold text-slate-600 text-sm">รายการพัสดุที่ค้างอยู่</h5>
-                                <button 
+                                <button
                                   onClick={() => clearDataForWbs(wbs)}
                                   className="text-xs text-red-500 hover:text-red-700 underline"
                                 >
