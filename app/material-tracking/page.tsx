@@ -190,7 +190,8 @@ export default function MaterialTracking() {
             } else {
               track_dem_returned_good = actual;
               track_dem_returned_damaged = damaged;
-              track_dem_pending = Math.max(0, estimated - actual - damaged);
+              track_dem_done_not_returned = Math.max(0, estimated - actual - damaged);
+              track_dem_pending = 0;
 
               if (totalReturned > 0 && totalReturned >= estimated) {
                 initialStatus = "ส่งคืนแล้ว";
