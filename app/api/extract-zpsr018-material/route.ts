@@ -47,7 +47,8 @@ Return ONLY a valid JSON array of objects representing the valid materials. Each
 - "technician_name": Technician name if found, else "".
 - "material_code": Material code/number (if available, else "").
 - "material_name": The name/description of the material.
-- "quantity": The estimated or actual quantity as a number.
+- "estimated_quantity": The estimated quantity (ประมาณการ) as a number. If not found, use 0.
+- "actual_quantity": For "new" materials, this is the amount DRAWN (เบิกไปแล้ว). For "demolish" materials, this is the amount RETURNED (ส่งคืนคลัง + ชำรุด). Return as a number, if not found, use 0.
 - "unit": The unit of measure (e.g. "ม.", "กก.", "ต้น").
 - "part": Must be exactly "new" or "demolish".
 
@@ -58,7 +59,8 @@ Example Output:
     "technician_name": "นายสมชาย สีทา",
     "material_code": "100001",
     "material_name": "สายไฟ THW 50",
-    "quantity": 100,
+    "estimated_quantity": 100,
+    "actual_quantity": 100,
     "unit": "ม.",
     "part": "new"
   },
