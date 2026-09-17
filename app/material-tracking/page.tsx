@@ -92,14 +92,6 @@ export default function MaterialTracking() {
 
       if (result.materials && result.materials.length > 0) {
         const newMaterials: Material[] = result.materials
-          .filter((m: any) => {
-            const name = (m.material_name || "").toLowerCase();
-            // กฎจากผู้ใช้: ตัดลวดเหล็กตีเกลียวออก
-            if (name.includes("ลวดเหล็กตีเกลียว") || name.includes("st. wire, stranded") || name.includes("เศษเหล็กและวัสดุ")) {
-              return false;
-            }
-            return true;
-          })
           .map((m: any) => {
             const estimated = Number(m.estimated_quantity) || Number(m.quantity) || 0;
             const actual = Number(m.actual_quantity) || 0;
