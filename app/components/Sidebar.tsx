@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut, Recycle, ArrowRightLeft, Camera, ClipboardList, ChevronDown, ChevronRight, Package, Tent } from "lucide-react";
+import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut, Recycle, ArrowRightLeft, Camera, ClipboardList, ChevronDown, ChevronRight, Package } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import { useEffect, useState } from "react";
 
@@ -24,7 +24,7 @@ export default function Sidebar() {
   };
 
   const SectionHeader = ({ id, title, isFirst = false }: { id: string, title: string, isFirst?: boolean }) => (
-    <div 
+    <div
       onClick={(e) => { e.stopPropagation(); toggleSection(id); }}
       className={`px-3 text-[14px] font-semibold text-amber-100 mb-2 flex justify-between items-center cursor-pointer hover:text-white transition-colors group ${isFirst ? 'mt-4' : 'mt-6'}`}
     >
@@ -59,10 +59,10 @@ export default function Sidebar() {
         <SectionHeader id="main" title="หน้าหลัก" isFirst={true} />
         {expanded.main && (
           <div onClick={closeSidebar}>
-              <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`}>
-                <LayoutDashboard size={20} />
-                <span>Dashboard งานก่อสร้าง</span>
-              </Link>
+            <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`}>
+              <LayoutDashboard size={20} />
+              <span>Dashboard งานก่อสร้าง</span>
+            </Link>
             <Link href="/update" className={`nav-item ${pathname === "/update" ? "active" : ""}`}>
               <FileEdit size={20} />
               <span>อัปเดตสถานะงาน</span>
@@ -82,10 +82,6 @@ export default function Sidebar() {
             <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`}>
               <CalendarDays size={20} />
               <span>แผนงานระบบ / แผนใช้รถ</span>
-            </Link>
-            <Link href="/camp-hub" className={`nav-item ${pathname === "/camp-hub" ? "active" : ""}`}>
-              <Tent size={20} />
-              <span>ศูนย์บริหารแคมป์หน้างาน</span>
             </Link>
           </div>
         )}
@@ -154,7 +150,7 @@ export default function Sidebar() {
               <span>ข้อมูลบุคลากร</span>
             </Link>
             <Link href="/driver-ot" className={`nav-item ${pathname === "/driver-ot" ? "active" : ""}`}>
-              <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               <span>คำนวณ OT พขร.</span>
             </Link>
             <Link href="/team-ot" className={`nav-item ${pathname === "/team-ot" ? "active" : ""}`}>
@@ -172,19 +168,19 @@ export default function Sidebar() {
               <span>ระบบยานพาหนะ</span>
             </Link>
             <Link href="/gas-report" className={`nav-item ${pathname === "/gas-report" ? "active" : ""}`}>
-              <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22h20"/><path d="M4 22V11c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4v11"/><path d="M14 22v-6c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v6"/><path d="M18 5V3c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2"/></svg>
+              <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22h20" /><path d="M4 22V11c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4v11" /><path d="M14 22v-6c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v6" /><path d="M18 5V3c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2" /></svg>
               <span>รายงานน้ำมัน (ยพ.6)</span>
             </Link>
           </div>
         )}
-        
-        <div 
+
+        <div
           onClick={() => {
             sessionStorage.removeItem("pea_auth");
             sessionStorage.removeItem("pea_role");
             window.location.reload();
           }}
-          className="nav-item" 
+          className="nav-item"
           style={{ marginTop: '30px', borderTop: '1px solid #e2e8f0', paddingTop: '15px', color: '#ef4444', cursor: 'pointer' }}
         >
           <LogOut size={20} />
