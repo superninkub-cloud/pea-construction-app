@@ -88,10 +88,10 @@ ${extractedText}
       try {
         const model = genAI.getGenerativeModel({ model: modelName });
         result = await model.generateContent([prompt]);
-        console.log(\`Successfully used model: \${modelName} for Material Tracking Extraction\`);
+        console.log(`Successfully used model: ${modelName} for Material Tracking Extraction`);
         break; // Success!
       } catch (err: any) {
-        console.warn(\`Model \${modelName} failed:\`, err.message);
+        console.warn(`Model ${modelName} failed:`, err.message);
         lastError = err;
         if (!err.message?.includes("503") && !err.message?.includes("429") && err.status !== 503 && err.status !== 429) {
           break;
@@ -105,7 +105,7 @@ ${extractedText}
 
     const responseText = result.response.text();
     // Clean up potential markdown formatting
-    const cleanedText = responseText.replace(/\`\`\`json/gi, '').replace(/\`\`\`/gi, '').trim();
+    const cleanedText = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
     
     let jsonData;
     try {
