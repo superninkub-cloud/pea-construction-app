@@ -363,7 +363,14 @@ export default function MaterialTracking() {
                 const pending = m.track_new_pending ?? m.actual_quantity;
                 stock.newPending += pending;
               } else if (m.part === 'demolish') {
-                const waitingToReturn = m.track_dem_done_not_returned ?? 0;
+                const returnedGood = m.actual_quantity || 0;
+                const returnedDamaged = m.damaged_quantity || 0;
+                const totalReturned = returnedGood + returnedDamaged;
+                const estimated = m.estimated_quantity || m.quantity || 0;
+                const totalNotReturned = Math.max(0, estimated - totalReturned);
+
+                const done_not_ret = m.track_dem_done_not_returned ?? totalNotReturned;
+                const waitingToReturn = Math.min(done_not_ret, totalNotReturned);
                 stock.demWaiting += waitingToReturn;
               }
             });
@@ -700,8 +707,8 @@ export default function MaterialTracking() {
                                         const estimated = m.estimated_quantity || m.quantity || 0;
                                         const totalNotReturned = Math.max(0, estimated - totalReturned);
                                         
-                                        const pending = m.track_dem_pending ?? 0;
-                                        const done_not_ret = m.track_dem_done_not_returned ?? totalNotReturned;
+                                        const pending = Math.min(m.track_dem_pending ?? 0, totalNotReturned);
+                                        const done_not_ret = Math.min(m.track_dem_done_not_returned ?? totalNotReturned, totalNotReturned);
                                         const isAllDone = totalReturned >= estimated && estimated > 0;
 
                                         return (
