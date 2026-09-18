@@ -718,9 +718,15 @@ export default function MaterialTracking() {
                                                 ยังไม่ส่งคืน: <span className="font-bold ml-1">{totalNotReturned}</span>
                                               </div>
 
-                                              <div className={`flex items-center divide-x px-2 py-1 rounded border font-medium ${totalReturned > 0 ? (totalReturned >= estimated ? 'bg-emerald-100 text-emerald-800 border-emerald-200 divide-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-200 divide-amber-300') : 'bg-slate-100 text-slate-500 border-slate-200 divide-slate-300'}`}>
-                                                <span className="pr-2">คืนดี ZPSR: <span className="font-bold">{returnedGood}</span></span>
-                                                <span className="pl-2">ชำรุด ZPSR: <span className="font-bold">{returnedDamaged}</span></span>
+                                              <div className={`flex items-center gap-2 px-2 py-1 rounded border font-medium ${totalReturned > 0 ? (totalReturned >= estimated ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200') : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                                <div className="flex items-center gap-1.5">
+                                                  <span className="whitespace-nowrap">คืนดี:</span>
+                                                  <input type="number" min="0" value={returnedGood} onChange={(e) => updateMaterialTracking(m.id, { actual_quantity: Number(e.target.value) })} className="w-12 text-center outline-none bg-white focus:ring-1 ring-emerald-400 rounded text-slate-800 font-bold border border-slate-300" />
+                                                </div>
+                                                <div className="flex items-center gap-1.5 pl-2 border-l border-slate-300/50">
+                                                  <span className="whitespace-nowrap">คืนชำรุด:</span>
+                                                  <input type="number" min="0" value={returnedDamaged} onChange={(e) => updateMaterialTracking(m.id, { damaged_quantity: Number(e.target.value) })} className="w-12 text-center outline-none bg-white focus:ring-1 ring-emerald-400 rounded text-slate-800 font-bold border border-slate-300" />
+                                                </div>
                                               </div>
                                             </div>
 
