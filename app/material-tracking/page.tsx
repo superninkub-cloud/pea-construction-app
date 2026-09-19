@@ -351,17 +351,20 @@ export default function MaterialTracking() {
             const orphanWbs = Array.from(new Set(techMaterials.map(m => m.wbs))).filter(wbs => !activeWbsSet.has(wbs));
 
             // คำนวณคลังแคมป์ (Camp Inventory) สำหรับช่างคนนี้
-            const inventoryMap = new Map<string, { code: string, name: string, unit: string, newPending: number, demWaiting: number }>();
+            const inventoryMap = new Map<string, { code: string, name: string, unit: string, newPending: number, demWaiting: number, shortage: number }>();
             techMaterials.forEach(m => {
               const key = `${m.material_code || 'no-code'}_${m.material_name}`;
               if (!inventoryMap.has(key)) {
-                inventoryMap.set(key, { code: m.material_code || '', name: m.material_name, unit: m.unit, newPending: 0, demWaiting: 0 });
+                inventoryMap.set(key, { code: m.material_code || '', name: m.material_name, unit: m.unit, newPending: 0, demWaiting: 0, shortage: 0 });
               }
               const stock = inventoryMap.get(key)!;
               
               if (m.part === 'new') {
-                const pending = m.track_new_pending ?? m.actual_quantity;
+                const actual = m.actual_quantity || 0;
+                const estimated = m.estimated_quantity || m.quantity || 0;
+                const pending = Math.min(m.track_new_pending ?? actual, actual);
                 stock.newPending += pending;
+                stock.shortage += Math.max(0, estimated - actual);
               } else if (m.part === 'demolish') {
                 const returnedGood = m.actual_quantity || 0;
                 const returnedDamaged = m.damaged_quantity || 0;
@@ -374,7 +377,7 @@ export default function MaterialTracking() {
                 stock.demWaiting += waitingToReturn;
               }
             });
-            const campInventory = Array.from(inventoryMap.values()).filter(item => item.newPending > 0 || item.demWaiting > 0);
+            const campInventory = Array.from(inventoryMap.values()).filter(item => item.newPending > 0 || item.demWaiting > 0 || item.shortage > 0);
             const isCampExpanded = showCampInventory[tech] || false;
 
             return (
@@ -455,6 +458,7 @@ export default function MaterialTracking() {
                                 <th className="px-4 py-3">รายการพัสดุ</th>
                                 <th className="px-4 py-3 text-center w-24">รอติดตั้ง</th>
                                 <th className="px-4 py-3 text-center w-24">รอคืน</th>
+                                <th className="px-4 py-3 text-center w-24 text-rose-600">รอเบิกเพิ่ม</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -468,6 +472,9 @@ export default function MaterialTracking() {
                                   </td>
                                   <td className="px-4 py-3 text-center">
                                     {item.demWaiting > 0 ? <span className="font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded">{item.demWaiting} {item.unit}</span> : <span className="text-slate-300">-</span>}
+                                  </td>
+                                  <td className="px-4 py-3 text-center">
+                                    {item.shortage > 0 ? <span className="font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded">{item.shortage} {item.unit}</span> : <span className="text-slate-300">-</span>}
                                   </td>
                                 </tr>
                               ))}
