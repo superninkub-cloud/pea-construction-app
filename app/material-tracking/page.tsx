@@ -642,34 +642,49 @@ export default function MaterialTracking() {
                                       </div>
                                       
                                       {newMats.map(m => {
-                                        const pending = m.track_new_pending ?? m.estimated_quantity;
-                                        const done = m.track_new_done ?? 0;
-                                        const isAllDone = done >= (m.estimated_quantity || m.quantity) && (m.estimated_quantity || m.quantity) > 0;
+                                        const actual = m.actual_quantity || 0;
+                                        const estimated = m.estimated_quantity || m.quantity || 0;
+                                        const shortage = Math.max(0, estimated - actual);
+                                        
+                                        // Pending should cap at actual since we can only install what we have
+                                        const pending = Math.min(m.track_new_pending ?? actual, actual);
+                                        const done = Math.min(m.track_new_done ?? 0, actual);
+                                        const isAllDone = done >= actual && actual > 0 && shortage === 0;
+
                                         return (
-                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200'}`}>
-                                          <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
+                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : shortage > 0 ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200'}`}>
+                                          <div className="flex items-start justify-between gap-2">
+                                            <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
+                                          </div>
                                           <div className="mt-3 flex flex-col gap-3">
                                             
                                             <div className="flex flex-wrap items-center gap-2 text-xs">
                                               <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">
-                                                ประเมิน: <span className="font-bold">{m.estimated_quantity || m.quantity} {m.unit}</span>
+                                                ประเมิน: <span className="font-bold">{estimated} {m.unit}</span>
                                               </span>
-                                              <span className={`px-2 py-1 rounded border font-medium ${m.actual_quantity > 0 ? (m.actual_quantity >= (m.estimated_quantity || m.quantity) ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200') : 'bg-red-50 text-red-600 border-red-100'}`}>
-                                                เบิกคลัง: <span className="font-bold">{m.actual_quantity} {m.unit}</span>
+                                              <span className={`px-2 py-1 rounded border font-medium ${actual > 0 ? (actual >= estimated ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200') : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                                                เบิกคลัง: <span className="font-bold">{actual} {m.unit}</span>
                                               </span>
+                                              {shortage > 0 && (
+                                                <span className="px-2 py-1 rounded border font-bold bg-rose-100 text-rose-700 border-rose-200 animate-pulse">
+                                                  ⚠️ ขาดคลัง/รอเบิกเพิ่ม: {shortage} {m.unit}
+                                                </span>
+                                              )}
                                             </div>
 
-                                            <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center">
-                                              <span className="font-medium text-slate-600 w-full sm:w-auto">ระบุจำนวน (EA):</span>
-                                              <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
-                                                <span className="text-slate-500 whitespace-nowrap">ยังไม่ก่อสร้าง</span>
-                                                <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_new_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                            {actual > 0 && (
+                                              <div className="flex flex-wrap gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 items-center mt-1">
+                                                <span className="font-medium text-slate-600 w-full sm:w-auto">แบ่งยอดเบิกแล้ว ({actual} {m.unit}):</span>
+                                                <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
+                                                  <span className="text-slate-500 whitespace-nowrap">ยังไม่ก่อสร้าง</span>
+                                                  <input type="number" min="0" max={actual} value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_new_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                                </div>
+                                                <div className="flex items-center gap-1.5 bg-white border border-emerald-300 px-2 py-1 rounded-md">
+                                                  <span className="text-emerald-700 whitespace-nowrap">ก่อสร้างแล้ว</span>
+                                                  <input type="number" min="0" max={actual} value={done} onChange={(e) => updateMaterialTracking(m.id, { track_new_done: Number(e.target.value) })} className="w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold" />
+                                                </div>
                                               </div>
-                                              <div className="flex items-center gap-1.5 bg-white border border-emerald-300 px-2 py-1 rounded-md">
-                                                <span className="text-emerald-700 whitespace-nowrap">ก่อสร้างแล้ว</span>
-                                                <input type="number" min="0" value={done} onChange={(e) => updateMaterialTracking(m.id, { track_new_done: Number(e.target.value) })} className="w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold" />
-                                              </div>
-                                            </div>
+                                            )}
                                           </div>
                                         </div>
                                       )})}
