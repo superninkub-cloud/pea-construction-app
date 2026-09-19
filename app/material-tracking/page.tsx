@@ -65,9 +65,9 @@ export default function MaterialTracking() {
         const techs = Array.from(new Set(active.map(p => p.supervisor).filter(Boolean))).sort();
         setTechnicians(techs);
 
-        // Auto-remove materials for F4 / TECO projects
+        // Auto-remove materials for F4 projects only
         const closedWbsSet = new Set(
-          data.filter(p => p.status === "F4" || p.status === "ปิดงาน (TECO)").map(p => p.wbs)
+          data.filter(p => p.status === "F4").map(p => p.wbs)
         );
 
         const saved = localStorage.getItem("material_tracking_data");
