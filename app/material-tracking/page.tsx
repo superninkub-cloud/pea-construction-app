@@ -27,6 +27,7 @@ interface Material {
   track_dem_done_not_returned?: number; // รื้อแล้วยังไม่คืน
   track_dem_returned_good?: number; // คืนดี
   track_dem_returned_damaged?: number; // คืนชำรุด
+  shortage_action?: string; // การดำเนินการสำหรับพัสดุที่ขาด
 }
 
 export default function MaterialTracking() {
@@ -673,9 +674,22 @@ export default function MaterialTracking() {
                                                 เบิกคลัง: <span className="font-bold">{actual} {m.unit}</span>
                                               </span>
                                               {shortage > 0 && (
-                                                <span className="px-2 py-1 rounded border font-bold bg-rose-100 text-rose-700 border-rose-200 animate-pulse">
-                                                  ⚠️ ขาดคลัง/รอเบิกเพิ่ม: {shortage} {m.unit}
-                                                </span>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                  <span className="px-2 py-1 rounded border font-bold bg-rose-100 text-rose-700 border-rose-200 animate-pulse">
+                                                    ⚠️ ขาดคลัง/รอเบิกเพิ่ม: {shortage} {m.unit}
+                                                  </span>
+                                                  <select 
+                                                    value={m.shortage_action || ""}
+                                                    onChange={(e) => updateMaterialTracking(m.id, { shortage_action: e.target.value })}
+                                                    className="text-xs bg-white border border-rose-300 text-rose-700 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-rose-400 font-medium"
+                                                  >
+                                                    <option value="">-- เลือกการดำเนินการ --</option>
+                                                    <option value="เบิกทวนซ้ำกับคลังพัสดุ">เบิกทวนซ้ำกับคลังพัสดุ</option>
+                                                    <option value="ขอโอนของจากคลังอื่น">ขอโอนของจากคลังอื่น</option>
+                                                    <option value="ของบซื้ออุปกรณ์">ของบซื้ออุปกรณ์</option>
+                                                    <option value="ไม่ต้องใช้งานแล้ว">ไม่ต้องใช้งานแล้ว</option>
+                                                  </select>
+                                                </div>
                                               )}
                                             </div>
 
