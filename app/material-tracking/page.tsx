@@ -5,6 +5,7 @@ import { Upload, Package, Wrench, AlertCircle, User, Loader2, Briefcase, Chevron
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import { savePhoto, loadAllPhotos } from "../../lib/photoIdb";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface Material {
   id: string;
@@ -310,6 +311,60 @@ export default function MaterialTracking() {
 
       <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
         
+        {/* Dashboard ภาพรวม */}
+        {allTechsToDisplay.length > 0 && materials.length > 0 && selectedTechnician === "ทั้งหมด" && (
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <Package className="text-blue-600" size={20} />
+              ภาพรวมประสิทธิภาพการเบิก-คืนพัสดุรายช่าง (ค่าเฉลี่ยความสำเร็จต่อรายการ)
+            </h2>
+            <div className="h-80 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={allTechsToDisplay.map(tech => {
+                    const techMats = materials.filter(m => (m.technician_name || "ยังไม่ระบุช่าง") === tech);
+                    const newMats = techMats.filter(m => m.part === 'new');
+                    const demMats = techMats.filter(m => m.part === 'demolish');
+
+                    let newTotalPct = 0;
+                    newMats.forEach(m => {
+                      const actual = m.actual_quantity || 0;
+                      const estimated = m.estimated_quantity || m.quantity || 0;
+                      if (estimated > 0) newTotalPct += Math.min(100, (actual / estimated) * 100);
+                      else if (actual > 0) newTotalPct += 100;
+                    });
+                    const avgNewPct = newMats.length > 0 ? newTotalPct / newMats.length : 0;
+
+                    let demTotalPct = 0;
+                    demMats.forEach(m => {
+                      const returned = (m.actual_quantity || 0) + (m.damaged_quantity || 0);
+                      const estimated = m.estimated_quantity || m.quantity || 0;
+                      if (estimated > 0) demTotalPct += Math.min(100, (returned / estimated) * 100);
+                      else if (returned > 0) demTotalPct += 100;
+                    });
+                    const avgDemPct = demMats.length > 0 ? demTotalPct / demMats.length : 0;
+
+                    return {
+                      name: tech,
+                      "เบิกไปแล้ว (%)": Math.round(avgNewPct),
+                      "ส่งคืนแล้ว (%)": Math.round(avgDemPct)
+                    };
+                  }).filter(d => d["เบิกไปแล้ว (%)"] > 0 || d["ส่งคืนแล้ว (%)"] > 0)}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" tick={{fontSize: 12, fill: '#64748b'}} axisLine={{stroke: '#cbd5e1'}} tickLine={false} />
+                  <YAxis tickFormatter={(val) => `${val}%`} domain={[0, 100]} tick={{fontSize: 12, fill: '#64748b'}} axisLine={false} tickLine={false} />
+                  <Tooltip cursor={{fill: '#f1f5f9'}} formatter={(value) => `${value}%`} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                  <Legend wrapperStyle={{paddingTop: '20px'}} />
+                  <Bar dataKey="เบิกไปแล้ว (%)" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                  <Bar dataKey="ส่งคืนแล้ว (%)" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
           <div className="flex items-center gap-3 w-full md:w-auto">
