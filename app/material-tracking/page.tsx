@@ -365,7 +365,10 @@ export default function MaterialTracking() {
                 const estimated = m.estimated_quantity || m.quantity || 0;
                 const pending = Math.min(m.track_new_pending ?? actual, actual);
                 stock.newPending += pending;
-                stock.shortage += Math.max(0, estimated - actual);
+                
+                const rawShortage = Math.max(0, estimated - actual);
+                const effectiveShortage = m.shortage_action === "ไม่ต้องใช้งานแล้ว" ? 0 : rawShortage;
+                stock.shortage += effectiveShortage;
               } else if (m.part === 'demolish') {
                 const returnedGood = m.actual_quantity || 0;
                 const returnedDamaged = m.damaged_quantity || 0;
@@ -652,15 +655,16 @@ export default function MaterialTracking() {
                                       {newMats.map(m => {
                                         const actual = m.actual_quantity || 0;
                                         const estimated = m.estimated_quantity || m.quantity || 0;
-                                        const shortage = Math.max(0, estimated - actual);
+                                        const rawShortage = Math.max(0, estimated - actual);
+                                        const effectiveShortage = m.shortage_action === "ไม่ต้องใช้งานแล้ว" ? 0 : rawShortage;
                                         
                                         // Pending should cap at actual since we can only install what we have
                                         const pending = Math.min(m.track_new_pending ?? actual, actual);
                                         const done = Math.min(m.track_new_done ?? 0, actual);
-                                        const isAllDone = done >= actual && actual > 0 && shortage === 0;
+                                        const isAllDone = done >= actual && actual > 0 && effectiveShortage === 0;
 
                                         return (
-                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : shortage > 0 ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200'}`}>
+                                        <div key={m.id} className={`bg-white p-3 rounded-xl border shadow-sm transition-colors ${isAllDone ? 'border-emerald-200 bg-emerald-50/30' : effectiveShortage > 0 ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200'}`}>
                                           <div className="flex items-start justify-between gap-2">
                                             <p className="font-semibold text-slate-800 text-sm line-clamp-2" title={m.material_name}>{m.material_name}</p>
                                           </div>
@@ -673,15 +677,15 @@ export default function MaterialTracking() {
                                               <span className={`px-2 py-1 rounded border font-medium ${actual > 0 ? (actual >= estimated ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200') : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                                                 เบิกคลัง: <span className="font-bold">{actual} {m.unit}</span>
                                               </span>
-                                              {shortage > 0 && (
+                                              {rawShortage > 0 && (
                                                 <div className="flex flex-wrap items-center gap-2">
-                                                  <span className="px-2 py-1 rounded border font-bold bg-rose-100 text-rose-700 border-rose-200 animate-pulse">
-                                                    ⚠️ ขาดคลัง/รอเบิกเพิ่ม: {shortage} {m.unit}
+                                                  <span className={`px-2 py-1 rounded border font-bold ${m.shortage_action === "ไม่ต้องใช้งานแล้ว" ? "bg-slate-100 text-slate-500 border-slate-200" : "bg-rose-100 text-rose-700 border-rose-200 animate-pulse"}`}>
+                                                    {m.shortage_action === "ไม่ต้องใช้งานแล้ว" ? `ไม่ต้องใช้งานแล้ว: ${rawShortage} ${m.unit}` : `⚠️ ขาดคลัง/รอเบิกเพิ่ม: ${rawShortage} ${m.unit}`}
                                                   </span>
                                                   <select 
                                                     value={m.shortage_action || ""}
                                                     onChange={(e) => updateMaterialTracking(m.id, { shortage_action: e.target.value })}
-                                                    className="text-xs bg-white border border-rose-300 text-rose-700 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-rose-400 font-medium"
+                                                    className={`text-xs bg-white border rounded px-2 py-1 outline-none font-medium ${m.shortage_action === "ไม่ต้องใช้งานแล้ว" ? "border-slate-300 text-slate-600 focus:ring-1 focus:ring-slate-400" : "border-rose-300 text-rose-700 focus:ring-1 focus:ring-rose-400"}`}
                                                   >
                                                     <option value="">-- เลือกการดำเนินการ --</option>
                                                     <option value="เบิกทวนซ้ำกับคลังพัสดุ">เบิกทวนซ้ำกับคลังพัสดุ</option>
