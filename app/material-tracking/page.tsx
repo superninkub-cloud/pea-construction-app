@@ -64,12 +64,24 @@ export default function MaterialTracking() {
 
         const techs = Array.from(new Set(active.map(p => p.supervisor).filter(Boolean))).sort();
         setTechnicians(techs);
-      }
 
-      const saved = localStorage.getItem("material_tracking_data");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setMaterials(parsed);
+        // Auto-remove materials for F4 / TECO projects
+        const closedWbsSet = new Set(
+          data.filter(p => p.status === "F4" || p.status === "ปิดงาน (TECO)").map(p => p.wbs)
+        );
+
+        const saved = localStorage.getItem("material_tracking_data");
+        if (saved) {
+          const parsed: Material[] = JSON.parse(saved);
+          const filteredMaterials = parsed.filter(m => !closedWbsSet.has(m.wbs));
+          
+          setMaterials(filteredMaterials);
+          
+          // Only update storage if we actually removed something
+          if (filteredMaterials.length !== parsed.length) {
+            localStorage.setItem("material_tracking_data", JSON.stringify(filteredMaterials));
+          }
+        }
       }
     } catch (e) {
       console.error("Failed to fetch base data", e);
