@@ -45,6 +45,7 @@ export default function MaterialTracking() {
   const [photos, setPhotos] = useState<Record<string, string>>({});
   const [activePhotoKey, setActivePhotoKey] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [userRole, setUserRole] = useState<string>("user");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function MaterialTracking() {
 
   const fetchBaseData = async () => {
     setIsLoading(true);
+    setUserRole(sessionStorage.getItem("pea_role") || "user");
     try {
       const { data, error } = await supabase.from("projects").select("*");
       if (error) throw error;
@@ -394,7 +396,7 @@ export default function MaterialTracking() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
-            {materials.length > 0 && (
+            {materials.length > 0 && userRole === 'admin' && (
               <button 
                 onClick={() => {
                   if(confirm("ต้องการล้างรายการพัสดุทั้งหมดในระบบใช่หรือไม่?")) saveToStorage([]);
@@ -657,6 +659,7 @@ export default function MaterialTracking() {
                             <div className="border-t border-slate-100 p-4 bg-slate-50/50">
                               
                               {/* Upload Action */}
+                              {userRole === 'admin' && (
                               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100 mb-6 shadow-sm">
                                 <div>
                                   <h5 className="text-sm font-bold text-blue-800 flex items-center gap-2">
@@ -683,6 +686,7 @@ export default function MaterialTracking() {
                                   </button>
                                 </div>
                               </div>
+                              )}
 
                               {/* Materials List for this Project */}
                               {projMaterials.length > 0 ? (
@@ -691,12 +695,14 @@ export default function MaterialTracking() {
                                     <h5 className="font-bold text-slate-700 text-sm flex items-center gap-2">
                                       <CheckCircle2 size={16} className="text-emerald-500" /> รายการพัสดุในงานนี้ (ข้อมูลจากการดึงล่าสุด)
                                     </h5>
+                                    {userRole === 'admin' && (
                                     <button 
                                       onClick={() => clearDataForWbs(p.wbs)}
                                       className="text-xs font-medium text-red-500 hover:text-white hover:bg-red-500 px-3 py-1.5 rounded border border-red-200 hover:border-red-500 transition-colors"
                                     >
                                       ล้างพัสดุงานนี้ทั้งหมด
                                     </button>
+                                    )}
                                   </div>
 
                                   <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -709,7 +715,7 @@ export default function MaterialTracking() {
                                           </h6>
                                           <p className="text-[11px] text-slate-500 mt-1">จัดการสถานะเพื่ออัปเดตการนำไปใช้งานจริง</p>
                                         </div>
-                                        {newMats.length > 0 && (
+                                        {newMats.length > 0 && userRole === 'admin' && (
                                           <button 
                                             onClick={() => markAllStatus(p.wbs, "new", "นำไปก่อสร้างแล้ว")}
                                             className="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 font-medium"
@@ -752,7 +758,8 @@ export default function MaterialTracking() {
                                                   <select 
                                                     value={m.shortage_action || ""}
                                                     onChange={(e) => updateMaterialTracking(m.id, { shortage_action: e.target.value })}
-                                                    className={`text-xs bg-white border rounded px-2 py-1 outline-none font-medium ${m.shortage_action === "ไม่ต้องใช้งานแล้ว" ? "border-slate-300 text-slate-600 focus:ring-1 focus:ring-slate-400" : "border-rose-300 text-rose-700 focus:ring-1 focus:ring-rose-400"}`}
+                                                    disabled={userRole !== 'admin'}
+                                                    className={`text-xs bg-white border rounded px-2 py-1 outline-none font-medium disabled:opacity-50 disabled:cursor-not-allowed ${m.shortage_action === "ไม่ต้องใช้งานแล้ว" ? "border-slate-300 text-slate-600 focus:ring-1 focus:ring-slate-400" : "border-rose-300 text-rose-700 focus:ring-1 focus:ring-rose-400"}`}
                                                   >
                                                     <option value="">-- เลือกการดำเนินการ --</option>
                                                     <option value="เบิกทวนซ้ำกับคลังพัสดุ">เบิกทวนซ้ำกับคลังพัสดุ</option>
@@ -769,11 +776,11 @@ export default function MaterialTracking() {
                                                 <span className="font-medium text-slate-600 w-full sm:w-auto">แบ่งยอดเบิกแล้ว ({actual} {m.unit}):</span>
                                                 <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
                                                   <span className="text-slate-500 whitespace-nowrap">ยังไม่ก่อสร้าง</span>
-                                                  <input type="number" min="0" max={actual} value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_new_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                                  <input type="number" min="0" max={actual} value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_new_pending: Number(e.target.value) })} disabled={userRole !== 'admin'} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold disabled:opacity-50 disabled:cursor-not-allowed" />
                                                 </div>
                                                 <div className="flex items-center gap-1.5 bg-white border border-emerald-300 px-2 py-1 rounded-md">
                                                   <span className="text-emerald-700 whitespace-nowrap">ก่อสร้างแล้ว</span>
-                                                  <input type="number" min="0" max={actual} value={done} onChange={(e) => updateMaterialTracking(m.id, { track_new_done: Number(e.target.value) })} className="w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold" />
+                                                  <input type="number" min="0" max={actual} value={done} onChange={(e) => updateMaterialTracking(m.id, { track_new_done: Number(e.target.value) })} disabled={userRole !== 'admin'} className="w-12 text-center outline-none bg-emerald-50 focus:bg-white focus:ring-1 ring-emerald-400 rounded text-emerald-800 font-bold disabled:opacity-50 disabled:cursor-not-allowed" />
                                                 </div>
                                               </div>
                                             )}
@@ -797,7 +804,7 @@ export default function MaterialTracking() {
                                           </h6>
                                           <p className="text-[11px] text-slate-500 mt-1">แยกรายการส่งคืนแบบ พัสดุดี และ พัสดุชำรุด</p>
                                         </div>
-                                        {demMats.length > 0 && (
+                                        {demMats.length > 0 && userRole === 'admin' && (
                                           <button 
                                             onClick={() => markAllStatus(p.wbs, "demolish", "ส่งคืนแล้ว")}
                                             className="text-[10px] bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 font-medium"
@@ -835,11 +842,11 @@ export default function MaterialTracking() {
                                               <div className={`flex items-center gap-2 px-2 py-1 rounded border font-medium ${totalReturned > 0 ? (totalReturned >= estimated ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200') : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                                                 <div className="flex items-center gap-1.5">
                                                   <span className="whitespace-nowrap">คืนดี:</span>
-                                                  <input type="number" min="0" value={returnedGood} onChange={(e) => updateMaterialTracking(m.id, { actual_quantity: Number(e.target.value) })} className="w-12 text-center outline-none bg-white focus:ring-1 ring-emerald-400 rounded text-slate-800 font-bold border border-slate-300" />
+                                                  <input type="number" min="0" value={returnedGood} onChange={(e) => updateMaterialTracking(m.id, { actual_quantity: Number(e.target.value) })} disabled={userRole !== 'admin'} className="w-12 text-center outline-none bg-white focus:ring-1 ring-emerald-400 rounded text-slate-800 font-bold border border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed" />
                                                 </div>
                                                 <div className="flex items-center gap-1.5 pl-2 border-l border-slate-300/50">
                                                   <span className="whitespace-nowrap">คืนชำรุด:</span>
-                                                  <input type="number" min="0" value={returnedDamaged} onChange={(e) => updateMaterialTracking(m.id, { damaged_quantity: Number(e.target.value) })} className="w-12 text-center outline-none bg-white focus:ring-1 ring-emerald-400 rounded text-slate-800 font-bold border border-slate-300" />
+                                                  <input type="number" min="0" value={returnedDamaged} onChange={(e) => updateMaterialTracking(m.id, { damaged_quantity: Number(e.target.value) })} disabled={userRole !== 'admin'} className="w-12 text-center outline-none bg-white focus:ring-1 ring-emerald-400 rounded text-slate-800 font-bold border border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed" />
                                                 </div>
                                               </div>
                                             </div>
@@ -849,11 +856,11 @@ export default function MaterialTracking() {
                                                 <span className="font-medium text-slate-600 w-full sm:w-auto">แบ่งยอดที่ยังไม่ส่งคืน ({totalNotReturned} EA):</span>
                                                 <div className="flex items-center gap-1.5 bg-white border border-slate-300 px-2 py-1 rounded-md">
                                                   <span className="text-slate-500 whitespace-nowrap">ยังไม่รื้อ</span>
-                                                  <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_dem_pending: Number(e.target.value) })} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold" />
+                                                  <input type="number" min="0" value={pending} onChange={(e) => updateMaterialTracking(m.id, { track_dem_pending: Number(e.target.value) })} disabled={userRole !== 'admin'} className="w-12 text-center outline-none bg-slate-100 focus:bg-white focus:ring-1 ring-blue-400 rounded text-slate-800 font-bold disabled:opacity-50 disabled:cursor-not-allowed" />
                                                 </div>
                                                 <div className="flex items-center gap-1.5 bg-white border border-amber-300 px-2 py-1 rounded-md">
                                                   <span className="text-amber-700 whitespace-nowrap">รื้อรอคืน</span>
-                                                  <input type="number" min="0" value={done_not_ret} onChange={(e) => updateMaterialTracking(m.id, { track_dem_done_not_returned: Number(e.target.value) })} className="w-12 text-center outline-none bg-amber-50 focus:bg-white focus:ring-1 ring-amber-400 rounded text-amber-800 font-bold" />
+                                                  <input type="number" min="0" value={done_not_ret} onChange={(e) => updateMaterialTracking(m.id, { track_dem_done_not_returned: Number(e.target.value) })} disabled={userRole !== 'admin'} className="w-12 text-center outline-none bg-amber-50 focus:bg-white focus:ring-1 ring-amber-400 rounded text-amber-800 font-bold disabled:opacity-50 disabled:cursor-not-allowed" />
                                                 </div>
                                               </div>
                                             )}
@@ -909,12 +916,14 @@ export default function MaterialTracking() {
                             <div className="border-t border-slate-200 p-4 bg-slate-100/50 space-y-6">
                               <div className="flex justify-between items-center">
                                 <h5 className="font-bold text-slate-600 text-sm">รายการพัสดุที่ค้างอยู่</h5>
+                                {userRole === 'admin' && (
                                 <button 
                                   onClick={() => clearDataForWbs(wbs)}
                                   className="text-xs text-red-500 hover:text-red-700 underline"
                                 >
                                   ล้างพัสดุงานนี้
                                 </button>
+                                )}
                               </div>
                               <div className="space-y-2">
                                 {projMaterials.map(m => (
