@@ -689,13 +689,13 @@ export default function MaterialTracking() {
                                     {isUploadingThis ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                                     {isUploadingThis ? "กำลังวิเคราะห์ด้วย AI..." : <span suppressHydrationWarning>เลือกไฟล์ ZPSR018 (ดึงข้อมูลล่าสุดวันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })})</span>}
                                   </button>
+                                  {pullHistory[p.wbs] && (
+                                    <div className="text-xs text-slate-500 mt-2 text-right">
+                                      ประวัติดึงข้อมูลล่าสุด: {pullHistory[p.wbs]}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
-                              {pullHistory[p.wbs] && (
-                                <div className="text-xs text-slate-500 mt-2 text-right">
-                                  ประวัติดึงข้อมูลล่าสุด: {pullHistory[p.wbs]}
-                                </div>
-                              )}
                               )}
 
                               {/* Materials List for this Project */}
