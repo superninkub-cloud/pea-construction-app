@@ -1215,7 +1215,7 @@ function BudgetTransferContent() {
                 </div>
               </div>
 
-              <label className="form-label" style={{ marginBottom: '12px' }}>อัพโหลดไฟล์ PDF ZPSR018 (เพื่อคำนวณอัตโนมัติ)</label>
+              <label className="form-label" style={{ marginBottom: '12px' }}>อัพโหลดไฟล์ PDF ZPSR018 (เพื่อคำนวณอัตโนมัติ) <span suppressHydrationWarning>(ดึงข้อมูลล่าสุดวันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })})</span></label>
               <label className="dropzone" style={{ opacity: isUploading ? 0.5 : 1 }}>
                 <input type="file" accept="application/pdf" style={{ display: 'none' }} onChange={handleFileUpload} disabled={isUploading} />
                 <div className="dropzone-icon">

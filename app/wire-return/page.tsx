@@ -804,7 +804,7 @@ export default function WireReturnPage() {
                               ) : (
                                 <Layers size={14} />
                               )}
-                              {isExtractingPDF ? "กำลังอ่าน ZPSR018..." : "ใช้ AI อ่านไฟล์ ZPSR018"}
+                              {isExtractingPDF ? "กำลังอ่าน ZPSR018..." : <span suppressHydrationWarning>ใช้ AI อ่านไฟล์ ZPSR018 (ดึงข้อมูลล่าสุดวันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })})</span>}
                             </button>
                           </div>
                         </div>

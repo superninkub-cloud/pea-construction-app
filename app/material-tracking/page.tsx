@@ -682,7 +682,7 @@ export default function MaterialTracking() {
                                     className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 group-hover:bg-blue-700 disabled:bg-slate-400 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
                                   >
                                     {isUploadingThis ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-                                    {isUploadingThis ? "กำลังวิเคราะห์ด้วย AI..." : "เลือกไฟล์ ZPSR018"}
+                                    {isUploadingThis ? "กำลังวิเคราะห์ด้วย AI..." : <span suppressHydrationWarning>เลือกไฟล์ ZPSR018 (ดึงข้อมูลล่าสุดวันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })})</span>}
                                   </button>
                                 </div>
                               </div>
