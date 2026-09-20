@@ -47,6 +47,14 @@ export default function WireReturnPage() {
   const [isCalcModalOpen, setIsCalcModalOpen] = useState(false);
   const [isExtractingPDF, setIsExtractingPDF] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [pullHistory, setPullHistory] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const hist = JSON.parse(localStorage.getItem("zpsr018_pull_history_wire") || "{}");
+      setPullHistory(hist);
+    } catch(e) {}
+  }, []);
 
   useEffect(() => {
     fetchProjects();
@@ -155,6 +163,12 @@ export default function WireReturnPage() {
 
         if (aiWires.length > 0) {
           setEditWires(aiWires);
+          
+          const now = new Date().toLocaleString('th-TH');
+          const newHistory = { ...pullHistory, [editingId || ""]: now };
+          setPullHistory(newHistory);
+          localStorage.setItem("zpsr018_pull_history_wire", JSON.stringify(newHistory));
+          
           alert("AI ดึงข้อมูลเศษสายจาก ZPSR018 สำเร็จ!");
         } else {
           alert("AI ไม่พบข้อมูลเศษสายที่ต้องคืน (หรือยอดส่งคืนหักลบแล้วเท่ากับ 0)");
@@ -806,6 +820,11 @@ export default function WireReturnPage() {
                               )}
                               {isExtractingPDF ? "กำลังอ่าน ZPSR018..." : <span suppressHydrationWarning>ใช้ AI อ่านไฟล์ ZPSR018 (ดึงข้อมูลล่าสุดวันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })})</span>}
                             </button>
+                            {pullHistory[editingId || ""] && (
+                              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px', textAlign: 'right' }}>
+                                ประวัติดึงข้อมูลล่าสุด: {pullHistory[editingId || ""]}
+                              </div>
+                            )}
                           </div>
                         </div>
                         {editWires.map((wire, idx) => (

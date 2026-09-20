@@ -13,6 +13,15 @@ export default function TecoChecker() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [pullHistory, setPullHistory] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const hist = JSON.parse(localStorage.getItem("zpsr018_pull_history_teco") || "{}");
+      setPullHistory(hist);
+    } catch(e) {}
+  }, []);
   
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedWbs, setSelectedWbs] = useState<string>("");
@@ -120,6 +129,12 @@ export default function TecoChecker() {
       }
 
       setResult(data.result);
+      
+      const now = new Date().toLocaleString('th-TH');
+      const newHistory = { ...pullHistory, [selectedWbs]: now };
+      setPullHistory(newHistory);
+      localStorage.setItem("zpsr018_pull_history_teco", JSON.stringify(newHistory));
+      
     } catch (err: any) {
       setError(err.message || "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ AI ได้");
     } finally {
@@ -274,6 +289,12 @@ export default function TecoChecker() {
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
                 </button>
+              </div>
+            )}
+
+            {pullHistory[selectedWbs] && !file && (
+              <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', textAlign: 'right' }}>
+                ประวัติดึงข้อมูลล่าสุด: {pullHistory[selectedWbs]}
               </div>
             )}
 

@@ -85,6 +85,15 @@ function BudgetTransferContent() {
   const [step3View, setStep3View] = useState<'memo' | 'approval'>('memo');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  
+  const [pullHistory, setPullHistory] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      const hist = localStorage.getItem("zpsr018_pull_history_budget") || "";
+      setPullHistory(hist);
+    } catch(e) {}
+  }, []);
 
   const categories = [
     "ค่าแรง",
@@ -125,6 +134,11 @@ function BudgetTransferContent() {
       if (contentType && contentType.includes("application/json")) {
         const data: NetworkData[] = await res.json();
         setNetworkDataList(data);
+        
+        const now = new Date().toLocaleString('th-TH');
+        setPullHistory(now);
+        localStorage.setItem("zpsr018_pull_history_budget", now);
+        
         autoCalculateTransfers(data);
         setCurrentStep(2);
       } else {
@@ -1228,6 +1242,12 @@ function BudgetTransferContent() {
                   เลือกไฟล์ PDF
                 </div>
               </label>
+              {pullHistory && (
+                <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', textAlign: 'right' }}>
+                  ประวัติดึงข้อมูลล่าสุด: {pullHistory}
+                </div>
+              )}
+              {uploadError && <div style={{ color: 'red', marginTop: '10px', fontSize: '0.9rem' }}>{uploadError}</div>}
 
               <div className="wizard-footer">
                 <button className="btn btn-outline" onClick={() => { setDocNo(''); setDate(''); setWbs(''); setProjectName(''); }}>ล้างข้อมูล</button>

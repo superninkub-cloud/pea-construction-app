@@ -243,6 +243,11 @@ export default function MaterialTracking() {
         const updated = [...materials, ...newMaterials];
         saveToStorage(updated);
         
+        const now = new Date().toLocaleString('th-TH');
+        const newHistory = { ...pullHistory, [targetWbs]: now };
+        setPullHistory(newHistory);
+        localStorage.setItem("zpsr018_pull_history_material", JSON.stringify(newHistory));
+        
         setExpandedProjects(prev => ({ ...prev, [targetWbs]: true }));
         alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการสำหรับงาน ${targetWbs}\n(ระบบจัดการแยกพัสดุดี/ชำรุดให้อัตโนมัติ พร้อมตัดเศษเหล็ก/ลวดตีเกลียวออกตามกฎแล้ว)`);
       } else {
@@ -686,6 +691,11 @@ export default function MaterialTracking() {
                                   </button>
                                 </div>
                               </div>
+                              {pullHistory[p.wbs] && (
+                                <div className="text-xs text-slate-500 mt-2 text-right">
+                                  ประวัติดึงข้อมูลล่าสุด: {pullHistory[p.wbs]}
+                                </div>
+                              )}
                               )}
 
                               {/* Materials List for this Project */}
