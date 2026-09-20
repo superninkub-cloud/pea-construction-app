@@ -42,6 +42,15 @@ export default function MaterialTracking() {
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
   const [showCampInventory, setShowCampInventory] = useState<Record<string, boolean>>({});
 
+  const [pullHistory, setPullHistory] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const hist = JSON.parse(localStorage.getItem("zpsr018_pull_history_material") || "{}");
+      setPullHistory(hist);
+    } catch(e) {}
+  }, []);
+
   const [photos, setPhotos] = useState<Record<string, string>>({});
   const [activePhotoKey, setActivePhotoKey] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
