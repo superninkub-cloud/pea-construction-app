@@ -162,7 +162,7 @@ export default function TecoChecker() {
               <span className="gradient-text">ระบบ AI ตรวจสอบเอกสารก่อนปิดงาน</span>
             </h2>
             <p style={{ color: 'var(--text-light)', marginBottom: '24px' }}>
-              เลือกโครงการและอัปโหลดไฟล์เอกสาร ZPSR018 (PDF) ระบบจะใช้ AI วิเคราะห์ความครบถ้วนของการเบิก-คืนพัสดุ งบประมาณ และ PR/PO อัตโนมัติ <span suppressHydrationWarning>(ดึงข้อมูลล่าสุดวันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })})</span>
+              เลือกโครงการและอัปโหลดไฟล์เอกสาร ZPSR018 (PDF) ระบบจะใช้ AI วิเคราะห์ความครบถ้วนของการเบิก-คืนพัสดุ งบประมาณ และ PR/PO อัตโนมัติ
             </p>
 
             {/* Project Selection */}
@@ -294,7 +294,7 @@ export default function TecoChecker() {
 
             {pullHistory[selectedWbs] && !file && (
               <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', textAlign: 'right' }}>
-                ประวัติดึงข้อมูลล่าสุด: {pullHistory[selectedWbs]}
+                (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory[selectedWbs]})
               </div>
             )}
 

@@ -1229,7 +1229,7 @@ function BudgetTransferContent() {
                 </div>
               </div>
 
-              <label className="form-label" style={{ marginBottom: '12px' }}>อัพโหลดไฟล์ PDF ZPSR018 (เพื่อคำนวณอัตโนมัติ) <span suppressHydrationWarning>(ดึงข้อมูลล่าสุดวันที่ {new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })})</span></label>
+              <label className="form-label" style={{ marginBottom: '12px' }}>อัพโหลดไฟล์ PDF ZPSR018 (เพื่อคำนวณอัตโนมัติ)</label>
               <label className="dropzone" style={{ opacity: isUploading ? 0.5 : 1 }}>
                 <input type="file" accept="application/pdf" style={{ display: 'none' }} onChange={handleFileUpload} disabled={isUploading} />
                 <div className="dropzone-icon">
@@ -1244,7 +1244,7 @@ function BudgetTransferContent() {
               </label>
               {pullHistory && (
                 <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', textAlign: 'right' }}>
-                  ประวัติดึงข้อมูลล่าสุด: {pullHistory}
+                  (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory})
                 </div>
               )}
               {uploadError && <div style={{ color: 'red', marginTop: '10px', fontSize: '0.9rem' }}>{uploadError}</div>}
