@@ -1242,11 +1242,9 @@ function BudgetTransferContent() {
                   เลือกไฟล์ PDF
                 </div>
               </label>
-              {pullHistory && (
-                <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', textAlign: 'right' }}>
-                  (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory})
-                </div>
-              )}
+              <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', textAlign: 'right' }}>
+                (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory || "ยังไม่มีประวัติ"})
+              </div>
               {uploadError && <div style={{ color: 'red', marginTop: '10px', fontSize: '0.9rem' }}>{uploadError}</div>}
 
               <div className="wizard-footer">

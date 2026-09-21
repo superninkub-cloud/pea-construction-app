@@ -820,11 +820,9 @@ export default function WireReturnPage() {
                               )}
                               {isExtractingPDF ? "กำลังอ่าน ZPSR018..." : "ใช้ AI อ่านไฟล์ ZPSR018"}
                             </button>
-                            {pullHistory[editingId || ""] && (
-                              <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px', textAlign: 'right' }}>
-                                (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory[editingId || ""]})
-                              </div>
-                            )}
+                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px', textAlign: 'right' }}>
+                              (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory[editingId || ""] || "ยังไม่มีประวัติ"})
+                            </div>
                           </div>
                         </div>
                         {editWires.map((wire, idx) => (

@@ -292,11 +292,9 @@ export default function TecoChecker() {
               </div>
             )}
 
-            {pullHistory[selectedWbs] && !file && (
-              <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', textAlign: 'right' }}>
-                (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory[selectedWbs]})
-              </div>
-            )}
+            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px', textAlign: 'right' }}>
+              (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory[selectedWbs] || "ยังไม่มีประวัติ"})
+            </div>
 
             {error && (
               <div style={{ 

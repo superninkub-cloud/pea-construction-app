@@ -698,11 +698,9 @@ export default function MaterialTracking() {
                                     {isUploadingThis ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                                     {isUploadingThis ? "กำลังวิเคราะห์ด้วย AI..." : "เลือกไฟล์ ZPSR018"}
                                   </button>
-                                  {pullHistory[p.wbs] && (
-                                    <div className="text-xs text-slate-500 mt-2 text-right">
-                                      (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory[p.wbs]})
-                                    </div>
-                                  )}
+                                  <div className="text-xs text-slate-500 mt-2 text-right">
+                                    (ดึงข้อมูลล่าสุดเมื่อวันที่: {pullHistory[p.wbs] || "ยังไม่มีประวัติ"})
+                                  </div>
                                 </div>
                               </div>
                               )}
