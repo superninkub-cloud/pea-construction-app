@@ -44,12 +44,7 @@ export default function MaterialTracking() {
 
   const [pullHistory, setPullHistory] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    try {
-      const hist = JSON.parse(localStorage.getItem("zpsr018_pull_history_material") || "{}");
-      setPullHistory(hist);
-    } catch(e) {}
-  }, []);
+  // Pull history is now populated from Supabase in fetchBaseData
 
   const [photos, setPhotos] = useState<Record<string, string>>({});
   const [activePhotoKey, setActivePhotoKey] = useState<string | null>(null);
@@ -81,18 +76,21 @@ export default function MaterialTracking() {
           data.filter(p => p.status === "F4").map(p => p.wbs)
         );
 
-        const saved = localStorage.getItem("material_tracking_data");
-        if (saved) {
-          const parsed: Material[] = JSON.parse(saved);
-          const filteredMaterials = parsed.filter(m => !closedWbsSet.has(m.wbs));
-          
-          setMaterials(filteredMaterials);
-          
-          // Only update storage if we actually removed something
-          if (filteredMaterials.length !== parsed.length) {
-            localStorage.setItem("material_tracking_data", JSON.stringify(filteredMaterials));
+        // Load materials and pull history from Supabase projects
+        let allMaterials: Material[] = [];
+        const hist: Record<string, string> = {};
+        
+        data.forEach(p => {
+          if (!closedWbsSet.has(p.wbs) && p.material_tracking_data && Array.isArray(p.material_tracking_data)) {
+            allMaterials = [...allMaterials, ...p.material_tracking_data];
           }
-        }
+          if (p.material_last_pulled_at) {
+            hist[p.wbs] = p.material_last_pulled_at;
+          }
+        });
+        
+        setMaterials(allMaterials);
+        setPullHistory(hist);
       }
     } catch (e) {
       console.error("Failed to fetch base data", e);
@@ -101,9 +99,14 @@ export default function MaterialTracking() {
     }
   };
 
-  const saveToStorage = (data: Material[]) => {
-    setMaterials(data);
-    localStorage.setItem("material_tracking_data", JSON.stringify(data));
+  const syncProjectToSupabase = async (wbs: string, updatedMaterials: Material[]) => {
+    setMaterials(updatedMaterials);
+    const projMaterials = updatedMaterials.filter(m => m.wbs === wbs);
+    try {
+      await supabase.from("projects").update({ material_tracking_data: projMaterials }).eq("wbs", wbs);
+    } catch (err) {
+      console.error("Failed to sync project to Supabase", err);
+    }
   };
 
   const toggleProject = (wbs: string) => {
@@ -249,13 +252,17 @@ export default function MaterialTracking() {
             };
           });
 
-        const updated = [...materials, ...newMaterials];
-        saveToStorage(updated);
+        const updated = [...materials.filter(m => m.wbs !== targetWbs), ...newMaterials];
+        setMaterials(updated);
         
         const now = new Date().toLocaleString('th-TH');
-        const newHistory = { ...pullHistory, [targetWbs]: now };
-        setPullHistory(newHistory);
-        localStorage.setItem("zpsr018_pull_history_material", JSON.stringify(newHistory));
+        setPullHistory(prev => ({ ...prev, [targetWbs]: now }));
+        
+        // Sync to Supabase
+        await supabase.from("projects").update({ 
+          material_tracking_data: newMaterials,
+          material_last_pulled_at: now
+        }).eq("wbs", targetWbs);
         
         setExpandedProjects(prev => ({ ...prev, [targetWbs]: true }));
         alert(`ดึงข้อมูลสำเร็จ ${newMaterials.length} รายการสำหรับงาน ${targetWbs}\n(ระบบจัดการแยกพัสดุดี/ชำรุดให้อัตโนมัติ พร้อมตัดเศษเหล็ก/ลวดตีเกลียวออกตามกฎแล้ว)`);
@@ -274,18 +281,20 @@ export default function MaterialTracking() {
   const clearDataForWbs = (wbs: string) => {
     if (confirm(`ต้องการล้างข้อมูลพัสดุสำหรับงาน ${wbs} ใช่หรือไม่?`)) {
       const updated = materials.filter(m => m.wbs !== wbs);
-      saveToStorage(updated);
+      syncProjectToSupabase(wbs, updated);
     }
   };
 
   const updateStatus = (id: string, newStatus: string) => {
     const updated = materials.map(m => m.id === id ? { ...m, status: newStatus } : m);
-    saveToStorage(updated);
+    const targetWbs = materials.find(m => m.id === id)?.wbs;
+    if (targetWbs) syncProjectToSupabase(targetWbs, updated);
   };
 
   const updateMaterialTracking = (id: string, updates: Partial<Material>) => {
     const updated = materials.map(m => m.id === id ? { ...m, ...updates } : m);
-    saveToStorage(updated);
+    const targetWbs = materials.find(m => m.id === id)?.wbs;
+    if (targetWbs) syncProjectToSupabase(targetWbs, updated);
   };
 
   const markAllStatus = (wbs: string, part: "new" | "demolish", newStatus: string) => {
@@ -300,7 +309,7 @@ export default function MaterialTracking() {
         }
         return m;
       });
-      saveToStorage(updated);
+      syncProjectToSupabase(wbs, updated);
     }
   };
 
@@ -410,16 +419,6 @@ export default function MaterialTracking() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
-            {materials.length > 0 && userRole === 'admin' && (
-              <button 
-                onClick={() => {
-                  if(confirm("ต้องการล้างรายการพัสดุทั้งหมดในระบบใช่หรือไม่?")) saveToStorage([]);
-                }}
-                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors border border-red-100"
-              >
-                ล้างรายการพัสดุทั้งหมด
-              </button>
-            )}
           </div>
         </div>
 
