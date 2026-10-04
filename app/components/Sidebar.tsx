@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut, Recycle, ArrowRightLeft, Camera, ClipboardList, ChevronDown, ChevronRight, Package } from "lucide-react";
+import { LayoutDashboard, FileEdit, CalendarDays, Car, ShieldCheck, BookOpen, AlertCircle, LogOut, Recycle, ArrowRightLeft, Camera, ClipboardList, ChevronDown, ChevronRight, Package, MapPin } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import { useEffect, useState } from "react";
 
@@ -96,6 +96,10 @@ export default function Sidebar() {
             <Link href="/important" className={`nav-item ${pathname === "/important" ? "active" : ""}`}>
               <AlertCircle size={20} />
               <span>ติดตามงานสำคัญ</span>
+            </Link>
+            <Link href="/emergency-plan" className={`nav-item ${pathname === "/emergency-plan" ? "active" : ""}`}>
+              <MapPin size={20} />
+              <span>งานฉุกเฉิน/รถชนเสา</span>
             </Link>
           </div>
         )}
