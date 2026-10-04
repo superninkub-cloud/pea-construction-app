@@ -17,6 +17,7 @@ interface Point {
   lat: number;
   lng: number;
   image_url?: string;
+  image_base64?: string;
   damage_details: string;
   pole_details: string;
   team_required: number;
@@ -63,6 +64,42 @@ export default function EmergencyPlan() {
     }
   };
 
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+      };
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleMultipleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const files = Array.from(e.target.files);
@@ -90,11 +127,19 @@ export default function EmergencyPlan() {
         console.error("Error reading EXIF:", error);
       }
 
+      let base64 = "";
+      try {
+        base64 = await compressImage(file);
+      } catch (err) {
+        console.error("Failed to compress image", err);
+      }
+
       newPoints.push({
         id: pointId,
         lat,
         lng,
         preview_url: objectUrl,
+        image_base64: base64,
         damage_details: "",
         pole_details: "",
         team_required: 1,
