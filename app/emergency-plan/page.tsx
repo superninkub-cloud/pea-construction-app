@@ -12,6 +12,12 @@ const MapComponent = dynamic(() => import("./MapComponent"), { ssr: false });
 
 import exifr from 'exifr';
 
+interface MaterialItem {
+  id: string;
+  name: string;
+  quantity: number;
+}
+
 interface Point {
   id: string;
   lat: number;
@@ -19,9 +25,11 @@ interface Point {
   image_url?: string;
   image_base64?: string;
   pole_name?: string;
+  pole_name?: string;
   damage_details: string;
-  pole_details: string;
-  team_required: number;
+  pole_details?: string;
+  team_required?: number;
+  materials?: MaterialItem[];
   preview_url?: string; // For local display before upload
 }
 
@@ -36,6 +44,7 @@ export default function EmergencyPlan() {
   const [jobs, setJobs] = useState<EmergencyJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showMaterialSummary, setShowMaterialSummary] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [title, setTitle] = useState("");
@@ -45,6 +54,17 @@ export default function EmergencyPlan() {
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const aggregatedMaterials = React.useMemo(() => {
+    const map = new Map<string, number>();
+    draftPoints.forEach(pt => {
+      pt.materials?.forEach(m => {
+        const current = map.get(m.name) || 0;
+        map.set(m.name, current + m.quantity);
+      });
+    });
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  }, [draftPoints]);
 
   useEffect(() => {
     fetchJobs();
@@ -169,8 +189,7 @@ export default function EmergencyPlan() {
         image_base64: base64,
         pole_name: "",
         damage_details: "",
-        pole_details: "",
-        team_required: 1,
+        materials: [],
       });
     }
 
@@ -205,8 +224,7 @@ export default function EmergencyPlan() {
         lng,
         pole_name: "",
         damage_details: "",
-        pole_details: "",
-        team_required: 1,
+        materials: [],
       };
       setDraftPoints(prev => [...prev, newPt]);
       setActivePointId(pointId);
@@ -228,6 +246,30 @@ export default function EmergencyPlan() {
         setActivePointId(updated.length > 0 ? updated[0].id : null);
       }
       return updated;
+    });
+  };
+
+  const addMaterial = () => {
+    if (!activePointId) return;
+    const pt = draftPoints.find(p => p.id === activePointId);
+    if (!pt) return;
+    const newMat = { id: Math.random().toString(36).substring(2, 9), name: "", quantity: 1 };
+    updateActivePoint({ materials: [...(pt.materials || []), newMat] });
+  };
+
+  const updateMaterial = (matId: string, field: 'name' | 'quantity', value: any) => {
+    const pt = draftPoints.find(p => p.id === activePointId);
+    if (!pt || !pt.materials) return;
+    updateActivePoint({
+      materials: pt.materials.map(m => m.id === matId ? { ...m, [field]: value } : m)
+    });
+  };
+
+  const removeMaterial = (matId: string) => {
+    const pt = draftPoints.find(p => p.id === activePointId);
+    if (!pt || !pt.materials) return;
+    updateActivePoint({
+      materials: pt.materials.filter(m => m.id !== matId)
     });
   };
 
@@ -322,7 +364,7 @@ export default function EmergencyPlan() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {jobs.map((job) => {
               const pointsCount = job.points?.length || 0;
-              const teamsCount = job.points?.reduce((acc: number, pt: any) => acc + (pt.team_required || 1), 0) || 0;
+              const materialsCount = job.points?.reduce((acc: number, pt: any) => acc + (pt.materials?.length || 0), 0) || 0;
               const createdDate = new Date(job.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
               return (
@@ -350,10 +392,10 @@ export default function EmergencyPlan() {
                         <span className="text-2xl font-bold text-blue-700">{pointsCount}</span>
                         <span className="text-xs font-medium text-blue-600 mt-1">จุดเกิดเหตุ</span>
                       </div>
-                      <div className="bg-purple-50 rounded-xl p-3 flex flex-col items-center justify-center text-center">
-                        <Users className="text-purple-600 mb-1" size={20} />
-                        <span className="text-2xl font-bold text-purple-700">{teamsCount}</span>
-                        <span className="text-xs font-medium text-purple-600 mt-1">ชุดปฏิบัติงาน</span>
+                      <div className="bg-indigo-50 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                        <Wrench className="text-indigo-600 mb-1" size={20} />
+                        <span className="text-2xl font-bold text-indigo-700">{materialsCount}</span>
+                        <span className="text-xs font-medium text-indigo-600 mt-1">รายการอุปกรณ์</span>
                       </div>
                     </div>
 
@@ -546,23 +588,47 @@ export default function EmergencyPlan() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">รายการหัวเสา / อุปกรณ์ที่ต้องใช้</label>
-                        <textarea 
-                          value={activePoint.pole_details} 
-                          onChange={e => updateActivePoint({ pole_details: e.target.value })} 
-                          rows={2} 
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none text-sm" 
-                          placeholder="เช่น ต้องใช้เสา 12ม 1 ต้น, ลูกถ้วย 3 ลูก..." 
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">ประเมินจำนวนชุดงานจุดนี้</label>
-                        <div className="flex items-center gap-3">
-                          <button type="button" onClick={() => updateActivePoint({ team_required: Math.max(0, activePoint.team_required - 1) })} className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold">-</button>
-                          <div className="w-16 text-center font-bold text-lg text-slate-800">{activePoint.team_required}</div>
-                          <button type="button" onClick={() => updateActivePoint({ team_required: activePoint.team_required + 1 })} className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold">+</button>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">รายการวัสดุอุปกรณ์ที่ต้องใช้</label>
+                        <div className="space-y-2 mb-3">
+                          {activePoint.materials && activePoint.materials.map((mat) => (
+                            <div key={mat.id} className="flex items-center gap-2">
+                              <input 
+                                type="text" 
+                                value={mat.name} 
+                                onChange={e => updateMaterial(mat.id, 'name', e.target.value)} 
+                                placeholder="ชื่ออุปกรณ์ (เช่น เสา 12ม)" 
+                                className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                              />
+                              <input 
+                                type="number" 
+                                value={mat.quantity || ""} 
+                                onChange={e => updateMaterial(mat.id, 'quantity', parseInt(e.target.value) || 0)} 
+                                placeholder="จำนวน" 
+                                min={1}
+                                className="w-20 p-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-center font-medium text-blue-700"
+                              />
+                              <button 
+                                type="button"
+                                onClick={() => removeMaterial(mat.id)}
+                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+                          ))}
+                          {(!activePoint.materials || activePoint.materials.length === 0) && (
+                            <div className="text-sm text-slate-400 text-center py-2 bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
+                              ยังไม่มีรายการอุปกรณ์
+                            </div>
+                          )}
                         </div>
+                        <button 
+                          type="button"
+                          onClick={addMaterial}
+                          className="w-full py-2 border-2 border-dashed border-slate-200 rounded-lg text-slate-500 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center gap-2 transition-colors text-sm font-medium"
+                        >
+                          <Plus size={16} /> เพิ่มอุปกรณ์
+                        </button>
                       </div>
                     </div>
                   ) : (
@@ -574,7 +640,16 @@ export default function EmergencyPlan() {
 
                 </form>
                 
-                <div className="pt-5 mt-auto border-t border-slate-100">
+                <div className="pt-5 mt-auto border-t border-slate-100 space-y-3">
+                  {draftPoints.some(pt => pt.materials && pt.materials.length > 0) && (
+                    <button 
+                      type="button"
+                      onClick={() => setShowMaterialSummary(true)}
+                      className="w-full py-2.5 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <Wrench size={18} /> ดูสรุปอุปกรณ์รวมทั้งโปรเจกต์ ({aggregatedMaterials.length} รายการ)
+                    </button>
+                  )}
                   <button 
                     type="submit" 
                     form="emergency-form"
@@ -606,6 +681,47 @@ export default function EmergencyPlan() {
             className="max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-white/10" 
             onClick={() => setFullscreenImageUrl(null)}
           />
+        </div>
+      )}
+
+      {/* Material Summary Modal */}
+      {showMaterialSummary && (
+        <div className="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh] animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+                <Wrench size={20} className="text-indigo-500" /> สรุปรายการอุปกรณ์รวมทั้งโครงการ
+              </h3>
+              <button onClick={() => setShowMaterialSummary(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto">
+              {aggregatedMaterials.length > 0 ? (
+                <div className="space-y-2">
+                  {aggregatedMaterials.map(([name, qty], idx) => (
+                    <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
+                      <span className="text-slate-700 font-medium">{name || "ไม่ระบุชื่อ"}</span>
+                      <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">{qty}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-400">
+                  <Wrench size={32} className="mx-auto mb-2 opacity-50" />
+                  ยังไม่มีการระบุอุปกรณ์ในโครงการนี้
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t border-slate-100 bg-slate-50">
+              <button 
+                onClick={() => setShowMaterialSummary(false)}
+                className="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-medium transition-colors"
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -10,6 +10,12 @@ import exifr from 'exifr';
 
 const MapComponent = dynamic(() => import("../MapComponent"), { ssr: false });
 
+interface MaterialItem {
+  id: string;
+  name: string;
+  quantity: number;
+}
+
 interface Point {
   id: string;
   lat: number;
@@ -18,8 +24,9 @@ interface Point {
   image_base64?: string; // For simple demo without bucket
   pole_name?: string;
   damage_details: string;
-  pole_details: string;
-  team_required: number;
+  pole_details?: string;
+  team_required?: number;
+  materials?: MaterialItem[];
   preview_url?: string;
 }
 
@@ -38,7 +45,20 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
+  const [showMaterialSummary, setShowMaterialSummary] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const aggregatedMaterials = React.useMemo(() => {
+    if (!job) return [];
+    const map = new Map<string, number>();
+    job.points.forEach(pt => {
+      pt.materials?.forEach(m => {
+        const current = map.get(m.name) || 0;
+        map.set(m.name, current + m.quantity);
+      });
+    });
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  }, [job]);
 
   useEffect(() => {
     fetchJob();
@@ -77,8 +97,7 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
         lng,
         pole_name: "",
         damage_details: "",
-        pole_details: "",
-        team_required: 1,
+        materials: [],
       };
       setJob({ ...job, points: [...job.points, newPt] });
       setActivePointId(pointId);
@@ -106,6 +125,29 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
         setActivePointId(updatedPoints.length > 0 ? updatedPoints[0].id : null);
       }
     }
+  };
+
+  const addMaterial = () => {
+    const pt = job?.points.find(p => p.id === activePointId);
+    if (!pt) return;
+    const newMat = { id: Math.random().toString(36).substring(2, 9), name: "", quantity: 1 };
+    updateActivePoint({ materials: [...(pt.materials || []), newMat] });
+  };
+
+  const updateMaterial = (matId: string, field: 'name' | 'quantity', value: any) => {
+    const pt = job?.points.find(p => p.id === activePointId);
+    if (!pt || !pt.materials) return;
+    updateActivePoint({
+      materials: pt.materials.map(m => m.id === matId ? { ...m, [field]: value } : m)
+    });
+  };
+
+  const removeMaterial = (matId: string) => {
+    const pt = job?.points.find(p => p.id === activePointId);
+    if (!pt || !pt.materials) return;
+    updateActivePoint({
+      materials: pt.materials.filter(m => m.id !== matId)
+    });
   };
 
   // Helper to compress image to base64
@@ -228,11 +270,18 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
               />
               <Edit3 size={16} className="text-slate-400" />
             </h1>
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-2">
-              <MapPin size={12} className="text-emerald-500"/> รวม {job.points.length} จุด 
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs text-slate-500 flex items-center gap-1">
+                <MapPin size={12} className="text-emerald-500"/> รวม {job.points.length} จุด 
+              </span>
               <span className="text-slate-300">|</span> 
-              <Users size={12} className="text-indigo-500"/> ใช้กำลังคน {job.points.reduce((sum, pt) => sum + pt.team_required, 0)} ชุดงาน
-            </p>
+              <button 
+                onClick={() => setShowMaterialSummary(true)}
+                className="text-xs text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded flex items-center gap-1 transition-colors font-medium"
+              >
+                <Wrench size={12} /> สรุปรายการอุปกรณ์ ({aggregatedMaterials.length} รายการ)
+              </button>
+            </div>
           </div>
         </div>
         
@@ -353,23 +402,46 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">รายการหัวเสา / วัสดุอุปกรณ์ที่ต้องใช้</label>
-                  <textarea 
-                    value={activePoint.pole_details} 
-                    onChange={e => updateActivePoint({ pole_details: e.target.value })} 
-                    rows={4} 
-                    className="w-full p-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none resize-none text-sm transition-shadow" 
-                    placeholder="เช่น ต้องใช้เสา 12ม 1 ต้น, ลูกถ้วย 3 ลูก, แร็ค..." 
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">ประเมินจำนวนชุดงาน (ทีม)</label>
-                  <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl border border-slate-200 w-fit">
-                    <button type="button" onClick={() => updateActivePoint({ team_required: Math.max(0, activePoint.team_required - 1) })} className="w-10 h-10 rounded-lg bg-white shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center font-bold text-xl transition-colors">-</button>
-                    <div className="w-8 text-center font-bold text-xl text-slate-800">{activePoint.team_required}</div>
-                    <button type="button" onClick={() => updateActivePoint({ team_required: activePoint.team_required + 1 })} className="w-10 h-10 rounded-lg bg-white shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center font-bold text-xl transition-colors">+</button>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">รายการวัสดุอุปกรณ์ที่ต้องใช้</label>
+                  <div className="space-y-2 mb-3">
+                    {activePoint.materials && activePoint.materials.map((mat) => (
+                      <div key={mat.id} className="flex items-center gap-2">
+                        <input 
+                          type="text" 
+                          value={mat.name} 
+                          onChange={e => updateMaterial(mat.id, 'name', e.target.value)} 
+                          placeholder="ชื่ออุปกรณ์ (เช่น เสา 12ม)" 
+                          className="flex-1 p-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                        />
+                        <input 
+                          type="number" 
+                          value={mat.quantity || ""} 
+                          onChange={e => updateMaterial(mat.id, 'quantity', parseInt(e.target.value) || 0)} 
+                          placeholder="จำนวน" 
+                          min={1}
+                          className="w-20 p-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-center font-medium text-blue-700"
+                        />
+                        <button 
+                          onClick={() => removeMaterial(mat.id)}
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          title="ลบรายการ"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    ))}
+                    {(!activePoint.materials || activePoint.materials.length === 0) && (
+                      <div className="text-sm text-slate-400 text-center py-2 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                        ยังไม่มีรายการอุปกรณ์
+                      </div>
+                    )}
                   </div>
+                  <button 
+                    onClick={addMaterial}
+                    className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center gap-2 transition-colors text-sm font-medium"
+                  >
+                    <Plus size={16} /> เพิ่มอุปกรณ์
+                  </button>
                 </div>
               </div>
             </div>
@@ -438,6 +510,47 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
             className="max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-white/10" 
             onClick={() => setFullscreenImageUrl(null)}
           />
+        </div>
+      )}
+
+      {/* Material Summary Modal */}
+      {showMaterialSummary && (
+        <div className="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh] animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+                <Wrench size={20} className="text-indigo-500" /> สรุปรายการอุปกรณ์รวมทั้งโครงการ
+              </h3>
+              <button onClick={() => setShowMaterialSummary(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto">
+              {aggregatedMaterials.length > 0 ? (
+                <div className="space-y-2">
+                  {aggregatedMaterials.map(([name, qty], idx) => (
+                    <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
+                      <span className="text-slate-700 font-medium">{name || "ไม่ระบุชื่อ"}</span>
+                      <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">{qty}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-400">
+                  <Wrench size={32} className="mx-auto mb-2 opacity-50" />
+                  ยังไม่มีการระบุอุปกรณ์ในโครงการนี้
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t border-slate-100 bg-slate-50">
+              <button 
+                onClick={() => setShowMaterialSummary(false)}
+                className="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-medium transition-colors"
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
