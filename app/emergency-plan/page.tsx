@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import dynamic from 'next/dynamic';
-import { Camera, MapPin, Save, Plus, AlertTriangle, FileText, Wrench, Users, Info, Image as ImageIcon, Trash2 } from "lucide-react";
+import { Camera, MapPin, Save, Plus, AlertTriangle, FileText, Wrench, Users, Info, Image as ImageIcon, Trash2, Edit3 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 // Use dynamic import for the map to prevent SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), { ssr: false });
@@ -255,7 +256,15 @@ export default function EmergencyPlan() {
                 {/* Details Panel (Right on desktop) */}
                 <div className="p-6 xl:p-8 flex-1 flex flex-col w-full xl:w-1/3 bg-slate-50">
                   <div className="mb-6">
-                    <h3 className="font-bold text-2xl text-slate-800 mb-3">{job.title}</h3>
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-bold text-2xl text-slate-800">{job.title}</h3>
+                      <Link 
+                        href={`/emergency-plan/${job.id}`}
+                        className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-colors shrink-0"
+                      >
+                        <Edit3 size={16} /> เข้าไปจัดการและแก้ไข
+                      </Link>
+                    </div>
                     <div className="flex flex-wrap gap-3">
                       <span className="flex items-center gap-2 font-semibold text-emerald-700 bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-200 shadow-sm">
                         <MapPin size={18} /> รวม {pointsCount} จุด
