@@ -288,122 +288,55 @@ export default function EmergencyPlan() {
             <p className="text-sm text-slate-400 mt-1">คลิกที่ปุ่ม &quot;เพิ่มโปรเจกต์งานฉุกเฉิน&quot; เพื่อเริ่มต้น</p>
           </div>
         ) : (
-          jobs.map((job, index) => {
-            const totalTeams = job.points?.reduce((sum, pt) => sum + (pt.team_required || 0), 0) || 0;
-            const pointsCount = job.points?.length || 0;
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {jobs.map((job) => {
+              const pointsCount = job.points?.length || 0;
+              const teamsCount = job.points?.reduce((acc: number, pt: any) => acc + (pt.team_required || 1), 0) || 0;
+              const createdDate = new Date(job.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
-            return (
-              <div key={job.id} className="bg-white rounded-3xl border border-slate-200 shadow-lg overflow-hidden flex flex-col xl:flex-row">
-                {/* Map Area (Left on desktop) */}
-                <div className="h-[400px] xl:h-[600px] w-full xl:w-2/3 bg-slate-100 relative border-b xl:border-b-0 xl:border-r border-slate-200">
-                  {pointsCount > 0 ? (
-                    <MapComponent points={job.points || []} readonly={true} />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-slate-400 flex-col gap-2">
-                      <MapPin size={40} className="text-slate-300" />
-                      <p>ไม่มีข้อมูลพิกัดในโปรเจกต์นี้</p>
+              return (
+                <div key={job.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="font-bold text-xl text-slate-800 line-clamp-2">{job.title}</h3>
+                      <button 
+                        onClick={() => deleteJob(job.id)}
+                        className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl transition-colors shrink-0 ml-2"
+                        title="ลบโปรเจกต์"
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
-                  )}
-                  {/* Badge for project index */}
-                  <div className="absolute top-4 left-4 z-[400]">
-                    <div className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl shadow-lg border border-blue-700/50 flex items-center gap-2">
-                      <span className="text-blue-200">#{jobs.length - index}</span> {job.title}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Details Panel (Right on desktop) */}
-                <div className="p-6 xl:p-8 flex-1 flex flex-col w-full xl:w-1/3 bg-slate-50">
-                  <div className="mb-6">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-bold text-2xl text-slate-800">{job.title}</h3>
-                      <div className="flex gap-2">
-                        <Link 
-                          href={`/emergency-plan/${job.id}`}
-                          className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-colors shrink-0"
-                        >
-                          <Edit3 size={16} /> เข้าไปจัดการและแก้ไข
-                        </Link>
-                        <button 
-                          onClick={() => deleteJob(job.id)}
-                          className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl transition-colors shrink-0"
-                          title="ลบโปรเจกต์"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                      <span className="flex items-center gap-2 font-semibold text-emerald-700 bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-200 shadow-sm">
-                        <MapPin size={18} /> รวม {pointsCount} จุด
-                      </span>
-                      <span className="flex items-center gap-2 font-semibold text-indigo-700 bg-indigo-100 px-4 py-2 rounded-xl border border-indigo-200 shadow-sm">
-                        <Users size={18} /> รวม {totalTeams} ชุดงาน
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 overflow-hidden flex flex-col">
-                    <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
-                      <FileText size={18} className="text-slate-400" /> 
-                      รายการจุดเกิดเหตุ และแผนการทำงาน
-                    </h4>
                     
-                    {pointsCount > 0 ? (
-                      <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                        {job.points?.map((pt, i) => (
-                          <div key={pt.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-300 transition-colors">
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0">
-                                {i + 1}
-                              </div>
-                              <div className="flex-1 space-y-2">
-                                <div className="text-xs text-slate-400 font-mono bg-slate-50 inline-block px-2 py-0.5 rounded border border-slate-100">
-                                  {pt.lat.toFixed(5)}, {pt.lng.toFixed(5)}
-                                </div>
-                                
-                                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                  <p className="text-sm font-semibold text-slate-700 mb-1">สภาพชำรุด:</p>
-                                  <p className="text-sm text-slate-600">
-                                    {pt.damage_details || <span className="text-slate-400 italic">ยังไม่ระบุรายละเอียด</span>}
-                                  </p>
-                                </div>
-                                
-                                <div className="bg-amber-50 p-3 rounded-xl border border-amber-100">
-                                  <p className="text-sm font-semibold text-amber-900 mb-1 flex items-center gap-1">
-                                    <Wrench size={14} /> วัสดุ/อุปกรณ์ที่ต้องใช้:
-                                  </p>
-                                  <p className="text-sm text-amber-800">
-                                    {pt.pole_details || <span className="text-amber-700/50 italic">ยังไม่ระบุรายการอุปกรณ์</span>}
-                                  </p>
-                                </div>
-                                
-                                <div className="flex justify-end pt-1">
-                                  <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
-                                    ชุดงาน: {pt.team_required} ทีม
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                    <div className="text-sm text-slate-500 mb-6 flex items-center gap-2">
+                      <FileText size={16} />
+                      สร้างเมื่อ {createdDate}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mb-6 mt-auto">
+                      <div className="bg-blue-50 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                        <MapPin className="text-blue-600 mb-1" size={20} />
+                        <span className="text-2xl font-bold text-blue-700">{pointsCount}</span>
+                        <span className="text-xs font-medium text-blue-600 mt-1">จุดเกิดเหตุ</span>
                       </div>
-                    ) : (
-                      <div className="text-center py-10 text-slate-400 bg-white rounded-2xl border border-slate-200">
-                        ไม่มีจุดเกิดเหตุ
+                      <div className="bg-purple-50 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                        <Users className="text-purple-600 mb-1" size={20} />
+                        <span className="text-2xl font-bold text-purple-700">{teamsCount}</span>
+                        <span className="text-xs font-medium text-purple-600 mt-1">ชุดปฏิบัติงาน</span>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-6 pt-4 border-t border-slate-200 flex justify-between items-center">
-                    <span className="text-slate-400 text-sm font-medium">
-                      สร้างเมื่อ: {new Date(job.created_at).toLocaleString('th-TH')}
-                    </span>
+                    </div>
+
+                    <Link 
+                      href={`/emergency-plan/${job.id}`}
+                      className="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-xl font-medium text-center flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <Edit3 size={18} /> เข้าไปจัดการรายละเอียด
+                    </Link>
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         )}
       </div>
 
