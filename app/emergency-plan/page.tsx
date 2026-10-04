@@ -3,22 +3,29 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import dynamic from 'next/dynamic';
-import { Camera, MapPin, Save, Plus, AlertTriangle, FileText, Wrench, Users, Info } from "lucide-react";
+import { Camera, MapPin, Save, Plus, AlertTriangle, FileText, Wrench, Users, Info, Image as ImageIcon, Trash2 } from "lucide-react";
+import Image from "next/image";
 
 // Use dynamic import for the map to prevent SSR issues with Leaflet
 const MapComponent = dynamic(() => import("./MapComponent"), { ssr: false });
 
 import exifr from 'exifr';
 
-interface EmergencyJob {
+interface Point {
   id: string;
-  title: string;
-  latitude: number | null;
-  longitude: number | null;
+  lat: number;
+  lng: number;
+  image_url?: string;
   damage_details: string;
   pole_details: string;
   team_required: number;
-  image_url: string | null;
+  preview_url?: string; // For local display before upload
+}
+
+interface EmergencyJob {
+  id: string;
+  title: string;
+  points: Point[];
   created_at: string;
 }
 
@@ -28,15 +35,9 @@ export default function EmergencyPlan() {
   const [showModal, setShowModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [formData, setFormData] = useState({
-    title: "",
-    damage_details: "",
-    pole_details: "",
-    team_required: 1,
-  });
-  
-  const [position, setPosition] = useState<{lat: number, lng: number} | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [draftPoints, setDraftPoints] = useState<Point[]>([]);
+  const [activePointId, setActivePointId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -51,58 +52,124 @@ export default function EmergencyPlan() {
         .select("*")
         .order("created_at", { ascending: false });
         
-      if (error && error.code !== "42P01") throw error; // Ignore relation not found error for now
+      if (error && error.code !== "42P01") throw error;
       
       setJobs(data || []);
     } catch (e: any) {
       console.error(e);
-      if (e.code === "42P01") {
-        console.warn("Table emergency_jobs does not exist yet. Please run the SQL migration.");
-      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMultipleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
+    const files = Array.from(e.target.files);
     
-    // Create preview
-    const objectUrl = URL.createObjectURL(file);
-    setImagePreview(objectUrl);
-    
-    // Try to extract GPS from EXIF
-    try {
-      const exifData = await exifr.gps(file);
-      if (exifData && exifData.latitude && exifData.longitude) {
-        setPosition({ lat: exifData.latitude, lng: exifData.longitude });
-        alert(`พบพิกัด GPS จากรูปภาพ! แผนที่จะทำการปักหมุดที่: ${exifData.latitude.toFixed(5)}, ${exifData.longitude.toFixed(5)}`);
-      } else {
-        alert("ไม่พบข้อมูลพิกัด GPS ในรูปภาพนี้ คุณสามารถปักหมุดตำแหน่งบนแผนที่ด้วยตัวเองได้");
+    let newPoints: Point[] = [];
+    let noGpsCount = 0;
+
+    for (const file of files) {
+      const objectUrl = URL.createObjectURL(file);
+      const pointId = Math.random().toString(36).substring(2, 9);
+      
+      let lat = 13.7563; // Default BKK
+      let lng = 100.5018;
+
+      try {
+        const exifData = await exifr.gps(file);
+        if (exifData && exifData.latitude && exifData.longitude) {
+          lat = exifData.latitude;
+          lng = exifData.longitude;
+        } else {
+          noGpsCount++;
+        }
+      } catch (error) {
+        noGpsCount++;
+        console.error("Error reading EXIF:", error);
       }
-    } catch (error) {
-      console.error("Error reading EXIF:", error);
+
+      newPoints.push({
+        id: pointId,
+        lat,
+        lng,
+        preview_url: objectUrl,
+        damage_details: "",
+        pole_details: "",
+        team_required: 1,
+      });
     }
+
+    if (noGpsCount > 0) {
+      alert(`มีรูปภาพจำนวน ${noGpsCount} รูป ที่ไม่พบพิกัด GPS ระบบได้วางจุดไว้ตรงกลางแผนที่ คุณสามารถคลิกเลือกจุดและปักหมุดใหม่บนแผนที่ได้`);
+    }
+
+    setDraftPoints(prev => {
+      const updated = [...prev, ...newPoints];
+      if (!activePointId && updated.length > 0) {
+        setActivePointId(updated[0].id);
+      }
+      return updated;
+    });
+    
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleMapClick = (lat: number, lng: number) => {
+    if (activePointId) {
+      setDraftPoints(prev => prev.map(pt => 
+        pt.id === activePointId ? { ...pt, lat, lng } : pt
+      ));
+    } else {
+      // Create a new point if none is active and clicked on map
+      const pointId = Math.random().toString(36).substring(2, 9);
+      const newPt: Point = {
+        id: pointId,
+        lat,
+        lng,
+        damage_details: "",
+        pole_details: "",
+        team_required: 1,
+      };
+      setDraftPoints(prev => [...prev, newPt]);
+      setActivePointId(pointId);
+    }
+  };
+
+  const updateActivePoint = (updates: Partial<Point>) => {
+    if (!activePointId) return;
+    setDraftPoints(prev => prev.map(pt => 
+      pt.id === activePointId ? { ...pt, ...updates } : pt
+    ));
+  };
+
+  const removePoint = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDraftPoints(prev => {
+      const updated = prev.filter(pt => pt.id !== id);
+      if (activePointId === id) {
+        setActivePointId(updated.length > 0 ? updated[0].id : null);
+      }
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title) return alert("กรุณาระบุชื่องาน");
-    if (!position) return alert("กรุณาปักหมุดบนแผนที่ หรืออัปโหลดรูปภาพที่มีพิกัด");
+    if (!title) return alert("กรุณาระบุชื่องาน");
+    if (draftPoints.length === 0) return alert("กรุณาเพิ่มจุดอย่างน้อย 1 จุด");
     
     setIsSubmitting(true);
     try {
+      // We would upload images to Storage here, but for now we'll just save the points (without preview_urls as they are local)
+      const pointsToSave = draftPoints.map(pt => {
+        const { preview_url, ...rest } = pt;
+        return rest;
+      });
+
       const { data, error } = await supabase.from("emergency_jobs").insert([{
-        title: formData.title,
-        damage_details: formData.damage_details,
-        pole_details: formData.pole_details,
-        team_required: formData.team_required,
-        latitude: position.lat,
-        longitude: position.lng,
-        // Since we don't have a storage bucket set up in this demo, we'll store local blob if we had one, 
-        // but typically you'd upload to Supabase Storage first.
-        image_url: null 
+        title,
+        points: pointsToSave,
       }]);
       
       if (error) throw error;
@@ -120,11 +187,13 @@ export default function EmergencyPlan() {
   };
 
   const resetForm = () => {
-    setFormData({ title: "", damage_details: "", pole_details: "", team_required: 1 });
-    setPosition(null);
-    setImagePreview(null);
+    setTitle("");
+    setDraftPoints([]);
+    setActivePointId(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  const activePoint = draftPoints.find(pt => pt.id === activePointId);
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
@@ -136,7 +205,7 @@ export default function EmergencyPlan() {
             วางแผนงานฉุกเฉิน / รถชนเสา
           </h1>
           <p className="text-slate-500 mt-2 text-sm md:text-base">
-            สร้างโปรเจคท์, ปักหมุดแผนที่ และวางแผนชุดงานสำหรับงานฉุกเฉิน
+            อัปโหลดรูปภาพหลายรูปพร้อมกันเพื่อดูปริมาณงานรวม และใส่รายละเอียดแต่ละจุด
           </p>
         </div>
         <button 
@@ -144,143 +213,248 @@ export default function EmergencyPlan() {
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-blue-200 transition-all flex items-center gap-2"
         >
           <Plus size={20} />
-          เพิ่มงานฉุกเฉิน
+          เพิ่มโปรเจกต์งานฉุกเฉิน
         </button>
       </div>
 
       {/* List of Jobs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {loading ? (
           <div className="col-span-full py-12 text-center text-slate-500">กำลังโหลดข้อมูล...</div>
         ) : jobs.length === 0 ? (
           <div className="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-200 shadow-sm">
             <AlertTriangle className="mx-auto text-slate-300 mb-3" size={48} />
             <p className="text-slate-500">ยังไม่มีงานฉุกเฉินในระบบ</p>
-            <p className="text-sm text-slate-400 mt-1">คลิกที่ปุ่ม &quot;เพิ่มงานฉุกเฉิน&quot; เพื่อเริ่มต้น</p>
+            <p className="text-sm text-slate-400 mt-1">คลิกที่ปุ่ม &quot;เพิ่มโปรเจกต์งานฉุกเฉิน&quot; เพื่อเริ่มต้น</p>
           </div>
         ) : (
-          jobs.map(job => (
-            <div key={job.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
-              {/* Map Preview for the job */}
-              <div className="h-40 w-full bg-slate-100 relative">
-                {job.latitude && job.longitude ? (
-                  <MapComponent position={{lat: job.latitude, lng: job.longitude}} setPosition={() => {}} readonly={true} />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-slate-400">
-                    ไม่มีข้อมูลพิกัด
+          jobs.map(job => {
+            const totalTeams = job.points?.reduce((sum, pt) => sum + (pt.team_required || 0), 0) || 0;
+            const pointsCount = job.points?.length || 0;
+
+            return (
+              <div key={job.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
+                {/* Map Preview for the job */}
+                <div className="h-64 w-full bg-slate-100 relative">
+                  {pointsCount > 0 ? (
+                    <MapComponent points={job.points || []} readonly={true} />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">
+                      ไม่มีข้อมูลพิกัด
+                    </div>
+                  )}
+                </div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <h3 className="font-bold text-xl text-slate-800 mb-2">{job.title}</h3>
+                  
+                  <div className="mt-2 text-sm text-slate-600 flex-1 space-y-3">
+                    <div className="flex gap-4">
+                      <span className="flex items-center gap-1.5 font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                        <MapPin size={16} /> รวม {pointsCount} จุด
+                      </span>
+                      <span className="flex items-center gap-1.5 font-medium text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">
+                        <Users size={16} /> รวม {totalTeams} ชุดงาน
+                      </span>
+                    </div>
+                    
+                    {pointsCount > 0 && (
+                      <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs max-h-32 overflow-y-auto space-y-2">
+                        {job.points?.map((pt, i) => (
+                          <div key={pt.id} className="flex gap-2">
+                            <span className="font-bold text-slate-400 min-w-[20px]">{i+1}.</span>
+                            <div className="flex-1">
+                              {pt.damage_details && <p className="text-slate-700 font-medium">{pt.damage_details}</p>}
+                              {pt.pole_details && <p className="text-slate-500 mt-0.5"><Wrench size={12} className="inline mr-1" />{pt.pole_details}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <h3 className="font-bold text-lg text-slate-800 line-clamp-1 mb-2">{job.title}</h3>
-                
-                <div className="space-y-2 mt-2 text-sm text-slate-600 flex-1">
-                  <p className="flex items-start gap-2">
-                    <MapPin className="text-rose-500 shrink-0 mt-0.5" size={16} />
-                    <span className="line-clamp-2">{job.latitude?.toFixed(4)}, {job.longitude?.toFixed(4)}</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <FileText className="text-blue-500 shrink-0 mt-0.5" size={16} />
-                    <span className="line-clamp-2" title={job.damage_details}>{job.damage_details || "-"}</span>
-                  </p>
-                  <p className="flex items-start gap-2">
-                    <Wrench className="text-amber-500 shrink-0 mt-0.5" size={16} />
-                    <span className="line-clamp-1">{job.pole_details || "-"}</span>
-                  </p>
-                </div>
-                
-                <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-1.5 font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">
-                    <Users size={16} /> {job.team_required} ชุดงาน
-                  </span>
-                  <span className="text-slate-400 text-xs">
-                    {new Date(job.created_at).toLocaleDateString('th-TH')}
-                  </span>
+                  
+                  <div className="mt-4 pt-4 border-t border-slate-100 text-right">
+                    <span className="text-slate-400 text-xs">
+                      สร้างเมื่อ: {new Date(job.created_at).toLocaleString('th-TH')}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
       {/* Add Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col md:flex-row">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
             
-            {/* Map Area */}
-            <div className="w-full md:w-1/2 h-64 md:h-auto bg-slate-100 relative">
-              <MapComponent position={position} setPosition={setPosition} />
-              <div className="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur text-xs p-3 rounded-xl shadow-lg border border-slate-200 z-[400] pointer-events-none">
-                <p className="font-semibold text-slate-800 flex items-center gap-1.5"><Info size={14} className="text-blue-500"/> วิธีปักหมุด:</p>
-                <ul className="mt-1 space-y-1 text-slate-600 ml-5 list-disc">
-                  <li>อัปโหลดรูปภาพที่มีข้อมูล GPS ระบบจะปักหมุดให้อัตโนมัติ</li>
-                  <li>คลิกบนพื้นที่ในแผนที่เพื่อปักหมุดด้วยตัวเอง</li>
-                </ul>
-              </div>
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h2 className="text-xl font-bold text-slate-800">สร้างโปรเจกต์งานฉุกเฉิน</h2>
+              <button onClick={() => {setShowModal(false); resetForm();}} className="text-slate-400 hover:text-slate-600 p-2">✕</button>
             </div>
 
-            {/* Form Area */}
-            <div className="w-full md:w-1/2 p-6 md:p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-slate-800">รายละเอียดงานฉุกเฉิน</h2>
-                <button onClick={() => {setShowModal(false); resetForm();}} className="text-slate-400 hover:text-slate-600 p-2">✕</button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">ชื่องาน <span className="text-red-500">*</span></label>
-                  <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น รถชนเสาไฟหน้าซอย 12" />
+            <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
+              {/* Map & List Area (Left) */}
+              <div className="w-full md:w-3/5 flex flex-col border-r border-slate-100">
+                <div className="h-64 md:h-1/2 bg-slate-100 relative">
+                  <MapComponent 
+                    points={draftPoints} 
+                    activePointId={activePointId}
+                    onMapClick={handleMapClick}
+                    onMarkerClick={setActivePointId}
+                  />
+                  <div className="absolute top-4 left-4 z-[400]">
+                    <div className="bg-white/95 backdrop-blur text-xs p-3 rounded-xl shadow-lg border border-slate-200">
+                      <p className="font-semibold text-slate-800 flex items-center gap-1.5"><Info size={14} className="text-blue-500"/> วิธีใช้งาน:</p>
+                      <ul className="mt-1 space-y-1 text-slate-600 ml-5 list-disc">
+                        <li>อัปโหลดรูปภาพหลายรูป ระบบจะปักหมุดทุกจุดให้อัตโนมัติ</li>
+                        <li>คลิกที่หมุดบนแผนที่ เพื่อสลับไปดูและแก้ไขรายละเอียดจุดนั้น</li>
+                        <li>หากพิกัดไม่ตรง ให้เลือกจุดในรายการ แล้วคลิกตำแหน่งใหม่บนแผนที่</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">รูปถ่ายหน้างาน (เพื่อดึง GPS)</label>
-                  <div className="flex gap-3">
-                    <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" id="photo-upload" />
-                    <label htmlFor="photo-upload" className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl cursor-pointer transition-colors border border-slate-200 text-sm font-medium">
-                      <Camera size={18} /> ถ่ายภาพ/อัปโหลดรูป
+                
+                {/* Points List */}
+                <div className="flex-1 overflow-y-auto p-4 bg-slate-50">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-semibold text-slate-700 flex items-center gap-2">
+                      <MapPin size={18} className="text-rose-500" />
+                      รายการจุดเกิดเหตุ ({draftPoints.length})
+                    </h3>
+                    
+                    <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleMultipleImageUpload} className="hidden" id="photo-upload-multi" />
+                    <label htmlFor="photo-upload-multi" className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg cursor-pointer transition-colors border border-blue-200 text-sm font-medium">
+                      <Plus size={16} /> อัปโหลดเพิ่ม
                     </label>
-                    {position && (
-                      <div className="flex items-center gap-2 text-emerald-600 text-sm bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-100">
-                        <MapPin size={16} /> ปักหมุดแล้ว
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {draftPoints.map((pt, i) => (
+                      <div 
+                        key={pt.id} 
+                        onClick={() => setActivePointId(pt.id)}
+                        className={`relative rounded-xl border-2 cursor-pointer overflow-hidden transition-all bg-white
+                          ${activePointId === pt.id ? 'border-blue-500 shadow-md ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-blue-300'}`}
+                      >
+                        <div className="h-20 bg-slate-100 relative">
+                          {pt.preview_url ? (
+                            <img src={pt.preview_url} alt="preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                              <ImageIcon size={24} />
+                            </div>
+                          )}
+                          <div className="absolute top-1 left-1 bg-black/60 text-white text-[10px] px-1.5 rounded-md font-bold">
+                            จุดที่ {i + 1}
+                          </div>
+                        </div>
+                        <div className="p-2 text-xs truncate text-slate-600">
+                          {pt.damage_details || "ยังไม่มีรายละเอียด"}
+                        </div>
+                        
+                        <button 
+                          onClick={(e) => removePoint(pt.id, e)}
+                          className="absolute top-1 right-1 bg-white/90 text-red-500 p-1 rounded-md hover:bg-red-50"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+                    {draftPoints.length === 0 && (
+                      <div className="col-span-full py-8 text-center text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-xl">
+                        อัปโหลดรูปภาพเพื่อเพิ่มจุดบนแผนที่
                       </div>
                     )}
                   </div>
-                  {imagePreview && (
-                    <div className="mt-3 relative w-32 h-32 rounded-xl overflow-hidden border border-slate-200">
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              </div>
+
+              {/* Edit Area (Right) */}
+              <div className="w-full md:w-2/5 p-6 flex flex-col bg-white overflow-y-auto">
+                <form id="emergency-form" onSubmit={handleSubmit} className="space-y-5 flex-1">
+                  
+                  {/* Global Project Details */}
+                  <div className="pb-5 border-b border-slate-100">
+                    <label className="block text-sm font-bold text-slate-800 mb-2">ชื่องาน (ภาพรวม) <span className="text-red-500">*</span></label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={title} 
+                      onChange={e => setTitle(e.target.value)} 
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium" 
+                      placeholder="เช่น พายุพัดเสาไฟล้ม 10 ต้น ถ.มิตรภาพ" 
+                    />
+                  </div>
+
+                  {/* Active Point Details */}
+                  {activePoint ? (
+                    <div className="space-y-4 pt-2">
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></div>
+                        <h3 className="font-bold text-slate-700">กำลังแก้ไขจุดที่เลือก</h3>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">พิกัด GPS</label>
+                        <div className="text-xs text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-200 font-mono">
+                          {activePoint.lat.toFixed(6)}, {activePoint.lng.toFixed(6)}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">รายละเอียดสภาพชำรุดจุดนี้</label>
+                        <textarea 
+                          value={activePoint.damage_details} 
+                          onChange={e => updateActivePoint({ damage_details: e.target.value })} 
+                          rows={3} 
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none text-sm" 
+                          placeholder="เช่น เสาหักครึ่งท่อน สายขาดรุ่ย..." 
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">รายการหัวเสา / อุปกรณ์ที่ต้องใช้</label>
+                        <textarea 
+                          value={activePoint.pole_details} 
+                          onChange={e => updateActivePoint({ pole_details: e.target.value })} 
+                          rows={2} 
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none text-sm" 
+                          placeholder="เช่น ต้องใช้เสา 12ม 1 ต้น, ลูกถ้วย 3 ลูก..." 
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">ประเมินจำนวนชุดงานจุดนี้</label>
+                        <div className="flex items-center gap-3">
+                          <button type="button" onClick={() => updateActivePoint({ team_required: Math.max(0, activePoint.team_required - 1) })} className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold">-</button>
+                          <div className="w-16 text-center font-bold text-lg text-slate-800">{activePoint.team_required}</div>
+                          <button type="button" onClick={() => updateActivePoint({ team_required: activePoint.team_required + 1 })} className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold">+</button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center text-slate-400">
+                      <MapPin className="mx-auto text-slate-200 mb-3" size={40} />
+                      <p>เลือกจุดบนแผนที่หรือในรายการเพื่อใส่รายละเอียด</p>
                     </div>
                   )}
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">รายละเอียดสภาพชำรุด</label>
-                  <textarea value={formData.damage_details} onChange={e => setFormData({...formData, damage_details: e.target.value})} rows={2} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none" placeholder="เช่น เสาหักครึ่งท่อน สายขาดรุ่ย..." />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">รายละเอียดหัวเสา / อุปกรณ์ที่ต้องใช้</label>
-                  <textarea value={formData.pole_details} onChange={e => setFormData({...formData, pole_details: e.target.value})} rows={2} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none" placeholder="เช่น ต้องใช้เสา 12ม 1 ต้น, ลูกถ้วย 3 ลูก..." />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">ประเมินจำนวนชุดงาน (ทีม)</label>
-                  <div className="flex items-center gap-3">
-                    <button type="button" onClick={() => setFormData(p => ({...p, team_required: Math.max(1, p.team_required - 1)}))} className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold">-</button>
-                    <div className="w-16 text-center font-bold text-lg text-slate-800">{formData.team_required}</div>
-                    <button type="button" onClick={() => setFormData(p => ({...p, team_required: p.team_required + 1}))} className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold">+</button>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-slate-100 flex gap-3">
-                  <button type="button" onClick={() => {setShowModal(false); resetForm();}} className="flex-1 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium transition-colors">
-                    ยกเลิก
-                  </button>
-                  <button type="submit" disabled={isSubmitting} className="flex-1 py-3 text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 rounded-xl font-medium flex items-center justify-center gap-2 shadow-sm shadow-blue-200 transition-all">
-                    {isSubmitting ? "กำลังบันทึก..." : <><Save size={20} /> บันทึกข้อมูล</>}
+                </form>
+                
+                <div className="pt-5 mt-auto border-t border-slate-100">
+                  <button 
+                    type="submit" 
+                    form="emergency-form"
+                    disabled={isSubmitting || draftPoints.length === 0} 
+                    className="w-full py-3.5 text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-xl font-medium flex items-center justify-center gap-2 shadow-sm shadow-blue-200 transition-all"
+                  >
+                    {isSubmitting ? "กำลังบันทึก..." : <><Save size={20} /> บันทึกโปรเจกต์งานฉุกเฉิน</>}
                   </button>
                 </div>
-              </form>
+              </div>
+
             </div>
           </div>
         </div>
