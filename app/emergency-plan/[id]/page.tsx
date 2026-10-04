@@ -136,6 +136,10 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
           ctx?.drawImage(img, 0, 0, width, height);
           resolve(canvas.toDataURL('image/jpeg', 0.6));
         };
+        img.onerror = () => {
+          console.warn("Could not load image into canvas, might be unsupported format (like HEIC)");
+          resolve(""); // Resolve empty string instead of rejecting
+        };
       };
       reader.onerror = error => reject(error);
     });

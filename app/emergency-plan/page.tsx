@@ -40,6 +40,7 @@ export default function EmergencyPlan() {
   const [title, setTitle] = useState("");
   const [draftPoints, setDraftPoints] = useState<Point[]>([]);
   const [activePointId, setActivePointId] = useState<string | null>(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -95,6 +96,10 @@ export default function EmergencyPlan() {
           ctx?.drawImage(img, 0, 0, width, height);
           resolve(canvas.toDataURL('image/jpeg', 0.6));
         };
+        img.onerror = () => {
+          console.warn("Could not load image into canvas, might be unsupported format (like HEIC)");
+          resolve(""); // Resolve empty string instead of rejecting to continue loop
+        };
       };
       reader.onerror = error => reject(error);
     });
@@ -102,6 +107,8 @@ export default function EmergencyPlan() {
 
   const handleMultipleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
+    
+    setIsUploadingImages(true);
     const files = Array.from(e.target.files);
     
     let newPoints: Point[] = [];
@@ -158,6 +165,7 @@ export default function EmergencyPlan() {
       return updated;
     });
     
+    setIsUploadingImages(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -380,13 +388,26 @@ export default function EmergencyPlan() {
                       รายการจุดเกิดเหตุ ({draftPoints.length})
                     </h3>
                     
-                    <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleMultipleImageUpload} className="hidden" id="photo-upload-multi" />
-                    <label htmlFor="photo-upload-multi" className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg cursor-pointer transition-colors border border-blue-200 text-sm font-medium">
-                      <Plus size={16} /> อัปโหลดเพิ่ม
-                    </label>
+                    <div>
+                      <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleMultipleImageUpload} className="hidden" id="photo-upload-multi" disabled={isUploadingImages} />
+                      <label htmlFor="photo-upload-multi" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${isUploadingImages ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 cursor-pointer'}`}>
+                        {isUploadingImages ? (
+                          <><div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div> กำลังอัปโหลด...</>
+                        ) : (
+                          <><Plus size={16} /> อัปโหลดเพิ่ม</>
+                        )}
+                      </label>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {isUploadingImages ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                      <p className="font-medium text-lg text-slate-700">กำลังประมวลผลรูปภาพ...</p>
+                      <p className="text-sm mt-1">กรุณารอสักครู่ หากมีรูปภาพจำนวนมากอาจใช้เวลาหลายวินาที</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {draftPoints.map((pt, i) => (
                       <div 
                         key={pt.id} 
@@ -420,14 +441,19 @@ export default function EmergencyPlan() {
                     ))}
                     {draftPoints.length === 0 && (
                       <label 
-                        htmlFor="photo-upload-multi" 
-                        className="col-span-full py-12 text-center text-slate-400 text-sm border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-300 hover:text-blue-500 transition-colors flex flex-col items-center justify-center gap-2"
+                        htmlFor={isUploadingImages ? "" : "photo-upload-multi"}
+                        className={`col-span-full py-12 text-center text-sm border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-colors ${
+                          isUploadingImages 
+                            ? 'border-slate-200 text-slate-300 cursor-not-allowed' 
+                            : 'border-slate-300 text-slate-400 cursor-pointer hover:bg-slate-50 hover:border-blue-300 hover:text-blue-500'
+                        }`}
                       >
                         <ImageIcon size={32} className="opacity-50" />
                         <span>คลิกเพื่ออัปโหลดรูปภาพเพื่อเพิ่มจุดบนแผนที่</span>
                       </label>
                     )}
                   </div>
+                  )}
                 </div>
               </div>
 
