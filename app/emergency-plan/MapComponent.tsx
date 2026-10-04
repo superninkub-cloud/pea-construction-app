@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -29,6 +29,9 @@ interface Point {
   id: string;
   lat: number;
   lng: number;
+  image_url?: string;
+  image_base64?: string;
+  preview_url?: string;
 }
 
 interface MapProps {
@@ -80,7 +83,20 @@ const MapComponent = ({ points, activePointId, onMapClick, onMarkerClick, readon
               if (onMarkerClick) onMarkerClick(pt.id);
             }
           }}
-        />
+        >
+          {/* Show image popup if available */}
+          {(pt.preview_url || pt.image_base64 || pt.image_url) && (
+            <Popup>
+              <div className="w-48 h-auto overflow-hidden rounded-lg">
+                <img 
+                  src={pt.preview_url || pt.image_base64 || pt.image_url} 
+                  alt="Site" 
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </Popup>
+          )}
+        </Marker>
       ))}
     </MapContainer>
   );
