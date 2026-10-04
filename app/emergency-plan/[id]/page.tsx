@@ -16,6 +16,7 @@ interface Point {
   lng: number;
   image_url?: string;
   image_base64?: string; // For simple demo without bucket
+  pole_name?: string;
   damage_details: string;
   pole_details: string;
   team_required: number;
@@ -74,6 +75,7 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
         id: pointId,
         lat,
         lng,
+        pole_name: "",
         damage_details: "",
         pole_details: "",
         team_required: 1,
@@ -326,6 +328,17 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
                     <span>{activePoint.lat.toFixed(6)}, {activePoint.lng.toFixed(6)}</span>
                     <span className="text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded text-[10px]">อัปเดตล่าสุด</span>
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">ชื่อเสา / ประเภทหัวเสา (เช่น SP, DDE)</label>
+                  <input 
+                    type="text" 
+                    value={activePoint.pole_name || ""} 
+                    onChange={e => updateActivePoint({ pole_name: e.target.value })} 
+                    className="w-full p-3 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-sm font-medium text-blue-800 transition-shadow" 
+                    placeholder="เช่น SP, DDE, SA..." 
+                  />
                 </div>
 
                 <div>

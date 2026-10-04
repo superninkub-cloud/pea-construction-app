@@ -18,6 +18,7 @@ interface Point {
   lng: number;
   image_url?: string;
   image_base64?: string;
+  pole_name?: string;
   damage_details: string;
   pole_details: string;
   team_required: number;
@@ -166,6 +167,7 @@ export default function EmergencyPlan() {
         lng,
         preview_url: objectUrl,
         image_base64: base64,
+        pole_name: "",
         damage_details: "",
         pole_details: "",
         team_required: 1,
@@ -201,6 +203,7 @@ export default function EmergencyPlan() {
         id: pointId,
         lat,
         lng,
+        pole_name: "",
         damage_details: "",
         pole_details: "",
         team_required: 1,
@@ -458,6 +461,7 @@ export default function EmergencyPlan() {
                           </div>
                         </div>
                         <div className="p-2 text-xs truncate text-slate-600 cursor-pointer" onClick={() => setActivePointId(pt.id)}>
+                          {pt.pole_name ? <span className="font-bold text-blue-700 block mb-0.5">{pt.pole_name}</span> : null}
                           {pt.damage_details || "ยังไม่มีรายละเอียด"}
                         </div>
                         
@@ -517,6 +521,17 @@ export default function EmergencyPlan() {
                         <div className="text-xs text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-200 font-mono">
                           {activePoint.lat.toFixed(6)}, {activePoint.lng.toFixed(6)}
                         </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">ชื่อเสา / ประเภทหัวเสา</label>
+                        <input 
+                          type="text" 
+                          value={activePoint.pole_name || ""} 
+                          onChange={e => updateActivePoint({ pole_name: e.target.value })} 
+                          className="w-full p-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-sm font-medium text-blue-800 transition-shadow" 
+                          placeholder="เช่น SP, DDE, SA..." 
+                        />
                       </div>
 
                       <div>

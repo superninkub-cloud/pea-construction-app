@@ -32,6 +32,7 @@ interface Point {
   image_url?: string;
   image_base64?: string;
   preview_url?: string;
+  pole_name?: string;
 }
 
 interface MapProps {
@@ -84,18 +85,27 @@ const MapComponent = ({ points, activePointId, onMapClick, onMarkerClick, readon
             }
           }}
         >
-          {/* Show image popup if available */}
-          {(pt.preview_url || pt.image_base64 || pt.image_url) && (
-            <Popup>
-              <div className="w-48 h-auto overflow-hidden rounded-lg">
+          {/* Show image and details popup */}
+          <Popup>
+            <div className="w-48 overflow-hidden rounded-lg flex flex-col gap-2 p-1">
+              {pt.pole_name && (
+                <div className="font-bold text-sm text-blue-800 border-b pb-1 text-center bg-blue-50 py-1 rounded-md">
+                  หัวเสา: {pt.pole_name}
+                </div>
+              )}
+              {(pt.preview_url || pt.image_base64 || pt.image_url) ? (
                 <img 
                   src={pt.preview_url || pt.image_base64 || pt.image_url} 
                   alt="Site" 
-                  className="w-full h-auto object-cover"
+                  className="w-full h-auto object-cover rounded shadow-sm"
                 />
-              </div>
-            </Popup>
-          )}
+              ) : (
+                <div className="w-full h-24 bg-slate-100 flex items-center justify-center text-slate-400 rounded">
+                  ไม่มีรูปภาพ
+                </div>
+              )}
+            </div>
+          </Popup>
         </Marker>
       ))}
     </MapContainer>
