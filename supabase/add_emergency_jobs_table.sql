@@ -10,4 +10,11 @@ CREATE TABLE public.emergency_jobs (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Note: In a real Supabase environment you may want to set up RLS policies.
+-- Fix Row-Level Security (RLS) issue
+-- Disable RLS for this table so that anyone can read/write data 
+-- (since this is an internal tool and we don't have authentication setup right now)
+ALTER TABLE public.emergency_jobs DISABLE ROW LEVEL SECURITY;
+
+-- If you prefer to keep RLS enabled, you can run this instead:
+-- ALTER TABLE public.emergency_jobs ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "Allow public all operations" ON public.emergency_jobs FOR ALL USING (true) WITH CHECK (true);
