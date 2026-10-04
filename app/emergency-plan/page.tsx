@@ -41,6 +41,7 @@ export default function EmergencyPlan() {
   const [draftPoints, setDraftPoints] = useState<Point[]>([]);
   const [activePointId, setActivePointId] = useState<string | null>(null);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -121,11 +122,17 @@ export default function EmergencyPlan() {
     
     setIsUploadingImages(true);
     const files = Array.from(e.target.files);
+    setUploadProgress({ current: 0, total: files.length });
     
     let newPoints: Point[] = [];
     let noGpsCount = 0;
 
-    for (const file of files) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setUploadProgress({ current: i + 1, total: files.length });
+      // Yield to main thread so React can re-render progress
+      await new Promise(resolve => setTimeout(resolve, 20));
+
       const objectUrl = URL.createObjectURL(file);
       const pointId = Math.random().toString(36).substring(2, 9);
       
@@ -177,6 +184,7 @@ export default function EmergencyPlan() {
     });
     
     setIsUploadingImages(false);
+    setUploadProgress({ current: 0, total: 0 });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -413,9 +421,20 @@ export default function EmergencyPlan() {
 
                   {isUploadingImages ? (
                     <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                      <div className="relative w-16 h-16 mb-4">
+                        <div className="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
+                        <div 
+                          className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"
+                        ></div>
+                        <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-700">
+                          {Math.round((uploadProgress.current / uploadProgress.total) * 100) || 0}%
+                        </div>
+                      </div>
                       <p className="font-medium text-lg text-slate-700">กำลังประมวลผลรูปภาพ...</p>
-                      <p className="text-sm mt-1">กรุณารอสักครู่ หากมีรูปภาพจำนวนมากอาจใช้เวลาหลายวินาที</p>
+                      <p className="text-sm mt-1">
+                        กำลังทำรายการ {uploadProgress.current} จาก {uploadProgress.total} รูป
+                      </p>
+                      <p className="text-xs mt-2 text-slate-400">กรุณารอสักครู่ หากเป็นไฟล์ HEIC จาก iPhone อาจใช้เวลา 1-3 วินาทีต่อรูป</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
