@@ -232,6 +232,20 @@ export default function EmergencyPlan() {
     }
   };
 
+  const deleteJob = async (id: string) => {
+    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบโปรเจกต์นี้? การกระทำนี้ไม่สามารถย้อนกลับได้")) return;
+    
+    try {
+      const { error } = await supabase.from("emergency_jobs").delete().eq("id", id);
+      if (error) throw error;
+      alert("ลบโปรเจกต์สำเร็จ!");
+      fetchJobs();
+    } catch (error: any) {
+      console.error(error);
+      alert("เกิดข้อผิดพลาด: " + error.message);
+    }
+  };
+
   const resetForm = () => {
     setTitle("");
     setDraftPoints([]);
@@ -303,12 +317,21 @@ export default function EmergencyPlan() {
                   <div className="mb-6">
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-bold text-2xl text-slate-800">{job.title}</h3>
-                      <Link 
-                        href={`/emergency-plan/${job.id}`}
-                        className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-colors shrink-0"
-                      >
-                        <Edit3 size={16} /> เข้าไปจัดการและแก้ไข
-                      </Link>
+                      <div className="flex gap-2">
+                        <Link 
+                          href={`/emergency-plan/${job.id}`}
+                          className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-colors shrink-0"
+                        >
+                          <Edit3 size={16} /> เข้าไปจัดการและแก้ไข
+                        </Link>
+                        <button 
+                          onClick={() => deleteJob(job.id)}
+                          className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl transition-colors shrink-0"
+                          title="ลบโปรเจกต์"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-3">
                       <span className="flex items-center gap-2 font-semibold text-emerald-700 bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-200 shadow-sm">
