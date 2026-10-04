@@ -25,7 +25,6 @@ interface Point {
   image_url?: string;
   image_base64?: string;
   pole_name?: string;
-  pole_name?: string;
   damage_details: string;
   pole_details?: string;
   team_required?: number;
