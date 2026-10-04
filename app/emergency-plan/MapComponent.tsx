@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -85,6 +85,13 @@ const MapComponent = ({ points, activePointId, onMapClick, onMarkerClick, readon
             }
           }}
         >
+          {/* Permanent Label for Pole Name */}
+          {pt.pole_name && (
+            <Tooltip permanent direction="bottom" offset={[0, 0]} className="font-bold text-xs bg-white/90 text-blue-800 px-1.5 py-0.5 border border-blue-200 shadow-sm rounded">
+              {pt.pole_name}
+            </Tooltip>
+          )}
+
           {/* Show image and details popup */}
           <Popup>
             <div className="w-48 overflow-hidden rounded-lg flex flex-col gap-2 p-1">
