@@ -419,9 +419,13 @@ export default function EmergencyPlan() {
                       </div>
                     ))}
                     {draftPoints.length === 0 && (
-                      <div className="col-span-full py-8 text-center text-slate-400 text-sm border-2 border-dashed border-slate-200 rounded-xl">
-                        อัปโหลดรูปภาพเพื่อเพิ่มจุดบนแผนที่
-                      </div>
+                      <label 
+                        htmlFor="photo-upload-multi" 
+                        className="col-span-full py-12 text-center text-slate-400 text-sm border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-blue-300 hover:text-blue-500 transition-colors flex flex-col items-center justify-center gap-2"
+                      >
+                        <ImageIcon size={32} className="opacity-50" />
+                        <span>คลิกเพื่ออัปโหลดรูปภาพเพื่อเพิ่มจุดบนแผนที่</span>
+                      </label>
                     )}
                   </div>
                 </div>
