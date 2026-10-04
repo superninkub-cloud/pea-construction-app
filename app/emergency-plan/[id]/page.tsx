@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import dynamic from 'next/dynamic';
-import { Camera, MapPin, Save, AlertTriangle, FileText, Wrench, Users, ArrowLeft, Image as ImageIcon, Trash2, Edit3, Check, Plus } from "lucide-react";
+import { Camera, MapPin, Save, AlertTriangle, FileText, Wrench, Users, ArrowLeft, Image as ImageIcon, Trash2, Edit3, Check, Plus, ChevronRight, ChevronLeft, X, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import exifr from 'exifr';
@@ -35,6 +35,8 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
   const [loading, setLoading] = useState(true);
   const [activePointId, setActivePointId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -242,10 +244,10 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         
-        {/* Map Area (Full screen on left) */}
-        <div className="w-full lg:w-2/3 h-1/2 lg:h-full bg-slate-200 relative z-0">
+        {/* Map Area */}
+        <div className={`transition-all duration-300 ${isSidebarOpen ? 'w-full lg:w-2/3' : 'w-full'} h-1/2 lg:h-full bg-slate-200 relative z-0`}>
           <MapComponent 
             points={job.points} 
             activePointId={activePointId}
@@ -260,10 +262,19 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
               <MapPin size={18} /> เพิ่มจุดใหม่ตรงนี้
             </button>
           </div>
+          
+          {/* Sidebar Toggle Button (Desktop Only) */}
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="hidden lg:flex absolute top-1/2 right-0 -translate-y-1/2 bg-white rounded-l-xl p-2 shadow-md border border-r-0 border-slate-200 z-[400] text-slate-500 hover:text-slate-800 transition-colors"
+            title={isSidebarOpen ? "ซ่อนแถบด้านข้าง" : "แสดงแถบด้านข้าง"}
+          >
+            {isSidebarOpen ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+          </button>
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-full lg:w-1/3 h-1/2 lg:h-full bg-white flex flex-col border-l border-slate-200 shadow-xl z-10">
+        <div className={`w-full lg:w-1/3 h-1/2 lg:h-full bg-white flex flex-col border-l border-slate-200 shadow-xl z-10 transition-all duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:hidden'}`}>
           
           {/* Active Point Editor */}
           {activePoint ? (
@@ -282,10 +293,19 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">รูปถ่ายหน้างาน</label>
                 {activePoint.preview_url || activePoint.image_base64 ? (
-                  <div className="relative rounded-2xl overflow-hidden border border-slate-200 group">
-                    <img src={activePoint.preview_url || activePoint.image_base64} alt="site" className="w-full max-h-64 object-contain bg-black" />
-                    <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium cursor-pointer transition-opacity">
-                      <Camera size={24} className="mr-2" /> เปลี่ยนรูปภาพ
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-200 group bg-black">
+                    <img 
+                      src={activePoint.preview_url || activePoint.image_base64} 
+                      alt="site" 
+                      className="w-full max-h-64 object-contain cursor-pointer transition-transform hover:scale-[1.02]" 
+                      onClick={() => setFullscreenImageUrl(activePoint.preview_url || activePoint.image_base64 || null)}
+                      title="คลิกเพื่อขยายเต็มจอ"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none flex items-center justify-center">
+                      <Maximize2 size={32} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
+                    </div>
+                    <label className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 backdrop-blur-sm p-2 rounded-full text-white cursor-pointer transition-colors border border-white/20" title="เปลี่ยนรูปภาพ">
+                      <Camera size={18} />
                       <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                     </label>
                   </div>
@@ -389,6 +409,24 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
 
         </div>
       </div>
+
+      {/* Fullscreen Image Modal */}
+      {fullscreenImageUrl && (
+        <div className="fixed inset-0 z-[1000] bg-black/95 flex items-center justify-center p-4 md:p-8 backdrop-blur-sm">
+          <button 
+            onClick={() => setFullscreenImageUrl(null)} 
+            className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 transition-colors z-[1010]"
+          >
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImageUrl} 
+            alt="Fullscreen site image" 
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-white/10" 
+            onClick={() => setFullscreenImageUrl(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }

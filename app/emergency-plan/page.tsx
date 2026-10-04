@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import dynamic from 'next/dynamic';
-import { Camera, MapPin, Save, Plus, AlertTriangle, FileText, Wrench, Users, Info, Image as ImageIcon, Trash2, Edit3 } from "lucide-react";
+import { Camera, MapPin, Save, Plus, AlertTriangle, FileText, Wrench, Users, Info, Image as ImageIcon, Trash2, Edit3, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -40,6 +40,7 @@ export default function EmergencyPlan() {
   const [title, setTitle] = useState("");
   const [draftPoints, setDraftPoints] = useState<Point[]>([]);
   const [activePointId, setActivePointId] = useState<string | null>(null);
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -441,15 +442,14 @@ export default function EmergencyPlan() {
                     {draftPoints.map((pt, i) => (
                       <div 
                         key={pt.id} 
-                        onClick={() => setActivePointId(pt.id)}
-                        className={`relative rounded-xl border-2 cursor-pointer overflow-hidden transition-all bg-white
+                        className={`relative rounded-xl border-2 overflow-hidden transition-all bg-white
                           ${activePointId === pt.id ? 'border-blue-500 shadow-md ring-2 ring-blue-500/20' : 'border-slate-200 hover:border-blue-300'}`}
                       >
-                        <div className="h-20 bg-slate-100 relative">
-                          {pt.preview_url ? (
-                            <img src={pt.preview_url} alt="preview" className="w-full h-full object-cover" />
+                        <div className="h-20 bg-black relative group cursor-pointer" onClick={() => { setActivePointId(pt.id); if(pt.preview_url || pt.image_base64) setFullscreenImageUrl(pt.preview_url || pt.image_base64 || null); }}>
+                          {pt.preview_url || pt.image_base64 ? (
+                            <img src={pt.preview_url || pt.image_base64} alt="preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <div className="w-full h-full flex items-center justify-center text-slate-400 bg-slate-100">
                               <ImageIcon size={24} />
                             </div>
                           )}
@@ -457,7 +457,7 @@ export default function EmergencyPlan() {
                             จุดที่ {i + 1}
                           </div>
                         </div>
-                        <div className="p-2 text-xs truncate text-slate-600">
+                        <div className="p-2 text-xs truncate text-slate-600 cursor-pointer" onClick={() => setActivePointId(pt.id)}>
                           {pt.damage_details || "ยังไม่มีรายละเอียด"}
                         </div>
                         
@@ -573,6 +573,24 @@ export default function EmergencyPlan() {
 
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Fullscreen Image Modal */}
+      {fullscreenImageUrl && (
+        <div className="fixed inset-0 z-[1000] bg-black/95 flex items-center justify-center p-4 md:p-8 backdrop-blur-sm">
+          <button 
+            onClick={() => setFullscreenImageUrl(null)} 
+            className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/50 hover:bg-black/80 rounded-full p-2 transition-colors z-[1010]"
+          >
+            <X size={32} />
+          </button>
+          <img 
+            src={fullscreenImageUrl} 
+            alt="Fullscreen preview" 
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-white/10" 
+            onClick={() => setFullscreenImageUrl(null)}
+          />
         </div>
       )}
     </div>
