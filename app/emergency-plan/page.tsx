@@ -65,10 +65,21 @@ export default function EmergencyPlan() {
     }
   };
 
-  const compressImage = (file: File): Promise<string> => {
+  const compressImage = async (file: File): Promise<string> => {
+    let processFile = file;
+    if (file.name.toLowerCase().endsWith('.heic') || file.type === 'image/heic' || file.type === 'image/heif') {
+      try {
+        const heic2any = (await import('heic2any')).default;
+        const converted = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+        processFile = new File([Array.isArray(converted) ? converted[0] : converted], file.name.replace(/\.heic$/i, '.jpg'), { type: 'image/jpeg' });
+      } catch (err) {
+        console.error("HEIC conversion failed", err);
+      }
+    }
+
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(processFile);
       reader.onload = (event) => {
         const img = new window.Image();
         img.src = event.target?.result as string;
