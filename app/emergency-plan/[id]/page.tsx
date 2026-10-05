@@ -105,7 +105,9 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
     if (!job) return;
     if (activePointId) {
       const activePt = job.points.find(p => p.id === activePointId);
-      if (activePt?.is_fixed) {
+      const hasImage = !!(activePt?.preview_url || activePt?.image_base64 || activePt?.image_url);
+      
+      if (activePt?.is_fixed || hasImage) {
         addNewPoint(lat, lng);
       } else {
         updateActivePoint({ lat, lng });
