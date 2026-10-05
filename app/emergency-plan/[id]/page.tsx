@@ -28,6 +28,7 @@ interface Point {
   team_required?: number;
   materials?: MaterialItem[];
   preview_url?: string;
+  is_fixed?: boolean;
 }
 
 interface EmergencyJob {
@@ -85,22 +86,32 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
     }
   };
 
+  const addNewPoint = (lat: number, lng: number) => {
+    if (!job) return;
+    const pointId = Math.random().toString(36).substring(2, 9);
+    const newPt: Point = {
+      id: pointId,
+      lat,
+      lng,
+      pole_name: "",
+      damage_details: "",
+      materials: [],
+    };
+    setJob({ ...job, points: [...job.points, newPt] });
+    setActivePointId(pointId);
+  };
+
   const handleMapClick = (lat: number, lng: number) => {
     if (!job) return;
     if (activePointId) {
-      updateActivePoint({ lat, lng });
+      const activePt = job.points.find(p => p.id === activePointId);
+      if (activePt?.is_fixed) {
+        addNewPoint(lat, lng);
+      } else {
+        updateActivePoint({ lat, lng });
+      }
     } else {
-      const pointId = Math.random().toString(36).substring(2, 9);
-      const newPt: Point = {
-        id: pointId,
-        lat,
-        lng,
-        pole_name: "",
-        damage_details: "",
-        materials: [],
-      };
-      setJob({ ...job, points: [...job.points, newPt] });
-      setActivePointId(pointId);
+      addNewPoint(lat, lng);
     }
   };
 
@@ -214,7 +225,7 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
       const exifData = await exifr.gps(file);
       if (exifData && exifData.latitude && exifData.longitude) {
         if (confirm(`พบพิกัดในรูปภาพ: ${exifData.latitude.toFixed(5)}, ${exifData.longitude.toFixed(5)}\nคุณต้องการอัปเดตตำแหน่งหมุดนี้ตามรูปภาพหรือไม่?`)) {
-          updateActivePoint({ lat: exifData.latitude, lng: exifData.longitude });
+          updateActivePoint({ lat: exifData.latitude, lng: exifData.longitude, is_fixed: true });
         }
       }
     } catch (error) {
@@ -307,7 +318,7 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
           />
           <div className="absolute top-4 left-4 z-[400]">
             <button 
-              onClick={() => handleMapClick(13.7563, 100.5018)} // Fallback if they just want to add
+              onClick={() => addNewPoint(13.7563, 100.5018)} // Fallback if they just want to add
               className="bg-white/90 backdrop-blur-sm text-slate-700 hover:text-blue-600 font-medium px-4 py-2 rounded-xl shadow-lg border border-slate-200 flex items-center gap-2"
             >
               <MapPin size={18} /> เพิ่มจุดใหม่ตรงนี้
@@ -483,7 +494,7 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
                 </div>
               ))}
               <div 
-                onClick={() => handleMapClick(13.7563, 100.5018)}
+                onClick={() => addNewPoint(13.7563, 100.5018)}
                 className="snap-start shrink-0 w-24 h-24 rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50 flex flex-col items-center justify-center cursor-pointer text-slate-500 transition-colors"
               >
                 <Plus size={24} className="mb-1" />
