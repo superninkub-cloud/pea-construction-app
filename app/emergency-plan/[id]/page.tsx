@@ -108,12 +108,12 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
       const hasImage = !!(activePt?.preview_url || activePt?.image_base64 || activePt?.image_url);
       
       if (activePt?.is_fixed || hasImage) {
-        addNewPoint(lat, lng);
+        // Do nothing. Map clicks should just pan/view if the point is fixed.
       } else {
         updateActivePoint({ lat, lng });
       }
     } else {
-      addNewPoint(lat, lng);
+      // Do nothing if no active point. User must explicitly click "Add Point" button.
     }
   };
 
