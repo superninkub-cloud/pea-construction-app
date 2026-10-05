@@ -12,8 +12,9 @@ const MapComponent = dynamic(() => import("../MapComponent"), { ssr: false });
 
 interface MaterialItem {
   id: string;
-  name: string;
-  quantity: number;
+  code?: string;
+  name?: string;
+  quantity?: number | string;
 }
 
 interface Point {
@@ -54,8 +55,11 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
     const map = new Map<string, number>();
     job.points.forEach(pt => {
       pt.materials?.forEach(m => {
-        const current = map.get(m.name) || 0;
-        map.set(m.name, current + m.quantity);
+        if (!m.name && !m.code) return; // Skip completely empty
+        const key = m.code ? `${m.code} - ${m.name || 'ไม่ระบุชื่อ'}` : (m.name || 'ไม่ระบุชื่อ');
+        const qty = typeof m.quantity === 'number' ? m.quantity : (parseInt(m.quantity as string) || 0);
+        const current = map.get(key) || 0;
+        map.set(key, current + qty);
       });
     });
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
@@ -143,11 +147,11 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
   const addMaterial = () => {
     const pt = job?.points.find(p => p.id === activePointId);
     if (!pt) return;
-    const newMat = { id: Math.random().toString(36).substring(2, 9), name: "", quantity: 1 };
+    const newMat = { id: Math.random().toString(36).substring(2, 9), code: "", name: "", quantity: "" };
     updateActivePoint({ materials: [...(pt.materials || []), newMat] });
   };
 
-  const updateMaterial = (matId: string, field: 'name' | 'quantity', value: any) => {
+  const updateMaterial = (matId: string, field: 'code' | 'name' | 'quantity', value: any) => {
     const pt = job?.points.find(p => p.id === activePointId);
     if (!pt || !pt.materials) return;
     updateActivePoint({
@@ -421,15 +425,22 @@ export default function EmergencyProjectDetails({ params }: { params: { id: stri
                       <div key={mat.id} className="flex items-center gap-2">
                         <input 
                           type="text" 
-                          value={mat.name} 
+                          value={mat.code || ""} 
+                          onChange={e => updateMaterial(mat.id, 'code', e.target.value)} 
+                          placeholder="รหัสพัสดุ" 
+                          className="w-24 p-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                        />
+                        <input 
+                          type="text" 
+                          value={mat.name || ""} 
                           onChange={e => updateMaterial(mat.id, 'name', e.target.value)} 
                           placeholder="ชื่ออุปกรณ์ (เช่น เสา 12ม)" 
                           className="flex-1 p-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                         />
                         <input 
                           type="number" 
-                          value={mat.quantity || ""} 
-                          onChange={e => updateMaterial(mat.id, 'quantity', parseInt(e.target.value) || 0)} 
+                          value={mat.quantity === undefined ? "" : mat.quantity} 
+                          onChange={e => updateMaterial(mat.id, 'quantity', e.target.value === "" ? "" : parseInt(e.target.value))} 
                           placeholder="จำนวน" 
                           min={1}
                           className="w-20 p-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm text-center font-medium text-blue-700"
