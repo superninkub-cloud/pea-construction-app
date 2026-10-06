@@ -8,20 +8,18 @@ import 'leaflet/dist/leaflet.css';
 // Fix for default Leaflet marker icon in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
-const defaultIcon = L.icon({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+const defaultIcon = L.divIcon({
+  className: 'custom-dot-icon',
+  html: `<div style="background-color: #ef4444; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>`,
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
 });
 
-const activeIcon = L.icon({
-  iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+const activeIcon = L.divIcon({
+  className: 'custom-dot-icon-active',
+  html: `<div style="background-color: #ef4444; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 3px rgba(239,68,68,0.5), 0 2px 4px rgba(0,0,0,0.4);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
 });
 
 
