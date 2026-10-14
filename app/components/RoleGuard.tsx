@@ -7,13 +7,14 @@ import { Lock } from "lucide-react";
 interface RoleGuardProps {
   children: React.ReactNode;
   allowedRoles?: string[];
+  message?: string;
 }
 
 /**
  * จำกัดสิทธิ์การเข้าถึงหน้าเพจตาม role ที่เก็บไว้ใน sessionStorage ("pea_role")
  * ค่าเริ่มต้น: อนุญาตเฉพาะ admin (ผู้ใช้แผนก/user และผู้เยี่ยมชม/guest จะเข้าไม่ได้)
  */
-export default function RoleGuard({ children, allowedRoles = ["admin"] }: RoleGuardProps) {
+export default function RoleGuard({ children, allowedRoles = ["admin"], message }: RoleGuardProps) {
   const [role, setRole] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
 
@@ -71,8 +72,10 @@ export default function RoleGuard({ children, allowedRoles = ["admin"] }: RoleGu
             ไม่มีสิทธิ์เข้าใช้งานหน้านี้
           </h2>
           <p style={{ fontSize: "0.9rem", color: "#64748b", lineHeight: 1.6, marginBottom: "20px" }}>
-            เมนูนี้เปิดให้เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น
-            กรุณาออกจากระบบแล้วเข้าสู่ระบบด้วยรหัสผ่านของผู้ดูแลระบบ
+            {message ||
+              (allowedRoles.includes("user")
+                ? "หน้านี้เปิดให้เฉพาะบุคลากรแผนกและผู้ดูแลระบบเท่านั้น กรุณาออกจากระบบแล้วเข้าสู่ระบบด้วยรหัสผ่านผู้ใช้งาน"
+                : "เมนูนี้เปิดให้เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น กรุณาออกจากระบบแล้วเข้าสู่ระบบด้วยรหัสผ่านของผู้ดูแลระบบ")}
           </p>
           <Link
             href="/"

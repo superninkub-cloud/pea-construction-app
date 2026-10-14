@@ -44,6 +44,9 @@ export default function Sidebar() {
   // เมนูที่เปิดให้เฉพาะ admin (ซ่อนจาก user และผู้เยี่ยมชม/guest)
   const canAccessRestricted = userRole === 'admin';
 
+  // เมนูคู่มือการใช้งานระบบ (เปิดให้เฉพาะ admin และ user - ซ่อนจาก guest)
+  const canAccessGuide = userRole === 'admin' || userRole === 'user';
+
   return (
     <div className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
       <div className="sidebar-logo-container">
@@ -189,52 +192,54 @@ export default function Sidebar() {
           </div>
         )}
 
-        {/* ส่วนท้าย Sidebar: คู่มือการใช้งานเว็บแอพ */}
+        {/* ส่วนท้าย Sidebar: คู่มือการใช้งานเว็บแอพ (ซ่อนสำหรับ Guest) */}
         <div style={{ marginTop: '28px', borderTop: '1px solid rgba(255, 255, 255, 0.12)', paddingTop: '16px' }}>
-          <div onClick={closeSidebar}>
-            <Link
-              href="/app-guide"
-              className={`nav-item ${pathname === "/app-guide" ? "active" : ""}`}
-              style={{
-                background: pathname === "/app-guide"
-                  ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
-                  : 'rgba(255, 255, 255, 0.05)',
-                border: pathname === "/app-guide"
-                  ? '1px solid #a78bfa'
-                  : '1px solid rgba(255, 255, 255, 0.12)',
-                color: '#ffffff',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 14px',
-                borderRadius: '12px',
-                transition: 'all 0.2s ease',
-                boxShadow: pathname === "/app-guide" ? '0 4px 12px rgba(124, 58, 237, 0.35)' : 'none'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <BookOpen size={18} style={{ color: '#fbbf24', flexShrink: 0 }} />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.88rem', fontWeight: '600', lineHeight: 1.2 }}>คู่มือการใช้งานเว็บแอพ</span>
-                  <span style={{ fontSize: '0.70rem', color: '#cbd5e1' }}>วิธีใช้ระบบ ผกร.(ก3)</span>
-                </div>
-              </div>
-              <span
+          {canAccessGuide && (
+            <div onClick={closeSidebar}>
+              <Link
+                href="/app-guide"
+                className={`nav-item ${pathname === "/app-guide" ? "active" : ""}`}
                 style={{
-                  fontSize: '0.65rem',
-                  backgroundColor: '#f59e0b',
-                  color: '#78350f',
-                  fontWeight: '700',
-                  padding: '2px 6px',
-                  borderRadius: '6px',
-                  whiteSpace: 'nowrap'
+                  background: pathname === "/app-guide"
+                    ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+                    : 'rgba(255, 255, 255, 0.05)',
+                  border: pathname === "/app-guide"
+                    ? '1px solid #a78bfa'
+                    : '1px solid rgba(255, 255, 255, 0.12)',
+                  color: '#ffffff',
+                  marginBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 14px',
+                  borderRadius: '12px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: pathname === "/app-guide" ? '0 4px 12px rgba(124, 58, 237, 0.35)' : 'none'
                 }}
               >
-                คู่มือ
-              </span>
-            </Link>
-          </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <BookOpen size={18} style={{ color: '#fbbf24', flexShrink: 0 }} />
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: '600', lineHeight: 1.2 }}>คู่มือการใช้งานเว็บแอพ</span>
+                    <span style={{ fontSize: '0.70rem', color: '#cbd5e1' }}>วิธีใช้ระบบ ผกร.(ก3)</span>
+                  </div>
+                </div>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    backgroundColor: '#f59e0b',
+                    color: '#78350f',
+                    fontWeight: '700',
+                    padding: '2px 6px',
+                    borderRadius: '6px',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  คู่มือ
+                </span>
+              </Link>
+            </div>
+          )}
 
           <div
             onClick={() => {
