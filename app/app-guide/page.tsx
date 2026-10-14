@@ -49,10 +49,7 @@ export default function AppGuidePage() {
     overview: true,
     update: true,
     wire: true,
-    material: true,
-    tasks: true,
     outage: true,
-    planning: true,
     emergency: true,
     estimation: true,
     budget: true,
@@ -86,8 +83,8 @@ export default function AppGuidePage() {
   const categories = [
     { id: "all", label: "ทั้งหมด (All Topics)" },
     { id: "overview", label: "📊 หน้าหลัก & สรุปภาพรวม" },
-    { id: "tasks", label: "🔨 งาน & พัสดุก่อสร้าง" },
-    { id: "planning", label: "📅 วางแผน & ฉุกเฉิน" },
+    { id: "tasks", label: "📝 อัปเดตงาน & คืนเศษสาย" },
+    { id: "planning", label: "📅 ดับไฟ & รับมือฉุกเฉิน" },
     { id: "docs", label: "📑 ประมาณการ & เอกสาร" },
     { id: "safety", label: "🦺 ความปลอดภัย & PPE" },
     { id: "fleet", label: "🚗 ยานพาหนะ & เชื้อเพลิง" },
@@ -190,76 +187,10 @@ export default function AppGuidePage() {
         tips: "สามารถใช้เครื่องคิดเลขแปลงความยาวเป็นน้ำหนักเพื่อตรวจสอบความสมเหตุสมผลของเศษสายก่อนนำส่งคืนจริง",
       },
       {
-        id: "material",
-        category: "tasks",
-        path: "/material-tracking",
-        title: "4. ติดตามพัสดุช่าง (Material & Tool Tracking)",
-        badge: "พัสดุ & ช่าง",
-        badgeColor: "bg-amber-100 text-amber-700",
-        summary: "ติดตามการเบิก-จ่ายพัสดุอุปกรณ์งานก่อสร้าง ตรวจสอบสถานะการติดตั้งและการรื้อถอนรายบุคคล",
-        keywords: "พัสดุ ช่าง เบิกของ ติดตั้ง รื้อถอน คืนดี คืนชำรุด สต็อก camp inventory sap",
-        steps: [
-          {
-            title: "เลือกดูพัสดุตามช่างผู้รับผิดชอบหรือ WBS",
-            desc: "เลือกฟิลเตอร์ช่างผู้ควบคุมงานเพื่อดูเฉพาะรายการพัสดุที่ช่างคนนั้นเบิกไปปฏิบัติงาน",
-          },
-          {
-            title: "ติดตามสถานะพัสดุ 6 หมวดสำคัญ",
-            desc: "1) นำไปก่อสร้างแล้ว 2) ยังไม่ได้ก่อสร้าง 3) ยังไม่รื้อ 4) รื้อแล้วยังไม่คืน 5) คืนดี (ส่งคลัง) 6) คืนชำรุด",
-          },
-          {
-            title: "อัปเดตจำนวนพัสดุที่ติดตั้งหรือรื้อถอนจริง",
-            desc: "กรอกจำนวนอุปกรณ์ที่ดำเนินการแล้วเสร็จ ระบบจะคำนวณจำนวนคงเหลือให้อัตโนมัติ",
-          },
-          {
-            title: "ถ่ายรูปพัสดุหน้างานเพื่อยืนยันสภาพ",
-            desc: "สามารถกดถ่ายรูปพัสดุที่รื้อถอน หรือพัสดุชำรุดเพื่อบันทึกไว้ในระบบก่อนส่งคืนคลัง",
-          },
-          {
-            title: "ตรวจสอบคลังพักพัสดุช่าง (Camp Inventory)",
-            desc: "ดูรายการพัสดุและเครื่องมือที่อยู่ที่แคมป์ช่าง เพื่อป้องกันของสูญหายหรือเบิกซ้ำซ้อน",
-          },
-        ],
-        tips: "การระบุพัสดุรื้อถอน 'คืนดี' และ 'คืนชำรุด' ให้ชัดเจนตั้งแต่หน้างาน จะช่วยให้การทำเอกสารส่งคืนคลังรวดเร็วขึ้นมาก",
-      },
-      {
-        id: "tasks",
-        category: "tasks",
-        path: "/my-tasks",
-        title: "5. มอบหมายและติดตามงาน (My Tasks & Assignments)",
-        badge: "บริหารทีม",
-        badgeColor: "bg-indigo-100 text-indigo-700",
-        summary: "มอบหมายภารกิจประจำวันให้ทีมงาน กำหนดลำดับความสำคัญ และติดตามสถานะแบบเรียลไทม์",
-        keywords: "มอบหมาย งานของฉัน tasks ช่าง มอบหมายงาน priority ด่วน เสร็จ กำหนดส่ง overdue",
-        steps: [
-          {
-            title: "สร้างงานใหม่ (Add Task)",
-            desc: "กดปุ่ม '+ มอบหมายงาน' ระบุชื่องาน, เลข WBS, รายละเอียดงาน, พิกัดสถานที่ และกำหนดส่งมอบ",
-          },
-          {
-            title: "เลือกผู้รับผิดชอบ (Assignee) และระดับความสำคัญ",
-            desc: "เลือกช่างผู้รับผิดชอบจากรายชื่อบุคลากร พร้อมเลือกระดับความสำคัญ: 'ฉุกเฉินด่วนที่สุด', 'สำคัญมาก', 'ปานกลาง', หรือ 'ทั่วไป'",
-          },
-          {
-            title: "ช่างเปิดดูรายการงานส่วนบุคคล (My Tasks)",
-            desc: "ช่างสามารถเข้ามาดูเฉพาะงานที่ตนเองได้รับมอบหมาย พร้อมเบอร์โทรและแผนที่นำทางไปยังหน้างาน",
-          },
-          {
-            title: "อัปเดตสถานะงาน (Pending -> In Progress -> Done)",
-            desc: "เมื่อเริ่มทำงานให้กด 'เริ่มดำเนินการ' และเมื่อทำเสร็จให้กด 'เสร็จสิ้น' พร้อมแนบรูปถ่ายจบงาน",
-          },
-          {
-            title: "ระบบแจ้งเตือนงานเกินกำหนด (Overdue Alert)",
-            desc: "งานที่เลยวันกำหนดส่งจะถูกไฮไลต์สีแดงเตือนผู้ควบคุมงานทันทีเพื่อเร่งรัดการปฏิบัติงาน",
-          },
-        ],
-        tips: "สามารถกดดูงานเรียงตามความสำคัญ (Priority) เพื่อให้ทีมงานเลือกทำงานเร่งด่วนที่สุดก่อนได้เสมอ",
-      },
-      {
         id: "outage",
         category: "planning",
         path: "/outage",
-        title: "6. แผนงานระบบ / แผนใช้รถ (Outage & Vehicle Schedule)",
+        title: "4. แผนงานระบบ / แผนใช้รถ (Outage & Vehicle Schedule)",
         badge: "ปฏิทินงาน",
         badgeColor: "bg-teal-100 text-teal-700",
         summary: "ปฏิทินแสดงตารางดับกระแสไฟฟ้าปฏิบัติงาน และการจองจัดสรรยานพาหนะเครื่องจักรกลหนัก",
@@ -285,43 +216,10 @@ export default function AppGuidePage() {
         tips: "ควรลงแผนดับไฟล่วงหน้าอย่างน้อย 3-5 วันทำการ เพื่อให้การประสานงานกับศูนย์สั่งการจ่ายไฟ (Dispatcher) ราบรื่น",
       },
       {
-        id: "planning",
-        category: "planning",
-        path: "/planning",
-        title: "7. วางแผนงานก่อสร้าง (Gantt Chart & S-Curve)",
-        badge: "การวางแผน",
-        badgeColor: "bg-cyan-100 text-cyan-700",
-        summary: "วางแผนก่อสร้างตาม 7 ขั้นตอนมาตรฐาน กฟภ. พร้อมกราฟ Gantt Chart และ S-Curve วิเคราะห์ความก้าวหน้า",
-        keywords: "วางแผน planning gantt s-curve 7ขั้นตอน ขุดหลุม ปักเสา พาดสาย รื้อถอน ความก้าวหน้า",
-        steps: [
-          {
-            title: "เลือกโครงการที่ต้องการวางแผน",
-            desc: "เลือกโครงการจากตาราง หรือค้นหาด้วยเลข WBS เพื่อเข้าสู่แดชบอร์ดวางแผนงาน",
-          },
-          {
-            title: "กำหนดวันเริ่มต้น-สิ้นสุดของ 7 ขั้นตอนมาตรฐาน กฟภ.",
-            desc: "0. เบิกของเตรียมอุปกรณ์ (น้ำหนัก 5%)\n1. ขุดหลุมปักเสา (น้ำหนัก 15%)\n2. ปักเสา (น้ำหนัก 20%)\n3. ติดตั้งอุปกรณ์ประกอบหัวเสา (น้ำหนัก 20%)\n4. พาดสายแรงสูง (น้ำหนัก 20%)\n5. พาดสายแรงต่ำ (น้ำหนัก 10%)\n6. งานรื้อถอน (น้ำหนัก 10%)",
-          },
-          {
-            title: "ดูแถบความก้าวหน้า Gantt Chart",
-            desc: "เปิดแท็บ 'Gantt Chart' เพื่อดู Timeline แผนงานและผลการทำงานจริง (Actual vs Planned) ของแต่ละขั้นตอน",
-          },
-          {
-            title: "วิเคราะห์กราฟ S-Curve",
-            desc: "ดูกราฟเส้น S-Curve เปรียบเทียบเส้นแผนงานกับเส้นผลงานจริง หากเส้นจริงต่ำกว่าแผนแสดงว่างบประมาณหรืองานล่าช้า",
-          },
-          {
-            title: "แผนงานรายเดือน (Monthly Plan) และการพิมพ์",
-            desc: "กดพิมพ์แผนงานเพื่อนำไปใช้ในการประชุมติดตามความก้าวหน้าร่วมกับผู้บริหารหรือคณะกรรมการตรวจรับ",
-          },
-        ],
-        tips: "เมื่อปรับจำนวนปริมาณงาน (Quantity) ในแต่ละขั้นตอน ระบบจะคำนวณเปอร์เซ็นต์สะสมของโครงการให้อัตโนมัติตามน้ำหนักมาตรฐาน",
-      },
-      {
         id: "emergency",
         category: "planning",
         path: "/emergency-plan",
-        title: "8. งานฉุกเฉิน / รถชนเสา (Emergency & Accident Response)",
+        title: "5. งานฉุกเฉิน / รถชนเสา (Emergency & Accident Response)",
         badge: "ฉุกเฉินเร่งด่วน",
         badgeColor: "bg-rose-100 text-rose-700",
         summary: "ระบบตอบสนองอุบัติเหตุรถชนเสาไฟฟ้า ปักหมุดแผนที่ดาวเทียม สกัดพิกัด GPS อัตโนมัติ และคำนวณพัสดุซ่อมด่วน",
@@ -354,7 +252,7 @@ export default function AppGuidePage() {
         id: "estimation",
         category: "docs",
         path: "/estimation",
-        title: "9. โปรแกรมประมาณการ (Cost & Assembly Estimation)",
+        title: "6. โปรแกรมประมาณการ (Cost & Assembly Estimation)",
         badge: "ประมาณการ",
         badgeColor: "bg-violet-100 text-violet-700",
         summary: "โปรแกรมจัดทำประมาณการงานก่อสร้างระบบจำหน่าย ประกอบชุด Assembly เสา และคำนวณค่าแรง/ค่าพัสดุ",
@@ -387,7 +285,7 @@ export default function AppGuidePage() {
         id: "budget",
         category: "docs",
         path: "/budget-transfer",
-        title: "10. เอกสารใบขอเบิกค่าใช้จ่าย (Budget Transfer & Signatures)",
+        title: "7. เอกสารใบขอเบิกค่าใช้จ่าย (Budget Transfer & Signatures)",
         badge: "เอกสารการเงิน",
         badgeColor: "bg-fuchsia-100 text-fuchsia-700",
         summary: "จัดทำเอกสารขอเบิกค่าใช้จ่ายงานก่อสร้าง โอนงบประมาณระหว่าง Network พร้อมระบบลงนามดิจิทัล",
@@ -416,7 +314,7 @@ export default function AppGuidePage() {
         id: "teco",
         category: "docs",
         path: "/teco-checker",
-        title: "11. ตรวจสอบปิดงาน TECO (TECO Readiness Checker)",
+        title: "8. ตรวจสอบปิดงาน TECO (TECO Readiness Checker)",
         badge: "ตรวจปิดงาน",
         badgeColor: "bg-amber-100 text-amber-700",
         summary: "เครื่องมือตรวจสอบความพร้อมก่อนส่งปิดงานทางเทคนิค (TECO) ในระบบ SAP ป้องกันเอกสารตีกลับ",
@@ -445,7 +343,7 @@ export default function AppGuidePage() {
         id: "guide115",
         category: "docs",
         path: "/guide",
-        title: "12. คู่มือภาคสนามก่อสร้างระบบ 115 kV (Technical Engineering Guide)",
+        title: "9. คู่มือภาคสนามก่อสร้างระบบ 115 kV (Technical Engineering Guide)",
         badge: "มาตรฐานวิศวกรรม",
         badgeColor: "bg-sky-100 text-sky-700",
         summary: "คู่มืออ้างอิงมาตรฐานวิศวกรรม 115 kV คำนวณ Sag & Tension ระยะ Clearances พร้อมระบบ AI ผู้ช่วยถาม-ตอบ",
@@ -474,7 +372,7 @@ export default function AppGuidePage() {
         id: "safety",
         category: "safety",
         path: "/safety",
-        title: "13. งานความปลอดภัย & PPE (Safety Compliance & PPE)",
+        title: "10. งานความปลอดภัย & PPE (Safety Compliance & PPE)",
         badge: "ความปลอดภัย",
         badgeColor: "bg-green-100 text-green-700",
         summary: "ติดตามแผนการฝึกอบรมความปลอดภัยประจำเดือน 10 หัวข้อ ตรวจสอบสภาพอุปกรณ์ PPE และรายงาน Safety Hub",
@@ -499,7 +397,7 @@ export default function AppGuidePage() {
         id: "fleet",
         category: "fleet",
         path: "/vehicle",
-        title: "14. ระบบยานพาหนะ & รายงานน้ำมัน ยพ.6 (Fleet & Fuel Report)",
+        title: "11. ระบบยานพาหนะ & รายงานน้ำมัน ยพ.6 (Fleet & Fuel Report)",
         badge: "ยานพาหนะ & น้ำมัน",
         badgeColor: "bg-orange-100 text-orange-700",
         summary: "ทะเบียนรถยนต์และเครื่องจักร คำนวณเบี้ยเลี้ยงและค่าล่วงเวลา (OT) พขร. พร้อมจัดทำรายงานน้ำมัน ยพ.6 อัตโนมัติ",
@@ -532,7 +430,7 @@ export default function AppGuidePage() {
         id: "faq",
         category: "faq",
         path: "/app-guide",
-        title: "15. คำถามที่พบบ่อย & การตั้งค่า (FAQ & Technical Tips)",
+        title: "12. คำถามที่พบบ่อย & การตั้งค่า (FAQ & Technical Tips)",
         badge: "ช่วยเหลือ & ตอบคำถาม",
         badgeColor: "bg-slate-100 text-slate-700",
         summary: "รวมข้อสงสัย วิธีแก้ปัญหาเมื่อระบบติดขัด และเทคนิคการติดตั้งเว็บแอพลงบนหน้าจอมือถือ",
@@ -621,7 +519,7 @@ export default function AppGuidePage() {
                   📱 รองรับ PC, แท็บเล็ต และสมาร์ทโฟน
                 </span>
                 <span className="px-2.5 py-1 rounded-md bg-white/10 text-white backdrop-blur-sm border border-white/10">
-                  🗂️ 15 โมดูลระบบครอบคลุมทุกสายงาน
+                  🗂️ 11 โมดูลระบบสำหรับผู้ใช้งาน
                 </span>
               </div>
             </div>
@@ -778,7 +676,7 @@ export default function AppGuidePage() {
                   ข้อจำกัด
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  ไม่สามารถลบโครงการหลัก หรือเข้าถึงเมนูของ Admin ได้ ได้แก่ Safety Hub, วางแผนงานก่อสร้าง, ติดตามพัสดุช่าง, มอบหมายและติดตามงาน และติดตามงานสำคัญ
+                  ไม่สามารถลบโครงการหลัก หรือเข้าถึงเมนูเฉพาะสำหรับผู้ดูแลระบบ (Admin) ได้ (ระบบจะซ่อนเมนูพิเศษให้อัตโนมัติ)
                 </p>
               </div>
             </div>
@@ -792,7 +690,7 @@ export default function AppGuidePage() {
                   สิทธิ์ระดับสูงสุด (Full Access)
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  สำหรับหัวหน้าแผนกและผู้ดูแลระบบ เข้าถึงทุกเมนู รวมถึงเมนูที่เปิดให้เฉพาะ Admin ได้แก่ วางแผนงานก่อสร้าง, ติดตามพัสดุช่าง, มอบหมายและติดตามงาน, ติดตามงานสำคัญ และรายงาน Safety Hub, ลบหรือแก้ไขข้อมูลโครงการหลัก และอนุมัติเอกสารขอเบิกค่าใช้จ่าย
+                  สำหรับหัวหน้าแผนกและผู้ดูแลระบบ เข้าถึงทุกเมนู รวมถึงเมนูบริหารจัดการสำหรับผู้ดูแลระบบ และรายงาน Safety Hub, ลบหรือแก้ไขข้อมูลโครงการหลัก และอนุมัติเอกสารขอเบิกค่าใช้จ่าย
                 </p>
               </div>
               <div>
@@ -842,7 +740,7 @@ export default function AppGuidePage() {
                   ข้อจำกัด
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  ไม่สามารถแก้ไขข้อมูล, อัปเดตงาน, เบิกจ่ายพัสดุ หรือบันทึกเอกสารการเงินใดๆ ได้ และจะไม่เห็นเมนู วางแผนงานก่อสร้าง, ติดตามพัสดุช่าง, มอบหมายและติดตามงาน, ติดตามงานสำคัญ (เปิดให้เฉพาะ Admin)
+                  ไม่สามารถแก้ไขข้อมูล, อัปเดตงาน, เบิกจ่ายพัสดุ หรือบันทึกเอกสารการเงินใดๆ ได้ และเข้าดูได้เฉพาะหน้าข้อมูลที่เปิดสาธารณะเท่านั้น
                 </p>
               </div>
             </div>
@@ -870,7 +768,7 @@ export default function AppGuidePage() {
                 </div>
                 <ul className="space-y-1 text-slate-600 list-disc list-inside">
                   <li>ประมาณการงานก่อสร้าง (/estimation)</li>
-                  <li>จัดทำแผนงาน 7 ขั้นตอน (/planning)</li>
+                  <li>ศึกษามาตรฐานวิศวกรรม 115 kV (/guide)</li>
                   <li>ลงปฏิทินดับไฟและจัดรถ (/outage)</li>
                 </ul>
               </div>
@@ -888,8 +786,8 @@ export default function AppGuidePage() {
                 </div>
                 <ul className="space-y-1 text-slate-600 list-disc list-inside">
                   <li>ตรวจ PPE & Morning Talk (/safety)</li>
-                  <li>เบิกและติดตามพัสดุช่าง (/material-tracking)</li>
-                  <li>รับมอบหมายงานรายวัน (/my-tasks)</li>
+                  <li>เตรียมยานพาหนะเครื่องจักร (/vehicle)</li>
+                  <li>รับมืออุบัติเหตุฉุกเฉิน (/emergency-plan)</li>
                 </ul>
               </div>
               <div className="mt-3 pt-2 border-t border-blue-200 text-[11px] text-blue-700 font-semibold flex items-center gap-1">
