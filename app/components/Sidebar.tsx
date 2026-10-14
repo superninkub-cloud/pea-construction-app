@@ -178,17 +178,74 @@ export default function Sidebar() {
           </div>
         )}
 
-        <div
-          onClick={() => {
-            sessionStorage.removeItem("pea_auth");
-            sessionStorage.removeItem("pea_role");
-            window.location.reload();
-          }}
-          className="nav-item"
-          style={{ marginTop: '30px', borderTop: '1px solid #e2e8f0', paddingTop: '15px', color: '#ef4444', cursor: 'pointer' }}
-        >
-          <LogOut size={20} />
-          <span style={{ fontWeight: '600' }}>ออกจากระบบ</span>
+        {/* ส่วนท้าย Sidebar: คู่มือการใช้งานเว็บแอพ */}
+        <div style={{ marginTop: '28px', borderTop: '1px solid rgba(255, 255, 255, 0.12)', paddingTop: '16px' }}>
+          <div onClick={closeSidebar}>
+            <Link
+              href="/app-guide"
+              className={`nav-item ${pathname === "/app-guide" ? "active" : ""}`}
+              style={{
+                background: pathname === "/app-guide"
+                  ? 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+                  : 'rgba(255, 255, 255, 0.05)',
+                border: pathname === "/app-guide"
+                  ? '1px solid #a78bfa'
+                  : '1px solid rgba(255, 255, 255, 0.12)',
+                color: '#ffffff',
+                marginBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                borderRadius: '12px',
+                transition: 'all 0.2s ease',
+                boxShadow: pathname === "/app-guide" ? '0 4px 12px rgba(124, 58, 237, 0.35)' : 'none'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <BookOpen size={18} style={{ color: '#fbbf24', flexShrink: 0 }} />
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: '600', lineHeight: 1.2 }}>คู่มือการใช้งานเว็บแอพ</span>
+                  <span style={{ fontSize: '0.70rem', color: '#cbd5e1' }}>วิธีใช้ระบบ ผกร.(ก3)</span>
+                </div>
+              </div>
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  backgroundColor: '#f59e0b',
+                  color: '#78350f',
+                  fontWeight: '700',
+                  padding: '2px 6px',
+                  borderRadius: '6px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                คู่มือ
+              </span>
+            </Link>
+          </div>
+
+          <div
+            onClick={() => {
+              sessionStorage.removeItem("pea_auth");
+              sessionStorage.removeItem("pea_role");
+              window.location.reload();
+            }}
+            className="nav-item"
+            style={{
+              marginTop: '4px',
+              padding: '10px 14px',
+              borderRadius: '10px',
+              color: '#f87171',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}
+          >
+            <LogOut size={18} />
+            <span style={{ fontWeight: '600', fontSize: '0.88rem' }}>ออกจากระบบ</span>
+          </div>
         </div>
       </nav>
     </div>
