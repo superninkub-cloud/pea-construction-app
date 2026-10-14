@@ -41,6 +41,9 @@ export default function Sidebar() {
     }
   }, []);
 
+  // เมนูที่เปิดให้เฉพาะ admin (ซ่อนจาก user และผู้เยี่ยมชม/guest)
+  const canAccessRestricted = userRole === 'admin';
+
   return (
     <div className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
       <div className="sidebar-logo-container">
@@ -71,14 +74,18 @@ export default function Sidebar() {
               <Recycle size={20} />
               <span>สถานะการคืนเศษสาย</span>
             </Link>
-            <Link href="/material-tracking" className={`nav-item ${pathname === "/material-tracking" ? "active" : ""}`}>
-              <Package size={20} />
-              <span>ติดตามพัสดุช่าง</span>
-            </Link>
-            <Link href="/my-tasks" className={`nav-item ${pathname === "/my-tasks" ? "active" : ""}`}>
-              <ClipboardList size={20} />
-              <span>มอบหมายและติดตามงาน</span>
-            </Link>
+            {canAccessRestricted && (
+              <Link href="/material-tracking" className={`nav-item ${pathname === "/material-tracking" ? "active" : ""}`}>
+                <Package size={20} />
+                <span>ติดตามพัสดุช่าง</span>
+              </Link>
+            )}
+            {canAccessRestricted && (
+              <Link href="/my-tasks" className={`nav-item ${pathname === "/my-tasks" ? "active" : ""}`}>
+                <ClipboardList size={20} />
+                <span>มอบหมายและติดตามงาน</span>
+              </Link>
+            )}
             <Link href="/outage" className={`nav-item ${pathname === "/outage" ? "active" : ""}`}>
               <CalendarDays size={20} />
               <span>แผนงานระบบ / แผนใช้รถ</span>
@@ -93,10 +100,12 @@ export default function Sidebar() {
               <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
               <span>วางแผนงานก่อสร้าง</span>
             </Link>
-            <Link href="/important" className={`nav-item ${pathname === "/important" ? "active" : ""}`}>
-              <AlertCircle size={20} />
-              <span>ติดตามงานสำคัญ</span>
-            </Link>
+            {canAccessRestricted && (
+              <Link href="/important" className={`nav-item ${pathname === "/important" ? "active" : ""}`}>
+                <AlertCircle size={20} />
+                <span>ติดตามงานสำคัญ</span>
+              </Link>
+            )}
             <Link href="/emergency-plan" className={`nav-item ${pathname === "/emergency-plan" ? "active" : ""}`}>
               <MapPin size={20} />
               <span>งานฉุกเฉิน/รถชนเสา</span>
