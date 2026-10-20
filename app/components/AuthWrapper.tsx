@@ -23,15 +23,21 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanPass = password.trim();
     try {
-      if (password === "Cha16072534" || password === "Cha16072534--") {
+      if (cleanPass === "Cha16072534" || cleanPass === "Cha16072534--") {
         sessionStorage.setItem("pea_auth", "true");
         sessionStorage.setItem("pea_role", "admin");
         setIsAuthenticated(true);
         setError(false);
-      } else if (password === "pscc3") {
+      } else if (cleanPass === "pscc3") {
         sessionStorage.setItem("pea_auth", "true");
         sessionStorage.setItem("pea_role", "user");
+        setIsAuthenticated(true);
+        setError(false);
+      } else if (cleanPass === "Office" || cleanPass === "office") {
+        sessionStorage.setItem("pea_auth", "true");
+        sessionStorage.setItem("pea_role", "office");
         setIsAuthenticated(true);
         setError(false);
       } else {
@@ -183,6 +189,25 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
             เข้าใช้งานโหมดผู้เยี่ยมชม (ดูเท่านั้น)
           </button>
         </form>
+
+        <div style={{
+          marginTop: "20px",
+          padding: "12px 14px",
+          backgroundColor: "#f8fafc",
+          borderRadius: "10px",
+          border: "1px solid #e2e8f0",
+          fontSize: "0.80rem",
+          color: "#64748b",
+          textAlign: "left",
+          lineHeight: 1.5
+        }}>
+          <div style={{ fontWeight: 600, color: "#334155", marginBottom: "4px" }}>
+            🔑 สิทธิ์และรหัสผ่านเข้าใช้งาน:
+          </div>
+          <div>• <strong>เจ้าหน้าที่สนาม (User)</strong>: รหัสผ่าน <code>pscc3</code></div>
+          <div>• <strong>พนักงาน Office</strong>: รหัสผ่าน <code>Office</code></div>
+          <div>• <strong>ผู้ดูแลระบบ (Admin)</strong>: รหัสผ่านเฉพาะผู้ดูแลระบบ</div>
+        </div>
       </div>
     </div>
   );

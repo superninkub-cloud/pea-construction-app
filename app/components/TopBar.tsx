@@ -24,6 +24,10 @@ export default function TopBar({ title }: { title: string }) {
     topText = "ADMIN";
     bottomText = "ชานินทร์";
     avatarText = "AD";
+  } else if (role === "office") {
+    topText = "OFFICE";
+    bottomText = "พนักงาน Office";
+    avatarText = "OF";
   } else if (role === "guest") {
     topText = "บุคคลภายนอก";
     bottomText = "ผู้เยี่ยมชม";
