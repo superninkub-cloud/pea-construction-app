@@ -7,7 +7,7 @@ import {
   LogOut, Recycle, ArrowRightLeft, Camera, ClipboardList, ChevronDown, ChevronRight, 
   Package, MapPin, Calculator, FileWarning, FileCheck, Wrench, CreditCard, 
   CheckCircle2, Building, PlayCircle, Receipt, PackagePlus, Trash2, Moon, Archive, 
-  X, Clock, Sparkles, Briefcase
+  X, Clock, Sparkles, Briefcase, Percent
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import { useEffect, useState } from "react";
@@ -99,22 +99,10 @@ export default function Sidebar() {
   const isUser = userRole === 'user';
   const canAccessRestricted = isAdmin;
   const canAccessGuide = isAdmin || isUser || isOffice;
-  const canAccessOfficeSection = isAdmin || isOffice;
+  const canAccessOfficeSection = isAdmin || isOffice || isUser;
 
-  // 13 โปรแกรมใหม่สำหรับพนักงาน Office (ทำเฉพาะ Sidebar ไว้ก่อน)
+  // 11 โปรแกรมใหม่สำหรับพนักงาน Office ที่อยู่ระหว่างเตรียมพัฒนา
   const officeUpcomingPrograms = [
-    {
-      id: "account-adjust",
-      title: "โปรแกรมปรับปรุงบัญชี",
-      icon: Calculator,
-      desc: "ระบบบันทึกและจัดทำรายการปรับปรุงบัญชีค้างจ่าย/ตั้งพัก ในระบบ SAP (GL Accounts & Cost Center) สำหรับแผนกก่อสร้าง",
-    },
-    {
-      id: "wire-clarify",
-      title: "โปรแกรมชี้แจงส่งคืนเศษสายไม่ครบ 100%",
-      icon: FileWarning,
-      desc: "ระบบจัดทำหนังสือชี้แจงเหตุผลทางวิศวกรรมกรณีส่งคืนเศษสายตัวนำเคเบิลไม่ครบตามเกณฑ์มาตรฐาน เพื่อเสนอผู้บังคับบัญชาพิจารณา",
-    },
     {
       id: "procurement-principle",
       title: "โปรแกรมอนุมัติหลักการจัดซื้อจัดจ้าง",
@@ -251,7 +239,7 @@ export default function Sidebar() {
             />
             {expanded.office && (
               <div onClick={closeSidebar}>
-                {/* 2 โปรแกรมที่เปิดใช้งานจริงแล้ว */}
+                {/* 3 โปรแกรมที่เปิดใช้งานจริงแล้ว */}
                 <Link 
                   href="/budget-transfer" 
                   className={`nav-item ${pathname === "/budget-transfer" ? "active" : ""}`}
@@ -259,6 +247,54 @@ export default function Sidebar() {
                 >
                   <ArrowRightLeft size={20} className="text-purple-300" />
                   <span className="font-semibold text-white">เอกสารใบขอเบิกค่าใช้จ่าย</span>
+                </Link>
+
+                <Link 
+                  href="/account-adjust" 
+                  className={`nav-item ${pathname === "/account-adjust" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/account-adjust" ? undefined : 'rgba(126, 34, 206, 0.22)',
+                    border: pathname === "/account-adjust" ? undefined : '1px solid rgba(168, 85, 247, 0.3)'
+                  }}
+                >
+                  <Calculator size={20} className="text-purple-300" />
+                  <span className="font-semibold text-white">โปรแกรมปรับปรุงบัญชี</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/wire-clarify" 
+                  className={`nav-item ${pathname === "/wire-clarify" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/wire-clarify" ? undefined : 'rgba(234, 88, 12, 0.22)',
+                    border: pathname === "/wire-clarify" ? undefined : '1px solid rgba(249, 115, 22, 0.3)'
+                  }}
+                >
+                  <Percent size={20} className="text-orange-400" />
+                  <span className="font-semibold text-white">ชี้แจงส่งคืนเศษสายไม่ครบ</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
                 </Link>
 
                 <Link 
