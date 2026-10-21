@@ -101,14 +101,8 @@ export default function Sidebar() {
   const canAccessGuide = isAdmin || isUser || isOffice;
   const canAccessOfficeSection = isAdmin || isOffice || isUser;
 
-  // 11 โปรแกรมใหม่สำหรับพนักงาน Office ที่อยู่ระหว่างเตรียมพัฒนา
+  // 10 โปรแกรมใหม่สำหรับพนักงาน Office ที่อยู่ระหว่างเตรียมพัฒนา
   const officeUpcomingPrograms = [
-    {
-      id: "procurement-principle",
-      title: "โปรแกรมอนุมัติหลักการจัดซื้อจัดจ้าง",
-      icon: FileCheck,
-      desc: "ระบบจัดทำบันทึกขออนุมัติหลักการจัดซื้อพัสดุและจัดจ้างแรงงานก่อสร้างตาม พ.ร.บ. จัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ",
-    },
     {
       id: "car-repair",
       title: "โปรแกรมแจ้งซ่อมรถยนต์",
@@ -283,6 +277,30 @@ export default function Sidebar() {
                 >
                   <Percent size={20} className="text-orange-400" />
                   <span className="font-semibold text-white">ชี้แจงส่งคืนเศษสายไม่ครบ</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/procurement-principle" 
+                  className={`nav-item ${pathname === "/procurement-principle" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/procurement-principle" ? undefined : 'rgba(13, 148, 136, 0.22)',
+                    border: pathname === "/procurement-principle" ? undefined : '1px solid rgba(20, 184, 166, 0.3)'
+                  }}
+                >
+                  <FileCheck size={20} className="text-teal-400" />
+                  <span className="font-semibold text-white">อนุมัติหลักการจัดซื้อจัดจ้าง</span>
                   <span style={{
                     marginLeft: 'auto',
                     fontSize: '0.62rem',
