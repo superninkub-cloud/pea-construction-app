@@ -23,15 +23,21 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanPass = password.trim();
     try {
-      if (password === "Cha16072534" || password === "Cha16072534--") {
+      if (cleanPass === "Cha16072534" || cleanPass === "Cha16072534--") {
         sessionStorage.setItem("pea_auth", "true");
         sessionStorage.setItem("pea_role", "admin");
         setIsAuthenticated(true);
         setError(false);
-      } else if (password === "pscc3") {
+      } else if (cleanPass === "pscc3") {
         sessionStorage.setItem("pea_auth", "true");
         sessionStorage.setItem("pea_role", "user");
+        setIsAuthenticated(true);
+        setError(false);
+      } else if (cleanPass === "Office" || cleanPass === "office") {
+        sessionStorage.setItem("pea_auth", "true");
+        sessionStorage.setItem("pea_role", "office");
         setIsAuthenticated(true);
         setError(false);
       } else {

@@ -522,15 +522,16 @@ export default function GasReportPage() {
 
               {reports.length > 0 ? (
                 <div id="printable-report">
-                  {Array.from({ length: Math.ceil(reports.length / 10) || 1 }).map((_, pageIndex) => {
-                    const chunk = reports.slice(pageIndex * 10, (pageIndex + 1) * 10);
+                  {Array.from({ length: Math.ceil(reports.length / 7) || 1 }).map((_, pageIndex, arr) => {
+                    const chunk = reports.slice(pageIndex * 7, (pageIndex + 1) * 7);
+                    const isLastPage = pageIndex === arr.length - 1;
                     return (
-                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid', position: 'relative', height: '185mm', display: 'flex', flexDirection: 'column' }}>
+                      <div key={pageIndex} className="official-form" style={{ pageBreakAfter: isLastPage ? 'auto' : 'always', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
                           <img src="/PEA-Logo.png" alt="PEA" style={{ width: '80px' }} onError={(e) => (e.currentTarget as any).style.display = 'none'} />
                         </div>
-                        <div className="form-header text-center" style={{ marginBottom: '24px' }}>
-                          <div style={{ fontSize: '28px', marginBottom: '8px' }}>การไฟฟ้าส่วนภูมิภาค</div>
+                        <div className="form-header text-center" style={{ marginBottom: '12px' }}>
+                          <div style={{ fontSize: '28px', marginBottom: '4px' }}>การไฟฟ้าส่วนภูมิภาค</div>
                           <div style={{ fontSize: '24px' }}>แบบฟอร์มรายงานการใช้ยานพาหนะหรือเครื่องจักร</div>
                         </div>
 
@@ -569,15 +570,15 @@ export default function GasReportPage() {
                             <span className="ml-2">หมายเลขทะเบียน</span>
                             <span className="dotted-blank text-center" style={{ width: '120px' }}>{reportPlate}</span>
                             <span className="ml-2">รหัส</span>
-                            <span className="dotted-blank text-center" style={{ flex: 1, minWidth: '80px' }}></span>
+                            <span className="dotted-blank text-center" style={{ flex: 1 }}></span>
                           </div>
-                          <div className="form-row flex-start" style={{ marginTop: '4px', display: 'flex', width: '100%' }}>
+                          
+                          <div className="form-row flex-start flex-wrap">
                             <span>ประเภท</span>
                             <span className="dotted-blank text-center" style={{ width: '150px' }}></span>
                             <span className="ml-2">ชนิด</span>
-                            <span className="dotted-blank text-center" style={{ flex: 1, minWidth: '80px' }}></span>
+                            <span className="dotted-blank text-center" style={{ flex: 1 }}></span>
                           </div>
-
 
                           <div className="form-row flex-start flex-wrap fuel-checkboxes" style={{ marginTop: '16px' }}>
                             <span style={{ marginRight: '8px' }}>ชนิดของเชื้อเพลิง</span>
@@ -586,21 +587,25 @@ export default function GasReportPage() {
                             <label><input type="checkbox" /> แก๊สโซฮอล์ E20</label>
                             <label><input type="checkbox" /> แก๊สโซฮอล์ E85</label>
                             <label><input type="checkbox" /> ดีเซล</label>
-                            <label><input type="checkbox" /> น้ำมันหล่อลื่น จำนวน</label>
-                            <span className="dotted-blank" style={{ flex: 1, minWidth: '40px', maxWidth: '80px' }}></span>
-                            <span>ลิตร</span>
+                            <div className="flex-start" style={{ whiteSpace: 'nowrap', flex: 1 }}>
+                              <label style={{ margin: '0 0 0 12px', display: 'flex', alignItems: 'center' }}>
+                                <input type="checkbox" style={{ marginRight: '4px' }} /> น้ำมันหล่อลื่น จำนวน
+                              </label>
+                              <span className="dotted-blank" style={{ flex: 1, minWidth: '40px' }}></span>
+                              <span>ลิตร</span>
+                            </div>
                           </div>
 
                           <div className="form-row flex-start">
                             <span>อัตราการสิ้นเปลืองเชื้อเพลิงยานพาหนะ</span>
                             <span className="dotted-blank" style={{ width: '200px' }}></span>
                             <span>กิโลเมตร/ลิตร, เครื่องจักร</span>
-                            <span className="dotted-blank" style={{ width: '200px' }}></span>
+                            <span className="dotted-blank" style={{ flex: 1, minWidth: '100px' }}></span>
                             <span>ลิตร/ชั่วโมง</span>
                           </div>
                         </div>
 
-                        <table className="official-table" style={{ flex: 1, marginBottom: '8px' }}>
+                        <table className="official-table">
                           <thead>
                             <tr>
                               <th rowSpan={2} style={{ width: '50px' }}>วันที่</th>
@@ -610,9 +615,8 @@ export default function GasReportPage() {
                               <th rowSpan={2} style={{ width: '90px' }}>ชั่วโมงการทำงาน<br/>ของเครื่องจักร</th>
                               <th rowSpan={2} style={{ width: '90px' }}>จำนวนเชื้อเพลิง<br/>ที่เติม (ลิตร)</th>
                               <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
-                              <th rowSpan={2} style={{ width: '120px' }}>รายการซ่อม</th>
-                              <th rowSpan={2} style={{ width: '80px' }}>จำนวนเงิน<br/>(บาท)</th>
-                              <th rowSpan={2} style={{ width: '120px' }}>หมายเหตุ</th>
+                              <th rowSpan={2} style={{ width: '100px' }}>รายการซ่อม</th>
+                              <th rowSpan={2} style={{ width: '180px' }}>หมายเหตุ</th>
                             </tr>
                             <tr>
                               <th style={{ width: '60px' }}>ไป</th>
@@ -625,56 +629,54 @@ export default function GasReportPage() {
                                 <td className="text-center">{getDayOnly(r.usage_date)}</td>
                                 <td className="text-center">{r.driver_name}</td>
                                 <td className="text-left">{r.work_location || ""}</td>
-                                <td className="text-center">{r.odo_start || ""}</td>
-                                <td className="text-center">{r.odo_end || ""}</td>
-                                <td className="text-center">{r.machine_hours || ""}</td>
-                                <td className="text-center">{r.fuel_liters || ""}</td>
-                                <td className="text-right">{r.fuel_cost ? r.fuel_cost.toFixed(2) : ""}</td>
+                                <td className="text-center">{r.odo_start ? Number(r.odo_start).toLocaleString('en-US') : ""}</td>
+                                <td className="text-center">{r.odo_end ? Number(r.odo_end).toLocaleString('en-US') : ""}</td>
+                                <td className="text-center">{r.machine_hours ? Number(r.machine_hours).toLocaleString('en-US') : ""}</td>
+                                <td className="text-center">{r.fuel_liters ? Number(r.fuel_liters).toLocaleString('en-US', { maximumFractionDigits: 3 }) : ""}</td>
+                                <td className="text-right">{r.fuel_cost ? Number(r.fuel_cost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}</td>
                                 <td className="text-left">{r.repair_details || ""}</td>
-                                <td className="text-right">{r.repair_cost ? r.repair_cost.toFixed(2) : ""}</td>
-                                <td className="text-left" style={{ fontSize: '12px' }}>{r.notes || ""}</td>
+                                <td className="text-left" style={{ fontSize: '13px' }}>{r.notes || ""}</td>
                               </tr>
                             ))}
-                            {/* Fill up to exactly 10 rows per page */}
-                            {Array.from({ length: 10 - chunk.length }).map((_, i) => (
+                            {/* Fill up to exactly 7 rows per page */}
+                            {Array.from({ length: 7 - chunk.length }).map((_, i) => (
                               <tr key={`empty-${i}`}>
-                                <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                               </tr>
                             ))}
                             {/* Total Row */}
                             <tr>
                               <td colSpan={6} className="text-right font-bold" style={{ paddingRight: '16px' }}>รวม</td>
                               <td className="text-center font-bold">
-                                {chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0).toFixed(2) : ""}
+                                {chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0) > 0 ? Number(chunk.reduce((sum, r) => sum + (r.fuel_liters || 0), 0)).toLocaleString('en-US', { maximumFractionDigits: 3 }) : ""}
                               </td>
                               <td className="text-right font-bold">
-                                {chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0).toFixed(2) : ""}
+                                {chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0) > 0 ? Number(chunk.reduce((sum, r) => sum + (r.fuel_cost || 0), 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ""}
                               </td>
                               <td></td>
-                              <td className="text-right font-bold">
-                                {chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0) > 0 ? chunk.reduce((sum, r) => sum + (r.repair_cost || 0), 0).toFixed(2) : ""}
-                              </td>
                               <td></td>
                             </tr>
                           </tbody>
                         </table>
                         
-                        <div style={{ marginTop: '4px', marginLeft: '40px', fontSize: '16px' }}>
+                        <div style={{ marginTop: '24px', marginLeft: '40px', fontSize: '16px' }}>
                           จึงเรียนมาเพื่อโปรดทราบ
                         </div>
 
-                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '0px' }}>
+                        <div className="form-footer" style={{ marginTop: 'auto', paddingBottom: '10px' }}>
                           <div className="signature-section flex-between">
                             <div className="signature-box" style={{ flex: 1 }}>
-                              <div>({reports[0]?.driver_name ? ` ${reports[0].driver_name} ` : "......................................................................................."})</div>
+                              <div style={{ display: 'inline-block', borderBottom: '1px dotted #000', width: '220px', height: '24px', marginBottom: '4px' }}></div>
+                              <div>( {chunk[0]?.driver_name || "........................................................"} )</div>
                               <div className="font-bold mt-2">ผู้ขับยานพาหนะ</div>
                             </div>
                             <div className="signature-box" style={{ flex: 1 }}>
-                              <div>({reports[0]?.supervisor_name ? ` ${reports[0].supervisor_name} ` : "......................................................................................."})</div>
+                              <div style={{ display: 'inline-block', borderBottom: '1px dotted #000', width: '220px', height: '24px', marginBottom: '4px' }}></div>
+                              <div>( {chunk[0]?.supervisor_name || "........................................................"} )</div>
                               <div className="font-bold mt-2">ผู้ควบคุม</div>
                             </div>
                           </div>
-                          <div className="form-code" style={{ position: 'absolute', bottom: '-15px', left: '0' }}>ยพ.6-ป.46</div>
+                          <div className="form-code" style={{ position: 'absolute', bottom: '0', left: '0' }}>ยพ.6-ป.46</div>
                         </div>
                       </div>
                     );

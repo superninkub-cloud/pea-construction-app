@@ -1,0 +1,974 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Bell, MapPin, Calendar as CalendarIcon, Play, Edit3, ChevronDown, 
+  Check, FileText, Wrench, Camera, ClipboardList, AlertCircle, Phone, 
+  CheckCircle, ChevronRight, MessageSquareWarning, Megaphone, Plus, X, List,
+  LogOut, Trash2, CalendarDays, Save
+} from 'lucide-react';
+import { mockTasks, Task, TaskStatus, TaskPriority } from './data';
+import { supabase } from '../../lib/supabaseClient';
+
+const ASSIGNEES = [
+  "ชานินทร์ ศรีสวัสดิ์ ชผ.กร.",
+  "อุดมศักดิ์ จันทร์กลิ่น พชง.7",
+  "ศราวุฒิ เกิดสีเล็ก พชง.6",
+  "ศุภวิชญ์ เกาะลอย พชง.6",
+  "วีรพัฒน์ นาคลมัย พชง.6",
+  "ขวัญนคร ศรีจันทร์อินทร์ พชง.5",
+  "กิตติพิชญ์ ประกอบทรัพย์ พชง.5",
+  "นฤเบศ ยันตรีสิงห์ พชง.5",
+  "สิริวัชญ์ ภิรมย์มาก พนง.Office",
+  "กิตติพิชญ์ พุ่มกำพล พนง.Office",
+  "กมลวิทย์ สุนทรพรเจริญ พนง.Office"
+];
+
+const formatThaiDateText = (dateString: string, prefix: string, includeTime: boolean = true) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return `${prefix}: ${dateString}`;
+  
+  const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear() + 543;
+  
+  if (includeTime) {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const mins = date.getMinutes().toString().padStart(2, '0');
+    return `${prefix}วันที่ ${day} ${month} ${year} เวลา ${hours}:${mins} น.`;
+  }
+  
+  return `${prefix}วันที่ ${day} ${month} ${year}`;
+};
+
+const formatThaiDateShort = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  
+  const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = (date.getFullYear() + 543).toString().slice(-2);
+  
+  return `${day} ${month} ${year}`;
+};
+
+const isTaskOverdue = (dateString: string) => {
+  if (!dateString || dateString === 'วันนี้' || dateString === 'พรุ่งนี้') return false;
+  
+  const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const fullMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  
+  let d = new Date(dateString);
+  if (isNaN(d.getTime())) {
+    const match = dateString.trim().match(/^(\d{1,2})\s+(.+?)\s+(\d{2}|\d{4})$/);
+    if (match) {
+      const day = parseInt(match[1], 10);
+      const monthStr = match[2];
+      let year = parseInt(match[3], 10);
+      if (year < 100) year += 2500;
+      year -= 543;
+      
+      let monthIndex = months.findIndex(m => m === monthStr);
+      if (monthIndex === -1) {
+        monthIndex = fullMonths.findIndex(m => m === monthStr);
+      }
+      
+      if (monthIndex !== -1) {
+        d = new Date(year, monthIndex, day, 23, 59, 59);
+      }
+    }
+  } else {
+    if (!dateString.includes('T')) {
+      d.setHours(23, 59, 59, 999);
+    }
+  }
+  
+  if (!isNaN(d.getTime())) {
+    return d.getTime() < new Date().getTime();
+  }
+  
+  return false;
+};
+
+export default function MyTasksDashboard() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isManagerMode, setIsManagerMode] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Modals state
+  const [showUpdateModal, setShowUpdateModal] = useState<string | null>(null);
+  const [updateNote, setUpdateNote] = useState('');
+  const [updateStatus, setUpdateStatus] = useState<'completed' | 'not_completed' | 'issue'>('completed');
+  const [showHistoryModal, setShowHistoryModal] = useState<Task | null>(null);
+  
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<string | null>(null);
+  const [editTaskData, setEditTaskData] = useState<Partial<Task>>({});
+  const [filterStatus, setFilterStatus] = useState<'all' | 'today' | 'completed' | 'tracked'>('all');
+  const [newTask, setNewTask] = useState<Partial<Task>>({
+    title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false, assigneeName: ''
+  });
+
+  useEffect(() => {
+    const role = sessionStorage.getItem("pea_role");
+    setUserRole(role);
+    if (role === 'admin') {
+      setIsManagerMode(true);
+    }
+
+    const fetchTasks = async () => {
+      const { data, error } = await supabase.from('my_tasks').select('*').order('created_at', { ascending: false });
+      if (data && data.length > 0) {
+        const formattedTasks = data.map(d => ({
+          ...d,
+          isTracked: d.is_tracked,
+          assigneeName: d.assignee_name
+        }));
+        setTasks(formattedTasks as Task[]);
+      } else {
+        setTasks(mockTasks);
+      }
+      setIsLoaded(true);
+    };
+
+    fetchTasks();
+
+    const channel = supabase.channel('schema-db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'my_tasks' }, (payload) => {
+        fetchTasks();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const allTasksCount = tasks.length;
+  const dueTodayCount = tasks.filter(t => t.time.includes('วันนี้') && !t.isTracked).length;
+  const completedCount = tasks.filter(t => t.status === 'completed' || t.status === 'waiting_for_review').length;
+  const trackedCount = tasks.filter(t => t.isTracked).length;
+
+  const filteredTasks = tasks.filter(t => {
+    if (filterStatus === 'all') return true;
+    if (filterStatus === 'today') return t.time.includes('วันนี้') && !t.isTracked;
+    if (filterStatus === 'completed') return t.status === 'completed' || t.status === 'waiting_for_review';
+    if (filterStatus === 'tracked') return t.isTracked;
+    return true;
+  });
+
+  const normalTasks = filteredTasks.filter(t => !t.isTracked);
+  const trackedTasks = filteredTasks.filter(t => t.isTracked);
+
+  // Actions
+  const updateTaskInDb = async (id: string, updates: Partial<any>) => {
+    const { error } = await supabase.from('my_tasks').update(updates).eq('id', id);
+    if (error) console.error('Error updating task:', error);
+  };
+
+  const handleStartTask = async (id: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'in_progress' } : t));
+    await updateTaskInDb(id, { status: 'in_progress' });
+  };
+
+  const handleUpdateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (showUpdateModal) {
+      if ((updateStatus === 'not_completed' || updateStatus === 'issue') && !updateNote.trim()) {
+        alert('กรุณาชี้แจงสาเหตุที่ทำงานยังไม่เสร็จหรืออธิบายปัญหา');
+        return;
+      }
+      
+      const newStatus = updateStatus === 'completed' ? 'waiting_for_review' : (updateStatus === 'issue' ? 'issue' : 'in_progress');
+      
+      const task = tasks.find(t => t.id === showUpdateModal);
+      let history: any[] = [];
+      if (task?.note) {
+        try {
+          history = JSON.parse(task.note);
+          if (!Array.isArray(history)) {
+            history = [{ timestamp: new Date(Date.now() - 86400000).toISOString(), status: 'unknown', note: task.note, by: 'Unknown' }];
+          }
+        } catch (err) {
+          history = [{ timestamp: new Date(Date.now() - 86400000).toISOString(), status: 'unknown', note: task.note, by: 'Unknown' }];
+        }
+      }
+      
+      history.push({
+        timestamp: new Date().toISOString(),
+        status: newStatus,
+        note: updateNote,
+        by: userRole === 'admin' ? 'หัวหน้างาน' : 'พนักงาน'
+      });
+      
+      const historyStr = JSON.stringify(history);
+
+      setTasks(prev => prev.map(t => 
+        t.id === showUpdateModal 
+          ? { ...t, status: newStatus, note: historyStr } 
+          : t
+      ));
+      await updateTaskInDb(showUpdateModal, { status: newStatus, note: historyStr });
+      setShowUpdateModal(null);
+      setUpdateNote('');
+    }
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    if (confirm('คุณต้องการลบงานนี้ใช่หรือไม่?')) {
+      setTasks(prev => prev.filter(t => t.id !== id));
+      await supabase.from('my_tasks').delete().eq('id', id);
+    }
+  };
+
+  const handleCreateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const task: Task = {
+      id: `T-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+      title: newTask.title || 'งานใหม่',
+      location: newTask.location || 'ไม่ระบุสถานที่',
+      time: newTask.time || 'วันนี้',
+      status: 'not_started',
+      priority: newTask.priority || 'normal',
+      isTracked: newTask.isTracked || false,
+      type: newTask.type || 'other',
+      assigneeName: newTask.assigneeName || '',
+    };
+    setTasks([task, ...tasks]);
+    
+    await supabase.from('my_tasks').insert({
+      id: task.id,
+      title: task.title,
+      location: task.location,
+      time: task.time,
+      status: task.status,
+      priority: task.priority,
+      is_tracked: task.isTracked,
+      type: task.type,
+      assignee_name: task.assigneeName
+    });
+    
+    setShowCreateModal(false);
+    setNewTask({ title: '', location: '', time: '', type: 'maintenance', priority: 'normal', isTracked: false, assigneeName: '' });
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTasks(prev => prev.map(t => t.id === editTaskData.id ? { ...t, ...editTaskData } as Task : t));
+    
+    if (editTaskData.id) {
+      await updateTaskInDb(editTaskData.id, {
+        title: editTaskData.title,
+        location: editTaskData.location,
+        time: editTaskData.time,
+        status: editTaskData.status,
+        priority: editTaskData.priority,
+        is_tracked: editTaskData.isTracked,
+        type: editTaskData.type,
+        assignee_name: editTaskData.assigneeName
+      });
+    }
+    
+    setShowEditModal(null);
+  };
+
+  const handleToggleTrack = async (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+      const newTrackedStatus = !task.isTracked;
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, isTracked: newTrackedStatus } : t));
+      await updateTaskInDb(id, { is_tracked: newTrackedStatus });
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'not_started': return <span className="px-3 py-1 bg-rose-100 text-rose-600 rounded-full text-xs font-medium">ยังไม่เริ่ม</span>;
+      case 'in_progress': return <span className="px-3 py-1 bg-amber-100 text-amber-600 rounded-full text-xs font-medium">กำลังทำ</span>;
+      case 'completed': return <span className="px-3 py-1 bg-emerald-100 text-emerald-600 rounded-full text-xs font-medium">เสร็จสิ้น</span>;
+      case 'waiting_for_review': return <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">รอส่งงาน/ตรวจ</span>;
+      case 'issue': return <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-medium flex items-center gap-1"><AlertCircle size={12}/> ติดปัญหา</span>;
+      default: return null;
+    }
+  };
+
+  const getTaskIcon = (type: string) => {
+    switch (type) {
+      case 'maintenance': return <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"><Wrench size={20} /></div>;
+      case 'survey': return <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0"><FileText size={20} /></div>;
+      case 'inspection': return <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><Camera size={20} /></div>;
+      default: return <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0"><ClipboardList size={20} /></div>;
+    }
+  };
+
+  if (!isLoaded) return null;
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      
+      {/* Top Header */}
+      <div className="bg-white px-4 md:px-8 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-30 shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">
+            {isManagerMode ? 'ระบบจัดการและมอบหมายงาน' : 'งานของฉันวันนี้'}
+          </h1>
+          <p className="text-sm text-slate-500">
+            {isManagerMode ? 'มอบหมาย ติดตาม และตรวจสอบสถานะการทำงานของทีม' : 'ดูงานที่ได้รับมอบหมาย ทำให้เสร็จ และส่งรายงานได้ในหน้านี้'}
+          </p>
+        </div>
+        <div className="flex items-center gap-4 self-end sm:self-auto">
+          {/* Mode Toggle */}
+          {userRole === 'admin' && (
+            <div className="bg-slate-100 p-1 rounded-lg flex text-sm font-medium">
+              <button 
+                onClick={() => setIsManagerMode(false)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${!isManagerMode ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                พนักงาน
+              </button>
+              <button 
+                onClick={() => setIsManagerMode(true)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${isManagerMode ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                หัวหน้างาน
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full pb-24 lg:pb-32">
+        
+        {/* Stat Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 cursor-pointer">
+          <div onClick={() => setFilterStatus('all')} className={`p-4 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 ${filterStatus === 'all' ? 'bg-blue-100 border-2 border-blue-400 shadow-md' : 'bg-blue-50 border border-blue-100 shadow-sm'}`}>
+            <div className="bg-blue-500 text-white p-3 rounded-xl shadow-sm">
+              <ClipboardList size={28} />
+            </div>
+            <div>
+              <p className="text-xs md:text-sm font-bold text-slate-700">งานทั้งหมด</p>
+              <p className="text-2xl md:text-3xl font-black text-slate-800 leading-none">{allTasksCount} <span className="text-xs md:text-sm font-normal text-slate-500">งาน</span></p>
+            </div>
+          </div>
+          <div onClick={() => setFilterStatus('today')} className={`p-4 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 ${filterStatus === 'today' ? 'bg-rose-100 border-2 border-rose-400 shadow-md' : 'bg-rose-50 border border-rose-100 shadow-sm'}`}>
+            <div className="bg-rose-500 text-white p-3 rounded-xl shadow-sm">
+              <CalendarIcon size={28} />
+            </div>
+            <div>
+              <p className="text-xs md:text-sm font-bold text-slate-700">ต้องทำวันนี้</p>
+              <p className="text-2xl md:text-3xl font-black text-slate-800 leading-none">{dueTodayCount} <span className="text-xs md:text-sm font-normal text-slate-500">งาน</span></p>
+            </div>
+          </div>
+          <div onClick={() => setFilterStatus('completed')} className={`p-4 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 ${filterStatus === 'completed' ? 'bg-emerald-100 border-2 border-emerald-400 shadow-md' : 'bg-emerald-50 border border-emerald-100 shadow-sm'}`}>
+            <div className="bg-emerald-500 text-white p-3 rounded-xl shadow-sm">
+              <CheckCircle size={28} />
+            </div>
+            <div>
+              <p className="text-xs md:text-sm font-bold text-slate-700">{isManagerMode ? 'รอตรวจ/เสร็จ' : 'เสร็จแล้ว'}</p>
+              <p className="text-2xl md:text-3xl font-black text-slate-800 leading-none">{completedCount} <span className="text-xs md:text-sm font-normal text-slate-500">งาน</span></p>
+            </div>
+          </div>
+          <div onClick={() => setFilterStatus('tracked')} className={`p-4 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 ${filterStatus === 'tracked' ? 'bg-amber-100 border-2 border-amber-400 shadow-md' : 'bg-amber-50 border border-amber-100 shadow-sm'}`}>
+            <div className="bg-amber-500 text-white p-3 rounded-xl shadow-sm">
+              <AlertCircle size={28} />
+            </div>
+            <div>
+              <p className="text-xs md:text-sm font-bold text-slate-700">ติดตามอยู่</p>
+              <p className="text-2xl md:text-3xl font-black text-slate-800 leading-none">{trackedCount} <span className="text-xs md:text-sm font-normal text-slate-500">งาน</span></p>
+            </div>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex justify-end gap-3 sticky top-[140px] sm:top-[80px] z-20 bg-slate-50 py-2 -mx-4 px-4 md:mx-0 md:px-0 shadow-sm md:shadow-none border-b border-slate-200 md:border-none md:bg-transparent">
+          {userRole === 'admin' && (
+            <button 
+              onClick={async () => {
+                let success = true;
+                for (const task of tasks) {
+                  const { error } = await supabase.from('my_tasks').upsert({
+                    id: task.id,
+                    title: task.title,
+                    location: task.location,
+                    time: task.time,
+                    status: task.status,
+                    priority: task.priority,
+                    is_tracked: task.isTracked,
+                    type: task.type,
+                    assignee_name: task.assigneeName,
+                    note: task.note
+                  }, { onConflict: 'id' });
+                  
+                  if (error) success = false;
+                }
+                
+                if (success) {
+                  alert('บันทึกและซิงค์ข้อมูลกับฐานข้อมูลเรียบร้อยแล้ว');
+                } else {
+                  alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลบางส่วน');
+                }
+              }}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+            >
+              <Save size={18} />
+              บันทึกข้อมูล
+            </button>
+          )}
+
+          {isManagerMode && (
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm"
+            >
+              <Plus size={18} />
+              มอบหมายงานใหม่
+            </button>
+          )}
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column: Tasks */}
+          <div className={`${isManagerMode ? 'lg:col-span-3' : 'lg:col-span-2'} flex flex-col gap-6`}>
+            
+            {/* Regular Tasks */}
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <ClipboardList size={22} className="text-slate-700" />
+                  {isManagerMode ? 'รายการงานทั้งหมด' : 'งานที่ต้องทำ'}
+                </h2>
+                <span className="text-sm font-medium text-slate-500">รวม {normalTasks.length} งาน</span>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {normalTasks.length === 0 && (
+                  <div className="p-8 text-center text-slate-500">ไม่มีรายการงานที่ต้องทำ</div>
+                )}
+                {normalTasks.map(task => (
+                  <div key={task.id} className="p-4 md:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+                    <div className="flex gap-4 items-start flex-1 min-w-0">
+                      {getTaskIcon(task.type)}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-slate-800 text-base flex flex-wrap items-center gap-2">
+                          <span className="truncate whitespace-normal">{task.title}</span>
+                          <span className="text-xs font-normal text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 whitespace-nowrap shrink-0">
+                            รับผิดชอบ: {task.assigneeName || 'ไม่ระบุ'}
+                          </span>
+                        </h3>
+                        <div className="flex flex-col mt-2">
+                          <span className="text-[11px] text-slate-400 font-medium ml-0.5">วันที่มอบหมาย</span>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                            <CalendarDays size={13} className="shrink-0" />
+                            <span className="truncate whitespace-normal">{formatThaiDateShort(task.location)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between xl:justify-end gap-4 md:gap-6 w-full xl:w-auto mt-2 xl:mt-0 shrink-0">
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <div className="flex flex-col">
+                          <span className="text-[11px] text-rose-400 font-medium ml-1">กำหนดเสร็จ</span>
+                          <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-md whitespace-nowrap shrink-0 mt-0.5">
+                            <CalendarIcon size={13} className="shrink-0" />
+                            <span>{formatThaiDateShort(task.time)}</span>
+                          </div>
+                        </div>
+                        {getStatusBadge(task.status)}
+                        {task.note && (
+                          <button onClick={() => setShowHistoryModal(task)} className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-2 py-1 rounded-md text-xs font-medium transition-colors">
+                            <List size={12} /> ประวัติ
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Action buttons based on mode */}
+                      {!isManagerMode ? (
+                        <>
+                          {task.status === 'not_started' && (
+                            <button onClick={() => handleStartTask(task.id)} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap w-28">
+                              <Play size={16} fill="currentColor" />
+                              เริ่มงาน
+                            </button>
+                          )}
+                          {task.status === 'in_progress' && (
+                            <button onClick={() => setShowUpdateModal(task.id)} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap w-32">
+                              <Edit3 size={16} />
+                              อัปเดตงาน
+                            </button>
+                          )}
+                          {(task.status === 'waiting_for_review' || task.status === 'completed') && (
+                            <button disabled className="flex items-center justify-center gap-2 bg-slate-100 text-slate-400 px-5 py-2 rounded-xl font-medium text-sm whitespace-nowrap w-32 cursor-not-allowed border border-slate-200">
+                              <Check size={16} strokeWidth={3} />
+                              ส่งงานแล้ว
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => handleToggleTrack(task.id)} 
+                            className="flex items-center gap-1 text-amber-600 hover:bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                          >
+                            <Megaphone size={14} />
+                            ติดตามงาน
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteTask(task.id)} 
+                            className="flex items-center gap-1 text-rose-500 hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                          >
+                            <Trash2 size={14} /> ลบ
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tracked Tasks */}
+            {trackedTasks.length > 0 && (
+              <div className="bg-purple-50/50 border border-purple-200 rounded-2xl shadow-sm relative overflow-hidden mb-6">
+                <div className="absolute top-0 left-0 w-2 h-full bg-purple-600"></div>
+                <div className="px-6 py-6 border-b border-purple-800 flex justify-between items-center bg-[#6B2169]">
+                  <h2 className="text-2xl font-bold text-amber-100 flex items-center gap-3">
+                    <Megaphone size={28} className="text-amber-200" />
+                    งานที่หัวหน้ากำลังติดตาม
+                  </h2>
+                  <span className="text-base font-bold text-purple-200 bg-purple-800/50 px-3 py-1 rounded-lg border border-purple-700">{trackedTasks.length} งาน</span>
+                </div>
+                <div className="flex flex-col gap-6 p-4 md:p-6 bg-slate-50/50">
+                  {[
+                    { 
+                      id: "not_finished",
+                      title: "งานที่ยังไม่เสร็จ / มีปัญหา / เลยกำหนด", 
+                      tasks: trackedTasks.filter(t => 
+                        (t.status === 'not_started' || t.status === 'issue') || 
+                        (t.status === 'in_progress' && isTaskOverdue(t.time))
+                      ),
+                      containerClass: "border-rose-200 shadow-sm",
+                      headerClass: "bg-rose-50 border-rose-100 text-rose-800",
+                      badgeClass: "bg-rose-100 text-rose-700",
+                      dividerClass: "divide-rose-100"
+                    },
+                    { 
+                      id: "in_progress",
+                      title: "งานที่กำลังทำอยู่", 
+                      tasks: trackedTasks.filter(t => t.status === 'in_progress' && !isTaskOverdue(t.time)),
+                      containerClass: "border-amber-200 shadow-sm",
+                      headerClass: "bg-amber-50 border-amber-100 text-amber-800",
+                      badgeClass: "bg-amber-100 text-amber-700",
+                      dividerClass: "divide-amber-100"
+                    },
+                    { 
+                      id: "completed",
+                      title: "งานที่เสร็จแล้ว", 
+                      tasks: trackedTasks.filter(t => t.status === 'completed' || t.status === 'waiting_for_review'),
+                      containerClass: "border-emerald-200 shadow-sm",
+                      headerClass: "bg-emerald-50 border-emerald-100 text-emerald-800",
+                      badgeClass: "bg-emerald-100 text-emerald-700",
+                      dividerClass: "divide-emerald-100"
+                    }
+                  ].filter(g => g.tasks.length > 0).map(group => (
+                    <div key={group.id} className={`bg-white rounded-2xl border ${group.containerClass} overflow-hidden`}>
+                      <div className={`px-5 py-3 border-b font-bold flex justify-between items-center ${group.headerClass}`}>
+                        <span className="flex items-center gap-2">{group.title}</span>
+                        <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold ${group.badgeClass}`}>{group.tasks.length} งาน</span>
+                      </div>
+                      <div className={`divide-y ${group.dividerClass}`}>
+                        {group.tasks.map(task => (
+                          <div key={task.id} className="p-4 md:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white/60 hover:bg-white transition-colors">
+                            <div className="flex gap-4 items-start flex-1 min-w-0">
+                              <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center shadow-sm shrink-0 ${group.id === 'completed' ? 'bg-emerald-500' : group.id === 'in_progress' ? 'bg-amber-500' : 'bg-rose-500'}`}>
+                                {group.id === 'completed' ? <CheckCircle size={24} /> : group.id === 'in_progress' ? <AlertCircle size={24} /> : <AlertCircle size={24} />}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-bold text-slate-800 text-base flex flex-wrap items-center gap-2">
+                                  <span className="truncate whitespace-normal">{task.title}</span>
+                                  <span className="text-xs font-normal text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
+                                    รับผิดชอบ: {task.assigneeName || 'ไม่ระบุ'}
+                                  </span>
+                                </h3>
+                                <div className="flex flex-col mt-2">
+                                  <span className="text-[11px] text-slate-400 font-medium ml-0.5">วันที่มอบหมาย</span>
+                                  <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                                    <CalendarDays size={13} className="shrink-0" />
+                                    <span className="truncate whitespace-normal">{formatThaiDateShort(task.location)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between xl:justify-end gap-4 md:gap-6 w-full xl:w-auto mt-2 xl:mt-0 shrink-0">
+                              <div className="flex flex-col">
+                                <span className="text-[11px] text-rose-400 font-medium ml-1">กำหนดเสร็จ</span>
+                                <div className="flex items-center gap-1.5 text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-md whitespace-nowrap shrink-0 mt-0.5">
+                                  <CalendarIcon size={13} className="shrink-0" />
+                                  <span>{formatThaiDateShort(task.time)}</span>
+                                </div>
+                              </div>
+                              {getStatusBadge(task.status)}
+                              {task.note && (
+                                <button onClick={() => setShowHistoryModal(task)} className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-2 py-1 rounded-md text-xs font-medium transition-colors">
+                                  <List size={12} /> ประวัติ
+                                </button>
+                              )}
+                              
+                              {isManagerMode ? (
+                                <div className="flex items-center gap-2">
+                                  <button 
+                                    onClick={() => {
+                                      setEditTaskData(task);
+                                      setShowEditModal(task.id);
+                                    }}
+                                    className="flex items-center gap-1 text-indigo-500 hover:bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                                  >
+                                    <Edit3 size={14} /> แก้ไข
+                                  </button>
+                                  <button 
+                                    onClick={() => handleToggleTrack(task.id)} 
+                                    className="flex items-center gap-1 text-slate-500 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                                  >
+                                    เลิกติดตาม
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteTask(task.id)} 
+                                    className="flex items-center gap-1 text-rose-500 hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                                  >
+                                    <Trash2 size={14} /> ลบ
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  {task.status === 'in_progress' && (
+                                    <button onClick={() => setShowUpdateModal(task.id)} className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
+                                      <Edit3 size={16} /> อัปเดตงาน
+                                    </button>
+                                  )}
+                                  {task.status === 'not_started' && (
+                                    <button onClick={() => handleStartTask(task.id)} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap">
+                                      <Play size={16} fill="currentColor" /> เริ่มงาน
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  {trackedTasks.length === 0 && (
+                    <div className="py-8 text-center text-slate-400 font-medium">ไม่มีงานที่กำลังติดตาม</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Workflow & Actions (Hidden in Manager Mode) */}
+          {!isManagerMode && (
+            <div className="flex flex-col gap-6">
+              
+              {/* Workflow Guide */}
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 mb-6">
+                  <CheckCircle size={20} className="text-slate-600" />
+                  ขั้นตอนการทำงาน
+                </h3>
+                
+                <div className="flex items-center justify-between mb-8 relative">
+                  <div className="absolute top-6 left-6 right-6 h-0.5 bg-slate-200 -z-10"></div>
+                  
+                  <div className="flex flex-col items-center gap-2 text-center w-1/4">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center border-4 border-white shadow-sm shrink-0">
+                      <ClipboardList size={20} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 text-xs md:text-sm whitespace-nowrap">1. รับงาน</p>
+                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5 hidden xl:block">ดูรายละเอียดงาน</p>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-slate-300 -mt-8 shrink-0" />
+                  
+                  <div className="flex flex-col items-center gap-2 text-center w-1/4">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center border-4 border-white shadow-sm shrink-0">
+                      <Play size={18} fill="currentColor" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 text-xs md:text-sm whitespace-nowrap">2. เริ่มทำ</p>
+                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5 hidden xl:block">กดเริ่มงาน</p>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-slate-300 -mt-8 shrink-0" />
+                  
+                  <div className="flex flex-col items-center gap-2 text-center w-1/4">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center border-4 border-white shadow-sm shrink-0">
+                      <Camera size={20} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 text-xs md:text-sm whitespace-nowrap">3. ถ่ายรูป</p>
+                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5 hidden xl:block">บันทึกผลทำงาน</p>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-slate-300 -mt-8 shrink-0" />
+                  
+                  <div className="flex flex-col items-center gap-2 text-center w-1/4">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center border-4 border-white shadow-sm shrink-0">
+                      <Check size={22} strokeWidth={3} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 text-xs md:text-sm whitespace-nowrap">4. เสร็จสิ้น</p>
+                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5 hidden xl:block">กดส่งงาน</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* How to use */}
+              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl shadow-sm p-6 relative overflow-hidden">
+                <h3 className="text-base font-bold text-emerald-900 flex items-center gap-2 mb-4">
+                  <div className="bg-emerald-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">?</div>
+                  วิธีใช้งาน (ทำได้ง่ายๆ)
+                </h3>
+                
+                <div className="space-y-4 relative z-10 w-3/4">
+                  <div className="flex gap-3">
+                    <div className="bg-blue-200 text-blue-700 font-bold w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</div>
+                    <p className="text-sm text-slate-700"><span className="font-bold">กดดูงาน</span> เลือกงานที่ได้รับมอบหมาย</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="bg-blue-200 text-blue-700 font-bold w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</div>
+                    <p className="text-sm text-slate-700"><span className="font-bold">กดเริ่มงาน</span> เมื่อไปถึงหน้างาน</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="bg-blue-200 text-blue-700 font-bold w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</div>
+                    <p className="text-sm text-slate-700"><span className="font-bold">เมื่อเสร็จให้กดส่งงาน</span> พร้อมแนบรูป (ถ้ามี)</p>
+                  </div>
+                </div>
+
+                <div className="absolute -right-4 -bottom-4 w-32 h-40 bg-emerald-100/50 rounded-tl-full flex items-center justify-center flex-col z-0">
+                   <div className="bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-2xl rounded-br-sm shadow-md mb-2 -ml-8 rotate-[-5deg]">
+                     ง่ายๆ<br/>แค่นี้ครับ!
+                   </div>
+                   <div className="w-16 h-16 bg-blue-100 rounded-full border-2 border-emerald-200 flex items-center justify-center text-2xl" title="PEA Worker">👷‍♂️</div>
+                </div>
+              </div>
+
+
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* --- MODALS --- */}
+      
+      {/* 1. Update/Submit Task Modal (Worker) */}
+      {showUpdateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Edit3 size={20} className="text-indigo-600" /> อัปเดตและส่งงาน
+              </h3>
+              <button onClick={() => setShowUpdateModal(null)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <form id="update-form" onSubmit={handleUpdateTask} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">สถานะงาน <span className="text-rose-500">*</span></label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-100 flex-1 justify-center transition-colors hover:bg-emerald-100">
+                      <input type="radio" name="status" value="completed" checked={updateStatus === 'completed'} onChange={() => setUpdateStatus('completed')} className="text-emerald-500 focus:ring-emerald-500 w-4 h-4" />
+                      <span className="text-sm font-bold text-emerald-700">เสร็จแล้ว</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer bg-amber-50 px-4 py-2 rounded-lg border border-amber-100 flex-1 justify-center transition-colors hover:bg-amber-100">
+                      <input type="radio" name="status" value="not_completed" checked={updateStatus === 'not_completed'} onChange={() => setUpdateStatus('not_completed')} className="text-amber-500 focus:ring-amber-500 w-4 h-4" />
+                      <span className="text-sm font-bold text-amber-700">ยังไม่เสร็จ</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer bg-rose-50 px-4 py-2 rounded-lg border border-rose-100 flex-1 justify-center transition-colors hover:bg-rose-100">
+                      <input type="radio" name="status" value="issue" checked={updateStatus === 'issue'} onChange={() => setUpdateStatus('issue')} className="text-rose-500 focus:ring-rose-500 w-4 h-4" />
+                      <span className="text-sm font-bold text-rose-700">รายงานปัญหา</span>
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ผลการดำเนินงาน / ชี้แจงสาเหตุ <span className="text-rose-500">*</span></label>
+                  <textarea 
+                    required={updateStatus === 'not_completed' || updateStatus === 'issue'}
+                    value={updateNote}
+                    onChange={(e) => setUpdateNote(e.target.value)}
+                    placeholder="พิมพ์รายละเอียดการทำงาน หรือปัญหาที่ทำให้งานยังไม่เสร็จ..."
+                    rows={4}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"
+                  ></textarea>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">แนบรูปภาพ (ออปชัน)</label>
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-indigo-500 transition-colors cursor-pointer">
+                    <Camera size={32} className="mb-2" />
+                    <span className="text-sm">คลิกเพื่ออัปโหลดรูปถ่ายหน้างาน</span>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button type="button" onClick={() => setShowUpdateModal(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
+              <button type="submit" form="update-form" className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-sm">ส่งงาน</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Create Task Modal (Manager) */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Plus size={20} className="text-indigo-600" /> มอบหมายงานใหม่
+              </h3>
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <form id="create-form" onSubmit={handleCreateTask} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ชื่องาน <span className="text-rose-500">*</span></label>
+                  <input required value={newTask.title} onChange={e => setNewTask({...newTask, title: e.target.value})} type="text" placeholder="เช่น ตรวจสอบมิเตอร์..." className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">กำหนดเวลาเริ่มต้น <span className="text-rose-500">*</span></label>
+                  <input required value={newTask.location} onChange={e => setNewTask({...newTask, location: e.target.value})} type="datetime-local" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">กำหนดเวลาแล้วเสร็จ <span className="text-rose-500">*</span></label>
+                  <input required value={newTask.time} onChange={e => setNewTask({...newTask, time: e.target.value})} type="datetime-local" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ผู้รับผิดชอบ <span className="text-rose-500">*</span></label>
+                  <select required value={newTask.assigneeName} onChange={e => setNewTask({...newTask, assigneeName: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="" disabled>-- เลือกผู้รับผิดชอบ --</option>
+                    {ASSIGNEES.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer mt-2 p-3 border border-amber-200 bg-amber-50 rounded-lg">
+                    <input type="checkbox" checked={newTask.isTracked} onChange={e => setNewTask({...newTask, isTracked: e.target.checked})} className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500 border-amber-300" />
+                    <span className="text-sm font-medium text-amber-900 flex items-center gap-1.5"><Megaphone size={16} /> ต้องการติดตามงานนี้เป็นพิเศษ (Track)</span>
+                  </label>
+                </div>
+              </form>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
+              <button type="submit" form="create-form" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">สร้างและมอบหมาย</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Edit Task Modal (Manager) */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Edit3 size={20} className="text-indigo-600" /> แก้ไขข้อมูลงาน
+              </h3>
+              <button onClick={() => setShowEditModal(null)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <form id="edit-form" onSubmit={handleSaveEdit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ชื่องาน <span className="text-rose-500">*</span></label>
+                  <input required value={editTaskData.title || ''} onChange={e => setEditTaskData({...editTaskData, title: e.target.value})} type="text" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">กำหนดเวลาเริ่มต้น <span className="text-rose-500">*</span></label>
+                  <input required value={editTaskData.location || ''} onChange={e => setEditTaskData({...editTaskData, location: e.target.value})} type="datetime-local" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">กำหนดเวลาแล้วเสร็จ <span className="text-rose-500">*</span></label>
+                  <input required value={editTaskData.time || ''} onChange={e => setEditTaskData({...editTaskData, time: e.target.value})} type="datetime-local" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">ผู้รับผิดชอบ <span className="text-rose-500">*</span></label>
+                  <select required value={editTaskData.assigneeName || ''} onChange={e => setEditTaskData({...editTaskData, assigneeName: e.target.value})} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="" disabled>-- เลือกผู้รับผิดชอบ --</option>
+                    {ASSIGNEES.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+              </form>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+              <button type="button" onClick={() => setShowEditModal(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
+              <button type="submit" form="edit-form" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+                <Save size={16} /> บันทึกการแก้ไข
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <List size={20} className="text-indigo-600" /> ประวัติการรายงานผล
+              </h3>
+              <button onClick={() => setShowHistoryModal(null)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto space-y-4">
+              {(() => {
+                let historyData: any[] = [];
+                try {
+                  historyData = showHistoryModal.note ? JSON.parse(showHistoryModal.note) : [];
+                  if (!Array.isArray(historyData)) {
+                    historyData = [{ timestamp: 'ข้อมูลเก่า', status: 'unknown', note: showHistoryModal.note, by: 'Unknown' }];
+                  }
+                } catch (e) {
+                  historyData = [{ timestamp: 'ข้อมูลเก่า', status: 'unknown', note: showHistoryModal.note, by: 'Unknown' }];
+                }
+                
+                if (historyData.length === 0) {
+                  return <div className="text-center text-slate-400 py-4">ไม่มีประวัติการอัปเดต</div>;
+                }
+                
+                return historyData.map((h, i) => (
+                  <div key={i} className="border-l-2 border-indigo-200 pl-4 pb-4 relative">
+                    <div className="absolute w-3 h-3 bg-indigo-500 rounded-full -left-[7px] top-1"></div>
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-bold text-sm text-slate-700">{h.by}</span>
+                      <span className="text-xs text-slate-400">{h.timestamp.includes('Z') ? new Date(h.timestamp).toLocaleString('th-TH') : h.timestamp}</span>
+                    </div>
+                    <div className="mb-2">{getStatusBadge(h.status)}</div>
+                    <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">{h.note}</p>
+                  </div>
+                ));
+              })()}
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end bg-slate-50">
+              <button onClick={() => setShowHistoryModal(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ปิดหน้าต่าง</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
