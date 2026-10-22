@@ -5,28 +5,29 @@ import {
   FileWarning,
   Calculator,
   Printer,
-  Save,
-  RotateCcw,
-  Plus,
-  Trash2,
   Copy,
-  FileText,
-  CheckCircle2,
-  AlertTriangle,
   Sparkles,
-  ArrowRight,
-  Layers,
-  Check,
-  FileSpreadsheet,
   Download,
   Calendar,
-  Eye,
-  ExternalLink,
-  Table as TableIcon,
-  Percent,
-  Scale,
+  Check,
+  Plus,
+  Trash2,
   Building,
-  UserCheck
+  UserCheck,
+  Edit3,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  Briefcase,
+  Layers,
+  Percent,
+  Sliders,
+  Info,
+  HelpCircle,
+  RotateCcw,
+  HardHat,
+  FileText
 } from 'lucide-react';
 import './wire-clarify.css';
 import {
@@ -34,32 +35,80 @@ import {
   WireItem,
   SAMPLE_WIRE_CLARIFY_DATA,
   POPULAR_WIRE_TYPES,
+  PRESET_WIRE_REASONS,
+  composeWireBackground,
+  composeWireFacts,
   formatKg,
   calculateWirePercent,
   formatPercent,
   getTodayThaiDate,
   generateWireClarifyMemoPlainText,
-  generateWireClarifyTableHtmlForWord,
-  generateWireClarifyWordDocument,
-  generateWireClarifyTsvForExcel
+  generateWireClarifyWordDocument
 } from './wireClarifyUtils';
+import TopBar from '../components/TopBar';
+
+type EditSectionKey = 'header' | 'project' | 'table' | 'reason' | 'signer' | null;
+
+interface SectionMeta {
+  key: EditSectionKey;
+  title: string;
+  shortName: string;
+  icon: any;
+}
+
+const SECTIONS_META: SectionMeta[] = [
+  { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileWarning },
+  { key: 'project', title: '2. โครงการ & อ้างอิงอนุมัติรื้อถอน', shortName: 'โครงการ & WBS', icon: Briefcase },
+  { key: 'table', title: '3. ตารางเปรียบเทียบเศษสายรื้อถอน (กก. / %)', shortName: 'ตารางเศษสาย', icon: Calculator },
+  { key: 'reason', title: '4. ข้อเท็จจริงและเหตุผลที่คืนไม่ครบ', shortName: 'เหตุผลชี้แจง', icon: Building },
+  { key: 'signer', title: '5. ผู้ลงนามและผู้อนุมัติ', shortName: 'ผู้ลงนาม & อนุมัติ', icon: UserCheck },
+];
 
 export default function WireClarifyPage() {
   const [formData, setFormData] = useState<WireClarifyFormData>(SAMPLE_WIRE_CLARIFY_DATA);
-  const [activeTab, setActiveTab] = useState<'form' | 'word' | 'preview'>('form');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState<boolean>(false);
+  const [activeEditSection, setActiveEditSection] = useState<EditSectionKey>(null);
+  const [reasonMode, setReasonMode] = useState<'guided' | 'freeform'>('guided');
+  const [selectedReasonKey, setSelectedReasonKey] = useState<string>('short_pieces');
 
-  // Load stored data from LocalStorage
   useEffect(() => {
-    setIsClient(true);
     try {
       const saved = localStorage.getItem('pea_wire_clarify_form');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.items && parsed.items.length > 0) {
-          setFormData(parsed);
+          const fixedDocTo = parsed.docTo === 'ผวบ.(ก๓)' ? 'ฝวบ.(ก๓)' : (parsed.docTo || 'ฝวบ.(ก๓)');
+          const fixedSalutation = parsed.salutation?.includes('อผ.วบ.')
+            ? 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)'
+            : (parsed.salutation || 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)');
+          const fixedSignerTitle = (parsed.signerTitle?.includes('กรย.') || !parsed.signerTitle)
+            ? 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)'
+            : parsed.signerTitle;
+          const fixedApproverTitle = (parsed.approverTitle === 'อผ.วบ.(ก๓)' || !parsed.approverTitle)
+            ? 'อฝ.วบ.(ก๓)'
+            : parsed.approverTitle;
+          const fixedConsideration = parsed.memoConsideration?.includes('ตามสภาพหน้างาน ดังนี้ ทั้งนี้')
+            ? parsed.memoConsideration.replace('ตามสภาพหน้างาน ดังนี้ ทั้งนี้', 'ตามสภาพหน้างาน ทั้งนี้')
+            : (parsed.memoConsideration || SAMPLE_WIRE_CLARIFY_DATA.memoConsideration);
+          const fixedApproverEndorsement = (parsed.approverEndorsementTo === '- กรย.(ก๓)' || !parsed.approverEndorsementTo)
+            ? '- อก.รย.(ก๓)'
+            : parsed.approverEndorsementTo;
+          const fixedApproverName = (parsed.approverName === 'นายเมธี สุกก่ำ' || parsed.approverName === 'นายเมธี สุภาก่า' || !parsed.approverName)
+            ? 'นายเมธี สุภาก่ำ'
+            : parsed.approverName;
+
+          setFormData({
+            ...SAMPLE_WIRE_CLARIFY_DATA,
+            ...parsed,
+            docTo: fixedDocTo,
+            salutation: fixedSalutation,
+            signerTitle: fixedSignerTitle,
+            approverTitle: fixedApproverTitle,
+            memoConsideration: fixedConsideration,
+            approverEndorsementTo: fixedApproverEndorsement,
+            approverName: fixedApproverName,
+          });
         }
       }
     } catch (e) {
@@ -67,41 +116,136 @@ export default function WireClarifyPage() {
     }
   }, []);
 
-  // Save to LocalStorage
-  const handleSaveToStorage = () => {
+  useEffect(() => {
     try {
       localStorage.setItem('pea_wire_clarify_form', JSON.stringify(formData));
-      showToast('✓ บันทึกข้อมูลลงเบราว์เซอร์สำเร็จ');
     } catch (e) {
-      showToast('⚠️ ไม่สามารถบันทึกลงเบราว์เซอร์ได้');
+      console.warn('Could not save form data', e);
     }
-  };
+  }, [formData]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3500);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Reset to original sample
   const handleResetToSample = () => {
     if (confirm('คุณต้องการรีเซ็ตข้อมูลทั้งหมดกลับเป็นแบบฟอร์มตัวอย่างเริ่มต้นใช่หรือไม่?')) {
       setFormData(SAMPLE_WIRE_CLARIFY_DATA);
       try {
         localStorage.removeItem('pea_wire_clarify_form');
       } catch (e) {}
-      showToast('✓ รีเซ็ตเป็นแบบฟอร์มตัวอย่างสำเร็จรูปแล้ว');
+      showToast('✓ รีเซ็ตเป็นแบบฟอร์มตัวอย่างแล้ว');
     }
   };
+
+  const handleSetTodayDocDate = () => {
+    const todayStr = getTodayThaiDate('short');
+    setFormData(prev => ({
+      ...prev,
+      docDate: todayStr,
+      signerDate: todayStr
+    }));
+    showToast(`ใส่วันที่เป็น: ${todayStr}`);
+  };
+
+  // Synchronize 4 dynamic variables with formal paragraphs
+  const handleUpdateVariable = (
+    field: 'approvalDocRef' | 'projectName' | 'wbsNo' | 'supervisorName' | 'supervisorPosition',
+    value: string
+  ) => {
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      const newBackground = composeWireBackground({
+        approvalDocRef: updated.approvalDocRef,
+        projectName: updated.projectName,
+        wbsNo: updated.wbsNo,
+        supervisorName: updated.supervisorName,
+        supervisorPosition: updated.supervisorPosition
+      });
+      const preset = PRESET_WIRE_REASONS.find(r => r.key === selectedReasonKey);
+      const newFacts = composeWireFacts({
+        projectName: updated.projectName,
+        dept: 'ผกร.กรย.(ก๓)',
+        factsDetail: preset?.factsDetail
+      });
+      return {
+        ...updated,
+        memoBackground: newBackground,
+        memoFacts: newFacts
+      };
+    });
+  };
+
+  const handleSelectPresetWireReason = (preset: typeof PRESET_WIRE_REASONS[0]) => {
+    setSelectedReasonKey(preset.key);
+    setFormData(prev => {
+      const newFacts = composeWireFacts({
+        projectName: prev.projectName,
+        dept: 'ผกร.กรย.(ก๓)',
+        factsDetail: preset.factsDetail
+      });
+      return {
+        ...prev,
+        memoFacts: newFacts
+      };
+    });
+    showToast(`✓ เลือกสาเหตุ: ${preset.badge}`);
+  };
+
+  // Render on-screen ๑. เรื่องเดิม with interactive color highlights
+  const renderScreenBackgroundText = () => {
+    const ref = formData.approvalDocRef || 'ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗';
+    const proj = formData.projectName || 'ปรับปรุงระบบจำหน่าย ๒๒ เควี';
+    const wbs = formData.wbsNo || 'P-TDD02.3-I-LYAIA.0016';
+    const name = formData.supervisorName || 'นายอุดมศักดิ์ จันทร์กลั่น';
+    const pos = formData.supervisorPosition || 'หชง.๔ ผกร.กรย.(ก๓)';
+
+    return (
+      <>
+        <span>ตามหนังสือที่ </span>
+        <span
+          className="a4-var-spot"
+          title="🟡 จุดที่ ๑: หนังสืออนุมัติงานเดิม (คลิกเพื่อแก้ไข)"
+          onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
+        >
+          {ref.replace(/^ตามหนังสือที่\s*/, '')}
+        </span>{' '}
+        <span>อนุมัติให้</span>{' '}
+        <span
+          className="a4-var-spot blue"
+          title="🔵 จุดที่ ๒: ชื่องานและสถานที่ก่อสร้าง (คลิกเพื่อแก้ไข)"
+          onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
+        >
+          {proj}
+        </span>{' '}
+        <span>หมายเลขงาน (WBS) : </span>{' '}
+        <span
+          className="a4-var-spot orange"
+          title="🟠 จุดที่ ๓: หมายเลขงาน WBS (คลิกเพื่อแก้ไข)"
+          onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
+        >
+          {wbs}
+        </span>{' '}
+        <span>โดยมี</span>{' '}
+        <span
+          className="a4-var-spot green"
+          title="🟢 จุดที่ ๔: ผู้ควบคุมงาน (คลิกเพื่อแก้ไข)"
+          onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
+        >
+          {name} {pos}
+        </span>{' '}
+        <span>เป็นผู้ควบคุมงาน นั้น</span>
+      </>
+    );
+  };
+
 
   // Calculations
   const totalEstimatedKg = formData.items.reduce((sum, item) => sum + (Number(item.estimatedKg) || 0), 0);
   const totalActualKg = formData.items.reduce((sum, item) => sum + (Number(item.actualKg) || 0), 0);
   const totalPercentage = calculateWirePercent(totalActualKg, totalEstimatedKg);
-  const differenceKg = totalEstimatedKg - totalActualKg;
 
-  // Add / Duplicate / Delete / Update Item
   const handleAddItem = () => {
     const newItem: WireItem = {
       id: `wire-${Date.now()}`,
@@ -114,24 +258,12 @@ export default function WireClarifyPage() {
       ...prev,
       items: [...prev.items, newItem]
     }));
-  };
-
-  const handleDuplicateItem = (index: number) => {
-    const target = formData.items[index];
-    if (!target) return;
-    const duplicated: WireItem = {
-      ...target,
-      id: `wire-${Date.now()}`
-    };
-    const updated = [...formData.items];
-    updated.splice(index + 1, 0, duplicated);
-    setFormData(prev => ({ ...prev, items: updated }));
-    showToast('คัดลอกแถวเรียบร้อย');
+    showToast('✓ เพิ่มรายการสายใหม่แล้ว');
   };
 
   const handleDeleteItem = (index: number) => {
     if (formData.items.length <= 1) {
-      showToast('ต้องมีรายการสายอย่างน้อย 1 รายการ');
+      showToast('⚠️ ต้องมีรายการสายอย่างน้อย 1 รายการ');
       return;
     }
     setFormData(prev => ({
@@ -148,118 +280,20 @@ export default function WireClarifyPage() {
     });
   };
 
-  const handleClearTable = () => {
-    if (confirm('คุณต้องการเคลียร์ค่าในตารางเศษสายทั้งหมดใช่หรือไม่?')) {
-      setFormData(prev => ({
-        ...prev,
-        items: [
-          {
-            id: `wire-${Date.now()}`,
-            wireType: '',
-            estimatedKg: 0,
-            actualKg: 0,
-            remarks: ''
-          }
-        ]
-      }));
-      showToast('เคลียร์ค่าในตารางเรียบร้อยแล้ว');
-    }
-  };
-
-  // Set today's date
-  const handleSetTodayDocDate = (type: 'short' | 'thai_num' = 'short') => {
-    const todayStr = getTodayThaiDate(type);
-    setFormData(prev => ({
-      ...prev,
-      docDate: todayStr,
-      signerDate: todayStr
-    }));
-    showToast(`ใส่วันที่เป็น: ${todayStr}`);
-  };
-
-  // Switch Document Mode (Division memo vs Supervisor report)
-  const handleSwitchDocLevel = (level: 'division_memo' | 'supervisor_report') => {
-    if (level === 'division_memo') {
-      setFormData(prev => ({
-        ...prev,
-        docLevel: 'division_memo',
-        docFrom: 'กรย.(ก๓)',
-        docTo: 'ผวบ.(ก๓)',
-        salutation: 'อผ.วบ.(ก๓) ผ่าน รผ.วบ.(ก๓)',
-        subject: 'ขออนุมัตินำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอน'
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        docLevel: 'supervisor_report',
-        docFrom: `พชง.ผู้ควบคุมงาน (${prev.supervisorName.split(' ')[1] || 'ผู้ควบคุมงาน'})`,
-        docTo: 'ผกร.กรย.(ก๓)',
-        salutation: 'ผห.กร.กรย.(ก๓) ผ่าน ชผ.กร.กรย.(ก๓)',
-        subject: `ขอรายงานผลการนำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอนงาน${prev.projectName}`
-      }));
-    }
-    showToast(`สลับแบบฟอร์มเป็น: ${level === 'division_memo' ? 'บันทึกขออนุมัติ กอง กรย.' : 'รายงานผู้ควบคุมงาน พชง.'}`);
-  };
-
-  // ============================================================================
-  // DIRECT CLIPBOARD COPY FOR WORD / EXCEL
-  // ============================================================================
-
   const handleCopyMemo = async () => {
     const plainText = generateWireClarifyMemoPlainText(formData);
+    const html = generateWireClarifyWordDocument(formData);
     try {
+      const htmlBlob = new Blob([html], { type: 'text/html' });
+      const textBlob = new Blob([plainText], { type: 'text/plain' });
+      const item = new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob });
+      await navigator.clipboard.write([item]);
+      setCopiedItem('memo');
+      showToast('✓ คัดลอกแล้ว! เปิด Microsoft Word แล้วกด Ctrl+V ได้ทันที');
+    } catch (e) {
       await navigator.clipboard.writeText(plainText);
       setCopiedItem('memo');
-      showToast('✓ คัดลอกข้อความบันทึกแล้ว! กด Ctrl+V ใน Microsoft Word ได้ทันที');
-    } catch (e) {
-      showToast('⚠️ ไม่สามารถคัดลอกได้');
-    }
-  };
-
-  const handleCopyTable = async () => {
-    const tableHtml = generateWireClarifyTableHtmlForWord(formData);
-    const plainText = generateWireClarifyTsvForExcel(formData);
-
-    try {
-      const htmlBlob = new Blob([tableHtml], { type: 'text/html' });
-      const textBlob = new Blob([plainText], { type: 'text/plain' });
-      const item = new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob });
-      await navigator.clipboard.write([item]);
-      setCopiedItem('table');
-      showToast('✓ คัดลอกตาราง ๕ ช่องแล้ว! กด Ctrl+V ใน Microsoft Word จะได้ตาราง Word แท้ๆ สมบูรณ์');
-    } catch (e) {
-      await navigator.clipboard.writeText(plainText);
-      setCopiedItem('table');
-      showToast('✓ คัดลอกตารางแล้ว');
-    }
-  };
-
-  const handleCopyAll = async () => {
-    const plainText = `${generateWireClarifyMemoPlainText(formData)}\n\n--- ตารางคำนวณส่งคืนเศษสาย ---\n\n${generateWireClarifyTsvForExcel(formData)}`;
-    const fullHtml = generateWireClarifyWordDocument(formData);
-
-    try {
-      const htmlBlob = new Blob([fullHtml], { type: 'text/html' });
-      const textBlob = new Blob([plainText], { type: 'text/plain' });
-      const item = new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob });
-      await navigator.clipboard.write([item]);
-      setCopiedItem('all');
-      showToast('✓ คัดลอกเอกสารทั้งชุดแล้ว! นำไปกด Ctrl+V ใน Word ได้ทันที');
-    } catch (e) {
-      await navigator.clipboard.writeText(plainText);
-      setCopiedItem('all');
-      showToast('✓ คัดลอกข้อความทั้งหมดแล้ว');
-    }
-  };
-
-  const handleCopyExcel = async () => {
-    const tsv = generateWireClarifyTsvForExcel(formData);
-    try {
-      await navigator.clipboard.writeText(tsv);
-      setCopiedItem('excel');
-      showToast('✓ คัดลอกตารางสำหรับ Excel แล้ว! นำไปกด Ctrl+V ใน Excel แยกคอลัมน์อัตโนมัติ');
-    } catch (e) {
-      showToast('⚠️ ไม่สามารถคัดลอกได้');
+      showToast('✓ คัดลอกข้อความแล้ว (Plain Text)');
     }
   };
 
@@ -269,1196 +303,1113 @@ export default function WireClarifyPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    const cleanName = formData.wbsNo || 'PEA';
-    link.download = `บันทึกชี้แจงส่งคืนเศษสาย_${cleanName}.doc`;
+    const cleanWbs = formData.wbsNo?.replace(/[^a-zA-Z0-9]/g, '_') || 'PEA';
+    link.download = `บันทึกชี้แจงส่งคืนเศษสายไม่ครบ_${cleanWbs}.doc`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('✓ ดาวน์โหลดไฟล์ Microsoft Word (.doc) สำเร็จแล้ว!');
+    URL.revokeObjectURL(url);
+    showToast('✓ ดาวน์โหลดไฟล์ Word (.doc) สำเร็จ');
   };
 
-  const handleTriggerPrint = () => {
-    window.print();
+  const currentSectionIndex = SECTIONS_META.findIndex(s => s.key === activeEditSection);
+  const handlePrevSection = () => {
+    if (currentSectionIndex > 0) {
+      setActiveEditSection(SECTIONS_META[currentSectionIndex - 1].key);
+    }
   };
-
-  if (!isClient) {
-    return <div style={{ padding: '40px', textAlign: 'center' }}>กำลังโหลดโปรแกรมชี้แจงส่งคืนเศษสาย...</div>;
-  }
+  const handleNextSection = () => {
+    if (currentSectionIndex < SECTIONS_META.length - 1) {
+      setActiveEditSection(SECTIONS_META[currentSectionIndex + 1].key);
+    }
+  };
 
   return (
-    <div className="wire-clarify-page">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="wc-toast">
-          <CheckCircle2 size={18} className="text-emerald-400" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+    <>
+      <TopBar title="โปรแกรมชี้แจงส่งคืนเศษสายไม่ครบ" />
 
-      {/* Header */}
-      <div className="wc-header wc-no-print">
-        <div className="wc-header-left">
-          <div className="wc-header-icon">
-            <Percent size={28} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-              <h1 className="wc-header-title">โปรแกรมชี้แจงส่งคืนเศษสายไม่ครบ 100%</h1>
-              <span className="wc-badge-active">
-                <CheckCircle2 size={12} />
-                เปิดใช้งาน
-              </span>
-              <span className="wc-badge-calc">
-                <Calculator size={12} />
-                คำนวณ % อัตโนมัติ
-              </span>
+      <div className="a4-wrapper">
+        {/* Sticky Action Toolbar */}
+        <div className="a4-action-bar">
+          <div className="a4-action-left">
+            <div className="a4-title-tag">
+              <Percent size={18} className="text-orange-400" />
+              <span>ชี้แจงส่งคืนเศษสายไม่ครบ (ผกร.กรย.ก3)</span>
             </div>
-            <div className="wc-header-sub">
-              ระบบจัดทำบันทึกข้อความชี้แจงเหตุผลทางวิศวกรรม คำนวณเปอร์เซ็นต์ส่งคืน และศูนย์คัดลอกลง Microsoft Word / Excel ทันที
+            <div className="a4-preset-group">
+              <button
+                type="button"
+                className={`a4-preset-chip ${formData.docLevel === 'division_memo' ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({ ...prev, docLevel: 'division_memo' }))}
+              >
+                บันทึกกอง (กรย. เสนอ ผวบ.)
+              </button>
+              <button
+                type="button"
+                className={`a4-preset-chip ${formData.docLevel === 'supervisor_report' ? 'active' : ''}`}
+                onClick={() => setFormData(prev => ({ ...prev, docLevel: 'supervisor_report' }))}
+              >
+                บันทึกผู้คุมงาน (รายงาน ผกร.)
+              </button>
+              <button
+                type="button"
+                className="a4-preset-chip"
+                onClick={handleResetToSample}
+                title="รีเซ็ตเป็นตัวอย่างเริ่มต้น"
+              >
+                คืนค่าตัวอย่าง
+              </button>
             </div>
           </div>
-        </div>
 
-        <div className="wc-header-actions">
-          <button
-            type="button"
-            className="wc-btn wc-btn-secondary"
-            onClick={handleResetToSample}
-            title="รีเซ็ตเป็นแบบฟอร์มตัวอย่างเริ่มต้น"
-          >
-            <RotateCcw size={15} />
-            รีเซ็ตตัวอย่าง
-          </button>
-          <button
-            type="button"
-            className="wc-btn wc-btn-secondary"
-            onClick={handleSaveToStorage}
-            title="บันทึกข้อมูลเก็บไว้ในเบราว์เซอร์"
-          >
-            <Save size={15} />
-            บันทึก
-          </button>
-          <button
-            type="button"
-            className="wc-btn wc-btn-word"
-            onClick={handleCopyAll}
-            title="คัดลอกทั้งหมดลง Microsoft Word"
-          >
-            <Copy size={16} />
-            คัดลอกลง Word
-          </button>
-          <button
-            type="button"
-            className="wc-btn wc-btn-secondary"
-            onClick={handleTriggerPrint}
-            title="พิมพ์เอกสารออกทางเครื่องพิมพ์"
-          >
-            <Printer size={16} />
-            สั่งพิมพ์
-          </button>
-        </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="wc-tabs-bar wc-no-print">
-        <button
-          type="button"
-          className={`wc-tab-item ${activeTab === 'form' ? 'active' : ''}`}
-          onClick={() => setActiveTab('form')}
-        >
-          <Scale size={18} />
-          ๑. ปรับแต่งข้อมูลและตารางคำนวณ
-        </button>
-
-        <button
-          type="button"
-          className={`wc-tab-item ${activeTab === 'word' ? 'active' : ''}`}
-          onClick={() => setActiveTab('word')}
-        >
-          <Copy size={18} />
-          ๒. ศูนย์คัดลอกลง Word / Excel
-        </button>
-
-        <button
-          type="button"
-          className={`wc-tab-item ${activeTab === 'preview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('preview')}
-        >
-          <Eye size={18} />
-          ๓. ตัวอย่างเอกสาร & สั่งพิมพ์ A4
-        </button>
-      </div>
-
-      {/* ====================================================================
-          TAB 1: FORM & INTERACTIVE CALCULATION TABLE
-          ==================================================================== */}
-      {activeTab === 'form' && (
-        <div className="wc-no-print">
-          {/* Document Level Switcher */}
-          <div className="wc-doc-selector">
-            <span className="wc-doc-selector-title">
-              <Building size={16} />
-              เลือกระดับเอกสารที่ต้องการจัดทำ:
-            </span>
+          <div className="a4-action-right">
             <button
               type="button"
-              className={`wc-doc-pill ${formData.docLevel === 'division_memo' ? 'active' : ''}`}
-              onClick={() => handleSwitchDocLevel('division_memo')}
+              className="a4-action-btn a4-btn-muted"
+              onClick={handleSetTodayDocDate}
+              title="ใส่วันที่ปัจจุบันในเอกสาร"
             >
-              แบบที่ ๑: บันทึกขออนุมัติ กรย.(ก๓) ถึง ผวบ.(ก๓) (ระดับกอง/เขต มี ๓ ตอน)
+              <Calendar size={15} /> วันที่วันนี้
             </button>
             <button
               type="button"
-              className={`wc-doc-pill ${formData.docLevel === 'supervisor_report' ? 'active' : ''}`}
-              onClick={() => handleSwitchDocLevel('supervisor_report')}
+              className="a4-action-btn a4-btn-indigo"
+              onClick={handleCopyMemo}
+              title="คัดลอกลง Word (Ctrl+V ได้ทันที)"
             >
-              แบบที่ ๒: บันทึกรายงานผล พชง. ถึง ผกร.กรย.(ก๓) (ระดับหน้างาน/ผู้ควบคุมงาน)
+              <Copy size={15} /> คัดลอกลง Word
+            </button>
+            <button
+              type="button"
+              className="a4-action-btn a4-btn-emerald"
+              onClick={handleDownloadWordFile}
+              title="ดาวน์โหลดไฟล์ .doc"
+            >
+              <Download size={15} /> ดาวน์โหลด Word
+            </button>
+            <button
+              type="button"
+              className="a4-action-btn a4-btn-amber"
+              onClick={() => window.print()}
+              title="สั่งพิมพ์หน้ากระดาษ A4"
+            >
+              <Printer size={15} /> พิมพ์ A4
             </button>
           </div>
-
-          {/* KPI Calculation Highlights */}
-          <div className="wc-kpi-container">
-            <div className="wc-kpi-card">
-              <span className="wc-kpi-label">ประมาณการส่งคืนรวม</span>
-              <div className="wc-kpi-val blue">{formatKg(totalEstimatedKg)} <span style={{ fontSize: '1rem', fontWeight: 500 }}>KG</span></div>
-              <div className="wc-kpi-sub">น้ำหนักตามแผนรื้อถอนทั้งหมด</div>
-            </div>
-
-            <div className="wc-kpi-card">
-              <span className="wc-kpi-label">จำนวนส่งคืนจริงรวม</span>
-              <div className="wc-kpi-val orange">{formatKg(totalActualKg)} <span style={{ fontSize: '1rem', fontWeight: 500 }}>KG</span></div>
-              <div className="wc-kpi-sub">น้ำหนักที่รื้อถอนส่งคืนคลังได้จริง</div>
-            </div>
-
-            <div className="wc-kpi-card">
-              <span className="wc-kpi-label">คิดเป็นเปอร์เซ็นต์ (%)</span>
-              <div className={`wc-kpi-val ${totalPercentage >= 90 ? 'green' : totalPercentage >= 70 ? 'orange' : 'red'}`}>
-                {formatPercent(totalPercentage)}
-              </div>
-              <div className="wc-kpi-sub">
-                {totalPercentage >= 90 ? '✓ ผ่านเกณฑ์มาตรฐาน (> 90%)' : '⚠️ ต่ำกว่าเกณฑ์ ต้องมีบันทึกชี้แจง'}
-              </div>
-            </div>
-
-            <div className="wc-kpi-card">
-              <span className="wc-kpi-label">ส่วนต่างน้ำหนักที่ขาด</span>
-              <div className={`wc-kpi-val ${differenceKg > 0 ? 'red' : 'green'}`}>
-                {formatKg(differenceKg)} <span style={{ fontSize: '1rem', fontWeight: 500 }}>KG</span>
-              </div>
-              <div className="wc-kpi-sub">
-                ขาดไป {(100 - totalPercentage).toFixed(2)} % จากประมาณการ
-              </div>
-            </div>
-          </div>
-
-          {/* Card 1: ข้อมูลโครงการและส่วนหัวบันทึก */}
-          <div className="wc-card">
-            <div className="wc-card-header">
-              <div className="wc-card-title">
-                <FileText className="text-orange-600" size={20} />
-                <span>1. ข้อมูลโครงการและส่วนหัวบันทึกข้อความ</span>
-              </div>
-              <button
-                type="button"
-                className="wc-btn wc-btn-word"
-                style={{ padding: '5px 12px', fontSize: '0.78rem' }}
-                onClick={handleCopyMemo}
-              >
-                <Copy size={13} />
-                คัดลอกข้อความส่วนนี้
-              </button>
-            </div>
-
-            <div className="wc-card-body">
-              {/* Meta Grid 4 */}
-              <div className="wc-form-grid-4" style={{ marginBottom: '16px' }}>
-                <div className="wc-field">
-                  <label className="wc-label">จาก</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.docFrom}
-                    onChange={e => setFormData({ ...formData, docFrom: e.target.value })}
-                    placeholder="เช่น กรย.(ก๓)"
-                  />
-                </div>
-
-                <div className="wc-field">
-                  <label className="wc-label">ถึง</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.docTo}
-                    onChange={e => setFormData({ ...formData, docTo: e.target.value })}
-                    placeholder="เช่น ผวบ.(ก๓)"
-                  />
-                </div>
-
-                <div className="wc-field">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label className="wc-label" style={{ margin: 0 }}>เลขที่หนังสือ</label>
-                    {formData.docNo && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFormData(prev => ({ ...prev, docNo: '' }));
-                          showToast('ล้างเลขที่หนังสือแล้ว');
-                        }}
-                        style={{ fontSize: '0.72rem', padding: '1px 6px', background: '#f8fafc', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}
-                        title="ล้างเลขที่หนังสือ"
-                      >
-                        ล้าง
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.docNo}
-                    onChange={e => setFormData({ ...formData, docNo: e.target.value })}
-                    placeholder="เว้นว่างไว้ลงรับ หรือกรอก เช่น ก.๓ กรย.(กร.) ..."
-                  />
-                </div>
-
-                <div className="wc-field">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label className="wc-label" style={{ margin: 0 }}>วันที่</label>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <button
-                        type="button"
-                        onClick={() => handleSetTodayDocDate('short')}
-                        style={{ fontSize: '0.72rem', padding: '1px 6px', background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa', borderRadius: '4px', cursor: 'pointer' }}
-                        title="ใส่วันที่ปัจจุบัน"
-                      >
-                        ใส่วันนี้
-                      </button>
-                      {formData.docDate && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, docDate: '', signerDate: '' }));
-                            showToast('ล้างวันที่แล้ว');
-                          }}
-                          style={{ fontSize: '0.72rem', padding: '1px 6px', background: '#f8fafc', color: '#64748b', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}
-                          title="ล้างวันที่"
-                        >
-                          ล้าง
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.docDate}
-                    onChange={e => setFormData({ ...formData, docDate: e.target.value })}
-                    placeholder="เว้นว่างไว้ลงวันที่ หรือกรอก เช่น ๑๗ ก.ย. ๖๙"
-                  />
-                </div>
-              </div>
-
-              {/* Subject & Salutation */}
-              <div className="wc-form-grid-2" style={{ marginBottom: '16px' }}>
-                <div className="wc-field">
-                  <label className="wc-label">เรื่อง</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.subject}
-                    onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                  />
-                </div>
-
-                <div className="wc-field">
-                  <label className="wc-label">เรียน</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.salutation}
-                    onChange={e => setFormData({ ...formData, salutation: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              {/* Project Specific Info */}
-              <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '10px', padding: '16px' }}>
-                <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#9a3412', marginBottom: '12px' }}>
-                  รายละเอียดงานก่อสร้างและหมายเลข WBS
-                </div>
-
-                <div className="wc-form-grid-3" style={{ marginBottom: '12px' }}>
-                  <div className="wc-field">
-                    <label className="wc-label">หมายเลขงาน (WBS)</label>
-                    <input
-                      type="text"
-                      className="wc-input"
-                      value={formData.wbsNo}
-                      onChange={e => setFormData({ ...formData, wbsNo: e.target.value })}
-                      placeholder="P-TDD02.3-I-LYAIA.0016"
-                    />
-                  </div>
-
-                  <div className="wc-field">
-                    <label className="wc-label">หนังสืออนุมัติงาน</label>
-                    <input
-                      type="text"
-                      className="wc-input"
-                      value={formData.approvalDocRef}
-                      onChange={e => setFormData({ ...formData, approvalDocRef: e.target.value })}
-                      placeholder="ก.๓ กวว.(วร) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๖ สิงหาคม ๒๕๖๗"
-                    />
-                  </div>
-
-                  <div className="wc-field">
-                    <label className="wc-label">หมายเลขโครงข่ายรื้อถอน</label>
-                    <input
-                      type="text"
-                      className="wc-input"
-                      value={formData.networkNo}
-                      onChange={e => setFormData({ ...formData, networkNo: e.target.value })}
-                      placeholder="โครงข่ายรื้อถอนแรงสูงภายนอก ๖๐๐๑๓๘๑๔๗๘"
-                    />
-                  </div>
-                </div>
-
-                <div className="wc-field">
-                  <label className="wc-label">ชื่องานและสถานที่ก่อสร้าง</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.projectName}
-                    onChange={e => setFormData({ ...formData, projectName: e.target.value })}
-                    placeholder="ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: เนื้อหาชี้แจงเหตุผล */}
-          <div className="wc-card">
-            <div className="wc-card-header">
-              <div className="wc-card-title">
-                <AlertTriangle className="text-amber-600" size={20} />
-                <span>
-                  2. ข้อความชี้แจงเหตุผลทางวิศวกรรม ({formData.docLevel === 'division_memo' ? 'แบบ ๓ ตอนตามระเบียบ' : 'รายงานผู้ควบคุมงาน'})
-                </span>
-              </div>
-            </div>
-
-            <div className="wc-card-body">
-              {formData.docLevel === 'division_memo' ? (
-                <>
-                  <div className="wc-field" style={{ marginBottom: '16px' }}>
-                    <label className="wc-label">๑. เรื่องเดิม</label>
-                    <textarea
-                      className="wc-textarea"
-                      rows={3}
-                      value={formData.memoBackground}
-                      onChange={e => setFormData({ ...formData, memoBackground: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="wc-field" style={{ marginBottom: '16px' }}>
-                    <label className="wc-label">
-                      <span>๒. ข้อเท็จจริง (เหตุผลที่เศษสายไม่ครบตามประมาณการ)</span>
-                      <span style={{ fontSize: '0.78rem', color: '#ea580c' }}>
-                        *ตัดทิ้งเป็นเศษสั้นๆ อุปกรณ์เข้าปลายสาย/ช่วงต่อสาย/ต่อแยกสาย
-                      </span>
-                    </label>
-                    <textarea
-                      className="wc-textarea"
-                      rows={4}
-                      value={formData.memoFacts}
-                      onChange={e => setFormData({ ...formData, memoFacts: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="wc-field" style={{ marginBottom: '16px' }}>
-                    <label className="wc-label">๓. ข้อพิจารณา</label>
-                    <textarea
-                      className="wc-textarea"
-                      rows={4}
-                      value={formData.memoConsideration}
-                      onChange={e => setFormData({ ...formData, memoConsideration: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="wc-field">
-                    <label className="wc-label">ข้อความปิดท้าย</label>
-                    <input
-                      type="text"
-                      className="wc-input"
-                      value={formData.memoClosing}
-                      onChange={e => setFormData({ ...formData, memoClosing: e.target.value })}
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="wc-field" style={{ marginBottom: '16px' }}>
-                    <label className="wc-label">เนื้อความรายงานของผู้ควบคุมงาน</label>
-                    <textarea
-                      className="wc-textarea"
-                      rows={5}
-                      value={formData.supervisorBody}
-                      onChange={e => setFormData({ ...formData, supervisorBody: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="wc-field">
-                    <label className="wc-label">ข้อความปิดท้าย</label>
-                    <textarea
-                      className="wc-textarea"
-                      rows={3}
-                      value={formData.supervisorClosing}
-                      onChange={e => setFormData({ ...formData, supervisorClosing: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Card 3: ตารางคำนวณส่งคืนเศษสาย (Interactive Table Editor) */}
-          <div className="wc-card">
-            <div className="wc-card-header">
-              <div className="wc-card-title">
-                <Layers className="text-orange-600" size={20} />
-                <span>3. ตารางส่งคืนเศษสายและคำนวณเปอร์เซ็นต์อัตโนมัติ</span>
-              </div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  className="wc-btn wc-btn-secondary"
-                  onClick={handleClearTable}
-                  title="เคลียร์ค่าทุกช่องในตารางให้เป็นช่องว่าง"
-                >
-                  <RotateCcw size={15} />
-                  เคลียร์ค่าตาราง
-                </button>
-                <button
-                  type="button"
-                  className="wc-btn wc-btn-excel"
-                  onClick={handleCopyExcel}
-                >
-                  <FileSpreadsheet size={15} />
-                  คัดลอกลง Excel
-                </button>
-                <button
-                  type="button"
-                  className="wc-btn wc-btn-primary"
-                  onClick={handleAddItem}
-                >
-                  <Plus size={16} />
-                  เพิ่มชนิดสาย (+ 1 แถว)
-                </button>
-              </div>
-            </div>
-
-            <div className="wc-card-body">
-              <div className="wc-table-wrapper">
-                <table className="wc-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: '60px' }}>ลำดับ</th>
-                      <th style={{ minWidth: '240px', textAlign: 'left' }}>ชนิดสาย</th>
-                      <th style={{ width: '180px', textAlign: 'right' }}>ประมาณการส่งคืน (KG)</th>
-                      <th style={{ width: '180px', textAlign: 'right' }}>จำนวนส่งคืน (KG)</th>
-                      <th style={{ width: '140px', textAlign: 'center' }}>คิดเป็นเปอร์เซ็นต์</th>
-                      <th style={{ width: '130px', textAlign: 'right' }}>ส่วนต่างขาด (KG)</th>
-                      <th style={{ width: '90px', textAlign: 'center' }}>จัดการ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {formData.items.map((item, index) => {
-                      const pct = calculateWirePercent(Number(item.actualKg) || 0, Number(item.estimatedKg) || 0);
-                      const diff = (Number(item.estimatedKg) || 0) - (Number(item.actualKg) || 0);
-
-                      return (
-                        <tr key={item.id}>
-                          <td style={{ textAlign: 'center', fontWeight: 600 }}>{index + 1}</td>
-                          <td>
-                            <input
-                              type="text"
-                              className="wc-input-cell"
-                              value={item.wireType}
-                              onChange={e => handleUpdateItem(index, 'wireType', e.target.value)}
-                              placeholder="ระบุชนิดสาย เช่น เศษสายอลูมิเนียมแกนเหล็ก"
-                              list="popularWireList"
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              step="any"
-                              className="wc-input-cell"
-                              style={{ textAlign: 'right', fontWeight: 600 }}
-                              value={item.estimatedKg || ''}
-                              onChange={e => handleUpdateItem(index, 'estimatedKg', parseFloat(e.target.value) || 0)}
-                              placeholder="0.00"
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              step="any"
-                              className="wc-input-cell"
-                              style={{ textAlign: 'right', fontWeight: 600, color: '#c2410c' }}
-                              value={item.actualKg || ''}
-                              onChange={e => handleUpdateItem(index, 'actualKg', parseFloat(e.target.value) || 0)}
-                              placeholder="0.00"
-                            />
-                          </td>
-                          <td style={{ textAlign: 'center' }}>
-                            <span className={`wc-pct-badge ${pct >= 90 ? 'good' : pct >= 70 ? 'warn' : 'danger'}`}>
-                              {formatPercent(pct)}
-                            </span>
-                          </td>
-                          <td style={{ textAlign: 'right', fontWeight: 500, color: diff > 0 ? '#dc2626' : '#16a34a' }}>
-                            {formatKg(diff)}
-                          </td>
-                          <td>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
-                              <button
-                                type="button"
-                                onClick={() => handleDuplicateItem(index)}
-                                style={{
-                                  padding: '4px 6px',
-                                  border: '1px solid #cbd5e1',
-                                  background: '#ffffff',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  color: '#475569',
-                                }}
-                                title="ทำสำเนาแถวนี้"
-                              >
-                                <Copy size={13} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteItem(index)}
-                                style={{
-                                  padding: '4px 6px',
-                                  border: '1px solid #fecaca',
-                                  background: '#fef2f2',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  color: '#ef4444',
-                                }}
-                                title="ลบแถวนี้"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Data list for wire types */}
-              <datalist id="popularWireList">
-                {POPULAR_WIRE_TYPES.map(wt => (
-                  <option key={wt} value={wt} />
-                ))}
-              </datalist>
-
-              {/* Summary Bar */}
-              <div className="wc-summary-bar">
-                <div className="wc-sum-items">
-                  <div className="wc-sum-item">
-                    <span className="wc-sum-label">รวมประมาณการส่งคืน:</span>
-                    <span className="wc-sum-val">{formatKg(totalEstimatedKg)} KG</span>
-                  </div>
-                  <div className="wc-sum-item">
-                    <span className="wc-sum-label">รวมจำนวนส่งคืนจริง:</span>
-                    <span className="wc-sum-val">{formatKg(totalActualKg)} KG</span>
-                  </div>
-                  <div className="wc-sum-item">
-                    <span className="wc-sum-label">คิดเป็นเปอร์เซ็นต์รวม:</span>
-                    <span className="wc-sum-val" style={{ color: totalPercentage >= 90 ? '#15803d' : '#c2410c' }}>
-                      {formatPercent(totalPercentage)}
-                    </span>
-                  </div>
-                  <div className="wc-sum-item">
-                    <span className="wc-sum-label">ส่วนต่างน้ำหนักขาด:</span>
-                    <span className="wc-sum-val" style={{ color: differenceKg > 0 ? '#b91c1c' : '#15803d' }}>
-                      {formatKg(differenceKg)} KG
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    type="button"
-                    className="wc-btn wc-btn-word"
-                    onClick={() => setActiveTab('word')}
-                  >
-                    ไปที่ศูนย์คัดลอกลง Word
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 4: ผู้ลงนามและผู้เกี่ยวข้อง */}
-          <div className="wc-card">
-            <div className="wc-card-header">
-              <div className="wc-card-title">
-                <UserCheck className="text-orange-600" size={20} />
-                <span>4. ข้อมูลผู้ลงนามและผู้เกี่ยวข้อง</span>
-              </div>
-            </div>
-
-            <div className="wc-card-body">
-              <div className="wc-form-grid-3" style={{ marginBottom: '16px' }}>
-                <div className="wc-field">
-                  <label className="wc-label">ชื่อผู้ควบคุมงาน</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.supervisorName}
-                    onChange={e => setFormData({ ...formData, supervisorName: e.target.value })}
-                    placeholder="นายอุดมศักดิ์ จันทร์กลิ่น"
-                  />
-                </div>
-                <div className="wc-field">
-                  <label className="wc-label">ตำแหน่งผู้ควบคุมงาน</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.supervisorPosition}
-                    onChange={e => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                    placeholder="พชง.๗ ผกร.กรย.(ก๓)"
-                  />
-                </div>
-                <div className="wc-field">
-                  <label className="wc-label">หัวหน้าแผนก (ชผ.กร. / ผห.กร.)</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.headOfSectionName}
-                    onChange={e => setFormData({ ...formData, headOfSectionName: e.target.value })}
-                    placeholder="นายชานินทร์ ศรีสวัสดิ์"
-                  />
-                </div>
-              </div>
-
-              <div className="wc-form-grid-3">
-                <div className="wc-field">
-                  <label className="wc-label">ชื่อผู้ลงนามหลัก (กรย.)</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.signerName}
-                    onChange={e => setFormData({ ...formData, signerName: e.target.value })}
-                    placeholder="นายอนันต์ กาญจนอุปถัมภ์"
-                  />
-                </div>
-                <div className="wc-field">
-                  <label className="wc-label">ตำแหน่งผู้ลงนามหลัก</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.signerTitle}
-                    onChange={e => setFormData({ ...formData, signerTitle: e.target.value })}
-                    placeholder="รก.กรย.(ก๓) ปฏิบัติงานแทน อก.กรย.(ก๓)"
-                  />
-                </div>
-                <div className="wc-field">
-                  <label className="wc-label">ผู้อนุมัติ (อผ.วบ.)</label>
-                  <input
-                    type="text"
-                    className="wc-input"
-                    value={formData.approverName}
-                    onChange={e => setFormData({ ...formData, approverName: e.target.value })}
-                    placeholder="นายเมธี สุกก่ำ"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      )}
 
-      {/* ====================================================================
-          TAB 2: MICROSOFT WORD & EXCEL COPY HUB
-          ==================================================================== */}
-      {activeTab === 'word' && (
-        <div className="wc-no-print">
-          {/* Action Cards Grid */}
-          <div className="wc-word-grid">
-            {/* Card 1: Copy Memo Text */}
-            <div className="wc-word-action-card">
-              <div>
-                <div className="wc-word-card-top">
-                  <div className="wc-word-card-icon blue">
-                    <FileText size={22} />
-                  </div>
-                  <div>
-                    <h3 className="wc-word-card-title">คัดลอกข้อความบันทึก</h3>
-                    <p className="wc-word-card-desc">
-                      คัดลอกข้อความหัวกระดาษ เลขที่ วันที่ เรื่อง เรียน เหตุผล ๓ ตอน และผู้ลงนาม นำไปวาง (Ctrl+V) ใน Word ได้ทันที
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="wc-btn wc-btn-word"
-                style={{ width: '100%', justifyContent: 'center' }}
-                onClick={handleCopyMemo}
-              >
-                {copiedItem === 'memo' ? <Check size={16} /> : <Copy size={16} />}
-                {copiedItem === 'memo' ? 'คัดลอกแล้ว!' : 'คัดลอกข้อความบันทึก'}
-              </button>
-            </div>
-
-            {/* Card 2: Copy Wire Table */}
-            <div className="wc-word-action-card">
-              <div>
-                <div className="wc-word-card-top">
-                  <div className="wc-word-card-icon orange">
-                    <TableIcon size={22} />
-                  </div>
-                  <div>
-                    <h3 className="wc-word-card-title">คัดลอกตารางส่งคืนเศษสาย</h3>
-                    <p className="wc-word-card-desc">
-                      คัดลอกเป็นตาราง Word แท้ๆ พร้อมเส้นกรอบ หัวตาราง การจัดตำแหน่งตัวเลข และผลรวมเปอร์เซ็นต์ วางใน Word แก้ไขต่อได้เลย
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="wc-btn wc-btn-primary"
-                style={{ width: '100%', justifyContent: 'center' }}
-                onClick={handleCopyTable}
-              >
-                {copiedItem === 'table' ? <Check size={16} /> : <Copy size={16} />}
-                {copiedItem === 'table' ? 'คัดลอกแล้ว!' : 'คัดลอกตาราง ๕ ช่องลง Word'}
-              </button>
-            </div>
-
-            {/* Card 3: Download Word File (.doc) */}
-            <div className="wc-word-action-card">
-              <div>
-                <div className="wc-word-card-top">
-                  <div className="wc-word-card-icon blue">
-                    <Download size={22} />
-                  </div>
-                  <div>
-                    <h3 className="wc-word-card-title">ดาวน์โหลดเป็นไฟล์ Word (.doc)</h3>
-                    <p className="wc-word-card-desc">
-                      บันทึกเป็นไฟล์ Word อัตโนมัติ เปิดในโปรแกรม Microsoft Word ได้ทันที ทั้งข้อความ ตารางคำนวณ และส่วนเกษียน
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="wc-btn wc-btn-secondary"
-                style={{ width: '100%', justifyContent: 'center', borderColor: '#2563eb', color: '#1d4ed8' }}
-                onClick={handleDownloadWordFile}
-              >
-                <Download size={16} />
-                ดาวน์โหลดไฟล์ Word (.doc)
-              </button>
-            </div>
-
-            {/* Card 4: Copy for Excel */}
-            <div className="wc-word-action-card">
-              <div>
-                <div className="wc-word-card-top">
-                  <div className="wc-word-card-icon green">
-                    <FileSpreadsheet size={22} />
-                  </div>
-                  <div>
-                    <h3 className="wc-word-card-title">คัดลอกตารางลง Excel</h3>
-                    <p className="wc-word-card-desc">
-                      คัดลอกข้อมูลเฉพาะตารางตัวเลข นำไปวางในโปรแกรม Microsoft Excel แยกคอลัมน์ให้อัตโนมัติ
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="wc-btn wc-btn-excel"
-                style={{ width: '100%', justifyContent: 'center' }}
-                onClick={handleCopyExcel}
-              >
-                {copiedItem === 'excel' ? <Check size={16} /> : <Copy size={16} />}
-                {copiedItem === 'excel' ? 'คัดลอกแล้ว!' : 'คัดลอกสำหรับ Excel'}
-              </button>
-            </div>
-          </div>
-
-          {/* Live Preview Box for Memo */}
-          <div className="wc-copy-preview-box">
-            <div className="wc-copy-preview-header">
-              <div className="wc-copy-preview-title">
-                <FileText size={18} className="text-blue-600" />
-                <span>ตัวอย่างข้อความบันทึก ({formData.docLevel === 'division_memo' ? 'แบบที่ ๑: บันทึกขออนุมัติ กรย.' : 'แบบที่ ๒: รายงาน พชง.'})</span>
-              </div>
-              <button
-                type="button"
-                className="wc-btn wc-btn-secondary"
-                style={{ padding: '5px 12px', fontSize: '0.8rem' }}
-                onClick={handleCopyMemo}
-              >
-                <Copy size={14} />
-                คัดลอกส่วนนี้
-              </button>
-            </div>
-
-            <div style={{ whiteSpace: 'pre-wrap', color: '#1e293b', fontSize: '15pt', lineHeight: 1.6, fontFamily: 'Sarabun, sans-serif' }}>
-              {generateWireClarifyMemoPlainText(formData)}
-            </div>
-          </div>
-
-          {/* Live Preview Box for Table */}
-          <div className="wc-copy-preview-box">
-            <div className="wc-copy-preview-header">
-              <div className="wc-copy-preview-title">
-                <TableIcon size={18} className="text-orange-600" />
-                <span>ตัวอย่างตาราง ๕ ช่อง (พร้อมคัดลอกเป็นตาราง Word)</span>
-              </div>
-              <button
-                type="button"
-                className="wc-btn wc-btn-secondary"
-                style={{ padding: '5px 12px', fontSize: '0.8rem' }}
-                onClick={handleCopyTable}
-              >
-                <Copy size={14} />
-                คัดลอกตารางนี้
-              </button>
-            </div>
-
-            <div 
-              style={{ overflowX: 'auto', margin: '10px 0' }}
-              dangerouslySetInnerHTML={{ __html: generateWireClarifyTableHtmlForWord(formData) }}
-            />
-          </div>
-
-          {/* Guidance Alert */}
-          <div style={{ padding: '16px 20px', borderRadius: '12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e40af', fontSize: '0.88rem', lineHeight: 1.6 }}>
-            <strong>💡 คำแนะนำการนำไปใส่ใน Microsoft Word:</strong>
-            <ol style={{ paddingLeft: '20px', marginTop: '6px', margin: 0 }}>
-              <li>กดปุ่ม <b>&ldquo;คัดลอกตาราง ๕ ช่องลง Word&rdquo;</b> หรือ <b>&ldquo;คัดลอกข้อความบันทึก&rdquo;</b> ด้านบน</li>
-              <li>เปิดโปรแกรม Microsoft Word หรือไฟล์เทมเพลตเอกสารของคุณ</li>
-              <li>คลิกตำแหน่งที่ต้องการ แล้วกดปุ่ม <b>Ctrl + V</b> (หรือคลิกขวาเลือก Paste)</li>
-              <li>ตารางและข้อความจะปรากฏใน Word ทันที โดยเป็นตารางของ Word ที่คุณสามารถจัดหน้า ปรับความกว้างคอลัมน์ หรือแก้ไขตัวอักษรได้อิสระครับ</li>
-            </ol>
-          </div>
+        {/* Section Quick Jump Bar */}
+        <div className="a4-jump-bar no-print">
+          <span className="text-xs text-slate-400 font-medium">จิ้มแก้ไขส่วน:</span>
+          {SECTIONS_META.map((sec) => (
+            <button
+              key={sec.key}
+              type="button"
+              className={`a4-jump-chip ${activeEditSection === sec.key ? 'active' : ''}`}
+              onClick={() => setActiveEditSection(sec.key)}
+            >
+              <sec.icon size={13} />
+              <span>{sec.shortName}</span>
+            </button>
+          ))}
         </div>
-      )}
 
-      {/* ====================================================================
-          TAB 3: DOCUMENT PREVIEW & DIRECT PRINT
-          ==================================================================== */}
-      {activeTab === 'preview' && (
-        <div className="wc-no-print">
-          {/* Controls Bar */}
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '12px',
-              padding: '12px 18px',
-              marginBottom: '20px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-              border: '1px solid #e2e8f0',
-              flexWrap: 'wrap',
-              gap: '12px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.86rem', fontWeight: 600, color: '#334155' }}>ระดับหนังสือ:</span>
-              <button
-                type="button"
-                className={`wc-btn ${formData.docLevel === 'division_memo' ? 'wc-btn-primary' : 'wc-btn-secondary'}`}
-                style={{ padding: '6px 12px', fontSize: '0.82rem' }}
-                onClick={() => handleSwitchDocLevel('division_memo')}
-              >
-                แบบที่ ๑: บันทึกขออนุมัติ กรย.(ก๓) ถึง ผวบ.(ก๓)
-              </button>
-              <button
-                type="button"
-                className={`wc-btn ${formData.docLevel === 'supervisor_report' ? 'wc-btn-primary' : 'wc-btn-secondary'}`}
-                style={{ padding: '6px 12px', fontSize: '0.82rem' }}
-                onClick={() => handleSwitchDocLevel('supervisor_report')}
-              >
-                แบบที่ ๒: รายงานผล พชง. ถึง ผกร.กรย.(ก๓)
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button
-                type="button"
-                className="wc-btn wc-btn-word"
-                style={{ padding: '6px 12px', fontSize: '0.82rem' }}
-                onClick={handleCopyAll}
-              >
-                <Copy size={15} />
-                คัดลอกลง Word
-              </button>
-              <button
-                type="button"
-                className="wc-btn wc-btn-secondary"
-                style={{ padding: '6px 12px', fontSize: '0.82rem' }}
-                onClick={handleTriggerPrint}
-              >
-                <Printer size={15} />
-                สั่งพิมพ์หน้านี้
-              </button>
-            </div>
-          </div>
-
-          {/* Screen Preview Document */}
-          <div className="wc-doc-preview-wrapper">
-            {/* Header */}
-            <div className="wc-memo-header">
-              <img src="/pea-logo.png" alt="PEA Logo" style={{ width: '55px', height: '55px', objectFit: 'contain' }} />
-              <div>
-                <div style={{ fontSize: '18pt', fontWeight: 'bold', lineHeight: 1.15 }}>การไฟฟ้าส่วนภูมิภาค</div>
-                <div style={{ fontSize: '9pt', fontWeight: 'bold' }}>PROVINCIAL ELECTRICITY AUTHORITY</div>
+        {/* ========================================================================= */}
+        {/* A4 PAPER CANVAS (LIVE EDITABLE)                                           */}
+        {/* ========================================================================= */}
+        <div className="a4-page-shadow">
+          <div className="a4-page">
+            {/* 1. HEADER SECTION */}
+            <div
+              className="a4-section-hoverable"
+              onClick={() => setActiveEditSection('header')}
+              title="คลิกเพื่อแก้ไขส่วนหัวหนังสือ"
+            >
+              <div className="section-edit-badge">
+                <Edit3 size={12} /> จิ้มแก้ไขส่วนหัวหนังสือ
               </div>
-            </div>
 
-            {/* Meta Table */}
-            <table className="wc-memo-meta-table">
-              <tbody>
-                <tr>
-                  <td style={{ width: '10%', fontWeight: 'bold' }}>จาก</td>
-                  <td style={{ width: '40%' }}>{formData.docFrom || '................................'}</td>
-                  <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
-                  <td style={{ width: '40%' }}>{formData.docTo || '................................'}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 'bold' }}>เลขที่</td>
-                  <td>{formData.docNo || '................................'}</td>
-                  <td style={{ fontWeight: 'bold' }}>วันที่</td>
-                  <td>{formData.docDate || '................................'}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 'bold' }}>เรื่อง</td>
-                  <td colSpan={3} style={{ fontWeight: 'bold' }}>{formData.subject}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 'bold' }}>เรียน</td>
-                  <td colSpan={3}>{formData.salutation}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Body */}
-            {formData.docLevel === 'division_memo' ? (
-              <>
-                <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>๑. เรื่องเดิม</p>
-                <p className="wc-memo-p">{formData.memoBackground}</p>
-
-                <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>๒. ข้อเท็จจริง</p>
-                <p className="wc-memo-p">{formData.memoFacts}</p>
-
-                <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>๓. ข้อพิจารณา</p>
-                <p className="wc-memo-p">{formData.memoConsideration}</p>
-
-                <div 
-                  style={{ overflowX: 'auto', margin: '14px 0' }}
-                  dangerouslySetInnerHTML={{ __html: generateWireClarifyTableHtmlForWord(formData) }}
+              <div className="a4-pea-header">
+                <img
+                  src="/pea-logo.png"
+                  alt="PEA Logo"
+                  style={{ width: '56px', height: '56px', objectFit: 'contain' }}
                 />
-
-                <p className="wc-memo-p" style={{ marginTop: '12px' }}>{formData.memoClosing}</p>
-
-                <div className="wc-signer-block">
-                  <p style={{ marginBottom: '25px' }}><br/></p>
-                  <p>({formData.signerName})</p>
-                  <p>{formData.signerTitle}</p>
-                  {formData.signerDate && <p style={{ fontSize: '14pt' }}>{formData.signerDate}</p>}
+                <div style={{ marginLeft: '12px' }}>
+                  <div style={{ fontSize: '20pt', fontWeight: 'bold', lineHeight: 1.15, fontFamily: 'var(--font-sarabun)' }}>
+                    บันทึกข้อความ
+                  </div>
+                  <div style={{ fontSize: '11pt', fontWeight: 'bold', letterSpacing: '0.4px', color: '#1e293b' }}>
+                    การไฟฟ้าส่วนภูมิภาค
+                  </div>
                 </div>
-
-                {/* Approver Endorsement Box */}
-                <table style={{ width: '100%', border: 'none', marginTop: '40px', fontSize: '14pt' }}>
-                  <tbody>
-                    <tr>
-                      <td style={{ width: '50%', verticalAlign: 'top', border: 'none' }}>
-                        <p><b>อก.บฟ.(ก๓)</b></p>
-                        <p style={{ marginTop: '6px' }}>อนุมัติ แจ้งส่วนเกี่ยวข้องดำเนินการต่อไป</p>
-                        <p style={{ marginTop: '30px' }}><br/></p>
-                        <p>({formData.approverName})</p>
-                        <p>{formData.approverTitle}</p>
-                      </td>
-                      <td style={{ width: '50%', verticalAlign: 'top', border: 'none', textAlign: 'right' }}>
-                        <p>ผห.กร.(ก๓) .............................. วันที่ ....../....../......</p>
-                        <p style={{ marginTop: '10px' }}>ชผ.กร.(ก๓) .............................. วันที่ ....../....../......</p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </>
-            ) : (
-              <>
-                <p className="wc-memo-p">{formData.supervisorBody}</p>
-                {formData.networkNo && (
-                  <p style={{ textAlign: 'center', fontWeight: 'bold', margin: '10pt 0' }}>{formData.networkNo}</p>
-                )}
-
-                <div 
-                  style={{ overflowX: 'auto', margin: '14px 0' }}
-                  dangerouslySetInnerHTML={{ __html: generateWireClarifyTableHtmlForWord(formData) }}
-                />
-
-                <p className="wc-memo-p" style={{ marginTop: '12px' }}>
-                  ทั้งนี้จึงขอรายงานผลการนำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอน เพื่อให้ส่วนเกี่ยวข้องช่วยพิจารณาดำเนินการต่อไป
-                </p>
-                <p className="wc-memo-p">
-                  จึงเรียนมาเพื่อโปรดทราบและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป
-                </p>
-
-                <div className="wc-signer-block">
-                  <p style={{ marginBottom: '25px' }}><br/></p>
-                  <p>({formData.supervisorName})</p>
-                  <p>{formData.supervisorPosition}</p>
-                </div>
-
-                <div className="wc-signer-block" style={{ marginTop: '30px' }}>
-                  <p>ทราบ ดำเนินการต่อไป</p>
-                  <p style={{ marginBottom: '25px' }}><br/></p>
-                  <p>({formData.headOfSectionName})</p>
-                  <p>{formData.headOfSectionTitle}</p>
-                </div>
-
-                <div style={{ marginTop: '50px', fontSize: '11pt', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '8px' }}>
-                  <p>{formData.contactDepartment}</p>
-                  <p>โทรศัพท์ {formData.contactPhone}</p>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ====================================================================
-          PRINT ONLY VIEWPORT
-          ==================================================================== */}
-      <div className="wc-print-only">
-        <div className="wc-doc-preview-wrapper">
-          <div className="wc-memo-header">
-            <img src="/pea-logo.png" alt="PEA Logo" style={{ width: '55px', height: '55px', objectFit: 'contain' }} />
-            <div>
-              <div style={{ fontSize: '18pt', fontWeight: 'bold', lineHeight: 1.15 }}>การไฟฟ้าส่วนภูมิภาค</div>
-              <div style={{ fontSize: '9pt', fontWeight: 'bold' }}>PROVINCIAL ELECTRICITY AUTHORITY</div>
-            </div>
-          </div>
-
-          <table className="wc-memo-meta-table">
-            <tbody>
-              <tr>
-                <td style={{ width: '10%', fontWeight: 'bold' }}>จาก</td>
-                <td style={{ width: '40%' }}>{formData.docFrom || '................................'}</td>
-                <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
-                <td style={{ width: '40%' }}>{formData.docTo || '................................'}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>เลขที่</td>
-                <td>{formData.docNo || '................................'}</td>
-                <td style={{ fontWeight: 'bold' }}>วันที่</td>
-                <td>{formData.docDate || '................................'}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>เรื่อง</td>
-                <td colSpan={3} style={{ fontWeight: 'bold' }}>{formData.subject}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>เรียน</td>
-                <td colSpan={3}>{formData.salutation}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          {formData.docLevel === 'division_memo' ? (
-            <>
-              <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>๑. เรื่องเดิม</p>
-              <p className="wc-memo-p">{formData.memoBackground}</p>
-
-              <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>๒. ข้อเท็จจริง</p>
-              <p className="wc-memo-p">{formData.memoFacts}</p>
-
-              <p style={{ fontWeight: 'bold', textDecoration: 'underline' }}>๓. ข้อพิจารณา</p>
-              <p className="wc-memo-p">{formData.memoConsideration}</p>
-
-              <div dangerouslySetInnerHTML={{ __html: generateWireClarifyTableHtmlForWord(formData) }} />
-
-              <p className="wc-memo-p" style={{ marginTop: '12px' }}>{formData.memoClosing}</p>
-
-              <div className="wc-signer-block">
-                <p style={{ marginBottom: '25px' }}><br/></p>
-                <p>({formData.signerName})</p>
-                <p>{formData.signerTitle}</p>
-                {formData.signerDate && <p style={{ fontSize: '14pt' }}>{formData.signerDate}</p>}
               </div>
 
-              <table style={{ width: '100%', border: 'none', marginTop: '40px', fontSize: '14pt' }}>
+              <table className="a4-info-table">
                 <tbody>
                   <tr>
-                    <td style={{ width: '50%', verticalAlign: 'top', border: 'none' }}>
-                      <p><b>อก.บฟ.(ก๓)</b></p>
-                      <p style={{ marginTop: '6px' }}>อนุมัติ แจ้งส่วนเกี่ยวข้องดำเนินการต่อไป</p>
-                      <p style={{ marginTop: '30px' }}><br/></p>
-                      <p>({formData.approverName})</p>
-                      <p>{formData.approverTitle}</p>
+                    <td style={{ width: '10%', fontWeight: 'bold' }}>หน่วยงาน</td>
+                    <td style={{ width: '40%' }}>
+                      <input
+                        type="text"
+                        className="a4-live-input"
+                        value={formData.docFrom}
+                        onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="เช่น กรย.(ก๓)"
+                      />
                     </td>
-                    <td style={{ width: '50%', verticalAlign: 'top', border: 'none', textAlign: 'right' }}>
-                      <p>ผห.กร.(ก๓) .............................. วันที่ ....../....../......</p>
-                      <p style={{ marginTop: '10px' }}>ชผ.กร.(ก๓) .............................. วันที่ ....../....../......</p>
+                    <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
+                    <td style={{ width: '40%' }}>
+                      <input
+                        type="text"
+                        className="a4-live-input"
+                        value={formData.docTo}
+                        onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="เช่น ฝวบ.(ก๓)"
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold' }}>ที่</td>
+                    <td>
+                      <input
+                        type="text"
+                        className="a4-live-input"
+                        value={formData.docNo}
+                        onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="เลขที่หนังสือ เช่น มท ๕๓๐๙.๑๖/..."
+                      />
+                    </td>
+                    <td style={{ fontWeight: 'bold' }}>วันที่</td>
+                    <td>
+                      <input
+                        type="text"
+                        className="a4-live-input"
+                        value={formData.docDate}
+                        onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold' }}>เรื่อง</td>
+                    <td colSpan={3}>
+                      <input
+                        type="text"
+                        className="a4-live-input"
+                        style={{ fontWeight: 'bold' }}
+                        value={formData.subject}
+                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold' }}>เรียน</td>
+                    <td colSpan={3}>
+                      <input
+                        type="text"
+                        className="a4-live-input"
+                        value={formData.salutation}
+                        onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="เช่น อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)"
+                      />
                     </td>
                   </tr>
                 </tbody>
               </table>
-            </>
-          ) : (
-            <>
-              <p className="wc-memo-p">{formData.supervisorBody}</p>
-              {formData.networkNo && (
-                <p style={{ textAlign: 'center', fontWeight: 'bold', margin: '10pt 0' }}>{formData.networkNo}</p>
+            </div>
+
+            {/* 2 & 4. BODY CONTENT */}
+            <div
+              className="a4-section-hoverable"
+              onClick={() => setActiveEditSection('reason')}
+              title="คลิกเพื่อแก้ไขเนื้อหาและเหตุผลความจำเป็น"
+              style={{ marginTop: '12pt' }}
+            >
+              <div className="section-edit-badge">
+                <Edit3 size={12} /> จิ้มแก้ไขข้อความและเหตุผลชี้แจง
+              </div>
+
+              {formData.docLevel === 'division_memo' ? (
+                <>
+                  {/* Dynamic Variable Hint on Screen */}
+                  <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '11px', background: '#fff7ed', color: '#c2410c', border: '1px solid #ffedd5', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                      📌 ตัวแปรประจำงานนี้: [WBS: {formData.wbsNo}] [ผู้ควบคุมงาน: {formData.supervisorName}]
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                      (ส่วนที่มีสีไฮไลท์คือจุดที่เปลี่ยนแต่ละงาน • เมื่อสั่งพิมพ์หรือก๊อปปี้จะเป็นสีดำทางการปกติ)
+                    </span>
+                  </div>
+
+                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๑. เรื่องเดิม</p>
+                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
+                    <span className="wc-print-only">{formData.memoBackground}</span>
+                    <span className="no-print">{renderScreenBackgroundText()}</span>
+                  </p>
+
+                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๒. ข้อเท็จจริง</p>
+                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', whiteSpace: 'pre-line', marginBottom: '8pt' }}>
+                    {formData.memoFacts}
+                  </p>
+                </>
+              ) : (
+                <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', whiteSpace: 'pre-line', marginBottom: '8pt' }}>
+                  {formData.supervisorBody}
+                </p>
               )}
+            </div>
 
-              <div dangerouslySetInnerHTML={{ __html: generateWireClarifyTableHtmlForWord(formData) }} />
-
-              <p className="wc-memo-p" style={{ marginTop: '12px' }}>
-                ทั้งนี้จึงขอรายงานผลการนำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอน เพื่อให้ส่วนเกี่ยวข้องช่วยพิจารณาดำเนินการต่อไป
-              </p>
-              <p className="wc-memo-p">
-                จึงเรียนมาเพื่อโปรดทราบและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป
-              </p>
-
-              <div className="wc-signer-block">
-                <p style={{ marginBottom: '25px' }}><br/></p>
-                <p>({formData.supervisorName})</p>
-                <p>{formData.supervisorPosition}</p>
+            {/* 3. WIRE TABLE SECTION */}
+            <div
+              className="a4-section-hoverable"
+              onClick={() => setActiveEditSection('table')}
+              title="คลิกเพื่อแก้ไขตารางเศษสาย"
+              style={{ marginTop: '8pt', marginBottom: '12pt' }}
+            >
+              <div className="section-edit-badge">
+                <Edit3 size={12} /> จิ้มแก้ไขตารางเศษสาย ({formData.items.length} รายการ)
               </div>
 
-              <div className="wc-signer-block" style={{ marginTop: '30px' }}>
-                <p>ทราบ ดำเนินการต่อไป</p>
-                <p style={{ marginBottom: '25px' }}><br/></p>
-                <p>({formData.headOfSectionName})</p>
-                <p>{formData.headOfSectionTitle}</p>
+              <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '13pt', marginBottom: '6pt' }}>
+                ตารางเปรียบเทียบปริมาณเศษสายรื้อถอน
               </div>
 
-              <div style={{ marginTop: '50px', fontSize: '11pt', color: '#64748b', borderTop: '1px solid #cbd5e1', paddingTop: '8px' }}>
-                <p>{formData.contactDepartment}</p>
-                <p>โทรศัพท์ {formData.contactPhone}</p>
+              <table className="a4-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '8%', textAlign: 'center' }}>ลำดับ</th>
+                    <th style={{ width: '42%' }}>ชนิดสาย</th>
+                    <th style={{ width: '18%', textAlign: 'right' }}>ประมาณการ (กก.)</th>
+                    <th style={{ width: '18%', textAlign: 'right' }}>ส่งคืนจริง (กก.)</th>
+                    <th style={{ width: '14%', textAlign: 'right' }}>ร้อยละ (%)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.items.map((item, idx) => {
+                    const pct = calculateWirePercent(item.actualKg, item.estimatedKg);
+                    return (
+                      <tr key={item.id}>
+                        <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                        <td>{item.wireType}</td>
+                        <td style={{ textAlign: 'right' }}>{formatKg(item.estimatedKg)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 600 }}>{formatKg(item.actualKg)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 600, color: pct < 100 ? '#b91c1c' : '#15803d' }}>
+                          {formatPercent(pct)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr style={{ fontWeight: 'bold', backgroundColor: '#f8fafc' }}>
+                    <td colSpan={2} style={{ textAlign: 'center' }}>รวมทั้งสิ้น</td>
+                    <td style={{ textAlign: 'right' }}>{formatKg(totalEstimatedKg)}</td>
+                    <td style={{ textAlign: 'right' }}>{formatKg(totalActualKg)}</td>
+                    <td style={{ textAlign: 'right', color: totalPercentage < 100 ? '#b91c1c' : '#15803d' }}>
+                      {formatPercent(totalPercentage)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* CONSIDERATION & CLOSING */}
+            <div
+              className="a4-section-hoverable"
+              onClick={() => setActiveEditSection('reason')}
+              title="คลิกเพื่อแก้ไขข้อพิจารณาและคำลงท้าย"
+            >
+              <div className="section-edit-badge">
+                <Edit3 size={12} /> จิ้มแก้ไขข้อพิจารณา
               </div>
-            </>
-          )}
+
+              {formData.docLevel === 'division_memo' ? (
+                <>
+                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๓. ข้อพิจารณา</p>
+                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
+                    {formData.memoConsideration}
+                  </p>
+                  <p className="a4-text-indent" style={{ marginTop: '12pt', marginBottom: '24pt' }}>
+                    {formData.memoClosing}
+                  </p>
+                </>
+              ) : (
+                <p className="a4-text-indent" style={{ marginTop: '12pt', marginBottom: '24pt' }}>
+                  {formData.supervisorClosing}
+                </p>
+              )}
+            </div>
+
+            {/* 5. SIGNER & APPROVER SECTION */}
+            <div
+              className="a4-section-hoverable"
+              onClick={() => setActiveEditSection('signer')}
+              title="คลิกเพื่อแก้ไขผู้ลงนาม"
+              style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10pt', marginBottom: '24pt' }}
+            >
+              <div className="section-edit-badge">
+                <Edit3 size={12} /> จิ้มแก้ไขผู้ลงนาม
+              </div>
+
+              <div style={{ textAlign: 'center', minWidth: '270px' }}>
+                <div style={{ height: '36px' }}></div>
+                <div>({formData.signerName || '...................................................'})</div>
+                <div style={{ fontSize: '13pt', color: '#334155', marginTop: '2pt' }}>{formData.signerTitle}</div>
+                {formData.signerDate && (
+                  <div style={{ fontSize: '12pt', color: '#64748b', marginTop: '2pt' }}>{formData.signerDate}</div>
+                )}
+              </div>
+            </div>
+
+            {/* APPROVAL STAMPS / FOOTER */}
+            <div
+              className="a4-section-hoverable"
+              onClick={() => setActiveEditSection('signer')}
+              title="คลิกเพื่อแก้ไขผู้อนุมัติ & ท้ายกระดาษ"
+              style={{ borderTop: '1px solid #cbd5e1', paddingTop: '10pt', marginTop: '14pt' }}
+            >
+              <div className="section-edit-badge">
+                <Edit3 size={12} /> จิ้มแก้ไขผู้อนุมัติ & ท้ายกระดาษ
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '12pt' }}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>{formData.approverEndorsementTo || '- อก.รย.(ก๓)'}</div>
+                  <div style={{ marginTop: '3pt', color: '#475569' }}>อนุมัติ ดำเนินการตามเสนอ</div>
+                  <div style={{ height: '30px' }}></div>
+                  <div>({formData.approverName})</div>
+                  <div style={{ fontSize: '11pt', color: '#64748b' }}>{formData.approverTitle}</div>
+                </div>
+
+                <div style={{ textAlign: 'right', fontSize: '11pt', color: '#475569' }}>
+                  <div>รฝ.วบ.(ก๓) ............................ วันที่ ....../....../......</div>
+                  <div style={{ marginTop: '8pt' }}>ผห.กร.(ก๓) ............................ วันที่ ....../....../......</div>
+                  <div style={{ marginTop: '8pt' }}>ชผ.กร.(ก๓) ............................ วันที่ ....../....../......</div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '14pt', fontSize: '10pt', color: '#64748b', borderTop: '1px dashed #cbd5e1', paddingTop: '6pt' }}>
+                {formData.contactDepartment} โทรศัพท์ {formData.contactPhone}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* ========================================================================= */}
+      {/* BIG SECTION POP-OUT EDITOR MODAL                                          */}
+      {/* ========================================================================= */}
+      {activeEditSection && (
+        <div className="big-editor-overlay" onClick={() => setActiveEditSection(null)}>
+          <div className="big-editor-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="big-editor-header">
+              <div className="big-editor-title">
+                {(() => {
+                  const meta = SECTIONS_META.find(s => s.key === activeEditSection);
+                  const Icon = meta?.icon || FileWarning;
+                  return (
+                    <>
+                      <Icon size={22} className="text-orange-400" />
+                      <span>{meta?.title}</span>
+                    </>
+                  );
+                })()}
+              </div>
+              <button
+                type="button"
+                className="big-editor-close"
+                onClick={() => setActiveEditSection(null)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="big-editor-body">
+              {/* SECTION 1: HEADER */}
+              {activeEditSection === 'header' && (
+                <div>
+                  <div className="big-grid-2">
+                    <div className="big-field-group">
+                      <label className="big-label">จาก (หน่วยงานเจ้าของเรื่อง)</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.docFrom}
+                        onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
+                        placeholder="เช่น กรย.(ก๓)"
+                      />
+                    </div>
+                    <div className="big-field-group">
+                      <label className="big-label">ถึง (หน่วยงานปลายทาง)</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.docTo}
+                        onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
+                        placeholder="เช่น ฝวบ.(ก๓)"
+                      />
+                      <div className="var-quick-options" style={{ marginTop: '6px' }}>
+                        <button
+                          type="button"
+                          className="var-quick-opt-btn"
+                          onClick={() => setFormData({ ...formData, docTo: 'ฝวบ.(ก๓)' })}
+                        >
+                          📌 ฝวบ.(ก๓)
+                        </button>
+                        <button
+                          type="button"
+                          className="var-quick-opt-btn"
+                          onClick={() => setFormData({ ...formData, docTo: 'ผกร.กรย.(ก๓)' })}
+                        >
+                          📌 ผกร.กรย.(ก๓)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="big-grid-2">
+                    <div className="big-field-group">
+                      <label className="big-label">เลขที่หนังสือ</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.docNo}
+                        onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
+                        placeholder="เช่น มท ๕๓๐๙.๑๖/..."
+                      />
+                    </div>
+                    <div className="big-field-group">
+                      <label className="big-label">วันที่ในหนังสือ</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.docDate}
+                        onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
+                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="big-field-group">
+                    <label className="big-label">เรื่อง</label>
+                    <input
+                      type="text"
+                      className="big-input"
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="big-field-group">
+                    <label className="big-label">เรียน</label>
+                    <input
+                      type="text"
+                      className="big-input"
+                      value={formData.salutation}
+                      onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
+                      placeholder="เช่น อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)"
+                    />
+                    <div className="var-quick-options" style={{ marginTop: '6px' }}>
+                      <button
+                        type="button"
+                        className="var-quick-opt-btn"
+                        onClick={() => setFormData({ ...formData, salutation: 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)' })}
+                      >
+                        📌 อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)
+                      </button>
+                      <button
+                        type="button"
+                        className="var-quick-opt-btn"
+                        onClick={() => setFormData({ ...formData, salutation: 'ผห.กร.(ก๓) ผ่าน ชผ.กร.(ก๓)' })}
+                      >
+                        📌 ผห.กร.(ก๓) ผ่าน ชผ.กร.(ก๓)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 2: PROJECT & WBS */}
+              {activeEditSection === 'project' && (
+                <div>
+                  <div className="big-grid-2">
+                    <div className="big-field-group">
+                      <label className="big-label">หมายเลขงาน WBS</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.wbsNo}
+                        onChange={(e) => setFormData({ ...formData, wbsNo: e.target.value })}
+                        placeholder="เช่น P-TDD02.3-I-LYAIA.0016"
+                      />
+                    </div>
+                    <div className="big-field-group">
+                      <label className="big-label">หนังสืออนุมัติงานรื้อถอนเดิม</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.approvalDocRef}
+                        onChange={(e) => setFormData({ ...formData, approvalDocRef: e.target.value })}
+                        placeholder="เช่น ก.๓ กวว.(วร) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๖ สิงหาคม ๒๕๖๗"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="big-field-group">
+                    <label className="big-label">ชื่องานและสถานที่ก่อสร้าง</label>
+                    <textarea
+                      rows={2}
+                      className="big-textarea"
+                      value={formData.projectName}
+                      onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
+                      placeholder="เช่น ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน..."
+                    />
+                  </div>
+
+                  <div className="big-field-group">
+                    <label className="big-label">หมายเลขโครงข่ายรื้อถอน</label>
+                    <input
+                      type="text"
+                      className="big-input"
+                      value={formData.networkNo}
+                      onChange={(e) => setFormData({ ...formData, networkNo: e.target.value })}
+                      placeholder="เช่น โครงข่ายรื้อถอนแรงสูงภายนอก ๖๐๐๑๓๘๑๔๗๘"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 3: WIRE TABLE */}
+              {activeEditSection === 'table' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <label className="big-label" style={{ marginBottom: 0 }}>
+                      รายการเศษสาย ({formData.items.length} รายการ)
+                    </label>
+                    <button
+                      type="button"
+                      className="a4-action-btn a4-btn-emerald"
+                      onClick={handleAddItem}
+                    >
+                      <Plus size={15} /> เพิ่มชนิดสาย
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {formData.items.map((item, idx) => {
+                      const pct = calculateWirePercent(item.actualKg, item.estimatedKg);
+                      return (
+                        <div key={item.id} className="big-table-card">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: 600, color: '#c2410c' }}>
+                              รายการที่ {idx + 1}: ร้อยละ {formatPercent(pct)}
+                            </span>
+                            {formData.items.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteItem(idx)}
+                                className="a4-action-btn"
+                                style={{ backgroundColor: '#fee2e2', color: '#991b1b', border: 'none', padding: '3px 8px' }}
+                              >
+                                <Trash2 size={13} /> ลบ
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="big-field-group">
+                            <span style={{ fontSize: '11px', color: '#64748b' }}>ชนิดสาย</span>
+                            <input
+                              type="text"
+                              className="big-input"
+                              value={item.wireType}
+                              onChange={(e) => handleUpdateItem(idx, 'wireType', e.target.value)}
+                              placeholder="เช่น เศษสายอลูมิเนียมแกนเหล็ก"
+                            />
+                          </div>
+
+                          <div className="big-grid-2">
+                            <div>
+                              <span style={{ fontSize: '11px', color: '#64748b' }}>ประมาณการ (กก.)</span>
+                              <input
+                                type="number"
+                                className="big-input"
+                                value={item.estimatedKg}
+                                onChange={(e) => handleUpdateItem(idx, 'estimatedKg', parseFloat(e.target.value) || 0)}
+                              />
+                            </div>
+                            <div>
+                              <span style={{ fontSize: '11px', color: '#64748b' }}>ส่งคืนจริง (กก.)</span>
+                              <input
+                                type="number"
+                                className="big-input"
+                                value={item.actualKg}
+                                onChange={(e) => handleUpdateItem(idx, 'actualKg', parseFloat(e.target.value) || 0)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div style={{ marginTop: '14px', padding: '12px', backgroundColor: '#fff7ed', borderRadius: '8px', border: '1px solid #ffedd5' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, color: '#c2410c' }}>
+                      <span>รวมประมาณการ: {formatKg(totalEstimatedKg)} กก.</span>
+                      <span>รวมคืนจริง: {formatKg(totalActualKg)} กก.</span>
+                      <span>คิดเป็น: {formatPercent(totalPercentage)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 4: REASON & CONSIDERATION (GUIDED VARIABLE BUILDER + FREEFORM) */}
+              {activeEditSection === 'reason' && (
+                <div>
+                  {/* Mode switcher */}
+                  <div className="wire-mode-toggle">
+                    <button
+                      type="button"
+                      className={`wire-mode-btn ${reasonMode === 'guided' ? 'active' : ''}`}
+                      onClick={() => setReasonMode('guided')}
+                    >
+                      <Sparkles size={15} /> โหมดกรอกตัวแปรเฉพาะจุด (แนะนำ - แก้ไขง่าย)
+                    </button>
+                    <button
+                      type="button"
+                      className={`wire-mode-btn ${reasonMode === 'freeform' ? 'active' : ''}`}
+                      onClick={() => setReasonMode('freeform')}
+                    >
+                      <Edit3 size={15} /> โหมดแก้ไขข้อความอิสระ (Freeform)
+                    </button>
+                  </div>
+
+                  {reasonMode === 'guided' ? (
+                    <div>
+                      <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        💡 <strong>ระบบสร้างข้อความอัตโนมัติ:</strong> แก้ไขตัวแปรทั้ง ๕ จุดด้านล่างนี้ ระบบจะนำไปประกอบเข้าเป็นย่อหน้า <strong>๑. เรื่องเดิม</strong> และ <strong>๒. ข้อเท็จจริง</strong> ในเอกสารให้อัตโนมัติทันที
+                      </div>
+
+                      {/* Card 1: หนังสืออ้างอิงเดิม */}
+                      <div className="variable-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span className="variable-badge-num badge-yellow">จุดที่ ๑</span>
+                          <strong style={{ fontSize: '14px', color: '#b45309' }}>หนังสืออนุมัติงานเดิม (ที่อ้างถึง)</strong>
+                        </div>
+                        <input
+                          type="text"
+                          className="big-input"
+                          value={formData.approvalDocRef}
+                          onChange={(e) => handleUpdateVariable('approvalDocRef', e.target.value)}
+                          placeholder="เช่น ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗"
+                        />
+                        <div className="var-quick-options">
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗')}
+                          >
+                            ตัวอย่าง ๑: ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ ส.ค. ๖๗
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.๓ กวว.(วร) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๖ สิงหาคม ๒๕๖๗')}
+                          >
+                            ตัวอย่าง ๒: ก.๓ กวว.(วร) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๖ ส.ค. ๖๗
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Card 2: ชื่องานและสถานที่ก่อสร้าง */}
+                      <div className="variable-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span className="variable-badge-num badge-blue">จุดที่ ๒</span>
+                          <strong style={{ fontSize: '14px', color: '#1d4ed8' }}>ชื่องานและสถานที่ก่อสร้าง</strong>
+                        </div>
+                        <textarea
+                          rows={2}
+                          className="big-textarea"
+                          value={formData.projectName}
+                          onChange={(e) => handleUpdateVariable('projectName', e.target.value)}
+                          placeholder="เช่น ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี"
+                        />
+                      </div>
+
+                      {/* Card 3: หมายเลขงาน WBS */}
+                      <div className="variable-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span className="variable-badge-num badge-orange">จุดที่ ๓</span>
+                          <strong style={{ fontSize: '14px', color: '#c2410c' }}>หมายเลขงาน WBS</strong>
+                        </div>
+                        <input
+                          type="text"
+                          className="big-input"
+                          value={formData.wbsNo}
+                          onChange={(e) => handleUpdateVariable('wbsNo', e.target.value)}
+                          placeholder="เช่น P-TDD02.3-I-LYAIA.0016"
+                        />
+                      </div>
+
+                      {/* Card 4: ผู้ควบคุมงาน */}
+                      <div className="variable-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span className="variable-badge-num badge-green">จุดที่ ๔</span>
+                          <strong style={{ fontSize: '14px', color: '#15803d' }}>ผู้ควบคุมงาน (ชื่อและตำแหน่ง)</strong>
+                        </div>
+                        <div className="big-grid-2">
+                          <div>
+                            <span style={{ fontSize: '12px', color: '#64748b' }}>ชื่อ-นามสกุล</span>
+                            <input
+                              type="text"
+                              className="big-input"
+                              value={formData.supervisorName}
+                              onChange={(e) => handleUpdateVariable('supervisorName', e.target.value)}
+                              placeholder="เช่น นายอุดมศักดิ์ จันทร์กลั่น"
+                            />
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '12px', color: '#64748b' }}>ตำแหน่ง/แผนก</span>
+                            <input
+                              type="text"
+                              className="big-input"
+                              value={formData.supervisorPosition}
+                              onChange={(e) => handleUpdateVariable('supervisorPosition', e.target.value)}
+                              placeholder="เช่น หชง.๔ ผกร.กรย.(ก๓)"
+                            />
+                          </div>
+                        </div>
+                        <div className="var-quick-options">
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            onClick={() => handleUpdateVariable('supervisorPosition', 'หชง.๔ ผกร.กรย.(ก๓)')}
+                          >
+                            📌 หชง.๔ ผกร.กรย.(ก๓)
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            onClick={() => handleUpdateVariable('supervisorPosition', 'พชง.๗ ผกร.กรย.(ก๓)')}
+                          >
+                            📌 พชง.๗ ผกร.กรย.(ก๓)
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            onClick={() => handleUpdateVariable('supervisorPosition', 'วศก.๔ ผกร.กรย.(ก๓)')}
+                          >
+                            📌 วศก.๔ ผกร.กรย.(ก๓)
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Card 5: สาเหตุที่ส่งคืนไม่ครบ */}
+                      <div className="variable-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span className="variable-badge-num" style={{ background: '#7c3aed', color: '#fff' }}>จุดที่ ๕</span>
+                          <strong style={{ fontSize: '14px', color: '#7c3aed' }}>สาเหตุ/เหตุผลความจำเป็นที่ส่งคืนเศษสายไม่ครบ</strong>
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
+                          เลือกสาเหตุสำเร็จรูปที่ตรงกับสภาพหน้างานจริง:
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                          {PRESET_WIRE_REASONS.map((preset) => (
+                            <button
+                              key={preset.key}
+                              type="button"
+                              className="var-quick-opt-btn"
+                              style={{
+                                textAlign: 'left',
+                                padding: '8px 10px',
+                                border: selectedReasonKey === preset.key ? '2px solid #ea580c' : '1px solid #cbd5e1',
+                                backgroundColor: selectedReasonKey === preset.key ? '#fff7ed' : '#ffffff',
+                                color: selectedReasonKey === preset.key ? '#c2410c' : '#334155',
+                                fontWeight: selectedReasonKey === preset.key ? 600 : 400
+                              }}
+                              onClick={() => handleSelectPresetWireReason(preset)}
+                            >
+                              {preset.badge}
+                            </button>
+                          ))}
+                        </div>
+
+                        <span style={{ fontSize: '12px', color: '#64748b' }}>ข้อความข้อเท็จจริง (ปรับแต่งเพิ่มเติมได้ตามต้องการ):</span>
+                        <textarea
+                          rows={4}
+                          className="big-textarea"
+                          value={formData.memoFacts}
+                          onChange={(e) => setFormData({ ...formData, memoFacts: e.target.value })}
+                        />
+                      </div>
+
+                      {/* Card 6: ๓. ข้อพิจารณา (วรรคสุดท้าย) */}
+                      <div className="variable-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span className="variable-badge-num" style={{ background: '#0284c7', color: '#fff' }}>ข้อ ๓</span>
+                          <strong style={{ fontSize: '14px', color: '#0369a1' }}>ข้อพิจารณา (วรรคสรุปก่อนตาราง)</strong>
+                        </div>
+                        <textarea
+                          rows={3}
+                          className="big-textarea"
+                          value={formData.memoConsideration}
+                          onChange={(e) => setFormData({ ...formData, memoConsideration: e.target.value })}
+                        />
+                      </div>
+
+                      {/* Live Compiled Preview */}
+                      <div className="var-live-preview-box">
+                        <div style={{ fontWeight: 600, color: '#0369a1', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Sparkles size={14} /> ตัวอย่างข้อความที่จะปรากฏในบันทึกข้อความ (Live Preview):
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
+                          <strong>๑. เรื่องเดิม:</strong> {formData.memoBackground}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
+                          <strong>๒. ข้อเท็จจริง:</strong> {formData.memoFacts}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#1e293b' }}>
+                          <strong>๓. ข้อพิจารณา:</strong> {formData.memoConsideration}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      {/* Freeform Editor */}
+                      <div className="big-field-group">
+                        <label className="big-label">๑. เรื่องเดิม</label>
+                        <textarea
+                          rows={3}
+                          className="big-textarea"
+                          value={formData.memoBackground}
+                          onChange={(e) => setFormData({ ...formData, memoBackground: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="big-field-group">
+                        <label className="big-label">๒. ข้อเท็จจริง (เหตุผลความจำเป็นที่ส่งคืนไม่ครบ)</label>
+                        <textarea
+                          rows={5}
+                          className="big-textarea"
+                          value={formData.memoFacts}
+                          onChange={(e) => setFormData({ ...formData, memoFacts: e.target.value })}
+                          placeholder="ระบุข้อเท็จจริง เช่น สายมีสภาพเปื่อย ขาดเป็นท่อนเล็กท่อนน้อย..."
+                        />
+                      </div>
+
+                      <div className="big-field-group">
+                        <label className="big-label">๓. ข้อพิจารณา</label>
+                        <textarea
+                          rows={3}
+                          className="big-textarea"
+                          value={formData.memoConsideration}
+                          onChange={(e) => setFormData({ ...formData, memoConsideration: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="big-field-group">
+                        <label className="big-label">คำลงท้าย</label>
+                        <input
+                          type="text"
+                          className="big-input"
+                          value={formData.memoClosing}
+                          onChange={(e) => setFormData({ ...formData, memoClosing: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SECTION 5: SIGNER & APPROVER */}
+              {activeEditSection === 'signer' && (
+                <div>
+                  <div className="big-field-group">
+                    <label className="big-label">ชื่อผู้ลงนามหลัก (ขวากลาง)</label>
+                    <input
+                      type="text"
+                      className="big-input"
+                      value={formData.signerName}
+                      onChange={(e) => setFormData({ ...formData, signerName: e.target.value })}
+                      placeholder="เช่น นายอนันต์ กาญจนอุปถัมภ์"
+                    />
+                  </div>
+
+                  <div className="big-field-group">
+                    <label className="big-label">ตำแหน่งผู้ลงนาม</label>
+                    <input
+                      type="text"
+                      className="big-input"
+                      value={formData.signerTitle}
+                      onChange={(e) => setFormData({ ...formData, signerTitle: e.target.value })}
+                      placeholder="เช่น รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)"
+                    />
+                    <div className="var-quick-options" style={{ marginTop: '6px' }}>
+                      <button
+                        type="button"
+                        className="var-quick-opt-btn"
+                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)' })}
+                      >
+                        📌 รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)
+                      </button>
+                      <button
+                        type="button"
+                        className="var-quick-opt-btn"
+                        onClick={() => setFormData({ ...formData, signerTitle: 'อก.รย.(ก๓)' })}
+                      >
+                        📌 อก.รย.(ก๓)
+                      </button>
+                      <button
+                        type="button"
+                        className="var-quick-opt-btn"
+                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก๓)' })}
+                      >
+                        📌 รก.รย.(ก๓)
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="big-grid-2">
+                    <div className="big-field-group">
+                      <label className="big-label">วันที่ลงนาม</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.signerDate}
+                        onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
+                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                      />
+                    </div>
+                    <div className="big-field-group">
+                      <label className="big-label">เบอร์โทรศัพท์ติดต่อ</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.contactPhone}
+                        onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                        placeholder="เช่น ๑๐๓๙๑"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '16px', borderTop: '1px solid #e2e8f0', paddingTop: '14px' }}>
+                    <div className="big-grid-2">
+                      <div className="big-field-group">
+                        <label className="big-label">ชื่อผู้อนุมัติ (ซ้ายล่าง)</label>
+                        <input
+                          type="text"
+                          className="big-input"
+                          value={formData.approverName}
+                          onChange={(e) => setFormData({ ...formData, approverName: e.target.value })}
+                          placeholder="เช่น นายเมธี สุกก่ำ"
+                        />
+                      </div>
+                      <div className="big-field-group">
+                        <label className="big-label">ตำแหน่งผู้อนุมัติ</label>
+                        <input
+                          type="text"
+                          className="big-input"
+                          value={formData.approverTitle}
+                          onChange={(e) => setFormData({ ...formData, approverTitle: e.target.value })}
+                          placeholder="เช่น อฝ.วบ.(ก๓)"
+                        />
+                        <div className="var-quick-options" style={{ marginTop: '6px' }}>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            onClick={() => setFormData({ ...formData, approverTitle: 'อฝ.วบ.(ก๓)' })}
+                          >
+                            📌 อฝ.วบ.(ก๓)
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            onClick={() => setFormData({ ...formData, approverTitle: 'รฝ.วบ.(ก๓)' })}
+                          >
+                            📌 รฝ.วบ.(ก๓)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="big-field-group" style={{ marginTop: '12px' }}>
+                      <label className="big-label">ข้อความสั่งการถึง (หัวตรายางอนุมัติของ อฝ.วบ.)</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.approverEndorsementTo || '- อก.รย.(ก๓)'}
+                        onChange={(e) => setFormData({ ...formData, approverEndorsementTo: e.target.value })}
+                        placeholder="เช่น - อก.รย.(ก๓)"
+                      />
+                      <div className="var-quick-options" style={{ marginTop: '6px' }}>
+                        <button
+                          type="button"
+                          className="var-quick-opt-btn"
+                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- อก.รย.(ก๓)' })}
+                        >
+                          📌 - อก.รย.(ก๓)
+                        </button>
+                        <button
+                          type="button"
+                          className="var-quick-opt-btn"
+                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- กรย.(ก๓)' })}
+                        >
+                          📌 - กรย.(ก๓)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="big-editor-footer">
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={handlePrevSection}
+                disabled={currentSectionIndex === 0}
+              >
+                <ChevronLeft size={16} /> ส่วนก่อนหน้า
+              </button>
+
+              <div style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>
+                {currentSectionIndex + 1} จาก {SECTIONS_META.length} ส่วน
+              </div>
+
+              {currentSectionIndex < SECTIONS_META.length - 1 ? (
+                <button
+                  type="button"
+                  className="stepper-btn primary"
+                  onClick={handleNextSection}
+                >
+                  ส่วนถัดไป <ChevronRight size={16} />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="stepper-btn primary"
+                  onClick={() => setActiveEditSection(null)}
+                >
+                  เสร็จสิ้น / บันทึก <Check size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Feedback */}
+      {toastMessage && (
+        <div className="a4-toast no-print">
+          <Check size={18} className="text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+    </>
   );
 }

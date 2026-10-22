@@ -44,8 +44,9 @@ export interface ProcurementFormData {
   signerDate: string;               // วันที่กำกับลายเซ็น (เว้นว่างไว้)
 
   // เกษียน / ผู้อนุมัติ
-  approverName: string;             // นายเมธี สุกก่ำ
-  approverTitle: string;            // อผ.วบ.(ก๓)
+  approverName: string;             // นายเมธี สุภาก่ำ
+  approverTitle: string;            // อฝ.วบ.(ก๓)
+  approverEndorsementTo?: string;   // สั่งการถึง เช่น - อก.รย.(ก๓)
   approverDivisionText: string;     // อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง
 }
 
@@ -56,17 +57,169 @@ export const DEFAULT_DELEGATION_ORDER =
   'ตามคำสั่งการไฟฟ้าส่วนภูมิภาคที่ พ.(ม) ๒๘/๒๕๖๘ ลงวันที่ ๑๗ พฤศจิกายน ๒๕๖๘ ซึ่งมอบอำนาจให้ ผู้อำนวยการกอง หรือ ผู้รักษาการแทนตำแหน่งดังกล่าว เป็นผู้มีอำนาจดำเนินการอนุมัติสั่งซื้อ/สั่งจ้าง/สั่งเช่า โดยวิธีเฉพาะเจาะจง ในวงเงินครั้งหนึ่งไม่เกิน ๑,๐๐๐,๐๐๐.-บาท (หนึ่งล้านบาทถ้วน) ตามข้อ ๕.๓';
 
 /**
+ * Helper to compose standardized PEA "๑. เรื่องเดิม" from variable parts
+ */
+export function composeProcurementBackground(params: {
+  approvalDocRef?: string;
+  projectName?: string;
+  workOpenerName?: string;
+  dept?: string;
+}): string {
+  const ref = params.approvalDocRef || 'ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙';
+  const proj = params.projectName || 'แผนงานพาดเพิ่ม ๒๒ เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม';
+  const opener = params.workOpenerName || 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)';
+  const dept = params.dept || 'กรย.(ก๓)';
+
+  const refPrefix = ref.startsWith('ตามอนุมัติ') || ref.startsWith('ตามหนังสือ') ? ref : `ตามอนุมัติเลขที่ ${ref}`;
+
+  return `${refPrefix} ด้วย ${dept} มี${proj} โดยมี${opener} เป็นผู้เปิดงาน`;
+}
+
+/**
+ * Helper to compose standardized PEA "๓. ข้อเสนอเพื่อพิจารณา" from variable parts
+ */
+export function composeProcurementProposal(params: {
+  procurementType?: 'buy' | 'hire';
+  projectName?: string;
+  itemDescription?: string;
+  targetDateOrPeriod?: string;
+  wbsNo?: string;
+  networkNo?: string;
+  activityNo?: string;
+  dept?: string;
+}): string {
+  const isHire = params.procurementType === 'hire';
+  const dept = params.dept || 'กรย.(ก๓)';
+  const proj = params.projectName || 'งานก่อสร้าง';
+  const item = params.itemDescription || 'พัสดุ/บริการ';
+  const targetDate = params.targetDateOrPeriod ? ` ${params.targetDateOrPeriod}` : '';
+  const wbs = params.wbsNo ? `หมายเลขงาน WBS: ${params.wbsNo}` : '';
+  const net = params.networkNo ? ` โครงข่าย ${params.networkNo}` : '';
+  const act = params.activityNo ? ` กิจกรรม ${params.activityNo}` : '';
+  const accountInfo = [wbs, net, act].filter(Boolean).join('');
+
+  if (isHire) {
+    return `${dept} พิจารณาแล้ว เพื่อให้งานก่อสร้างเป็นไปด้วยความเรียบร้อย และแล้วเสร็จทันตามกำหนดตามแผนงานที่กำหนดไว้ จึงขออนุมัติหลักการจ้าง${item}${targetDate} โดยเบิกค่าใช้จ่ายจาก${proj} ${accountInfo}`;
+  } else {
+    return `${dept} พิจารณาแล้ว เพื่อให้การก่อสร้างเป็นไปตามแผนงานและไม่กระทบงานก่อสร้าง${proj} เห็นควรให้อนุมัติจัดซื้อ${item}${targetDate} โดยให้เบิกจ่ายจาก${accountInfo}`;
+  }
+}
+
+/**
+ * Helper to compose standardized PEA subject line for procurement memo
+ */
+export function composeProcurementSubject(params: {
+  procurementType?: 'buy' | 'hire';
+  itemDescription?: string;
+  procurementMethod?: string;
+}): string {
+  const isHire = params.procurementType === 'hire';
+  const prefix = isHire ? 'ขออนุมัติหลักการจัดจ้าง' : 'ขออนุมัติหลักการจัดซื้อ';
+  const rawItem = (params.itemDescription || '').trim();
+
+  // Clean item description if it already has "จัดซื้อ" or "จัดจ้าง"
+  const cleanItem = rawItem
+    .replace(/^(ขออนุมัติหลักการจัดซื้อ|ขออนุมัติหลักการจัดจ้าง|จัดซื้อ|จัดจ้าง)\s*/, '')
+    .trim();
+
+  const method = (params.procurementMethod || 'โดยวิธีเฉพาะเจาะจง').trim();
+  const methodSuffix = method ? ` ${method.startsWith('โดย') ? method : `โดย${method}`}` : '';
+
+  if (!cleanItem) {
+    return `${prefix}${isHire ? 'บริการ/เครื่องจักร' : 'พัสดุ/อุปกรณ์'}${methodSuffix}`;
+  }
+
+  return `${prefix}${cleanItem}${methodSuffix}`;
+}
+
+export interface SubjectPreset {
+  key: string;
+  badge: string;
+  label: string;
+  type: ProcurementType;
+  subject: string;
+  itemDescription: string;
+  method: string;
+}
+
+export const COMMON_PROCUREMENT_SUBJECT_PRESETS: SubjectPreset[] = [
+  {
+    key: 'buy-drill',
+    badge: '🛒 จัดซื้อดอกสว่าน/หัวเสา',
+    label: 'จัดซื้อดอกสว่านสำหรับเจาะเหล็กดัดแปลงอุปกรณ์หัวเสา',
+    type: 'buy',
+    subject: 'ขออนุมัติหลักการจัดซื้อดอกสว่านสำหรับเจาะเหล็กดัดแปลงอุปกรณ์หัวเสา โดยวิธีเฉพาะเจาะจง',
+    itemDescription: 'ดอกสว่าน BDS HKK-N ๐๒๒ ดอกเจ็ทบอช ๒๒ mm. เจาะลึก ๓๐ mm. จำนวน ๒ ดอก',
+    method: 'โดยวิธีเฉพาะเจาะจง'
+  },
+  {
+    key: 'buy-material',
+    badge: '🛒 จัดซื้อวัสดุ/อุปกรณ์งานก่อสร้าง',
+    label: 'จัดซื้อวัสดุอุปกรณ์สำหรับงานก่อสร้างระบบจำหน่าย',
+    type: 'buy',
+    subject: 'ขออนุมัติหลักการจัดซื้อวัสดุอุปกรณ์สำหรับงานก่อสร้างระบบจำหน่าย โดยวิธีเฉพาะเจาะจง',
+    itemDescription: 'วัสดุอุปกรณ์สำหรับงานก่อสร้างระบบจำหน่าย',
+    method: 'โดยวิธีเฉพาะเจาะจง'
+  },
+  {
+    key: 'buy-safety',
+    badge: '🛒 จัดซื้ออุปกรณ์ความปลอดภัย/เครื่องมือ',
+    label: 'จัดซื้ออุปกรณ์ความปลอดภัยและเครื่องมือประจำชุดงานก่อสร้าง',
+    type: 'buy',
+    subject: 'ขออนุมัติหลักการจัดซื้ออุปกรณ์ความปลอดภัยและเครื่องมือประจำชุดงานก่อสร้าง โดยวิธีเฉพาะเจาะจง',
+    itemDescription: 'อุปกรณ์ความปลอดภัยและเครื่องมือประจำชุดงานก่อสร้าง',
+    method: 'โดยวิธีเฉพาะเจาะจง'
+  },
+  {
+    key: 'hire-backhoe',
+    badge: '🚜 จัดจ้างรถแบคโฮ/หัวกระแทก',
+    label: 'จัดจ้างรถแบคโฮหัวกระแทกเพื่อเข้างานก่อสร้าง',
+    type: 'hire',
+    subject: 'ขออนุมัติหลักการจัดจ้างรถแบคโฮหัวกระแทกเพื่อเข้างานก่อสร้าง โดยวิธีเฉพาะเจาะจง',
+    itemDescription: 'รถแบคโฮหัวกระแทก PC ๕๕ จำนวน ๑ คัน',
+    method: 'โดยวิธีเฉพาะเจาะจง'
+  },
+  {
+    key: 'hire-crane',
+    badge: '🏗️ จัดจ้างรถเครนยกเสา/อุปกรณ์',
+    label: 'จัดจ้างรถเครนพร้อมพนักงานขับรถปฏิบัติงานก่อสร้าง',
+    type: 'hire',
+    subject: 'ขออนุมัติหลักการจัดจ้างรถเครนพร้อมพนักงานขับรถปฏิบัติงานก่อสร้าง โดยวิธีเฉพาะเจาะจง',
+    itemDescription: 'รถเครนขนาด ๒๕ ตัน พร้อมพนักงานขับรถ จำนวน ๑ คัน',
+    method: 'โดยวิธีเฉพาะเจาะจง'
+  },
+  {
+    key: 'hire-labor',
+    badge: '👷 จัดจ้างเหมาบริการ/แรงงานภายนอก',
+    label: 'จัดจ้างเหมาบริการปฏิบัติงานก่อสร้างระบบจำหน่าย',
+    type: 'hire',
+    subject: 'ขออนุมัติหลักการจัดจ้างเหมาบริการปฏิบัติงานก่อสร้างระบบจำหน่าย โดยวิธีเฉพาะเจาะจง',
+    itemDescription: 'จ้างเหมาบริการปฏิบัติงานก่อสร้างระบบจำหน่ายไฟฟ้า',
+    method: 'โดยวิธีเฉพาะเจาะจง'
+  },
+  {
+    key: 'hire-truck',
+    badge: '🚛 จัดจ้างรถบรรทุกขนส่งเสาและอุปกรณ์',
+    label: 'จัดจ้างรถบรรทุกขนส่งเสาและอุปกรณ์เข้าสถานที่ก่อสร้าง',
+    type: 'hire',
+    subject: 'ขออนุมัติหลักการจัดจ้างรถบรรทุกขนส่งเสาและอุปกรณ์เข้าสถานที่ก่อสร้าง โดยวิธีเฉพาะเจาะจง',
+    itemDescription: 'รถบรรทุก ๑๐ ล้อ พร้อมพนักงานขับรถ',
+    method: 'โดยวิธีเฉพาะเจาะจง'
+  }
+];
+
+/**
  * Sample 1: ขออนุมัติหลักการจัดซื้อ (Purchasing Materials/Tools - matching Image 1)
  */
 export const SAMPLE_BUY_DATA: ProcurementFormData = {
   procurementType: 'buy',
 
   docFrom: 'กรย.(ก๓)',
-  docTo: 'ผวบ.(ก๓)',
+  docTo: 'ฝวบ.(ก๓)',
   docNo: '',                        // Blank by default
   docDate: '',                      // Blank by default
   subject: 'ขออนุมัติหลักการจัดซื้อดอกสว่านสำหรับเจาะเหล็กดัดแปลงอุปกรณ์หัวเสา โดยวิธีเฉพาะเจาะจง',
-  salutation: 'อผ.วบ.(ก๓) ผ่าน รผ.วบ.(ก๓)',
+  salutation: 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)',
 
   wbsNo: 'I-69-I-PSCXX.19.3909',
   networkNo: '7001210932',
@@ -92,8 +245,9 @@ export const SAMPLE_BUY_DATA: ProcurementFormData = {
   signerTitle: 'อก.รย.(ก๓)',
   signerDate: '',
 
-  approverName: 'นายเมธี สุกก่ำ',
-  approverTitle: 'อผ.วบ.(ก๓)',
+  approverName: 'นายเมธี สุภาก่ำ',
+  approverTitle: 'อฝ.วบ.(ก๓)',
+  approverEndorsementTo: '- อก.รย.(ก๓)',
   approverDivisionText: 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'
 };
 
@@ -104,11 +258,11 @@ export const SAMPLE_HIRE_DATA: ProcurementFormData = {
   procurementType: 'hire',
 
   docFrom: 'กรย.(ก๓)',
-  docTo: 'ผวบ.(ก๓)',
+  docTo: 'ฝวบ.(ก๓)',
   docNo: '',                        // Blank by default
   docDate: '',                      // Blank by default
   subject: 'ขออนุมัติหลักการจัดจ้างรถแบคโฮหัวกระแทก PC ๕๕ จำนวน ๑ คัน เพื่อเข้างานก่อสร้างงานย้ายแนวระบบสายส่ง ๑๑๕ kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี',
-  salutation: 'อผ.วบ.(ก๓) ผ่าน รผ.วบ.(ก๓)',
+  salutation: 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)',
 
   wbsNo: 'I-69-I-KCI69.M4.1114',
   networkNo: '',
@@ -134,8 +288,9 @@ export const SAMPLE_HIRE_DATA: ProcurementFormData = {
   signerTitle: 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)',
   signerDate: '',
 
-  approverName: 'นายเมธี สุกก่ำ',
-  approverTitle: 'อผ.วบ.(ก๓)',
+  approverName: 'นายเมธี สุภาก่ำ',
+  approverTitle: 'อฝ.วบ.(ก๓)',
+  approverEndorsementTo: '- อก.รย.(ก๓)',
   approverDivisionText: 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'
 };
 
@@ -206,12 +361,12 @@ PROVINCIAL ELECTRICITY AUTHORITY
                              ${data.signerDate || ''}
 
 
-- ${data.docFrom || 'กรย.(ก๓)'}
+- ${data.approverEndorsementTo || '- อก.รย.(ก๓)'}
   ${data.approverDivisionText || 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'}
 
 
-                                        (${data.approverName || 'นายเมธี สุกก่ำ'})
-                             ${data.approverTitle || 'อผ.วบ.(ก๓)'}
+                                        (${data.approverName || 'นายเมธี สุภาก่ำ'})
+                             ${data.approverTitle || 'อฝ.วบ.(ก๓)'}
 `;
 }
 
@@ -296,14 +451,14 @@ export function generateProcurementWordDocument(data: ProcurementFormData): stri
       <table style="width: 100%; border: none; margin-top: 45px; font-size: 14pt;">
         <tr>
           <td style="width: 55%; vertical-align: top; border: none;">
-            <p>- ${data.docFrom || 'กรย.(ก๓)'}</p>
+            <p>${data.approverEndorsementTo || '- อก.รย.(ก๓)'}</p>
             <p style="margin-top: 6px;">${data.approverDivisionText || 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'}</p>
             <p style="margin-top: 35px;"><br/></p>
-            <p>(${data.approverName || 'นายเมธี สุกก่ำ'})</p>
-            <p>${data.approverTitle || 'อผ.วบ.(ก๓)'}</p>
+            <p>(${data.approverName || 'นายเมธี สุภาก่ำ'})</p>
+            <p>${data.approverTitle || 'อฝ.วบ.(ก๓)'}</p>
           </td>
           <td style="width: 45%; vertical-align: top; border: none; text-align: right;">
-            <p>รผ.วบ.(ก๓) .............................. วันที่ ....../....../......</p>
+            <p>รฝ.วบ.(ก๓) .............................. วันที่ ....../....../......</p>
             <p style="margin-top: 10px;">ผห.กร.(ก๓) .............................. วันที่ ....../....../......</p>
             <p style="margin-top: 10px;">ชผ.กร.(ก๓) .............................. วันที่ ....../....../......</p>
           </td>

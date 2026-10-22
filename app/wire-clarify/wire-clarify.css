@@ -715,3 +715,200 @@
     page-break-after: always;
   }
 }
+
+/* ==========================================================================
+   VARIABLE BUILDER & HIGHLIGHT STYLES FOR WIRE CLARIFY
+   Helps user distinguish dynamic variables (Approval Ref, Project, WBS, Supervisor)
+   ========================================================================== */
+
+.wire-mode-toggle {
+  display: flex;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.75rem;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 1.25rem;
+}
+
+.wire-mode-btn {
+  flex: 1;
+  padding: 9px 14px;
+  border-radius: 0.5rem;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.wire-mode-btn.active {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);
+}
+
+.wire-mode-btn:hover:not(.active) {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.variable-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.variable-card:hover {
+  border-color: rgba(234, 88, 12, 0.4);
+}
+
+.variable-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.625rem;
+}
+
+.variable-badge-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.badge-yellow {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.badge-blue {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.badge-orange {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+
+.badge-green {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.var-quick-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.var-quick-opt-btn {
+  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.var-quick-opt-btn:hover {
+  background: rgba(234, 88, 12, 0.3);
+  border-color: #ea580c;
+  color: #ffffff;
+}
+
+.var-live-preview-box {
+  background: #0f172a;
+  border: 1.5px solid #ea580c;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.var-live-preview-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fb923c;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.var-live-preview-text {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #f8fafc;
+}
+
+/* On-screen highlights on the A4 sheet to make variable spots crystal clear to staff */
+.a4-var-spot {
+  background: #fef08a;
+  color: #854d0e;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 600;
+  border-bottom: 1.5px dashed #ca8a04;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.a4-var-spot:hover {
+  background: #fde047;
+}
+
+.a4-var-spot.blue {
+  background: #dbeafe;
+  color: #1e40af;
+  border-bottom: 1.5px dashed #3b82f6;
+}
+
+.a4-var-spot.green {
+  background: #dcfce7;
+  color: #166534;
+  border-bottom: 1.5px dashed #22c55e;
+}
+
+.a4-var-spot.orange {
+  background: #ffedd5;
+  color: #9a3412;
+  border-bottom: 1.5px dashed #ea580c;
+}
+
+/* Strip highlights completely in print */
+@media print {
+  .a4-var-spot,
+  .a4-var-spot.blue,
+  .a4-var-spot.green,
+  .a4-var-spot.orange {
+    background: transparent !important;
+    color: #000000 !important;
+    border-bottom: none !important;
+    padding: 0 !important;
+    font-weight: normal !important;
+  }
+}
+

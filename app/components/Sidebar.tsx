@@ -101,62 +101,8 @@ export default function Sidebar() {
   const canAccessGuide = isAdmin || isUser || isOffice;
   const canAccessOfficeSection = isAdmin || isOffice || isUser;
 
-  // 10 โปรแกรมใหม่สำหรับพนักงาน Office ที่อยู่ระหว่างเตรียมพัฒนา
+  // 8 โปรแกรมใหม่สำหรับพนักงาน Office ที่อยู่ระหว่างเตรียมพัฒนา
   const officeUpcomingPrograms = [
-    {
-      id: "car-repair",
-      title: "โปรแกรมแจ้งซ่อมรถยนต์",
-      icon: Wrench,
-      desc: "ระบบออกใบแจ้งส่งซ่อมบำรุงยานพาหนะและเครื่องจักรกลหนักประจำแผนก ติดตามสถานะงานซ่อมอู่และศูนย์บริการ",
-    },
-    {
-      id: "site-expense-extra",
-      title: "โปรแกรมขอค่าใช้จ่ายหน้างานเพิ่มเติม",
-      icon: CreditCard,
-      desc: "ระบบขออนุมัติขยายกรอบวงเงินค่าใช้จ่ายหน้างานก่อสร้าง กรณีมีงานเร่งด่วนหรืองานที่มีความจำเป็นพิเศษ",
-    },
-    {
-      id: "job-close-memo",
-      title: "โปรแกรมบันทึกแจ้งปิดงาน",
-      icon: CheckCircle2,
-      desc: "ระบบจัดทำบันทึกข้อความแจ้งปิดงานก่อสร้างระบบไฟฟ้าอย่างเป็นทางการ ส่งฝ่ายบัญชี แผนกปฏิบัติการ และหน่วยงานที่เกี่ยวข้อง",
-    },
-    {
-      id: "concrete-transfer",
-      title: "โปรแกรมขอโอนคอนกรีตจาก กผภ.",
-      icon: Building,
-      desc: "ระบบจัดทำเอกสารประสานงานขอโอนพัสดุคอนกรีต เสา คอร. และคาน คอร. จากกองผลิตคอนกรีตและอุปกรณ์ (กผภ.)",
-    },
-    {
-      id: "job-open-request",
-      title: "โปรแกรมแจ้งขอเปิดงาน",
-      icon: PlayCircle,
-      desc: "ระบบแจ้งขอเปิด WBS และเริ่มงานก่อสร้างในพื้นที่ พร้อมประสานงานแผนกบริการลูกค้าและแผนกปฏิบัติการ",
-    },
-    {
-      id: "voucher-certify",
-      title: "โปรแกรมรับรองใบสำคัญจ่าย",
-      icon: Receipt,
-      desc: "ระบบออกหนังสือรับรองใบเสร็จรับเงิน/ใบสำคัญรับเงินสำหรับเบิกจ่ายชดใช้เงินยืมทดรองราชการของแผนก",
-    },
-    {
-      id: "shortage-budget",
-      title: "โปรแกรมของบซื้อพัสดุขาดแคลน",
-      icon: PackagePlus,
-      desc: "ระบบเสนอขอจัดสรรงบประมาณเพื่อจัดซื้อพัสดุอุปกรณ์ระบบจำหน่ายที่มีภาวะขาดแคลนในคลังพัสดุ",
-    },
-    {
-      id: "demolish-scrap",
-      title: "โปรแกรมขอส่งคืนพัสดุรื้อถอนแบบทำลาย",
-      icon: Trash2,
-      desc: "ระบบบันทึกรายการและขออนุมัติส่งคืนพัสดุรื้อถอนสภาพชำรุดเสียหายสิ้นเชิงเพื่อดำเนินการจำหน่ายทำลายตามระเบียบ",
-    },
-    {
-      id: "overnight-stay",
-      title: "โปรแกรมขออนุมัติพักแรมหน้างาน",
-      icon: Moon,
-      desc: "ระบบจัดทำหนังสือขออนุมัติให้ชุดงานก่อสร้างพักค้างแรมต่างพื้นที่ เพื่อประกอบการเบิกจ่ายเบี้ยเลี้ยงที่พัก",
-    },
     {
       id: "asset-disposal",
       title: "โปรแกรมจำหน่ายทรัพย์สิน",
@@ -301,6 +247,222 @@ export default function Sidebar() {
                 >
                   <FileCheck size={20} className="text-teal-400" />
                   <span className="font-semibold text-white">อนุมัติหลักการจัดซื้อจัดจ้าง</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/car-repair" 
+                  className={`nav-item ${pathname === "/car-repair" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/car-repair" ? undefined : 'rgba(2, 132, 199, 0.22)',
+                    border: pathname === "/car-repair" ? undefined : '1px solid rgba(14, 165, 233, 0.3)'
+                  }}
+                >
+                  <Wrench size={20} className="text-sky-400" />
+                  <span className="font-semibold text-white">โปรแกรมแจ้งซ่อมรถยนต์</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/job-close-memo" 
+                  className={`nav-item ${pathname === "/job-close-memo" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/job-close-memo" ? undefined : 'rgba(13, 148, 136, 0.22)',
+                    border: pathname === "/job-close-memo" ? undefined : '1px solid rgba(20, 184, 166, 0.3)'
+                  }}
+                >
+                  <CheckCircle2 size={20} className="text-teal-400" />
+                  <span className="font-semibold text-white">บันทึกแจ้งปิดงาน (กส.3)</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/overnight-stay" 
+                  className={`nav-item ${pathname === "/overnight-stay" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/overnight-stay" ? undefined : 'rgba(79, 70, 229, 0.22)',
+                    border: pathname === "/overnight-stay" ? undefined : '1px solid rgba(99, 102, 241, 0.3)'
+                  }}
+                >
+                  <Moon size={20} className="text-indigo-400" />
+                  <span className="font-semibold text-white">ขออนุมัติพักแรมหน้างาน</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/shortage-budget" 
+                  className={`nav-item ${pathname === "/shortage-budget" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/shortage-budget" ? undefined : 'rgba(217, 119, 6, 0.22)',
+                    border: pathname === "/shortage-budget" ? undefined : '1px solid rgba(245, 158, 11, 0.3)'
+                  }}
+                >
+                  <PackagePlus size={20} className="text-amber-400" />
+                  <span className="font-semibold text-white">ของบซื้อพัสดุขาดแคลน</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/concrete-transfer" 
+                  className={`nav-item ${pathname === "/concrete-transfer" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/concrete-transfer" ? undefined : 'rgba(59, 130, 246, 0.22)',
+                    border: pathname === "/concrete-transfer" ? undefined : '1px solid rgba(96, 165, 250, 0.3)'
+                  }}
+                >
+                  <Building size={20} className="text-blue-400" />
+                  <span className="font-semibold text-white">ขอโอนคอนกรีตจาก กผภ.</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/voucher-certify" 
+                  className={`nav-item ${pathname === "/voucher-certify" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/voucher-certify" ? undefined : 'rgba(16, 185, 129, 0.22)',
+                    border: pathname === "/voucher-certify" ? undefined : '1px solid rgba(16, 185, 129, 0.35)'
+                  }}
+                >
+                  <Receipt size={20} className="text-emerald-400" />
+                  <span className="font-semibold text-white">รับรองใบสำคัญจ่าย</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/job-open-request" 
+                  className={`nav-item ${pathname === "/job-open-request" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/job-open-request" ? undefined : 'rgba(245, 158, 11, 0.22)',
+                    border: pathname === "/job-open-request" ? undefined : '1px solid rgba(245, 158, 11, 0.35)'
+                  }}
+                >
+                  <PlayCircle size={20} className="text-amber-400" />
+                  <span className="font-semibold text-white">แจ้งขอเปิดงาน</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/site-expense-extra" 
+                  className={`nav-item ${pathname === "/site-expense-extra" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/site-expense-extra" ? undefined : 'rgba(239, 68, 68, 0.22)',
+                    border: pathname === "/site-expense-extra" ? undefined : '1px solid rgba(239, 68, 68, 0.35)'
+                  }}
+                >
+                  <CreditCard size={20} className="text-rose-400" />
+                  <span className="font-semibold text-white">ขอค่าใช้จ่ายหน้างานเพิ่ม</span>
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: '0.62rem',
+                    padding: '2px 6px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    fontWeight: 600
+                  }}>
+                    เปิดใช้งาน
+                  </span>
+                </Link>
+
+                <Link 
+                  href="/demolish-scrap" 
+                  className={`nav-item ${pathname === "/demolish-scrap" ? "active" : ""}`}
+                  style={{ 
+                    backgroundColor: pathname === "/demolish-scrap" ? undefined : 'rgba(234, 88, 12, 0.22)',
+                    border: pathname === "/demolish-scrap" ? undefined : '1px solid rgba(234, 88, 12, 0.35)'
+                  }}
+                >
+                  <Trash2 size={20} className="text-orange-400" />
+                  <span className="font-semibold text-white">ขอส่งคืนพัสดุทำลาย</span>
                   <span style={{
                     marginLeft: 'auto',
                     fontSize: '0.62rem',

@@ -19,6 +19,15 @@ export interface AdjustmentItem {
   deptPostingDate?: string; // 10. วันที่ผ่านรายการ (หน่วยงานปรับปรุง)
 }
 
+export type ReasonCategory =
+  | 'labor'
+  | 'wbs_mismatch'
+  | 'vehicle'
+  | 'cost_center'
+  | 'material'
+  | 'fuel'
+  | 'custom';
+
 export interface AccountAdjustFormData {
   // Memo Fields (หน้า 1: บันทึกข้อความ)
   docFrom: string;          // จาก เช่น "กรย.(ก๓)"
@@ -27,12 +36,19 @@ export interface AccountAdjustFormData {
   docDate: string;          // วันที่ เช่น "๑๙ ต.ค. ๖๗"
   subject: string;          // เรื่อง เช่น "ขอให้ปรับปรุงรายการทางบัญชี"
   salutation: string;       // คำขึ้นต้น เช่น "เรียน อก.กบฟ.(ก๓)"
-  memoReason: string;       // ข้อความเหตุผล
+  memoReason: string;       // ข้อความเหตุผลฉบับเต็ม
   memoClosing: string;      // ข้อความปิดท้าย เช่น "จึงเรียนมาเพื่อโปรดพิจารณาดำเนินการต่อไป"
   signerName: string;       // ชื่อผู้ลงนาม เช่น "นายอนันต์ กาญจนอุปถัมภ์"
   signerTitle: string;      // ตำแหน่งผู้ลงนาม เช่น "รก.กรย.(ก๓) ปฏิบัติงานแทน อก.กรย.(ก๓)"
   signerDate: string;       // วันที่กำกับลายเซ็น เช่น "19 ต.ค. 67"
   showDigitalSign: boolean; // แสดงลายเซ็นดิจิทัลหรือไม่
+
+  // จุดตัวแปรเหตุผลในการขอปรับปรุงบัญชี (Dynamic Variable Spots)
+  reasonCategory?: ReasonCategory; // หมวดหมู่สาเหตุ
+  causeItem?: string;              // จุดที่ 1: สิ่งที่เบิกผิด (เช่น ค่าจ้างเหมาบริการและแรงงาน / ค่าซ่อมยานพาหนะ)
+  errorType?: string;              // จุดที่ 2: ลักษณะความผิดพลาด (เช่น มีการบันทึกรายการทางบัญชีผิดพลาด / บันทึกผิดหมายเลขงาน WBS)
+  detailNote?: string;             // จุดที่ 3: ระบุเจาะจง (ถ้ามี เช่น เลข WBS หรือเลขศูนย์ต้นทุน)
+  purpose?: string;                // จุดที่ 4: วัตถุประสงค์ (เช่น เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้)
 
   // Table Form Header Fields (หน้า 2: แบบฟอร์มขอปรับปรุงฯ)
   peaBranch: string;        // การไฟฟ้า เช่น "ผกร.กรย.(ก๓)"
@@ -66,6 +82,12 @@ export const SAMPLE_ACCOUNT_ADJUST_DATA: AccountAdjustFormData = {
   signerTitle: "รก.กรย.(ก๓) ปฏิบัติงานแทน อก.กรย.(ก๓)",
   signerDate: "",
   showDigitalSign: true,
+
+  reasonCategory: "vehicle",
+  causeItem: "ค่าซ่อมยานพาหนะ",
+  errorType: "มีการบันทึกรายการทางบัญชีผิดพลาด",
+  detailNote: "",
+  purpose: "เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้",
 
   peaBranch: "ผกร.กรย.(ก๓)",
   businessType: "",
@@ -218,38 +240,117 @@ export const POPULAR_SAP_ACCOUNTS = [
 ];
 
 /**
- * Preset Reason Templates
+ * Helper to compose standardized PEA memorandum reason text from dynamic variable parts
+ */
+export function composeReasonText(params: {
+  docFrom?: string;
+  docTo?: string;
+  causeItem?: string;
+  errorType?: string;
+  detailNote?: string;
+  purpose?: string;
+}): string {
+  const from = params.docFrom || 'กรย.(ก๓)';
+  const to = params.docTo || 'กบฟ.(ก๓)';
+  const cause = params.causeItem || 'ค่าใช้จ่ายดำเนินงาน';
+  const err = params.errorType || 'มีการบันทึกรายการทางบัญชีผิดพลาด';
+  const note = params.detailNote && params.detailNote.trim() ? ` (${params.detailNote.trim()})` : '';
+  const purp = params.purpose || 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้';
+
+  return `${from} ได้ตรวจสอบพบว่ามีการเบิกจ่าย${cause} ${err}${note} จึงจำเป็นต้องปรับปรุงรายการดังกล่าวให้ถูกต้อง ดังนั้น${purp} จึงขอให้ ${to} ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้`;
+}
+
+/**
+ * Preset Reason Templates for Account Adjustment
+ * Fully covers Labor/Contractor mismatch, WBS project mismatch, Vehicle repair, Cost center, Materials, Fuel
  */
 export const PRESET_REASON_TEMPLATES = [
   {
-    title: 'ค่าซ่อมยานพาหนะ (ตามตัวอย่างภาพ)',
+    category: 'labor' as ReasonCategory,
+    badge: '👷 เบิกค่าแรงผิด',
+    title: 'เบิกจ่ายค่าแรงงาน / ค่าจ้างเหมาผิดพลาด',
+    causeItem: 'ค่าจ้างเหมาบริการและแรงงานภายนอก',
+    errorType: 'มีการบันทึกรายการทางบัญชีผิดพลาด',
+    detailNote: '',
+    purpose: 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้',
+    reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการเบิกจ่ายค่าจ้างเหมาบริการและแรงงานภายนอก มีการบันทึกรายการทางบัญชีผิดพลาด จึงจำเป็นต้องปรับปรุงรายการดังกล่าวให้ถูกต้อง ดังนั้นเพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้ จึงขอให้ กบฟ.(ก๓) ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้',
+    col4Header: 'wbs' as const,
+    col7Header: 'cost_center' as const,
+    routingType: 'wbs' as const,
+    suggestedAccountCode: '53040110',
+  },
+  {
+    category: 'wbs_mismatch' as ReasonCategory,
+    badge: '🏗️ ผิดหมายเลขงาน WBS',
+    title: 'เบิกจ่ายผิดหมายเลขงาน WBS (สลับโครงการ/ข้ามงาน)',
+    causeItem: 'ค่าใช้จ่ายโครงการก่อสร้าง',
+    errorType: 'บันทึกผิดหมายเลขงาน WBS ข้ามโครงการ',
+    detailNote: 'บันทึกเข้า WBS ผิดโครงการ',
+    purpose: 'เพื่อให้การสรุปค่าใช้จ่ายโครงการมีความถูกต้องและปิด กส.๓ ได้ตามกำหนด',
+    reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการเบิกจ่ายค่าใช้จ่ายโครงการก่อสร้าง บันทึกผิดหมายเลขงาน WBS ข้ามโครงการ จึงจำเป็นต้องปรับปรุงโอนรายการเข้าหมายเลขงาน WBS ที่ถูกต้อง เพื่อให้การสรุปค่าใช้จ่ายโครงการมีความถูกต้องและปิด กส.๓ ได้ตามกำหนด จึงขอให้ กบฟ.(ก๓) ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้',
+    col4Header: 'wbs' as const,
+    col7Header: 'wbs' as const,
+    routingType: 'wbs' as const,
+    suggestedAccountCode: '',
+  },
+  {
+    category: 'vehicle' as ReasonCategory,
+    badge: '🚗 ค่าซ่อมยานพาหนะ',
+    title: 'เบิกจ่ายค่าซ่อมแซมยานพาหนะผิดพลาด',
+    causeItem: 'ค่าซ่อมยานพาหนะ',
+    errorType: 'มีการบันทึกรายการทางบัญชีผิดพลาด',
+    detailNote: '',
+    purpose: 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้',
     reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการเบิกจ่ายค่าซ่อมยานพาหนะ มีการบันทึกรายการทางบัญชีผิดพลาด จึงจำเป็นต้องปรับปรุงรายการดังกล่าวให้ถูกต้อง ดังนั้นเพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้ จึงขอให้ กบฟ.(ก๓) ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้',
     col4Header: 'wbs' as const,
     col7Header: 'cost_center' as const,
     routingType: 'wbs' as const,
+    suggestedAccountCode: '53051050',
   },
   {
-    title: 'บันทึกผิดศูนย์ต้นทุน เข้า WBS โครงการ',
-    reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการบันทึกค่าใช้จ่ายเข้าศูนย์ต้นทุนผิดพลาด ซึ่งความเป็นจริงเป็นค่าใช้จ่ายของงานโครงการก่อสร้างระบบไฟฟ้า จึงจำเป็นต้องปรับปรุงรายการดังกล่าวเข้า WBS ให้ถูกต้อง เพื่อให้สามารถดำเนินการปิดงาน กส.๓ ได้อย่างสมบูรณ์',
-    col4Header: 'cost_center' as const,
-    col7Header: 'wbs' as const,
-    routingType: 'wbs' as const,
-  },
-  {
-    title: 'ปรับปรุงสลับศูนย์ต้นทุน (ส่ง ผบต.)',
-    reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการบันทึกบัญชีค่าใช้จ่ายผิดศูนย์ต้นทุน จึงขอส่งเรื่องปรับปรุงรายการทางบัญชีระหว่างศูนย์ต้นทุน โดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้',
+    category: 'cost_center' as ReasonCategory,
+    badge: '🏢 ผิดศูนย์ต้นทุน',
+    title: 'บันทึกผิดศูนย์ต้นทุน (จัดส่ง ผบต.)',
+    causeItem: 'ค่าใช้จ่ายดำเนินงาน',
+    errorType: 'มีการบันทึกบัญชีผิดศูนย์ต้นทุน',
+    detailNote: '',
+    purpose: 'เพื่อให้การจัดทำบัญชีต้นทุนถูกต้องครบถ้วน',
+    reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการบันทึกบัญชีค่าใช้จ่ายผิดศูนย์ต้นทุน จึงขอส่งเรื่องปรับปรุงรายการทางบัญชีระหว่างศูนย์ต้นทุนให้ถูกต้อง เพื่อให้การจัดทำบัญชีต้นทุนถูกต้องครบถ้วน จึงขอให้ กบฟ.(ก๓) ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้',
     col4Header: 'cost_center' as const,
     col7Header: 'cost_center' as const,
     routingType: 'cost_center' as const,
+    suggestedAccountCode: '',
   },
   {
-    title: 'ปรับปรุงโอนย้ายข้าม WBS งานก่อสร้าง',
-    reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการเบิกจ่ายค่าพัสดุและค่าแรงงานบันทึกผิดหมายเลขงาน WBS จึงจำเป็นต้องปรับปรุงโอนรายการเข้าหมายเลขงาน WBS ที่ถูกต้อง เพื่อให้การสรุปค่าใช้จ่ายโครงการมีความถูกต้องและปิด กส.๓ ได้ตามกำหนด',
+    category: 'material' as ReasonCategory,
+    badge: '📦 ค่าพัสดุและอุปกรณ์',
+    title: 'เบิกจ่ายค่าพัสดุและอุปกรณ์ระบบไฟฟ้าผิดพลาด',
+    causeItem: 'ค่าพัสดุและอุปกรณ์ระบบจำหน่ายไฟฟ้า',
+    errorType: 'มีการบันทึกรายการทางบัญชีผิดพลาด',
+    detailNote: '',
+    purpose: 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้',
+    reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการเบิกจ่ายค่าพัสดุและอุปกรณ์ระบบจำหน่ายไฟฟ้า มีการบันทึกรายการทางบัญชีผิดพลาด จึงจำเป็นต้องปรับปรุงรายการดังกล่าวให้ถูกต้อง ดังนั้นเพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้ จึงขอให้ กบฟ.(ก๓) ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้',
     col4Header: 'wbs' as const,
-    col7Header: 'wbs' as const,
+    col7Header: 'cost_center' as const,
     routingType: 'wbs' as const,
+    suggestedAccountCode: '53010110',
+  },
+  {
+    category: 'fuel' as ReasonCategory,
+    badge: '⛽ ค่าน้ำมันเชื้อเพลิง',
+    title: 'เบิกจ่ายค่าน้ำมันเชื้อเพลิงและหล่อลื่นผิดพลาด',
+    causeItem: 'ค่าน้ำมันเชื้อเพลิงและหล่อลื่น',
+    errorType: 'มีการบันทึกรายการทางบัญชีผิดพลาด',
+    detailNote: '',
+    purpose: 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้',
+    reason: 'กรย.(ก๓) ได้ตรวจสอบพบว่ามีการเบิกจ่ายค่าน้ำมันเชื้อเพลิงและหล่อลื่น มีการบันทึกรายการทางบัญชีผิดพลาด จึงจำเป็นต้องปรับปรุงรายการดังกล่าวให้ถูกต้อง ดังนั้นเพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้ จึงขอให้ กบฟ.(ก๓) ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้',
+    col4Header: 'wbs' as const,
+    col7Header: 'cost_center' as const,
+    routingType: 'wbs' as const,
+    suggestedAccountCode: '53020110',
   }
 ];
+
 
 // ============================================================================
 // MICROSOFT WORD & EXCEL EXPORT / COPY GENERATORS
