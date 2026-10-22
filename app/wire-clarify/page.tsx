@@ -555,14 +555,20 @@ export default function WireClarifyPage() {
                   </p>
 
                   <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>2. ข้อเท็จจริง</p>
-                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', whiteSpace: 'pre-line', marginBottom: '8pt' }}>
-                    {formData.memoFacts}
-                  </p>
+                  {(formData.memoFacts || '').split('\n').map(l => l.trim()).filter(Boolean).map((line, idx) => (
+                    <p key={idx} className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '6pt', textIndent: '2.5cm' }}>
+                      {line}
+                    </p>
+                  ))}
                 </>
               ) : (
-                <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', whiteSpace: 'pre-line', marginBottom: '8pt' }}>
-                  {formData.supervisorBody}
-                </p>
+                <>
+                  {(formData.supervisorBody || '').split('\n').map(l => l.trim()).filter(Boolean).map((line, idx) => (
+                    <p key={idx} className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '6pt', textIndent: '2.5cm' }}>
+                      {line}
+                    </p>
+                  ))}
+                </>
               )}
             </div>
 

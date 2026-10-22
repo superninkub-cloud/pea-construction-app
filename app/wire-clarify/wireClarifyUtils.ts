@@ -378,21 +378,30 @@ export function generateWireClarifyWordDocument(data: WireClarifyFormData): stri
   const tableHtml = generateWireClarifyTableHtmlForWord(data);
   const isDiv = data.docLevel === 'division_memo';
 
+  const formatWordLines = (text: string = ''): string => {
+    return text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => `<p style="text-indent: 2.5cm; text-align: justify; margin: 4pt 0;">${line}</p>`)
+      .join('\n');
+  };
+
   let bodyContent = '';
   if (isDiv) {
     bodyContent = `
       <p style="font-weight: bold; margin-top: 14pt;"><u>1. เรื่องเดิม</u></p>
-      <p style="text-indent: 40px; text-align: justify;">${data.memoBackground || ''}</p>
+      ${formatWordLines(data.memoBackground)}
 
       <p style="font-weight: bold; margin-top: 14pt;"><u>2. ข้อเท็จจริง</u></p>
-      <p style="text-indent: 40px; text-align: justify;">${data.memoFacts || ''}</p>
+      ${formatWordLines(data.memoFacts)}
 
       <p style="font-weight: bold; margin-top: 14pt;"><u>3. ข้อพิจารณา</u></p>
-      <p style="text-indent: 40px; text-align: justify;">${data.memoConsideration || ''}</p>
+      ${formatWordLines(data.memoConsideration)}
 
       ${tableHtml}
 
-      <p style="text-indent: 40px; text-align: justify; margin-top: 12pt;">${data.memoClosing || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}</p>
+      <p style="text-indent: 2.5cm; text-align: justify; margin-top: 12pt;">${data.memoClosing || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}</p>
 
       <div style="margin-top: 40px; margin-left: 50%; text-align: center;">
         <p style="margin-bottom: 25px;"><br/></p>
@@ -421,15 +430,15 @@ export function generateWireClarifyWordDocument(data: WireClarifyFormData): stri
     `;
   } else {
     bodyContent = `
-      <p style="text-indent: 40px; text-align: justify;">${data.supervisorBody || ''}</p>
+      ${formatWordLines(data.supervisorBody)}
       ${data.networkNo ? `<p style="text-align: center; font-weight: bold; margin: 10pt 0;">${data.networkNo}</p>` : ''}
 
       ${tableHtml}
 
-      <p style="text-indent: 40px; text-align: justify; margin-top: 12pt;">
+      <p style="text-indent: 2.5cm; text-align: justify; margin-top: 12pt;">
         ทั้งนี้จึงขอรายงานผลการนำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอน เพื่อให้ส่วนเกี่ยวข้องช่วยพิจารณาดำเนินการต่อไป
       </p>
-      <p style="text-indent: 40px; text-align: justify; margin-top: 6pt;">
+      <p style="text-indent: 2.5cm; text-align: justify; margin-top: 6pt;">
         จึงเรียนมาเพื่อโปรดทราบและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป
       </p>
 

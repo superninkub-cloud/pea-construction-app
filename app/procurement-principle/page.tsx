@@ -209,28 +209,131 @@ export default function ProcurementPrinciplePage() {
   ) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
-      const newBackground = composeProcurementBackground({
-        approvalDocRef: updated.approvalDocRef,
-        projectName: updated.projectName,
-        workOpenerName: updated.workOpenerName,
-        dept: updated.docFrom || 'กรย.(ก3)'
-      });
-      const newProposal = composeProcurementProposal({
-        procurementType: updated.procurementType,
-        projectName: updated.projectName,
-        itemDescription: updated.itemDescription,
-        targetDateOrPeriod: updated.targetDateOrPeriod,
-        wbsNo: updated.wbsNo,
-        networkNo: updated.networkNo,
-        activityNo: updated.activityNo,
-        dept: updated.docFrom || 'กรย.(ก3)'
-      });
+      // Only auto-recompose if background hasn't been modified with custom sub-clauses
+      const hasCustomBackground = prev.backgroundText && (prev.backgroundText.includes('\n') || prev.backgroundText.includes('1.1'));
+      const newBackground = hasCustomBackground
+        ? prev.backgroundText
+        : composeProcurementBackground({
+            approvalDocRef: updated.approvalDocRef,
+            projectName: updated.projectName,
+            workOpenerName: updated.workOpenerName,
+            dept: updated.docFrom || 'กรย.(ก3)'
+          });
+
+      // Only auto-recompose if proposal hasn't been modified with custom sub-clauses
+      const hasCustomProposal = prev.proposalText && (prev.proposalText.includes('\n') || prev.proposalText.includes('3.1'));
+      const newProposal = hasCustomProposal
+        ? prev.proposalText
+        : composeProcurementProposal({
+            procurementType: updated.procurementType,
+            projectName: updated.projectName,
+            itemDescription: updated.itemDescription,
+            targetDateOrPeriod: updated.targetDateOrPeriod,
+            wbsNo: updated.wbsNo,
+            networkNo: updated.networkNo,
+            activityNo: updated.activityNo,
+            dept: updated.docFrom || 'กรย.(ก3)'
+          });
+
       return {
         ...updated,
         backgroundText: newBackground,
         proposalText: newProposal
       };
     });
+  };
+
+  const handleRecomposeBackground = () => {
+    const text = composeProcurementBackground({
+      approvalDocRef: formData.approvalDocRef,
+      projectName: formData.projectName,
+      workOpenerName: formData.workOpenerName,
+      dept: formData.docFrom || 'กรย.(ก3)'
+    });
+    setFormData(prev => ({ ...prev, backgroundText: text }));
+    showToast('✓ ประกอบข้อความ 1. เรื่องเดิม จากตัวแปรเรียบร้อย');
+  };
+
+  const handleRecomposeProposal = () => {
+    const text = composeProcurementProposal({
+      procurementType: formData.procurementType,
+      projectName: formData.projectName,
+      itemDescription: formData.itemDescription,
+      targetDateOrPeriod: formData.targetDateOrPeriod,
+      wbsNo: formData.wbsNo,
+      networkNo: formData.networkNo,
+      activityNo: formData.activityNo,
+      dept: formData.docFrom || 'กรย.(ก3)'
+    });
+    setFormData(prev => ({ ...prev, proposalText: text }));
+    showToast('✓ ประกอบข้อความ 3. ข้อเสนอ จากตัวแปรเรียบร้อย');
+  };
+
+  const handleAddSubclause = (
+    field: 'backgroundText' | 'factsText' | 'proposalText',
+    clauseNumber: string
+  ) => {
+    setFormData(prev => {
+      const current = (prev[field] || '').trim();
+      if (!current) {
+        return { ...prev, [field]: `${clauseNumber} ` };
+      }
+      return { ...prev, [field]: `${current}\n${clauseNumber} ` };
+    });
+    showToast(`✓ เพิ่มข้อย่อย ${clauseNumber} เรียบร้อย (ย่อหน้า 2.5 ซม. อัตโนมัติ)`);
+  };
+
+  const handleAddNewParagraph = (
+    field: 'backgroundText' | 'factsText' | 'proposalText'
+  ) => {
+    setFormData(prev => {
+      const current = (prev[field] || '').trim();
+      return { ...prev, [field]: current ? `${current}\n` : '' };
+    });
+    showToast('✓ ขึ้นบรรทัดวรรคใหม่เรียบร้อย (ย่อหน้า 2.5 ซม. อัตโนมัติ)');
+  };
+
+  // Render paragraphs with 2.5cm indentation for every newline / sub-clause
+  const renderIndentedParagraphs = (
+    text?: string,
+    screenHighlightFallback?: React.ReactNode
+  ) => {
+    if (!text && !screenHighlightFallback) return null;
+    const raw = (text || '').trim();
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+
+    // If single line and screenHighlightFallback is provided and not custom numbered
+    if (lines.length <= 1 && screenHighlightFallback && !raw.includes('1.1') && !raw.includes('3.1')) {
+      return (
+        <p
+          className="a4-text-indent"
+          style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt', textIndent: '2.5cm' }}
+        >
+          <span className="pp-print-only">{raw}</span>
+          <span className="pp-no-print">{screenHighlightFallback}</span>
+        </p>
+      );
+    }
+
+    // Multiple lines or custom sub-clauses: each line is an independent <p> with textIndent: 2.5cm!
+    return (
+      <>
+        {lines.map((line, idx) => (
+          <p
+            key={idx}
+            className="a4-text-indent"
+            style={{
+              lineHeight: 1.6,
+              textAlign: 'justify',
+              marginBottom: '6pt',
+              textIndent: '2.5cm'
+            }}
+          >
+            {line}
+          </p>
+        ))}
+      </>
+    );
   };
 
   // Render on-screen 1. เรื่องเดิม with interactive color highlights
@@ -637,34 +740,28 @@ export default function ProcurementPrinciplePage() {
                   📌 ตัวแปรประจำงานนี้: [WBS: {formData.wbsNo}] [ผู้เปิดงาน: {formData.workOpenerName}]
                 </span>
                 <span style={{ fontSize: '11px', color: '#64748b' }}>
-                  (ส่วนที่มีสีไฮไลท์คือจุดที่เปลี่ยนแต่ละงาน • เมื่อสั่งพิมพ์หรือก๊อปปี้จะเป็นสีดำทางการปกติ)
+                  (ส่วนที่มีสีไฮไลท์คือจุดที่เปลี่ยนแต่ละงาน • เมื่อสั่งพิมพ์หรือก๊อปปี้จะเป็นสีดำทางการ • ขึ้นวรรคใหม่หรือข้อย่อย ย่อหน้า 2.5 ซม. อัตโนมัติ)
                 </span>
               </div>
 
               {/* 1. เรื่องเดิม */}
               <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>1. เรื่องเดิม</p>
-              <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
-                <span className="pp-print-only">{formData.backgroundText}</span>
-                <span className="pp-no-print">{renderScreenBackgroundText()}</span>
-              </p>
+              {renderIndentedParagraphs(formData.backgroundText, renderScreenBackgroundText())}
 
               {/* 2. ข้อเท็จจริง */}
               <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>2. ข้อเท็จจริง</p>
-              <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', whiteSpace: 'pre-line', marginBottom: '8pt' }}>
-                {formData.factsText}
-              </p>
+              {renderIndentedParagraphs(formData.factsText)}
 
               {/* 3. ข้อเสนอเพื่อพิจารณา */}
               <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>3. ข้อเสนอเพื่อพิจารณา</p>
-              <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '6pt' }}>
-                <span className="pp-print-only">{formData.proposalText}</span>
-                <span className="pp-no-print">{renderScreenProposalText()}</span>
-              </p>
-              <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
-                {formData.delegationOrderText}
-              </p>
+              {renderIndentedParagraphs(formData.proposalText, renderScreenProposalText())}
+              {formData.delegationOrderText && (
+                <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt', textIndent: '2.5cm' }}>
+                  {formData.delegationOrderText}
+                </p>
+              )}
 
-              <p className="a4-text-indent" style={{ marginTop: '12pt', marginBottom: '20pt' }}>
+              <p className="a4-text-indent" style={{ marginTop: '12pt', marginBottom: '20pt', lineHeight: 1.6, textAlign: 'justify', textIndent: '2.5cm' }}>
                 {formData.closingText || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}
               </p>
             </div>
@@ -1342,41 +1439,313 @@ export default function ProcurementPrinciplePage() {
                         </div>
                       </div>
 
-                      {/* Card 6: 2. ข้อเท็จจริง (เหตุผลความจำเป็น) */}
-                      <div className="variable-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-teal">ข้อ 2</span>
-                          <strong style={{ fontSize: '14px', color: '#0f766e' }}>2. ข้อเท็จจริง (เหตุผลความจำเป็นในการจัดซื้อ/จัดจ้าง)</strong>
+                      {/* Card: 1. เรื่องเดิม (ข้อความ & ข้อย่อย) */}
+                      <div className="variable-card" style={{ border: '1.5px solid #0284c7', background: '#f0f9ff' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="variable-badge-num" style={{ background: '#0284c7', color: '#fff' }}>ข้อ 1</span>
+                            <strong style={{ fontSize: '14px', color: '#0369a1' }}>1. เรื่องเดิม (ปรับแต่งหรือใส่ข้อย่อย 1.1, 1.2)</strong>
+                          </div>
+                          <span className="indent-badge-info">
+                            📐 ย่อหน้า 2.5 ซม. ทุกวรรค/ข้อย่อย
+                          </span>
                         </div>
+
+                        {/* Sub-clause toolbar for 1. เรื่องเดิม */}
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('backgroundText', '1.1')}
+                          >
+                            ➕ ข้อย่อย 1.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('backgroundText', '1.2')}
+                          >
+                            ➕ ข้อย่อย 1.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('backgroundText', '1.3')}
+                          >
+                            ➕ ข้อย่อย 1.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('backgroundText')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={handleRecomposeBackground}
+                          >
+                            🔄 ประกอบข้อความมาตรฐานจากจุด 1-3
+                          </button>
+                        </div>
+
                         <textarea
-                          rows={4}
+                          rows={3}
+                          className="big-textarea"
+                          value={formData.backgroundText}
+                          onChange={(e) => setFormData({ ...formData, backgroundText: e.target.value })}
+                          placeholder="เช่น ตามอนุมัติเลขที่... ด้วย กรย.(ก3) มีแผนงาน... โดยมี... เป็นผู้เปิดงาน หรือใส่ข้อย่อย 1.1..."
+                        />
+                      </div>
+
+                      {/* Card 6: 2. ข้อเท็จจริง (เหตุผลความจำเป็น & ข้อย่อย 2.1, 2.2) */}
+                      <div className="variable-card" style={{ border: '1.5px solid #0d9488', background: '#f0fdfa' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="variable-badge-num badge-teal" style={{ background: '#0d9488', color: '#fff' }}>ข้อ 2</span>
+                            <strong style={{ fontSize: '14px', color: '#0f766e' }}>2. ข้อเท็จจริง (เหตุผลความจำเป็น & ข้อย่อย 2.1, 2.2)</strong>
+                          </div>
+                          <span className="indent-badge-info">
+                            📐 ย่อหน้า 2.5 ซม. ทุกวรรค/ข้อย่อย
+                          </span>
+                        </div>
+
+                        {/* Sub-clause toolbar for 2. ข้อเท็จจริง */}
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('factsText', '2.1')}
+                          >
+                            ➕ ข้อย่อย 2.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('factsText', '2.2')}
+                          >
+                            ➕ ข้อย่อย 2.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('factsText', '2.3')}
+                          >
+                            ➕ ข้อย่อย 2.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('factsText')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ccfbf1', color: '#0f766e', borderColor: '#99f6e4', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                factsText: `2.1 งานก่อสร้างดังกล่าวออกแบบให้ใช้เหล็กรางน้ำขนาด 4.50 เมตร ในการติดตั้งอุปกรณ์ประกอบหัวเสา ซึ่งการนำเหล็กรางน้ำไปใช้งานนั้น จำเป็นต้องเจาะรูเพื่อให้นำไปติดตั้งใช้งานได้\n2.2 ดอกสว่านที่ใช้งานร่วมกับสว่านไฟฟ้า ที่ ผกร.กรย.(ก3) มีใช้งานอยู่ปัจจุบันมีสภาพชำรุดไม่สามารถใช้งานได้ จึงจำเป็นต้องจัดหาทดแทน`
+                              }));
+                              showToast('✓ โหลดตัวอย่างข้อย่อย 2.1 และ 2.2 (จัดซื้อพัสดุ)');
+                            }}
+                          >
+                            📌 ตัวอย่าง 2.1 + 2.2 (จัดซื้อ)
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffedd5', color: '#c2410c', borderColor: '#fed7aa', fontWeight: 600 }}
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                factsText: 'ด้วย กรย.(ก3) ได้ดำเนินการย้ายแนวระบบสายส่ง 115 เควี บริเวณตรงข้ามวัดท่าน้ำตื้นถึง เมืองไทยสินเชื่อเงินด่วน แล้วเสร็จ ปัจจุบันยังคงเหลืองานรื้อถอนฐานรากชนิด F2 จำนวน 3 ฐาน และชนิด F1/1 จำนวน 1 ฐาน ในการปฏิบัติงาน กรย.(ก3) ไม่มีรถแบคโฮหัวกระแทก เพื่อให้งานรื้อถอนแล้วเสร็จตามแผนงานของกรมทางหลวง จำเป็นต้องดำเนินการโดยวิธีจ้างเหมาบุคคลภายนอกต่อไป เพื่อให้งานก่อสร้างย้ายแนวสายส่ง 115 เควี แล้วเสร็จทันตามแผนงานและวันเวลาที่กำหนด จึงจัดจ้างรถแบคโฮหัวกระแทก PC 55 จำนวน 1 คัน ในวันจันทร์ที่ 19 ตุลาคม 2569'
+                              }));
+                              showToast('✓ โหลดตัวอย่างข้อความจัดจ้างเครื่องจักร');
+                            }}
+                          >
+                            📌 ตัวอย่างจัดจ้าง (รถแบคโฮ)
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#dc2626', borderColor: '#fca5a5' }}
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, factsText: '' }));
+                              showToast('ล้างข้อเท็จจริง');
+                            }}
+                          >
+                            🗑️ ล้าง
+                          </button>
+                        </div>
+
+                        <textarea
+                          rows={5}
                           className="big-textarea"
                           value={formData.factsText}
                           onChange={(e) => setFormData({ ...formData, factsText: e.target.value })}
-                          placeholder="ระบุเหตุผลความจำเป็น เช่น งานก่อสร้างออกแบบให้ใช้เหล็กรางน้ำขนาด 4.50 เมตร... จำเป็นต้องเจาะรู... ดอกสว่านเดิมชำรุดไม่สามารถใช้งานได้"
+                          placeholder="ระบุเหตุผลความจำเป็น เช่น 2.1 งานก่อสร้างดังกล่าว...\n2.2 ดอกสว่านที่ใช้งานร่วมกับสว่านไฟฟ้า..."
                         />
+                      </div>
+
+                      {/* Card: 3. ข้อเสนอเพื่อพิจารณา (ข้อความ & ข้อย่อย 3.1, 3.2) */}
+                      <div className="variable-card" style={{ border: '1.5px solid #9333ea', background: '#faf5ff' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="variable-badge-num" style={{ background: '#9333ea', color: '#fff' }}>ข้อ 3</span>
+                            <strong style={{ fontSize: '14px', color: '#7e22ce' }}>3. ข้อเสนอเพื่อพิจารณา (ปรับแต่งหรือใส่ข้อย่อย 3.1, 3.2)</strong>
+                          </div>
+                          <span className="indent-badge-info">
+                            📐 ย่อหน้า 2.5 ซม. ทุกวรรค/ข้อย่อย
+                          </span>
+                        </div>
+
+                        {/* Sub-clause toolbar for 3. ข้อเสนอเพื่อพิจารณา */}
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('proposalText', '3.1')}
+                          >
+                            ➕ ข้อย่อย 3.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('proposalText', '3.2')}
+                          >
+                            ➕ ข้อย่อย 3.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('proposalText', '3.3')}
+                          >
+                            ➕ ข้อย่อย 3.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('proposalText')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#f3e8ff', color: '#7e22ce', borderColor: '#e9d5ff', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={handleRecomposeProposal}
+                          >
+                            🔄 ประกอบข้อความมาตรฐานจากจุด 2, 4, 5
+                          </button>
+                        </div>
+
+                        <textarea
+                          rows={3}
+                          className="big-textarea"
+                          value={formData.proposalText}
+                          onChange={(e) => setFormData({ ...formData, proposalText: e.target.value })}
+                          placeholder="เช่น กรย.(ก3) พิจารณาแล้ว... หรือใส่ข้อย่อย 3.1..."
+                        />
+
+                        <div className="big-grid-2" style={{ marginTop: '10px' }}>
+                          <div>
+                            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>คำสั่งมอบอำนาจ กฟภ.</span>
+                            <input
+                              type="text"
+                              className="big-input"
+                              style={{ fontSize: '13px' }}
+                              value={formData.delegationOrderText}
+                              onChange={(e) => setFormData({ ...formData, delegationOrderText: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>คำลงท้าย</span>
+                            <input
+                              type="text"
+                              className="big-input"
+                              style={{ fontSize: '13px' }}
+                              value={formData.closingText}
+                              onChange={(e) => setFormData({ ...formData, closingText: e.target.value })}
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       {/* Live Compiled Preview */}
                       <div className="var-live-preview-box">
                         <div style={{ fontWeight: 600, color: '#0369a1', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Sparkles size={14} /> ตัวอย่างข้อความที่จะปรากฏในบันทึกข้อความ (Live Preview):
+                          <Sparkles size={14} /> ตัวอย่างข้อความที่จะปรากฏในบันทึกข้อความ (Live Preview - ย่อหน้า 2.5 ซม. ทุกวรรค):
                         </div>
-                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px', whiteSpace: 'pre-line' }}>
                           <strong>1. เรื่องเดิม:</strong> {formData.backgroundText}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px', whiteSpace: 'pre-line' }}>
                           <strong>2. ข้อเท็จจริง:</strong> {formData.factsText}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#1e293b' }}>
+                        <div style={{ fontSize: '12px', color: '#1e293b', whiteSpace: 'pre-line' }}>
                           <strong>3. ข้อเสนอเพื่อพิจารณา:</strong> {formData.proposalText}
                         </div>
                       </div>
                     </div>
                   ) : (
                     <div>
+                      {/* Freeform Mode with Toolbar */}
+                      <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        ✏️ <strong>โหมดแก้ไขข้อความอิสระ (Freeform):</strong> สามารถพิมพ์ข้อความและข้อย่อยได้อย่างอิสระ ทุกครั้งที่กดขึ้นบรรทัดใหม่ (Enter) หรือกดปุ่มข้อย่อย ระบบจะย่อหน้า 2.5 ซม. ให้อัตโนมัติทุกข้อ
+                      </div>
+
                       <div className="big-field-group">
-                        <label className="big-label">1. เรื่องเดิม</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
+                          <label className="big-label" style={{ marginBottom: 0 }}>1. เรื่องเดิม</label>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
+                        </div>
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('backgroundText', '1.1')}
+                          >
+                            ➕ ข้อย่อย 1.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('backgroundText', '1.2')}
+                          >
+                            ➕ ข้อย่อย 1.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('backgroundText', '1.3')}
+                          >
+                            ➕ ข้อย่อย 1.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('backgroundText')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={handleRecomposeBackground}
+                          >
+                            🔄 ดึงข้อความมาตรฐานจากตัวแปร
+                          </button>
+                        </div>
                         <textarea
                           rows={3}
                           className="big-textarea"
@@ -1386,7 +1755,55 @@ export default function ProcurementPrinciplePage() {
                       </div>
 
                       <div className="big-field-group">
-                        <label className="big-label">2. ข้อเท็จจริง (เหตุผลความจำเป็น)</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
+                          <label className="big-label" style={{ marginBottom: 0 }}>2. ข้อเท็จจริง (เหตุผลความจำเป็น & ข้อย่อย)</label>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
+                        </div>
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('factsText', '2.1')}
+                          >
+                            ➕ ข้อย่อย 2.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('factsText', '2.2')}
+                          >
+                            ➕ ข้อย่อย 2.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('factsText', '2.3')}
+                          >
+                            ➕ ข้อย่อย 2.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('factsText')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ccfbf1', color: '#0f766e', borderColor: '#99f6e4', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                factsText: `2.1 งานก่อสร้างดังกล่าวออกแบบให้ใช้เหล็กรางน้ำขนาด 4.50 เมตร ในการติดตั้งอุปกรณ์ประกอบหัวเสา ซึ่งการนำเหล็กรางน้ำไปใช้งานนั้น จำเป็นต้องเจาะรูเพื่อให้นำไปติดตั้งใช้งานได้\n2.2 ดอกสว่านที่ใช้งานร่วมกับสว่านไฟฟ้า ที่ ผกร.กรย.(ก3) มีใช้งานอยู่ปัจจุบันมีสภาพชำรุดไม่สามารถใช้งานได้ จึงจำเป็นต้องจัดหาทดแทน`
+                              }));
+                              showToast('✓ โหลดตัวอย่างข้อย่อย 2.1 และ 2.2');
+                            }}
+                          >
+                            📌 ตัวอย่าง 2.1 + 2.2
+                          </button>
+                        </div>
                         <textarea
                           rows={4}
                           className="big-textarea"
@@ -1396,7 +1813,49 @@ export default function ProcurementPrinciplePage() {
                       </div>
 
                       <div className="big-field-group">
-                        <label className="big-label">3. ข้อเสนอเพื่อพิจารณา</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
+                          <label className="big-label" style={{ marginBottom: 0 }}>3. ข้อเสนอเพื่อพิจารณา</label>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
+                        </div>
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('proposalText', '3.1')}
+                          >
+                            ➕ ข้อย่อย 3.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('proposalText', '3.2')}
+                          >
+                            ➕ ข้อย่อย 3.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('proposalText', '3.3')}
+                          >
+                            ➕ ข้อย่อย 3.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('proposalText')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#f3e8ff', color: '#7e22ce', borderColor: '#e9d5ff', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={handleRecomposeProposal}
+                          >
+                            🔄 ดึงข้อความมาตรฐานจากตัวแปร
+                          </button>
+                        </div>
                         <textarea
                           rows={3}
                           className="big-textarea"
