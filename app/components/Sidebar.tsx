@@ -25,7 +25,7 @@ export default function Sidebar() {
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     main: true,
-    office: true,
+    office: false,
     planning: false,
     docs: false,
     safety: false,
@@ -61,7 +61,7 @@ export default function Sidebar() {
       if (role === "office") {
         setExpanded({
           main: true,
-          office: true,
+          office: false,
           planning: false,
           docs: false,
           safety: false,
@@ -71,7 +71,7 @@ export default function Sidebar() {
       } else if (role === "admin") {
         setExpanded({
           main: true,
-          office: true,
+          office: false,
           planning: false,
           docs: false,
           safety: false,
@@ -169,16 +169,65 @@ export default function Sidebar() {
           </div>
         )}
 
-        {/* หมวดงานสำนักงานและธุรการ (Office) - เปิดให้เฉพาะ Admin และ Office */}
+        {/* หมวดงานสำนักงานและธุรการ (Office) - พนักงาน Office */}
         {canAccessOfficeSection && (
-          <>
-            <SectionHeader 
-              id="office" 
-              title="งานเอกสารและธุรการ (Office)" 
-              badge={isOffice ? "พนักงาน Office" : "Office"} 
-            />
+          <div className="mt-4 mb-2">
+            <div
+              onClick={(e) => { e.stopPropagation(); toggleSection('office'); }}
+              className="group cursor-pointer mx-2 p-2.5 rounded-xl border transition-all duration-200 select-none"
+              style={{
+                background: expanded.office 
+                  ? 'linear-gradient(135deg, rgba(234, 88, 12, 0.25) 0%, rgba(194, 65, 12, 0.18) 100%)' 
+                  : 'rgba(255, 255, 255, 0.05)',
+                borderColor: expanded.office ? 'rgba(249, 115, 22, 0.5)' : 'rgba(255, 255, 255, 0.12)',
+                boxShadow: expanded.office ? '0 4px 14px rgba(234, 88, 12, 0.2)' : 'none',
+              }}
+              title="คลิกเพื่อแสดง / ซ่อนรายการโปรแกรมพนักงาน Office"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div 
+                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105"
+                    style={{
+                      background: expanded.office ? '#ea580c' : 'rgba(234, 88, 12, 0.22)',
+                      color: '#ffffff'
+                    }}
+                  >
+                    <Briefcase size={17} />
+                  </div>
+                  <div>
+                    <div className="text-[13.5px] font-bold text-white flex items-center gap-1.5">
+                      <span>พนักงาน Office</span>
+                      <span 
+                        className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                        style={{
+                          background: 'rgba(245, 158, 11, 0.25)',
+                          color: '#fbbf24',
+                          border: '1px solid rgba(245, 158, 11, 0.4)'
+                        }}
+                      >
+                        13 โปรแกรม
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-300">
+                      {expanded.office ? 'แตะเพื่อยุบซ่อนเมนู' : 'แตะเพื่อเปิดดูโปรแกรมงานเอกสาร'}
+                    </div>
+                  </div>
+                </div>
+                <div 
+                  className="w-6 h-6 rounded-md flex items-center justify-center transition-all"
+                  style={{
+                    background: expanded.office ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)',
+                    color: '#fed7aa'
+                  }}
+                >
+                  {expanded.office ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </div>
+              </div>
+            </div>
+
             {expanded.office && (
-              <div onClick={closeSidebar}>
+              <div className="mt-2" onClick={closeSidebar}>
                 {/* 3 โปรแกรมที่เปิดใช้งานจริงแล้ว */}
                 <Link 
                   href="/budget-transfer" 
@@ -546,7 +595,7 @@ export default function Sidebar() {
                 })}
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* หมวดภาคสนาม (ซ่อนจากผู้ใช้งาน Office เพื่อความกระชับ) */}
