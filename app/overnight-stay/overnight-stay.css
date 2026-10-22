@@ -632,4 +632,10 @@
     margin: 0 !important;
     max-width: 100% !important;
   }
+
+  .a4-var-red {
+    color: #000000 !important;
+    font-weight: normal !important;
+  }
 }
+

@@ -741,7 +741,7 @@ export default function ShortageBudgetPage() {
               <input
                 type="text"
                 className="a4-inline-input"
-                style={{ width: '230px', fontWeight: 'bold', color: '#0369a1' }}
+                style={{ width: '230px', fontWeight: 'bold', color: '#dc2626' }}
                 value={formData.wbsNo}
                 onChange={(e) => setFormData({ ...formData, wbsNo: e.target.value })}
                 placeholder="P-TDD02.3-I-BLNIA.0026"

@@ -1713,13 +1713,18 @@ body {
   padding-top: 10pt;
 }
 
+/* ========================================================== */
+/* INLINE EDITABLE A4 STYLES (ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง)  */
+/* ========================================================== */
+
 .a4-live-input {
   font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 16pt;
   line-height: 1.2;
-  color: #000000;
-  background: rgba(234, 88, 12, 0.04);
-  border: 1px dashed rgba(203, 213, 225, 0.8);
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
+  font-weight: 600;
+  background: rgba(239, 68, 68, 0.04);
+  border: 1px dashed rgba(248, 113, 113, 0.6);
   border-radius: 3px;
   padding: 1px 4px;
   width: 100%;
@@ -1730,40 +1735,41 @@ body {
 .a4-live-input:focus {
   outline: none;
   background: #ffffff;
-  border: 1.5px solid #ea580c;
-  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+  border: 1.5px solid #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
 
 .a4-inline-input {
   font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 16pt;
   line-height: 1.2;
-  color: #000000;
-  background: rgba(234, 88, 12, 0.05);
-  border: 1px dashed #ea580c;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
+  background: rgba(239, 68, 68, 0.04);
+  border: 1px dashed rgba(248, 113, 113, 0.6);
   border-radius: 3px;
   padding: 0 4px;
   display: inline-block;
   vertical-align: baseline;
   box-sizing: border-box;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.15s ease;
 }
 
 .a4-inline-input:focus {
   outline: none;
   background: #ffffff;
-  border: 1.5px solid #ea580c;
-  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+  border: 1.5px solid #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
 
 .a4-live-textarea {
   font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 16pt;
   line-height: 1.25;
-  color: #000000;
-  background: rgba(234, 88, 12, 0.04);
-  border: 1px dashed rgba(203, 213, 225, 0.8);
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
+  font-weight: 600;
+  background: rgba(239, 68, 68, 0.04);
+  border: 1px dashed rgba(248, 113, 113, 0.6);
   border-radius: 4px;
   padding: 4px 6px;
   width: 100%;
@@ -1775,14 +1781,15 @@ body {
 .a4-live-textarea:focus {
   outline: none;
   background: #ffffff;
-  border: 1.5px solid #ea580c;
-  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+  border: 1.5px solid #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
 
 .a4-table-input {
   font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 15pt;
-  color: #000000;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
+  font-weight: 600;
   background: transparent;
   border: none;
   width: 100%;
@@ -1793,14 +1800,15 @@ body {
 .a4-table-input:focus {
   outline: none;
   background: #ffffff;
-  box-shadow: 0 0 0 1.5px #ea580c;
+  box-shadow: 0 0 0 1.5px #dc2626;
   border-radius: 2px;
 }
 
 .a4-table-select {
   font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 14pt;
-  color: #000000;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
+  font-weight: 600;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -1810,8 +1818,55 @@ body {
 .a4-table-select:focus {
   outline: none;
   background: #ffffff;
-  box-shadow: 0 0 0 1.5px #ea580c;
+  box-shadow: 0 0 0 1.5px #dc2626;
 }
+
+/* Universal Red Highlight for Variables and Editable Spots across Office Programs */
+.a4-var-spot,
+.a4-var-red,
+.a4-var-text {
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
+  font-weight: 600 !important;
+}
+
+.a4-var-spot.blue,
+.a4-var-spot.green,
+.a4-var-spot.orange,
+.a4-var-spot.purple,
+.a4-var-spot.yellow,
+.a4-var-spot.teal,
+.a4-var-spot.subject {
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
+  font-weight: 600 !important;
+}
+
+/* Print reset: All editable parts print in standard black without color or borders */
+@media print {
+  .a4-live-input,
+  .a4-inline-input,
+  .a4-live-textarea,
+  .a4-table-input,
+  .a4-table-select,
+  .a4-var-spot,
+  .a4-var-spot.blue,
+  .a4-var-spot.green,
+  .a4-var-spot.orange,
+  .a4-var-spot.purple,
+  .a4-var-spot.yellow,
+  .a4-var-spot.teal,
+  .a4-var-spot.subject,
+  .a4-var-red,
+  .a4-var-text {
+    color: #000000 !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+    padding: 0 !important;
+    font-weight: normal !important;
+    box-shadow: none !important;
+  }
+}
+
 
 /* Hoverable Section on A4 Page */
 .a4-section-hoverable {

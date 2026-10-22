@@ -489,17 +489,17 @@ export default function OvernightStayPage() {
 
               <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
                 ตามอนุมัติเดินทางไปปฏิบัติงานต่างพื้นที่ เลขที่{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.travelOrderNo || '............'}</span>{' '}
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.travelOrderNo || '............'}</span>{' '}
                 ให้พนักงานในสังกัดเดินทางไปปฏิบัติงานในพื้นที่{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.workArea || '............'}</span>{' '}
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.workArea || '............'}</span>{' '}
                 โดยปฏิบัติงานก่อสร้างดังนี้{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.constructionDescription || '............'}</span>{' '}
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.constructionDescription || '............'}</span>{' '}
                 ตั้งแต่วันที่{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.workStartDate || '............'}</span>{' '}
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.workStartDate || '............'}</span>{' '}
                 ถึงวันที่{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.workEndDate || '............'}</span>{' '}
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.workEndDate || '............'}</span>{' '}
                 เนื่องจากระยะทางไปกลับประมาณ{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.roundTripDistanceKm || '............'}</span> กม.{' '}
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.roundTripDistanceKm || '............'}</span> กม.{' '}
                 การเคลื่อนย้ายชุดปฏิบัติงานซึ่งประกอบด้วย คนงานรายวัน, เครื่องมือ, และเครื่องจักร เป็นไปด้วยความลำบาก และเสียค่าใช้จ่ายมาก เพื่อให้เกิดประสิทธิภาพต่อการปฏิบัติงาน ลดค่าใช้จ่ายในการเดินทางและให้เป็นไปอย่างต่อเนื่อง
               </p>
 
@@ -522,9 +522,9 @@ export default function OvernightStayPage() {
               {formData.persons.length === 1 ? (
                 <div style={{ textIndent: '2.5cm', marginBottom: '6pt', lineHeight: 1.6 }}>
                   1. ขออนุมัติให้{' '}
-                  <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.persons[0].name}</span>{' '}
-                  ตำแหน่ง <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.persons[0].position}</span>{' '}
-                  สังกัด <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.persons[0].department}</span>{' '}
+                  <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.persons[0].name}</span>{' '}
+                  ตำแหน่ง <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.persons[0].position}</span>{' '}
+                  สังกัด <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.persons[0].department}</span>{' '}
                   พักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ
                 </div>
               ) : (
@@ -534,16 +534,16 @@ export default function OvernightStayPage() {
                   </div>
                   {formData.persons.map((p, idx) => (
                     <div key={p.id} style={{ textIndent: '3.5cm', marginBottom: '3pt', lineHeight: 1.55 }}>
-                      {isThaiNum ? ('1.' + toThaiNumerals(idx + 1)) : ('1.' + (idx + 1))} {p.name || '(ไม่ได้ระบุชื่อ)'} ตำแหน่ง {p.position} สังกัด {p.department}
+                      {isThaiNum ? ('1.' + toThaiNumerals(idx + 1)) : ('1.' + (idx + 1))} <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{p.name || '(ไม่ได้ระบุชื่อ)'}</span> ตำแหน่ง <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{p.position}</span> สังกัด <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{p.department}</span>
                     </div>
                   ))}
                 </div>
               )}
 
               <div style={{ textIndent: '2.5cm', marginBottom: '6pt', lineHeight: 1.6 }}>
-                ทั้งนี้ตั้งแต่วันที่ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.stayStartDate}</span> ถึงวันที่{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.stayEndDate}</span> รวม{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.totalDays}</span> วัน
+                ทั้งนี้ตั้งแต่วันที่ <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.stayStartDate}</span> ถึงวันที่{' '}
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.stayEndDate}</span> รวม{' '}
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.totalDays}</span> วัน
               </div>
             </div>
 
@@ -560,11 +560,11 @@ export default function OvernightStayPage() {
 
               <div style={{ textIndent: '2.5cm', marginBottom: '8pt', lineHeight: 1.6 }}>
                 2. ขออนุมัตินำรถยนต์ กฟภ. หมายเลขทะเบียน{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>
                   {formData.vehicles.length > 0 ? formData.vehicles.join(', ') : '..................'}
                 </span>{' '}
                 จอดเก็บรักษาหลังจากเลิกปฏิบัติงาน โดยให้อยู่ในความดูแลรับผิดชอบของ{' '}
-                <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.caretakerName || '..................'}</span>
+                <span className="a4-var-red" style={{ fontWeight: 600, color: '#dc2626' }}>{formData.caretakerName || '..................'}</span>
               </div>
 
               <p className="a4-text-indent" style={{ marginTop: '10pt', marginBottom: '20pt' }}>
