@@ -650,10 +650,11 @@
   border: none;
 }
 
-.wc-memo-p {
-  text-indent: 40px;
+.wc-memo-p,
+.a4-text-indent {
+  text-indent: 2.5cm !important;
   text-align: justify;
-  margin-bottom: 8pt;
+  margin-bottom: 6pt;
 }
 
 .wc-signer-block {

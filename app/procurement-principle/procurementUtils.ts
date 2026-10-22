@@ -333,7 +333,20 @@ export function getTodayThaiDate(type: 'short' | 'full' | 'thai_num' = 'short'):
  * Generate plain text for memo (Formatted for clean pasting into Word)
  */
 export function generateProcurementMemoPlainText(data: ProcurementFormData): string {
-  const proposalCombined = `${data.proposalText || ''}\n\n    ${data.delegationOrderText || ''}`;
+  const indentLines = (text: string = '', tab = '\t'): string => {
+    return text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => `${tab}${line}`)
+      .join('\n');
+  };
+
+  const backgroundFormatted = indentLines(data.backgroundText);
+  const factsFormatted = indentLines(data.factsText);
+  const proposalFormatted = indentLines(data.proposalText);
+  const delegationFormatted = data.delegationOrderText ? `\t${data.delegationOrderText}` : '';
+  const closingFormatted = `\t${data.closingText || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}`;
 
   return `การไฟฟ้าส่วนภูมิภาค
 PROVINCIAL ELECTRICITY AUTHORITY
@@ -344,15 +357,17 @@ PROVINCIAL ELECTRICITY AUTHORITY
 เรียน: ${data.salutation || ''}
 
 1. เรื่องเดิม
-    ${data.backgroundText || ''}
+${backgroundFormatted}
 
 2. ข้อเท็จจริง
-    ${data.factsText || ''}
+${factsFormatted}
 
 3. ข้อเสนอเพื่อพิจารณา
-    ${proposalCombined}
+${proposalFormatted}
 
-    ${data.closingText || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}
+${delegationFormatted}
+
+${closingFormatted}
 
 
 
@@ -374,7 +389,14 @@ PROVINCIAL ELECTRICITY AUTHORITY
  * Generate HTML Document for downloading as Microsoft Word (.doc)
  */
 export function generateProcurementWordDocument(data: ProcurementFormData): string {
-  const proposalCombined = `${data.proposalText || ''}<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${data.delegationOrderText || ''}`;
+  const formatWordParagraphs = (text: string = ''): string => {
+    return text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => `<p class="indent">${line}</p>`)
+      .join('\n');
+  };
 
   return `
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -384,7 +406,7 @@ export function generateProcurementWordDocument(data: ProcurementFormData): stri
       <style>
         body { font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Sarabun', sans-serif; font-size: 16pt; line-height: 1.35; margin: 2cm; }
         p { margin: 4pt 0; text-align: justify; }
-        .indent { text-indent: 40px; text-align: justify; }
+        .indent { text-indent: 2.5cm; text-align: justify; margin: 4pt 0; line-height: 1.35; }
         table.meta { width: 100%; border: none; margin-bottom: 16px; font-size: 16pt; }
         table.meta td { border: none; padding: 2px 0; vertical-align: top; }
       </style>
@@ -429,13 +451,14 @@ export function generateProcurementWordDocument(data: ProcurementFormData): stri
 
       <!-- Body 3 Paragraphs -->
       <p style="font-weight: bold; margin-top: 14pt;"><u>1. เรื่องเดิม</u></p>
-      <p class="indent">${data.backgroundText || ''}</p>
+      ${formatWordParagraphs(data.backgroundText)}
 
       <p style="font-weight: bold; margin-top: 14pt;"><u>2. ข้อเท็จจริง</u></p>
-      <p class="indent" style="white-space: pre-wrap;">${data.factsText || ''}</p>
+      ${formatWordParagraphs(data.factsText)}
 
       <p style="font-weight: bold; margin-top: 14pt;"><u>3. ข้อเสนอเพื่อพิจารณา</u></p>
-      <p class="indent">${proposalCombined}</p>
+      ${formatWordParagraphs(data.proposalText)}
+      ${data.delegationOrderText ? `<p class="indent">${data.delegationOrderText}</p>` : ''}
 
       <p class="indent" style="margin-top: 14pt;">${data.closingText || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}</p>
 
