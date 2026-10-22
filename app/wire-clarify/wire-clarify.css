@@ -913,3 +913,67 @@
   }
 }
 
+.subclause-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.var-subclause-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.var-subclause-btn:hover {
+  background: #dcfce7;
+  border-color: #22c55e;
+  transform: translateY(-1px);
+}
+
+.var-subclause-btn.blue {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+.var-subclause-btn.blue:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.var-subclause-btn.purple {
+  background: #faf5ff;
+  border-color: #d8b4fe;
+  color: #6b21a8;
+}
+
+.var-subclause-btn.purple:hover {
+  background: #f3e8ff;
+  border-color: #a855f7;
+}
+
+.indent-badge-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-weight: 500;
+}
+

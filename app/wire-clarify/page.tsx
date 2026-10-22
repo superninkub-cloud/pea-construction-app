@@ -149,32 +149,91 @@ export default function WireClarifyPage() {
     showToast(`ใส่วันที่เป็น: ${todayStr}`);
   };
 
-  // Synchronize 4 dynamic variables with formal paragraphs
+  // Synchronize dynamic variables with formal paragraphs
   const handleUpdateVariable = (
     field: 'approvalDocRef' | 'projectName' | 'wbsNo' | 'supervisorName' | 'supervisorPosition',
     value: string
   ) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
-      const newBackground = composeWireBackground({
-        approvalDocRef: updated.approvalDocRef,
-        projectName: updated.projectName,
-        wbsNo: updated.wbsNo,
-        supervisorName: updated.supervisorName,
-        supervisorPosition: updated.supervisorPosition
-      });
+      const hasCustomBackground = prev.memoBackground && (prev.memoBackground.includes('\n') || prev.memoBackground.includes('1.1'));
+      const newBackground = hasCustomBackground
+        ? prev.memoBackground
+        : composeWireBackground({
+            approvalDocRef: updated.approvalDocRef,
+            projectName: updated.projectName,
+            wbsNo: updated.wbsNo,
+            supervisorName: updated.supervisorName,
+            supervisorPosition: updated.supervisorPosition
+          });
+
       const preset = PRESET_WIRE_REASONS.find(r => r.key === selectedReasonKey);
-      const newFacts = composeWireFacts({
-        projectName: updated.projectName,
-        dept: 'ผกร.กรย.(ก3)',
-        factsDetail: preset?.factsDetail
-      });
+      const hasCustomFacts = prev.memoFacts && (prev.memoFacts.includes('\n') || prev.memoFacts.includes('2.1'));
+      
+      let newFacts = prev.memoFacts;
+      if (!hasCustomFacts) {
+        newFacts = composeWireFacts({
+          projectName: updated.projectName,
+          dept: 'ผกร.กรย.(ก3)',
+          factsDetail: preset?.factsDetail
+        });
+      } else if (field === 'projectName' && prev.projectName && prev.memoFacts.includes(prev.projectName)) {
+        newFacts = prev.memoFacts.replaceAll(prev.projectName, value);
+      }
+
       return {
         ...updated,
         memoBackground: newBackground,
         memoFacts: newFacts
       };
     });
+  };
+
+  const handleRecomposeBackground = () => {
+    const text = composeWireBackground({
+      approvalDocRef: formData.approvalDocRef,
+      projectName: formData.projectName,
+      wbsNo: formData.wbsNo,
+      supervisorName: formData.supervisorName,
+      supervisorPosition: formData.supervisorPosition
+    });
+    setFormData(prev => ({ ...prev, memoBackground: text }));
+    showToast('✓ ประกอบข้อความ 1. เรื่องเดิม จากตัวแปรเรียบร้อย');
+  };
+
+  const handleRecomposeFacts = () => {
+    const preset = PRESET_WIRE_REASONS.find(r => r.key === selectedReasonKey);
+    const text = composeWireFacts({
+      projectName: formData.projectName,
+      dept: 'ผกร.กรย.(ก3)',
+      factsDetail: preset?.factsDetail
+    });
+    setFormData(prev => ({ ...prev, memoFacts: text }));
+    showToast('✓ อัปเดตชื่องานและข้อความในข้อเท็จจริงเรียบร้อย');
+  };
+
+  const handleAddSubclause = (
+    field: 'memoBackground' | 'memoFacts' | 'memoConsideration' | 'supervisorBody',
+    clauseNumber: string
+  ) => {
+    setFormData(prev => {
+      const current = (prev[field] || '').trim();
+      if (!current) {
+        return { ...prev, [field]: `${clauseNumber} ` };
+      }
+      return { ...prev, [field]: `${current}\n${clauseNumber} ` };
+    });
+    showToast(`✓ เพิ่มข้อย่อย ${clauseNumber} เรียบร้อย (ย่อหน้า 2.5 ซม. อัตโนมัติ)`);
+  };
+
+  const handleAddNewParagraph = (
+    field: 'memoBackground' | 'memoFacts' | 'memoConsideration' | 'supervisorBody'
+  ) => {
+    setFormData(prev => {
+      const current = (prev[field] || '').trim();
+      return { ...prev, [field]: current ? `${current}\n` : '' };
+    });
+    showToast('✓ ขึ้นบรรทัดวรรคใหม่เรียบร้อย (ย่อหน้า 2.5 ซม. อัตโนมัติ)');
   };
 
   const handleSelectPresetWireReason = (preset: typeof PRESET_WIRE_REASONS[0]) => {
@@ -236,6 +295,95 @@ export default function WireClarifyPage() {
           {name} {pos}
         </span>{' '}
         <span>เป็นผู้ควบคุมงาน นั้น</span>
+      </>
+    );
+  };
+
+  // Render on-screen 2. ข้อเท็จจริง with interactive blue color highlight on project name
+  const renderScreenFactsText = (text: string) => {
+    if (!text) return null;
+    const proj = (formData.projectName || '').trim();
+    if (!proj) return text;
+
+    const toThaiNum = (s: string) => s.replace(/\d/g, d => '๐๑๒๓๔๕๖๗๘๙'[Number(d)]);
+    const toArabicNum = (s: string) => s.replace(/[๐-๙]/g, d => String('๐๑๒๓๔๕๖๗๘๙'.indexOf(d)));
+
+    const candidates = [
+      `แผนงานก่อสร้าง${proj}`,
+      `แผนงานก่อสร้าง${toThaiNum(proj)}`,
+      `แผนงานก่อสร้าง${toArabicNum(proj)}`,
+      proj,
+      toThaiNum(proj),
+      toArabicNum(proj)
+    ];
+
+    let matchTarget = '';
+    for (const cand of candidates) {
+      if (cand && text.includes(cand)) {
+        matchTarget = cand;
+        break;
+      }
+    }
+
+    if (!matchTarget) {
+      return text;
+    }
+
+    const parts = text.split(matchTarget);
+    return (
+      <>
+        {parts.map((part, index) => (
+          <React.Fragment key={index}>
+            {part}
+            {index < parts.length - 1 && (
+              <span
+                className="a4-var-spot blue"
+                title="🔵 จุดที่ 2: ชื่องานและสถานที่ก่อสร้าง (คลิกเพื่อแก้ไข)"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveEditSection('reason');
+                }}
+              >
+                {matchTarget}
+              </span>
+            )}
+          </React.Fragment>
+        ))}
+      </>
+    );
+  };
+
+  // Render paragraphs for 1. เรื่องเดิม
+  const renderIndentedBackground = (text?: string, screenHighlightFallback?: React.ReactNode) => {
+    if (!text && !screenHighlightFallback) return null;
+    const raw = (text || '').trim();
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+
+    if (lines.length <= 1 && screenHighlightFallback && !raw.includes('1.1')) {
+      return (
+        <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt', textIndent: '2.5cm' }}>
+          <span className="wc-print-only">{raw}</span>
+          <span className="no-print">{screenHighlightFallback}</span>
+        </p>
+      );
+    }
+
+    return (
+      <>
+        {lines.map((line, idx) => (
+          <p
+            key={idx}
+            className="a4-text-indent"
+            style={{
+              lineHeight: 1.6,
+              textAlign: 'justify',
+              marginBottom: '6pt',
+              textIndent: '2.5cm'
+            }}
+          >
+            {line}
+          </p>
+        ))}
       </>
     );
   };
@@ -549,15 +697,13 @@ export default function WireClarifyPage() {
                   </div>
 
                   <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>1. เรื่องเดิม</p>
-                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
-                    <span className="wc-print-only">{formData.memoBackground}</span>
-                    <span className="no-print">{renderScreenBackgroundText()}</span>
-                  </p>
+                  {renderIndentedBackground(formData.memoBackground, renderScreenBackgroundText())}
 
                   <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>2. ข้อเท็จจริง</p>
                   {(formData.memoFacts || '').split('\n').map(l => l.trim()).filter(Boolean).map((line, idx) => (
                     <p key={idx} className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '6pt', textIndent: '2.5cm' }}>
-                      {line}
+                      <span className="wc-print-only">{line}</span>
+                      <span className="no-print">{renderScreenFactsText(line)}</span>
                     </p>
                   ))}
                 </>
@@ -565,7 +711,8 @@ export default function WireClarifyPage() {
                 <>
                   {(formData.supervisorBody || '').split('\n').map(l => l.trim()).filter(Boolean).map((line, idx) => (
                     <p key={idx} className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '6pt', textIndent: '2.5cm' }}>
-                      {line}
+                      <span className="wc-print-only">{line}</span>
+                      <span className="no-print">{renderScreenFactsText(line)}</span>
                     </p>
                   ))}
                 </>
@@ -637,15 +784,17 @@ export default function WireClarifyPage() {
               {formData.docLevel === 'division_memo' ? (
                 <>
                   <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>3. ข้อพิจารณา</p>
-                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
-                    {formData.memoConsideration}
-                  </p>
-                  <p className="a4-text-indent" style={{ marginTop: '12pt', marginBottom: '24pt' }}>
+                  {(formData.memoConsideration || '').split('\n').map(l => l.trim()).filter(Boolean).map((line, idx) => (
+                    <p key={idx} className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '6pt', textIndent: '2.5cm' }}>
+                      {line}
+                    </p>
+                  ))}
+                  <p className="a4-text-indent" style={{ marginTop: '12pt', marginBottom: '24pt', lineHeight: 1.6, textAlign: 'justify', textIndent: '2.5cm' }}>
                     {formData.memoClosing}
                   </p>
                 </>
               ) : (
-                <p className="a4-text-indent" style={{ marginTop: '12pt', marginBottom: '24pt' }}>
+                <p className="a4-text-indent" style={{ marginTop: '12pt', marginBottom: '24pt', lineHeight: 1.6, textAlign: 'justify', textIndent: '2.5cm' }}>
                   {formData.supervisorClosing}
                 </p>
               )}
@@ -1035,7 +1184,10 @@ export default function WireClarifyPage() {
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                           <span className="variable-badge-num badge-blue">จุดที่ 2</span>
-                          <strong style={{ fontSize: '14px', color: '#1d4ed8' }}>ชื่องานและสถานที่ก่อสร้าง</strong>
+                          <strong style={{ fontSize: '14px', color: '#1d4ed8' }}>ชื่องานและสถานที่ก่อสร้าง (จุดมาร์คสีฟ้า)</strong>
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '6px' }}>
+                          🔵 ชื่องานนี้จะแสดงมาร์คสีฟ้าทั้งใน <strong>1. เรื่องเดิม</strong> และ <strong>2. ข้อเท็จจริง</strong> ในเอกสารเพื่อให้ตรวจทานและแก้ได้สะดวก
                         </div>
                         <textarea
                           rows={2}
@@ -1114,14 +1266,75 @@ export default function WireClarifyPage() {
                         </div>
                       </div>
 
-                      {/* Card 5: สาเหตุที่ส่งคืนไม่ครบ */}
-                      <div className="variable-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num" style={{ background: '#7c3aed', color: '#fff' }}>จุดที่ 5</span>
-                          <strong style={{ fontSize: '14px', color: '#7c3aed' }}>สาเหตุ/เหตุผลความจำเป็นที่ส่งคืนเศษสายไม่ครบ</strong>
+                      {/* Card: 1. เรื่องเดิม (ข้อความ & ข้อย่อย) */}
+                      <div className="variable-card" style={{ border: '1.5px solid #0284c7', background: '#f0f9ff' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="variable-badge-num" style={{ background: '#0284c7', color: '#fff' }}>ข้อ 1</span>
+                            <strong style={{ fontSize: '14px', color: '#0369a1' }}>1. เรื่องเดิม (ปรับแต่งหรือใส่ข้อย่อย 1.1, 1.2)</strong>
+                          </div>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
+                        </div>
+
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('memoBackground', '1.1')}
+                          >
+                            ➕ ข้อย่อย 1.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('memoBackground', '1.2')}
+                          >
+                            ➕ ข้อย่อย 1.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('memoBackground', '1.3')}
+                          >
+                            ➕ ข้อย่อย 1.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('memoBackground')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={handleRecomposeBackground}
+                          >
+                            🔄 ประกอบข้อความมาตรฐานจากจุด 1-4
+                          </button>
+                        </div>
+
+                        <textarea
+                          rows={3}
+                          className="big-textarea"
+                          value={formData.memoBackground}
+                          onChange={(e) => setFormData({ ...formData, memoBackground: e.target.value })}
+                        />
+                      </div>
+
+                      {/* Card 5: สาเหตุที่ส่งคืนไม่ครบ / 2. ข้อเท็จจริง */}
+                      <div className="variable-card" style={{ border: '1.5px solid #0d9488', background: '#f0fdfa' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="variable-badge-num" style={{ background: '#0d9488', color: '#fff' }}>ข้อ 2</span>
+                            <strong style={{ fontSize: '14px', color: '#0f766e' }}>2. ข้อเท็จจริง (เหตุผลความจำเป็น & ข้อย่อย 2.1, 2.2)</strong>
+                          </div>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
                         </div>
                         <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
-                          เลือกสาเหตุสำเร็จรูปที่ตรงกับสภาพหน้างานจริง:
+                          เลือกสาเหตุสำเร็จรูปที่ตรงกับสภาพหน้างานจริง (ชื่องานจะมีมาร์คสีฟ้าบนหน้าจอ):
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
                           {PRESET_WIRE_REASONS.map((preset) => (
@@ -1144,9 +1357,48 @@ export default function WireClarifyPage() {
                           ))}
                         </div>
 
-                        <span style={{ fontSize: '12px', color: '#64748b' }}>ข้อความข้อเท็จจริง (ปรับแต่งเพิ่มเติมได้ตามต้องการ):</span>
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('memoFacts', '2.1')}
+                          >
+                            ➕ ข้อย่อย 2.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('memoFacts', '2.2')}
+                          >
+                            ➕ ข้อย่อย 2.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('memoFacts', '2.3')}
+                          >
+                            ➕ ข้อย่อย 2.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('memoFacts')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ccfbf1', color: '#0f766e', borderColor: '#99f6e4', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={handleRecomposeFacts}
+                          >
+                            🔄 ดึงชื่องานและข้อความตามสาเหตุ
+                          </button>
+                        </div>
+
                         <textarea
-                          rows={4}
+                          rows={5}
                           className="big-textarea"
                           value={formData.memoFacts}
                           onChange={(e) => setFormData({ ...formData, memoFacts: e.target.value })}
@@ -1154,31 +1406,89 @@ export default function WireClarifyPage() {
                       </div>
 
                       {/* Card 6: 3. ข้อพิจารณา (วรรคสุดท้าย) */}
-                      <div className="variable-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num" style={{ background: '#0284c7', color: '#fff' }}>ข้อ 3</span>
-                          <strong style={{ fontSize: '14px', color: '#0369a1' }}>ข้อพิจารณา (วรรคสรุปก่อนตาราง)</strong>
+                      <div className="variable-card" style={{ border: '1.5px solid #9333ea', background: '#faf5ff' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="variable-badge-num" style={{ background: '#9333ea', color: '#fff' }}>ข้อ 3</span>
+                            <strong style={{ fontSize: '14px', color: '#7e22ce' }}>3. ข้อพิจารณา (ปรับแต่งหรือใส่ข้อย่อย 3.1, 3.2)</strong>
+                          </div>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
                         </div>
+
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('memoConsideration', '3.1')}
+                          >
+                            ➕ ข้อย่อย 3.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('memoConsideration', '3.2')}
+                          >
+                            ➕ ข้อย่อย 3.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('memoConsideration', '3.3')}
+                          >
+                            ➕ ข้อย่อย 3.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('memoConsideration')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#f3e8ff', color: '#7e22ce', borderColor: '#e9d5ff', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={() => setFormData(prev => ({
+                              ...prev,
+                              memoConsideration: 'เห็นควรอนุมัตินำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอน ตามตารางเปรียบเทียบปริมาณเศษสายรื้อถอนต่อไป'
+                            }))}
+                          >
+                            🔄 ดึงข้อความมาตรฐาน
+                          </button>
+                        </div>
+
                         <textarea
                           rows={3}
                           className="big-textarea"
                           value={formData.memoConsideration}
                           onChange={(e) => setFormData({ ...formData, memoConsideration: e.target.value })}
                         />
+
+                        <div style={{ marginTop: '10px' }}>
+                          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>คำลงท้าย:</span>
+                          <input
+                            type="text"
+                            className="big-input"
+                            style={{ fontSize: '13px', marginTop: '4px' }}
+                            value={formData.memoClosing}
+                            onChange={(e) => setFormData({ ...formData, memoClosing: e.target.value })}
+                          />
+                        </div>
                       </div>
 
                       {/* Live Compiled Preview */}
                       <div className="var-live-preview-box">
                         <div style={{ fontWeight: 600, color: '#0369a1', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Sparkles size={14} /> ตัวอย่างข้อความที่จะปรากฏในบันทึกข้อความ (Live Preview):
+                          <Sparkles size={14} /> ตัวอย่างข้อความที่จะปรากฏในบันทึกข้อความ (Live Preview - ย่อหน้า 2.5 ซม. ทุกวรรค):
                         </div>
-                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px', whiteSpace: 'pre-line' }}>
                           <strong>1. เรื่องเดิม:</strong> {formData.memoBackground}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px', whiteSpace: 'pre-line' }}>
                           <strong>2. ข้อเท็จจริง:</strong> {formData.memoFacts}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#1e293b' }}>
+                        <div style={{ fontSize: '12px', color: '#1e293b', whiteSpace: 'pre-line' }}>
                           <strong>3. ข้อพิจารณา:</strong> {formData.memoConsideration}
                         </div>
                       </div>
@@ -1186,8 +1496,47 @@ export default function WireClarifyPage() {
                   ) : (
                     <div>
                       {/* Freeform Editor */}
+                      <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        ✏️ <strong>โหมดแก้ไขข้อความอิสระ (Freeform):</strong> สามารถพิมพ์ข้อความและข้อย่อยได้อย่างอิสระ ทุกครั้งที่กดขึ้นบรรทัดใหม่ (Enter) หรือกดปุ่มข้อย่อย ระบบจะย่อหน้า 2.5 ซม. ให้อัตโนมัติทุกข้อ
+                      </div>
+
                       <div className="big-field-group">
-                        <label className="big-label">1. เรื่องเดิม</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
+                          <label className="big-label" style={{ marginBottom: 0 }}>1. เรื่องเดิม</label>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
+                        </div>
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('memoBackground', '1.1')}
+                          >
+                            ➕ ข้อย่อย 1.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn blue"
+                            onClick={() => handleAddSubclause('memoBackground', '1.2')}
+                          >
+                            ➕ ข้อย่อย 1.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('memoBackground')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={handleRecomposeBackground}
+                          >
+                            🔄 ดึงข้อความมาตรฐาน
+                          </button>
+                        </div>
                         <textarea
                           rows={3}
                           className="big-textarea"
@@ -1197,7 +1546,49 @@ export default function WireClarifyPage() {
                       </div>
 
                       <div className="big-field-group">
-                        <label className="big-label">2. ข้อเท็จจริง (เหตุผลความจำเป็นที่ส่งคืนไม่ครบ)</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
+                          <label className="big-label" style={{ marginBottom: 0 }}>2. ข้อเท็จจริง (เหตุผลความจำเป็น & ข้อย่อย)</label>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
+                        </div>
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('memoFacts', '2.1')}
+                          >
+                            ➕ ข้อย่อย 2.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('memoFacts', '2.2')}
+                          >
+                            ➕ ข้อย่อย 2.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn"
+                            onClick={() => handleAddSubclause('memoFacts', '2.3')}
+                          >
+                            ➕ ข้อย่อย 2.3
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('memoFacts')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ccfbf1', color: '#0f766e', borderColor: '#99f6e4', fontWeight: 600, marginLeft: 'auto' }}
+                            onClick={handleRecomposeFacts}
+                          >
+                            🔄 ดึงข้อความตามสาเหตุ
+                          </button>
+                        </div>
                         <textarea
                           rows={5}
                           className="big-textarea"
@@ -1208,7 +1599,34 @@ export default function WireClarifyPage() {
                       </div>
 
                       <div className="big-field-group">
-                        <label className="big-label">3. ข้อพิจารณา</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
+                          <label className="big-label" style={{ marginBottom: 0 }}>3. ข้อพิจารณา</label>
+                          <span className="indent-badge-info">📐 ย่อหน้า 2.5 ซม.</span>
+                        </div>
+                        <div className="subclause-toolbar">
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('memoConsideration', '3.1')}
+                          >
+                            ➕ ข้อย่อย 3.1
+                          </button>
+                          <button
+                            type="button"
+                            className="var-subclause-btn purple"
+                            onClick={() => handleAddSubclause('memoConsideration', '3.2')}
+                          >
+                            ➕ ข้อย่อย 3.2
+                          </button>
+                          <button
+                            type="button"
+                            className="var-quick-opt-btn"
+                            style={{ background: '#ffffff', color: '#475569', borderColor: '#cbd5e1' }}
+                            onClick={() => handleAddNewParagraph('memoConsideration')}
+                          >
+                            ↵ ขึ้นวรรคใหม่
+                          </button>
+                        </div>
                         <textarea
                           rows={3}
                           className="big-textarea"
