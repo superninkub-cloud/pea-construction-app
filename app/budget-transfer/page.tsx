@@ -47,7 +47,7 @@ interface SectionMeta {
 
 const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileText },
-  { key: 'project', title: '2. โครงการ & อ้างอิงอนุมัติเดิม', shortName: 'โครงการ & WBS', icon: Briefcase },
+  { key: 'project', title: '2. โครงการ, อ้างอิงเดิม & ค่าใช้จ่าย', shortName: 'โครงการ & ค่าใช้จ่าย', icon: Briefcase },
   { key: 'reason', title: '3. เหตุผลความจำเป็นในการโอนงบ', shortName: 'เหตุผลชี้แจง', icon: Building },
   { key: 'transfers', title: '4. รายการโอนงบประมาณระหว่างโครงข่าย', shortName: 'รายการโอนงบ', icon: ArrowRightLeft },
   { key: 'signer', title: '5. ผู้เสนอและผู้อนุมัติ (อก.รย. & ฝวบ.)', shortName: 'ผู้เสนอ & อนุมัติ', icon: UserCheck },
@@ -168,6 +168,12 @@ function BudgetTransferContent() {
   const [supervisorName, setSupervisorName] = useState('นายอุดมศักดิ์ จันทร์กลิ่น');
   const [supervisorLevel, setSupervisorLevel] = useState('7');
 
+  // Project Expense Breakdown (Customizable & Editable)
+  const [totalExpense, setTotalExpense] = useState('1,915,387.03');
+  const [materialExpense, setMaterialExpense] = useState('1,357,472.03');
+  const [siteExpense, setSiteExpense] = useState('479,162.00');
+  const [operatingExpense, setOperatingExpense] = useState('78,753.00');
+
   // Reason
   const [reasonText, setReasonText] = useState('ปัจจุบันงานก่อสร้างดังกล่าวได้ดำเนินการแล้วเสร็จและจ่ายไฟแล้ว แต่เนื่องจากในการดำเนินการก่อสร้างมีความจำเป็นต้องดับกระแสไฟและระดมชุดงานเพื่อปฏิบัติงานในวันอาทิตย์หลายครั้ง ซึ่งในการปฏิบัติงานวันอาทิตย์นั้น กฟภ.ต้องจ่ายค่าแรงงานเป็น 2 เท่าของค่าแรงงานปกติ จึงส่งผลให้ค่าใช้จ่ายหน้างานในบางส่วนไม่เพียงพอ');
 
@@ -228,6 +234,10 @@ function BudgetTransferContent() {
         if (parsed.peaOffice) setPeaOffice(parsed.peaOffice);
         if (parsed.supervisorName) setSupervisorName(parsed.supervisorName);
         if (parsed.supervisorLevel) setSupervisorLevel(parsed.supervisorLevel);
+        if (parsed.totalExpense !== undefined) setTotalExpense(parsed.totalExpense);
+        if (parsed.materialExpense !== undefined) setMaterialExpense(parsed.materialExpense);
+        if (parsed.siteExpense !== undefined) setSiteExpense(parsed.siteExpense);
+        if (parsed.operatingExpense !== undefined) setOperatingExpense(parsed.operatingExpense);
         if (parsed.reasonText) setReasonText(parsed.reasonText);
         if (parsed.signer1Name) setSigner1Name(parsed.signer1Name);
         if (parsed.signer1Title) setSigner1Title(parsed.signer1Title);
@@ -248,6 +258,7 @@ function BudgetTransferContent() {
       const payload = {
         projectName, wbs, docNo, docDate, docTo, docFrom, subject, salutation,
         refDocNo, refDocDate, peaOffice, supervisorName, supervisorLevel,
+        totalExpense, materialExpense, siteExpense, operatingExpense,
         reasonText, signer1Name, signer1Title, signer2Name, signer2Title,
         transfers, networkDataList
       };
@@ -258,6 +269,7 @@ function BudgetTransferContent() {
   }, [
     projectName, wbs, docNo, docDate, docTo, docFrom, subject, salutation,
     refDocNo, refDocDate, peaOffice, supervisorName, supervisorLevel,
+    totalExpense, materialExpense, siteExpense, operatingExpense,
     reasonText, signer1Name, signer1Title, signer2Name, signer2Title,
     transfers, networkDataList
   ]);
@@ -304,6 +316,39 @@ function BudgetTransferContent() {
       });
     });
     return total;
+  };
+
+  // Helper to auto-sum sub-expenses into totalExpense
+  const handleAutoSumExpenses = () => {
+    const parseNum = (val: string) => {
+      const clean = (val || '').replace(/,/g, '').trim();
+      const n = parseFloat(clean);
+      return isNaN(n) ? 0 : n;
+    };
+    const mat = parseNum(materialExpense);
+    const site = parseNum(siteExpense);
+    const ops = parseNum(operatingExpense);
+    const sum = mat + site + ops;
+    setTotalExpense(fmt(sum));
+    showToast(`✓ คำนวณรวมยอดค่าใช้จ่ายทั้งสิ้นเป็น ${fmt(sum)} บาท เรียบร้อยแล้ว`);
+  };
+
+  // Helper to pull calculated expenses from ZPSR018
+  const handlePullZpsrExpenses = () => {
+    if (networkDataList.length === 0) {
+      showToast('⚠️ ไม่พบข้อมูล ZPSR018 ให้ดึง');
+      return;
+    }
+    const totalB = calculateTotalProjectValue();
+    const matB = calculateBudgetByCategoryGroup(['พัสดุ']);
+    const siteB = calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']);
+    const opsB = calculateBudgetByCategoryGroup(['ดำเนินการ']);
+
+    setTotalExpense(fmt(totalB));
+    setMaterialExpense(fmt(matB));
+    setSiteExpense(fmt(siteB));
+    setOperatingExpense(fmt(opsB));
+    showToast('✓ ดึงยอดคำนวณจาก ZPSR018 เรียบร้อยแล้ว');
   };
 
   // Helper to find deficit categories for a network
@@ -455,6 +500,28 @@ function BudgetTransferContent() {
         }
 
         setNetworkDataList(data);
+
+        // Calculate and pre-fill project expenses from ZPSR018
+        let totalB = 0;
+        let matB = 0;
+        let siteB = 0;
+        let opsB = 0;
+        data.forEach(net => {
+          Object.entries(net.categories).forEach(([catKey, vals]) => {
+            totalB += vals.budget;
+            if (catKey.includes('พัสดุ')) matB += vals.budget;
+            if (['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด'].some(g => catKey.includes(g) || g.includes(catKey.replace('งาน', '')))) {
+              siteB += vals.budget;
+            }
+            if (catKey.includes('ดำเนินการ')) opsB += vals.budget;
+          });
+        });
+        if (totalB > 0) {
+          setTotalExpense(fmt(totalB));
+          setMaterialExpense(fmt(matB));
+          setSiteExpense(fmt(siteB));
+          setOperatingExpense(fmt(opsB));
+        }
 
         const now = new Date().toLocaleString('th-TH');
         setPullHistory(now);
@@ -877,30 +944,52 @@ function BudgetTransferContent() {
                 <div
                   className="a4-section-hoverable"
                   onClick={() => setActiveEditSection('project')}
-                  title="คลิกเพื่อแก้ไขข้อมูลโครงการและหนังสืออ้างอิง"
+                  title="คลิกเพื่อแก้ไขข้อมูลโครงการ, หนังสืออ้างอิง และค่าใช้จ่าย"
                   style={{ marginTop: '12pt' }}
                 >
                   <div className="section-edit-badge">
-                    <Edit3 size={12} /> จิ้มแก้ไขข้อมูลโครงการ & อ้างอิง
+                    <Edit3 size={12} /> จิ้มแก้ไขข้อมูลโครงการ, อ้างอิง & ค่าใช้จ่าย
                   </div>
 
-                  {networkDataList.length > 0 ? (
-                    <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
-                      1. ตามหนังสือ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{projectName}</span> หมายเลขงาน (WBS){' '}
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{wbs}</span> โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())}.- บาท แยกเป็นค่าพัสดุจำนวน {fmt(calculateBudgetByCategoryGroup(['พัสดุ']))}.- บาท ค่าใช้จ่ายหน้างาน เป็นเงิน {fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))}.- บาท และค่าดำเนินการ เป็นเงิน {fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}.- บาท ซึ่งมี{' '}
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{supervisorName}</span> {supervisorLevel ? `พชง.${supervisorLevel}` : ''} เป็นผู้ควบคุมงาน นั้น
-                    </p>
-                  ) : (
-                    <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
-                      1. ตามหนังสือ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{projectName}</span> หมายเลขงาน (WBS){' '}
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{wbs}</span> โดยมี{' '}
-                      <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{supervisorName}</span> เป็นผู้ควบคุมงาน นั้น
-                    </p>
-                  )}
+                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
+                    1. ตามหนังสือ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
+                    <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
+                    <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{projectName}</span> หมายเลขงาน (WBS){' '}
+                    <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{wbs}</span> โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน{' '}
+                    <span
+                      className="a4-var-spot blue cursor-pointer"
+                      style={{ fontWeight: 600 }}
+                      onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                      title="คลิกเพื่อแก้ไขค่าใช้จ่ายทั้งสิ้น"
+                    >
+                      {totalExpense || fmt(calculateTotalProjectValue())}
+                    </span>.- บาท แยกเป็นค่าพัสดุจำนวน{' '}
+                    <span
+                      className="a4-var-spot purple cursor-pointer"
+                      style={{ fontWeight: 600 }}
+                      onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                      title="คลิกเพื่อแก้ไขค่าพัสดุ"
+                    >
+                      {materialExpense || fmt(calculateBudgetByCategoryGroup(['พัสดุ']))}
+                    </span>.- บาท ค่าใช้จ่ายหน้างาน เป็นเงิน{' '}
+                    <span
+                      className="a4-var-spot orange cursor-pointer"
+                      style={{ fontWeight: 600 }}
+                      onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                      title="คลิกเพื่อแก้ไขค่าใช้จ่ายหน้างาน"
+                    >
+                      {siteExpense || fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))}
+                    </span>.- บาท และค่าดำเนินการ เป็นเงิน{' '}
+                    <span
+                      className="a4-var-spot teal cursor-pointer"
+                      style={{ fontWeight: 600 }}
+                      onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                      title="คลิกเพื่อแก้ไขค่าดำเนินการ"
+                    >
+                      {operatingExpense || fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}
+                    </span>.- บาท ซึ่งมี{' '}
+                    <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{supervisorName}</span> {supervisorLevel ? `พชง.${supervisorLevel}` : ''} เป็นผู้ควบคุมงาน นั้น
+                  </p>
 
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginTop: '6pt' }}>
                     2. {reasonText}
@@ -1993,6 +2082,105 @@ function BudgetTransferContent() {
                         placeholder="เช่น 7"
                       />
                     </div>
+                  </div>
+
+                  {/* EXPENSE BREAKDOWN (EDITABLE) */}
+                  <div style={{
+                    marginTop: '16px',
+                    padding: '14px',
+                    borderRadius: '10px',
+                    backgroundColor: '#f8fafc',
+                    border: '1.5px solid #cbd5e1'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                      <label className="big-label" style={{ margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>💰 รายการค่าใช้จ่ายตามหนังสืออนุมัติเดิม (แก้ไขปรับเปลี่ยนได้):</span>
+                      </label>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        {networkDataList.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={handlePullZpsrExpenses}
+                            className="text-xs px-2.5 py-1 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded font-semibold flex items-center gap-1 transition"
+                            title="ดึงยอดคำนวณจากไฟล์ ZPSR018 ที่อัพโหลดไว้"
+                          >
+                            <RefreshCw size={12} /> ดึงจาก ZPSR018
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleAutoSumExpenses}
+                          className="text-xs px-2.5 py-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded font-semibold flex items-center gap-1 transition"
+                          title="รวมยอด: ค่าพัสดุ + ค่าใช้จ่ายหน้างาน + ค่าดำเนินการ ลงในช่องค่าใช้จ่ายทั้งสิ้น"
+                        >
+                          <Plus size={12} /> รวมยอดทั้งสิ้น
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="big-grid-2">
+                      <div className="big-field-group">
+                        <label className="big-label" style={{ fontSize: '12px', color: '#1e40af' }}>
+                          1. ค่าใช้จ่ายทั้งสิ้น (บาท)
+                        </label>
+                        <input
+                          type="text"
+                          className="big-input"
+                          style={{ borderColor: '#93c5fd', fontWeight: 600, color: '#1e3a8a' }}
+                          value={totalExpense}
+                          onChange={(e) => setTotalExpense(e.target.value)}
+                          placeholder="เช่น 1,915,387.03"
+                        />
+                      </div>
+
+                      <div className="big-field-group">
+                        <label className="big-label" style={{ fontSize: '12px', color: '#6b21a8' }}>
+                          2. แยกเป็นค่าพัสดุ (บาท)
+                        </label>
+                        <input
+                          type="text"
+                          className="big-input"
+                          style={{ borderColor: '#d8b4fe', color: '#6b21a8' }}
+                          value={materialExpense}
+                          onChange={(e) => setMaterialExpense(e.target.value)}
+                          placeholder="เช่น 1,357,472.03"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="big-grid-2" style={{ marginTop: '8px' }}>
+                      <div className="big-field-group">
+                        <label className="big-label" style={{ fontSize: '12px', color: '#c2410c' }}>
+                          3. ค่าใช้จ่ายหน้างาน (บาท)
+                        </label>
+                        <input
+                          type="text"
+                          className="big-input"
+                          style={{ borderColor: '#fdba74', color: '#c2410c' }}
+                          value={siteExpense}
+                          onChange={(e) => setSiteExpense(e.target.value)}
+                          placeholder="เช่น 479,162.00"
+                        />
+                      </div>
+
+                      <div className="big-field-group">
+                        <label className="big-label" style={{ fontSize: '12px', color: '#0f766e' }}>
+                          4. ค่าดำเนินการ (บาท)
+                        </label>
+                        <input
+                          type="text"
+                          className="big-input"
+                          style={{ borderColor: '#99f6e4', color: '#0f766e' }}
+                          value={operatingExpense}
+                          onChange={(e) => setOperatingExpense(e.target.value)}
+                          placeholder="เช่น 78,753.00"
+                        />
+                      </div>
+                    </div>
+
+                    <p style={{ fontSize: '11px', color: '#64748b', marginTop: '8px', marginBottom: 0 }}>
+                      💡 ตัวเลขค่าใช้จ่าย 4 ช่องนี้จะแสดงผลลงในข้อ 1. ของบันทึกข้อความทันที (สามารถแก้ไขเปลี่ยนแปลงได้ทุกครั้งตามหนังสืออนุมัติจริง)
+                    </p>
                   </div>
                 </div>
               )}

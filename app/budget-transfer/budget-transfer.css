@@ -7,3 +7,72 @@
 .budget-transfer-container * {
   font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
 }
+
+/* Interactive editable variable spots on A4 preview */
+.a4-var-spot {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background-color: rgba(254, 240, 138, 0.4);
+  border-bottom: 1.5px dashed #ca8a04;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.a4-var-spot:hover {
+  background-color: #fef08a;
+  border-bottom-color: #a16207;
+}
+
+.a4-var-spot.blue {
+  background-color: rgba(219, 234, 254, 0.5);
+  border-bottom: 1.5px dashed #2563eb;
+  color: #1e40af;
+}
+
+.a4-var-spot.blue:hover {
+  background-color: #dbeafe;
+}
+
+.a4-var-spot.purple {
+  background-color: rgba(243, 232, 255, 0.5);
+  border-bottom: 1.5px dashed #9333ea;
+  color: #6b21a8;
+}
+
+.a4-var-spot.purple:hover {
+  background-color: #f3e8ff;
+}
+
+.a4-var-spot.orange {
+  background-color: rgba(255, 237, 213, 0.6);
+  border-bottom: 1.5px dashed #ea580c;
+  color: #c2410c;
+}
+
+.a4-var-spot.orange:hover {
+  background-color: #ffedd5;
+}
+
+.a4-var-spot.teal {
+  background-color: rgba(204, 251, 241, 0.5);
+  border-bottom: 1.5px dashed #0d9488;
+  color: #0f766e;
+}
+
+.a4-var-spot.teal:hover {
+  background-color: #ccfbf1;
+}
+
+@media print {
+  .a4-var-spot,
+  .a4-var-spot.blue,
+  .a4-var-spot.purple,
+  .a4-var-spot.orange,
+  .a4-var-spot.teal {
+    background-color: transparent !important;
+    border-bottom: none !important;
+    color: inherit !important;
+    padding: 0 !important;
+  }
+}
