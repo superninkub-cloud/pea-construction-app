@@ -73,7 +73,11 @@ export default function OvernightStayPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.subject) {
-          setFormData(parsed);
+          setFormData({
+            ...SAMPLE_SUPAWIT_DATA,
+            ...parsed,
+            docTo: parsed.docTo || 'กฟก.3'
+          });
           setActivePreset('custom');
         }
       }
@@ -407,15 +411,15 @@ export default function OvernightStayPage() {
                         placeholder="หน่วยงานเจ้าของเรื่อง เช่น แผนกก่อสร้างระบบไฟฟ้า..."
                       />
                     </td>
-                    <td style={{ width: '10%', fontWeight: 'bold' }}>โทร.</td>
+                    <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
                     <td style={{ width: '40%' }}>
                       <input
                         type="text"
                         className="a4-live-input"
-                        value={formData.contactPhone}
-                        onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                        value={formData.docTo || 'กฟก.3'}
+                        onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="โทรภายใน เช่น ๑๐๑๗๑"
+                        placeholder="เช่น กฟก.3"
                       />
                     </td>
                   </tr>
@@ -684,15 +688,27 @@ export default function OvernightStayPage() {
               {/* SECTION 1: HEADER */}
               {activeEditSection === 'header' && (
                 <div>
-                  <div className="big-field-group">
-                    <label className="big-label">หน่วยงานเจ้าของเรื่อง (จาก)</label>
-                    <input
-                      type="text"
-                      className="big-input"
-                      value={formData.docFrom}
-                      onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
-                      placeholder="เช่น แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา..."
-                    />
+                  <div className="big-grid-2">
+                    <div className="big-field-group">
+                      <label className="big-label">หน่วยงานเจ้าของเรื่อง (จาก)</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.docFrom}
+                        onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
+                        placeholder="เช่น กรย.(ก3)"
+                      />
+                    </div>
+                    <div className="big-field-group">
+                      <label className="big-label">ถึง</label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={formData.docTo || 'กฟก.3'}
+                        onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
+                        placeholder="เช่น กฟก.3"
+                      />
+                    </div>
                   </div>
 
                   <div className="big-grid-2">

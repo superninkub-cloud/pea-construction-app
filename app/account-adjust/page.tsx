@@ -79,9 +79,16 @@ export default function AccountAdjustPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.items && parsed.items.length > 0) {
+          let salutation = parsed.salutation || 'อก.บฟ.(ก๓)';
+          if (salutation === 'อก.กบฟ.(ก๓)' || salutation === 'อก.กบฟ.(ก3)') {
+            salutation = 'อก.บฟ.(ก๓)';
+          }
+          const docTo = parsed.docTo || 'กบฟ.(ก๓)';
           setFormData({
             ...SAMPLE_ACCOUNT_ADJUST_DATA,
             ...parsed,
+            salutation,
+            docTo,
             reasonCategory: parsed.reasonCategory || 'vehicle',
             causeItem: parsed.causeItem || 'ค่าซ่อมยานพาหนะ',
             errorType: parsed.errorType || 'มีการบันทึกรายการทางบัญชีผิดพลาด',
@@ -89,7 +96,7 @@ export default function AccountAdjustPage() {
             purpose: parsed.purpose || 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้',
             memoReason: parsed.memoReason || composeReasonText({
               docFrom: parsed.docFrom,
-              docTo: parsed.docTo,
+              docTo: docTo,
               causeItem: parsed.causeItem || 'ค่าซ่อมยานพาหนะ',
               errorType: parsed.errorType || 'มีการบันทึกรายการทางบัญชีผิดพลาด',
               detailNote: parsed.detailNote || '',
@@ -478,9 +485,16 @@ export default function AccountAdjustPage() {
                           placeholder="เช่น กรย.(ก๓)"
                         />
                       </td>
-                      <td style={{ width: '10%', fontWeight: 'bold' }}>โทร.</td>
+                      <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
                       <td style={{ width: '40%' }}>
-                        <span style={{ color: '#475569' }}>-</span>
+                        <input
+                          type="text"
+                          className="a4-live-input"
+                          value={formData.docTo}
+                          onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
+                          onClick={(e) => e.stopPropagation()}
+                          placeholder="เช่น กบฟ.(ก๓)"
+                        />
                       </td>
                     </tr>
                     <tr>
@@ -529,7 +543,7 @@ export default function AccountAdjustPage() {
                           value={formData.salutation}
                           onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น อก.กบฟ.(ก๓)"
+                          placeholder="เช่น อก.บฟ.(ก๓)"
                         />
                       </td>
                     </tr>
@@ -750,7 +764,7 @@ export default function AccountAdjustPage() {
                       className="big-input"
                       value={formData.salutation}
                       onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
-                      placeholder="เช่น อก.กบฟ.(ก๓)"
+                      placeholder="เช่น อก.บฟ.(ก๓)"
                     />
                   </div>
                 </div>
