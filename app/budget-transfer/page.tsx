@@ -305,6 +305,23 @@ function BudgetTransferContent() {
     return total;
   };
 
+  // Helper to find deficit categories for a network
+  const getNetworkDeficits = (net: NetworkData) => {
+    const deficits: { category: string; amount: number; remaining: number }[] = [];
+    CATEGORIES.forEach(cat => {
+      const catKey = Object.keys(net.categories).find(k => k.includes(cat) || cat.includes(k.replace('งาน', '')));
+      const vals = catKey ? net.categories[catKey] : null;
+      if (vals && vals.remaining < 0) {
+        deficits.push({
+          category: cat,
+          amount: Math.abs(vals.remaining),
+          remaining: vals.remaining
+        });
+      }
+    });
+    return deficits;
+  };
+
   // Auto Calculation Algorithm (Exact logic matching PEA financial transfer rules)
   const autoCalculateTransfers = (data: NetworkData[]): TransferItem[] => {
     let fieldDeficits: { network: string; category: string; amount: number }[] = [];
@@ -888,13 +905,92 @@ function BudgetTransferContent() {
                     ๒. {reasonText}
                   </p>
 
+                  {/* Summary Callout for Deficits */}
+                  {networkDataList.some(net => getNetworkDeficits(net).length > 0) && (
+                    <div style={{ margin: '8pt 0 10pt 0', padding: '8pt 14pt', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px' }}>
+                      <div style={{ fontWeight: 600, color: '#991b1b', fontSize: '11.5pt', marginBottom: '4pt' }}>
+                        สรุปงบประมาณไม่เพียงพอที่ต้องขออนุมัติโอนงบมาชดเชย:
+                      </div>
+                      {networkDataList.filter(net => getNetworkDeficits(net).length > 0).map(net => {
+                        const defs = getNetworkDeficits(net);
+                        return (
+                          <div key={net.network} style={{ fontSize: '11pt', color: '#b91c1c', marginLeft: '12px', lineHeight: 1.5 }}>
+                            • <strong>{getFullNetworkName(net.networkName)}</strong> (โครงข่าย {net.network}):{' '}
+                            {defs.map(d => `${d.category} ขาดงบ ${fmt(Math.abs(d.remaining))} บาท`).join(', ')}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Breakdown for each network with budget table */}
                   {networkDataList.length > 0 && (
-                    <div style={{ marginLeft: '1cm', marginTop: '6pt' }}>
-                      {networkDataList.map((net, i) => (
-                        <div key={net.network} style={{ fontSize: '12.5pt', color: '#1e293b', marginBottom: '2pt' }}>
-                          ๒.{i + 1} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}
-                        </div>
-                      ))}
+                    <div style={{ marginTop: '8pt' }}>
+                      {networkDataList.map((net, i) => {
+                        const deficits = getNetworkDeficits(net);
+                        const hasDeficit = deficits.length > 0;
+
+                        return (
+                          <div key={net.network} style={{ marginBottom: '14pt', pageBreakInside: 'avoid' }}>
+                            <div style={{ fontSize: '12.5pt', color: '#0f172a', fontWeight: 600, marginBottom: '4pt' }}>
+                              ๒.{i + 1} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}
+                              {hasDeficit ? (
+                                <span style={{ color: '#dc2626', fontWeight: 600, fontSize: '11pt', marginLeft: '8px' }}>
+                                  (งบประมาณไม่เพียงพอ: {deficits.map(d => `${d.category} ขาด ${fmt(Math.abs(d.remaining))} บาท`).join(', ')})
+                                </span>
+                              ) : (
+                                <span style={{ color: '#16a34a', fontWeight: 500, fontSize: '10.5pt', marginLeft: '8px' }}>
+                                  (มีงบคงเหลือ)
+                                </span>
+                              )}
+                            </div>
+
+                            <table className="a4-table" style={{ fontSize: '10.5pt', width: '100%', margin: '2pt 0 6pt 0' }}>
+                              <thead>
+                                <tr>
+                                  <th style={{ width: '28%', textAlign: 'center' }}>รายการ</th>
+                                  <th style={{ width: '24%', textAlign: 'center' }}>งบประมาณ (บาท)</th>
+                                  <th style={{ width: '24%', textAlign: 'center' }}>เบิกจ่ายแล้ว (บาท)</th>
+                                  <th style={{ width: '24%', textAlign: 'center' }}>คงเหลือ (บาท)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {CATEGORIES.map(cat => {
+                                  const catKey = Object.keys(net.categories).find(k => k.includes(cat) || cat.includes(k.replace('งาน', '')));
+                                  const vals = catKey ? net.categories[catKey] : { budget: 0, disbursed: 0, remaining: 0 };
+                                  if (vals.budget === 0 && vals.disbursed === 0 && vals.remaining === 0) return null;
+                                  const isDeficit = vals.remaining < 0;
+
+                                  return (
+                                    <tr
+                                      key={cat}
+                                      style={{
+                                        backgroundColor: isDeficit ? '#fef2f2' : 'transparent',
+                                        color: isDeficit ? '#991b1b' : 'inherit'
+                                      }}
+                                    >
+                                      <td style={{ textAlign: 'left', fontWeight: isDeficit ? 600 : 'normal' }}>
+                                        {cat} {isDeficit && <span style={{ color: '#dc2626', fontSize: '9pt', fontWeight: 700 }}>(ไม่เพียงพอ)</span>}
+                                      </td>
+                                      <td style={{ textAlign: 'right' }}>{fmt(vals.budget)}</td>
+                                      <td style={{ textAlign: 'right' }}>{fmt(vals.disbursed)}</td>
+                                      <td
+                                        style={{
+                                          textAlign: 'right',
+                                          fontWeight: isDeficit ? 700 : 'normal',
+                                          color: isDeficit ? '#dc2626' : (vals.remaining > 0 ? '#15803d' : 'inherit')
+                                        }}
+                                      >
+                                        {fmt(vals.remaining)}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -1912,6 +2008,51 @@ function BudgetTransferContent() {
                       onChange={(e) => setReasonText(e.target.value)}
                     />
                   </div>
+
+                  {networkDataList.length > 0 && (
+                    <div style={{ marginTop: '16px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                      <label className="big-label" style={{ color: '#0f172a' }}>
+                        ข้อมูลโครงข่ายและงบประมาณที่ไม่เพียงพอ (ข้อ ๒.๑ - ๒.{networkDataList.length})
+                      </label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {networkDataList.map((net, i) => {
+                          const deficits = getNetworkDeficits(net);
+                          const hasDeficit = deficits.length > 0;
+                          return (
+                            <div
+                              key={net.network}
+                              style={{
+                                padding: '10px 12px',
+                                borderRadius: '6px',
+                                border: hasDeficit ? '1px solid #fecaca' : '1px solid #e2e8f0',
+                                backgroundColor: hasDeficit ? '#fef2f2' : '#f8fafc',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <div>
+                                <span style={{ fontWeight: 600, color: hasDeficit ? '#991b1b' : '#334155' }}>
+                                  ๒.{i + 1} {getFullNetworkName(net.networkName)} ({net.network})
+                                </span>
+                              </div>
+                              <div>
+                                {hasDeficit ? (
+                                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#dc2626' }}>
+                                    ⚠️ {deficits.map(d => `${d.category} ขาด ${fmt(Math.abs(d.remaining))} บ.`).join(', ')}
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.85rem', color: '#16a34a' }}>
+                                    ✓ งบคงเหลือปกติ
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
