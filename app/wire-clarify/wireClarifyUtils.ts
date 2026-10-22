@@ -290,22 +290,31 @@ export function generateWireClarifyMemoPlainText(data: WireClarifyFormData): str
 
   const isDiv = data.docLevel === 'division_memo';
 
+  const indentLines = (text: string = '', tab = '\t'): string => {
+    return text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => `${tab}${line}`)
+      .join('\n');
+  };
+
   let bodyText = '';
   if (isDiv) {
     bodyText = `1. เรื่องเดิม
-    ${data.memoBackground || ''}
+${indentLines(data.memoBackground)}
 
 2. ข้อเท็จจริง
-    ${data.memoFacts || ''}
+${indentLines(data.memoFacts)}
 
 3. ข้อพิจารณา
-    ${data.memoConsideration || ''}
+${indentLines(data.memoConsideration)}
 
-    จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป`;
+\t${data.memoClosing || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}`;
   } else {
-    bodyText = `    ${data.supervisorBody || ''}
-${data.networkNo ? `    ${data.networkNo}\n` : ''}
-    ${data.supervisorClosing || ''}`;
+    bodyText = `${indentLines(data.supervisorBody)}
+${data.networkNo ? `\t${data.networkNo}\n` : ''}
+\t${data.supervisorClosing || ''}`;
   }
 
   const signerBlock = isDiv 
