@@ -305,7 +305,7 @@ export const SAMPLE_SHORTAGE_BUDGET_DATA: ShortageBudgetFormData = {
   proposerDate: '8 ต.ค. 69',
 
   hasCommanderOrder: true,
-  orderTo: 'ผจร.กรย.(ก3)',
+  orderTo: 'หผ.จร.กรย.(ก3)',
   orderText: 'แจ้งส่วนเกี่ยวข้องดำเนินการต่อไป',
   commanderName: 'นายอนันต์ กาญจนอุปถัมภ์',
   commanderPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
