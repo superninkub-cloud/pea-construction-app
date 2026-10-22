@@ -952,10 +952,10 @@ function BudgetTransferContent() {
                   </div>
 
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
-                    1. ตามหนังสือ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
-                    <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
-                    <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{projectName}</span> หมายเลขงาน (WBS){' '}
-                    <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{wbs}</span> โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน{' '}
+                    1. ตามหนังสือ <span className="a4-var-spot" style={{ fontWeight: 600 }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
+                    <span className="a4-var-spot" style={{ fontWeight: 600 }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
+                    <span className="a4-var-spot blue" style={{ fontWeight: 600 }}>{projectName}</span> หมายเลขงาน (WBS){' '}
+                    <span className="a4-var-spot orange" style={{ fontWeight: 600 }}>{wbs}</span> โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน{' '}
                     <span
                       className="a4-var-spot blue cursor-pointer"
                       style={{ fontWeight: 600 }}
@@ -988,7 +988,7 @@ function BudgetTransferContent() {
                     >
                       {operatingExpense || fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}
                     </span>.- บาท ซึ่งมี{' '}
-                    <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{supervisorName}</span> {supervisorLevel ? `พชง.${supervisorLevel}` : ''} เป็นผู้ควบคุมงาน นั้น
+                    <span className="a4-var-spot green" style={{ fontWeight: 600 }}>{supervisorName}</span> {supervisorLevel ? `พชง.${supervisorLevel}` : ''} เป็นผู้ควบคุมงาน นั้น
                   </p>
 
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginTop: '6pt' }}>

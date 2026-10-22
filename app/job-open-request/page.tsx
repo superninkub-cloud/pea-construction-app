@@ -729,7 +729,7 @@ export default function JobOpenRequestPage() {
                 <input
                   type="text"
                   className="a4-inline-input"
-                  style={{ width: '230px', fontWeight: 'bold', color: '#0369a1' }}
+                  style={{ width: '230px', fontWeight: 'bold', color: '#dc2626' }}
                   value={formData.wbsNumber}
                   onChange={(e) => setFormData({ ...formData, wbsNumber: e.target.value })}
                   placeholder="I-69-I-SMG69.M4.1116"

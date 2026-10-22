@@ -763,56 +763,56 @@
   margin-bottom: 1rem;
 }
 
-/* On-screen highlights on the A4 sheet to make variable spots crystal clear to staff */
+/* On-screen highlights on the A4 sheet to make variable spots crystal clear to staff (ตัวหนังสือสีแดง) */
 .a4-var-spot {
-  background: #fef08a;
-  color: #854d0e;
+  background: #fef2f2;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
   padding: 1px 5px;
   border-radius: 4px;
   font-weight: 600;
-  border-bottom: 1.5px dashed #ca8a04;
+  border-bottom: 1.5px dashed #ef4444;
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .a4-var-spot:hover {
-  background: #fde047;
+  background: #fee2e2;
 }
 
 .a4-var-spot.blue {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #eff6ff;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
   border-bottom: 1.5px dashed #3b82f6;
 }
 
 .a4-var-spot.green {
-  background: #dcfce7;
-  color: #166534;
+  background: #f0fdf4;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
   border-bottom: 1.5px dashed #22c55e;
 }
 
 .a4-var-spot.orange {
-  background: #ffedd5;
-  color: #9a3412;
+  background: #fff7ed;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
   border-bottom: 1.5px dashed #ea580c;
 }
 
 .a4-var-spot.purple {
-  background: #f3e8ff;
-  color: #6b21a8;
+  background: #faf5ff;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
   border-bottom: 1.5px dashed #a855f7;
 }
 
 .a4-var-spot.subject {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px dashed #d97706;
+  background: #fef2f2;
+  color: #dc2626 !important; /* ส่วนที่ต้องแก้ไข: ตัวหนังสือสีแดง */
+  border: 1px dashed #ef4444;
   border-radius: 4px;
   padding: 2px 8px;
 }
 
 .a4-var-spot.subject:hover {
-  background: #fde68a;
+  background: #fee2e2;
 }
 
 /* Strip highlights completely in print */

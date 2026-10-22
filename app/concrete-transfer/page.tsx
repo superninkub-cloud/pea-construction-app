@@ -749,7 +749,7 @@ export default function ConcreteTransferPage() {
               <input
                 type="text"
                 className="a4-inline-input"
-                style={{ width: '230px', fontWeight: 'bold', color: '#0369a1' }}
+                style={{ width: '230px', fontWeight: 'bold', color: '#dc2626' }}
                 value={formData.wbsNo}
                 onChange={(e) => setFormData({ ...formData, wbsNo: e.target.value })}
                 placeholder="I-69-I-SM269.M4.1105"

@@ -852,7 +852,7 @@ export default function SiteExpenseExtraPage() {
                         onChange={(e) => handleUpdateJobItem(it.id, 'jobName', e.target.value)}
                         placeholder="ชื่องาน..."
                       />
-                      <div style={{ fontSize: '13pt', color: '#0369a1', fontFamily: 'monospace' }}>
+                      <div style={{ fontSize: '13pt', color: '#dc2626', fontWeight: 600, fontFamily: 'monospace' }}>
                         WBS: {tn(it.wbsNumber)}
                       </div>
                     </td>

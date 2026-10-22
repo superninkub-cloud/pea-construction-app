@@ -807,7 +807,7 @@ export default function VoucherCertifyPage() {
                     <input
                       type="text"
                       className="a4-table-input"
-                      style={{ textAlign: 'center', fontWeight: 'bold', color: '#0369a1', fontFamily: 'monospace' }}
+                      style={{ textAlign: 'center', fontWeight: 'bold', color: '#dc2626', fontFamily: 'monospace' }}
                       value={formData.wbsNumber}
                       onChange={(e) => setFormData({ ...formData, wbsNumber: e.target.value })}
                       placeholder="I-69-I-SMG69.M4.1116"

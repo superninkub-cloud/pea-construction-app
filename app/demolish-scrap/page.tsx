@@ -762,7 +762,7 @@ export default function DemolishScrapPage() {
               <input
                 type="text"
                 className="a4-inline-input"
-                style={{ width: '230px', fontWeight: 'bold', color: '#0369a1' }}
+                style={{ width: '230px', fontWeight: 'bold', color: '#dc2626' }}
                 value={formData.wbsNumber}
                 onChange={(e) => setFormData({ ...formData, wbsNumber: e.target.value })}
                 placeholder="P-TDD02.3-I-KPNIA.0027"
