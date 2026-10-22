@@ -82,6 +82,9 @@ export default function ShortageBudgetPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.items && parsed.items.length > 0) {
+          if (!parsed.orderTo || parsed.orderTo === 'ผจร.กรย.(ก3)') {
+            parsed.orderTo = 'หผ.จร.กรย.(ก3)';
+          }
           setFormData(parsed);
         }
       }
@@ -1004,15 +1007,15 @@ export default function ShortageBudgetPage() {
             </span>
 
             <div style={{ fontSize: '15pt', lineHeight: 1.4 }}>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <span style={{ fontWeight: 'bold' }}>เรียน:</span>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <span style={{ fontWeight: 'bold', fontSize: '16pt' }}>-</span>
                 <input
                   type="text"
                   className="a4-inline-input"
                   style={{ width: '220px', fontWeight: 'bold' }}
                   value={formData.orderTo}
                   onChange={(e) => setFormData({ ...formData, orderTo: e.target.value })}
-                  placeholder="ผจร.กรย.(ก3)"
+                  placeholder="หผ.จร.กรย.(ก3)"
                 />
               </div>
               <div style={{ marginTop: '2pt' }}>
@@ -1679,14 +1682,14 @@ export default function ShortageBudgetPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>สั่งการถึง</span>
-                        <span className="big-label-hint">เช่น ผจร.กรย.(ก3)</span>
+                        <span className="big-label-hint">เช่น หผ.จร.กรย.(ก3)</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.orderTo}
                         onChange={(e) => setFormData({ ...formData, orderTo: e.target.value })}
-                        placeholder="ผจร.กรย.(ก3)"
+                        placeholder="หผ.จร.กรย.(ก3)"
                       />
                     </div>
 
