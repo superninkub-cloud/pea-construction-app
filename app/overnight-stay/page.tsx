@@ -50,7 +50,7 @@ interface SectionMeta {
 
 const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileText },
-  { key: 'work', title: '2. วรรค ๑: รายละเอียดงานและเหตุผล', shortName: 'งาน & เหตุผล', icon: Building },
+  { key: 'work', title: '2. วรรค 1: รายละเอียดงานและเหตุผล', shortName: 'งาน & เหตุผล', icon: Building },
   { key: 'persons', title: '3. รายชื่อพนักงานและกำหนดวันพักแรม', shortName: 'รายชื่อพนักงาน', icon: Users },
   { key: 'vehicles', title: '4. รถยนต์และผู้ดูแลรับผิดชอบ', shortName: 'รถ & ผู้ดูแล', icon: Truck },
   { key: 'proposer', title: '5. ผู้เสนอและข้อมูลติดต่อ', shortName: 'ผู้เสนอ', icon: UserCheck },
@@ -64,7 +64,7 @@ export default function OvernightStayPage() {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [activeEditSection, setActiveEditSection] = useState<EditSectionKey>(null);
   const [newVehicleInput, setNewVehicleInput] = useState<string>('');
-  const [isThaiNum, setIsThaiNum] = useState<boolean>(true);
+  const [isThaiNum, setIsThaiNum] = useState<boolean>(false);
 
   // Load from LocalStorage
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function OvernightStayPage() {
         position: convert(p.position)
       }))
     }));
-    showToast(nextState ? '✓ แปลงเป็นเลขไทย (๑ ๒ ๓) แล้ว' : '✓ แปลงเป็นเลขอารบิก (1 2 3) แล้ว');
+    showToast(nextState ? '✓ แปลงเป็นเลขไทย (1 2 3) แล้ว' : '✓ แปลงเป็นเลขอารบิก (1 2 3) แล้ว');
   };
 
   const handleSetTodayDocDate = () => {
@@ -199,7 +199,7 @@ export default function OvernightStayPage() {
 
   const handleRemovePerson = (index: number) => {
     if (formData.persons.length <= 1) {
-      showToast('⚠️ ต้องมีพนักงานอย่างน้อย ๑ คน');
+      showToast('⚠️ ต้องมีพนักงานอย่างน้อย 1 คน');
       return;
     }
     setFormData(prev => ({
@@ -319,9 +319,9 @@ export default function OvernightStayPage() {
               type="button"
               className="a4-action-btn a4-btn-muted"
               onClick={handleToggleNumerals}
-              title="สลับเลขไทย ๑๒๓ และเลขอารบิก 123"
+              title="สลับเลขไทย 123 และเลขอารบิก 123"
             >
-              {isThaiNum ? 'เลขไทย ๑ ๒ ๓' : '123 อารบิก'}
+              {isThaiNum ? 'เลขไทย 1 2 3' : '123 อารบิก'}
             </button>
             <button
               type="button"
@@ -432,7 +432,7 @@ export default function OvernightStayPage() {
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เลขที่หนังสือ เช่น มท ๕๓๐๙.๑๖/..."
+                        placeholder="เลขที่หนังสือ เช่น มท 5309.16/..."
                       />
                     </td>
                     <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -443,7 +443,7 @@ export default function OvernightStayPage() {
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </td>
                   </tr>
@@ -476,15 +476,15 @@ export default function OvernightStayPage() {
               </table>
             </div>
 
-            {/* 2. WORK & REASON SECTION (วรรค ๑) */}
+            {/* 2. WORK & REASON SECTION (วรรค 1) */}
             <div
               className="a4-section-hoverable"
               onClick={() => setActiveEditSection('work')}
-              title="คลิกเพื่อแก้ไขวรรค ๑: รายละเอียดงานและเหตุผล"
+              title="คลิกเพื่อแก้ไขวรรค 1: รายละเอียดงานและเหตุผล"
               style={{ marginTop: '12pt' }}
             >
               <div className="section-edit-badge">
-                <Edit3 size={12} /> จิ้มแก้ไขวรรค ๑: รายละเอียดงานและเหตุผล
+                <Edit3 size={12} /> จิ้มแก้ไขวรรค 1: รายละเอียดงานและเหตุผล
               </div>
 
               <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
@@ -521,7 +521,7 @@ export default function OvernightStayPage() {
 
               {formData.persons.length === 1 ? (
                 <div style={{ textIndent: '2.5cm', marginBottom: '6pt', lineHeight: 1.6 }}>
-                  ๑. ขออนุมัติให้{' '}
+                  1. ขออนุมัติให้{' '}
                   <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.persons[0].name}</span>{' '}
                   ตำแหน่ง <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.persons[0].position}</span>{' '}
                   สังกัด <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{formData.persons[0].department}</span>{' '}
@@ -530,11 +530,11 @@ export default function OvernightStayPage() {
               ) : (
                 <div style={{ marginBottom: '6pt' }}>
                   <div style={{ textIndent: '2.5cm', marginBottom: '4pt', lineHeight: 1.6 }}>
-                    ๑. ขออนุมัติให้พนักงานพักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ ดังนี้
+                    1. ขออนุมัติให้พนักงานพักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ ดังนี้
                   </div>
                   {formData.persons.map((p, idx) => (
                     <div key={p.id} style={{ textIndent: '3.5cm', marginBottom: '3pt', lineHeight: 1.55 }}>
-                      ๑.{toThaiNumerals(idx + 1)} {p.name || '(ไม่ได้ระบุชื่อ)'} ตำแหน่ง {p.position} สังกัด {p.department}
+                      {isThaiNum ? ('1.' + toThaiNumerals(idx + 1)) : ('1.' + (idx + 1))} {p.name || '(ไม่ได้ระบุชื่อ)'} ตำแหน่ง {p.position} สังกัด {p.department}
                     </div>
                   ))}
                 </div>
@@ -559,7 +559,7 @@ export default function OvernightStayPage() {
               </div>
 
               <div style={{ textIndent: '2.5cm', marginBottom: '8pt', lineHeight: 1.6 }}>
-                ๒. ขออนุมัตินำรถยนต์ กฟภ. หมายเลขทะเบียน{' '}
+                2. ขออนุมัตินำรถยนต์ กฟภ. หมายเลขทะเบียน{' '}
                 <span style={{ fontWeight: 600, color: '#1e3a8a' }}>
                   {formData.vehicles.length > 0 ? formData.vehicles.join(', ') : '..................'}
                 </span>{' '}
@@ -719,7 +719,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น มท ๕๓๐๙.๑๖/๒๓๖๐"
+                        placeholder="เช่น มท 5309.16/2360"
                       />
                     </div>
                     <div className="big-field-group">
@@ -729,7 +729,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </div>
                   </div>
@@ -778,7 +778,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.roundTripDistanceKm}
                         onChange={(e) => setFormData({ ...formData, roundTripDistanceKm: e.target.value })}
-                        placeholder="เช่น ๖๐ หรือ 120"
+                        placeholder="เช่น 60 หรือ 120"
                       />
                     </div>
                   </div>
@@ -813,7 +813,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.workStartDate}
                         onChange={(e) => setFormData({ ...formData, workStartDate: e.target.value })}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </div>
                     <div className="big-field-group">
@@ -823,7 +823,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.workEndDate}
                         onChange={(e) => setFormData({ ...formData, workEndDate: e.target.value })}
-                        placeholder="เช่น ๓๑ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 31 ตุลาคม 2569"
                       />
                     </div>
                   </div>
@@ -841,7 +841,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.stayStartDate}
                         onChange={(e) => setFormData({ ...formData, stayStartDate: e.target.value })}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </div>
                     <div className="big-field-group">
@@ -851,7 +851,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.stayEndDate}
                         onChange={(e) => setFormData({ ...formData, stayEndDate: e.target.value })}
-                        placeholder="เช่น ๓๑ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 31 ตุลาคม 2569"
                       />
                     </div>
                     <div className="big-field-group">
@@ -861,7 +861,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.totalDays}
                         onChange={(e) => setFormData({ ...formData, totalDays: e.target.value })}
-                        placeholder="เช่น ๒๗"
+                        placeholder="เช่น 27"
                       />
                     </div>
                   </div>
@@ -957,7 +957,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={newVehicleInput}
                         onChange={(e) => setNewVehicleInput(e.target.value)}
-                        placeholder="พิมพ์หมายเลขทะเบียน เช่น ๙๐-๒๒๒๘ นฐ. แล้วกดเพิ่ม"
+                        placeholder="พิมพ์หมายเลขทะเบียน เช่น 90-2228 นฐ. แล้วกดเพิ่ม"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
@@ -1040,7 +1040,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.proposerDate}
                         onChange={(e) => setFormData({ ...formData, proposerDate: e.target.value })}
-                        placeholder="เช่น ๙ ต.ค. ๖๙"
+                        placeholder="เช่น 9 ต.ค. 69"
                       />
                     </div>
                     <div className="big-field-group">
@@ -1050,7 +1050,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.contactPhone}
                         onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                        placeholder="เช่น ๑๐๑๗๑"
+                        placeholder="เช่น 10171"
                       />
                     </div>
                   </div>
@@ -1089,7 +1089,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.approverDate}
                         onChange={(e) => setFormData({ ...formData, approverDate: e.target.value })}
-                        placeholder="เช่น ๑๒ ต.ค. ๒๕๖๙"
+                        placeholder="เช่น 12 ต.ค. 2569"
                       />
                     </div>
                   </div>
@@ -1129,7 +1129,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampRwWbDate}
                             onChange={(e) => setFormData({ ...formData, stampRwWbDate: e.target.value })}
-                            placeholder="เช่น ๑๒ ต.ค. ๖๙"
+                            placeholder="เช่น 12 ต.ค. 69"
                           />
                         </div>
                         <div className="big-field-group">
@@ -1139,7 +1139,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampHpKrDate}
                             onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                            placeholder="เช่น ๙ ต.ค. ๖๙"
+                            placeholder="เช่น 9 ต.ค. 69"
                           />
                         </div>
                         <div className="big-field-group">
@@ -1149,7 +1149,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampCpKrDate}
                             onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                            placeholder="เช่น ๙/๑๐/๒๕๖๙"
+                            placeholder="เช่น 9/10/2569"
                           />
                         </div>
                       </div>

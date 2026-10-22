@@ -18,9 +18,9 @@ export interface JobCloseFormData {
   // ข้อมูลส่วนหัวหนังสือ (บันทึกข้อความ)
   docFrom: string;          // จาก เช่น กรย.(ก3) หรือ ผกร.กรย.(ก3)
   docTo: string;            // ถึง เช่น กบฟ.(ก3) หรือ กผง.(ก3)
-  docNo: string;            // เลขที่หนังสือ เช่น ก.3 กรย.(กร) ๒๓๘๓/๒๕๖๘
-  docDate: string;          // วันที่ เช่น ๑๒ ก.ค. ๒๕๖๘
-  subject: string;          // เรื่อง เช่น ขอนำส่งรายงานปิด กส.๓ จำนวน ๑ งาน
+  docNo: string;            // เลขที่หนังสือ เช่น ก.3 กรย.(กร) 2383/2568
+  docDate: string;          // วันที่ เช่น 12 ก.ค. 2568
+  subject: string;          // เรื่อง เช่น ขอนำส่งรายงานปิด กส.3 จำนวน 1 งาน
   salutation: string;       // เรียน เช่น อก.บฟ.(ก3) หรือ อก.ผง.(ก3)
 
   // เนื้อหาหลัก
@@ -34,7 +34,7 @@ export interface JobCloseFormData {
   // ข้อมูลผู้ลงนาม
   signerName: string;       // นายอนันต์ กาญจนอุปถัมภ์
   signerPosition: string;   // รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
-  signerDate: string;       // ๑๒ ก.ค. ๒๕๖๘
+  signerDate: string;       // 12 ก.ค. 2568
   showDigitalSign: boolean; // แสดงลายเซ็นจำลองหรือไม่
 }
 
@@ -54,7 +54,7 @@ export function toArabicNumerals(str: string | number | undefined | null): strin
   if (str === undefined || str === null) return '';
   const thaiToEng: Record<string, string> = {
     '๐': '0', '๑': '1', '๒': '2', '๓': '3', '๔': '4',
-    '๕': '5', '๖': '6', '๗': '7', '๘': '8', '๙': '9'
+    '5': '5', '6': '6', '7': '7', '8': '8', '9': '9'
   };
   return str.toString().replace(/[๐-๙]/g, (match) => thaiToEng[match] || match);
 }
@@ -126,13 +126,13 @@ export const POPULAR_DESTINATIONS = [
 export const SAMPLE_JOB_CLOSE_DATA: JobCloseFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กบฟ.(ก3)',
-  docNo: 'ก.3 กรย.(กร) ๒๓๘๓/๒๕๖๘',
-  docDate: '๑๒ ก.ค. ๒๕๖๘',
-  subject: 'ขอนำส่งรายงานปิด กส.๓ จำนวน ๑ งาน',
+  docNo: 'ก.3 กรย.(กร) 2383/2568',
+  docDate: '12 ก.ค. 2568',
+  subject: 'ขอนำส่งรายงานปิด กส.3 จำนวน 1 งาน',
   salutation: 'อก.บฟ.(ก3)',
 
   workCategory: 'งานก่อสร้างปรับปรุงระบบสายส่ง 115 kV.',
-  completionText: 'แล้วเสร็จพร้อมจ่ายไฟแล้วนั้น จึงขอนำส่งเอกสารปิด กส.๓ งานดังนี้',
+  completionText: 'แล้วเสร็จพร้อมจ่ายไฟแล้วนั้น จึงขอนำส่งเอกสารปิด กส.3 งานดังนี้',
   closingStatement: 'จึงเรียนมาเพื่อโปรดพิจารณาและดำเนินการต่อไป',
 
   jobs: [
@@ -146,7 +146,7 @@ export const SAMPLE_JOB_CLOSE_DATA: JobCloseFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '๑๒ ก.ค. ๒๕๖๘',
+  signerDate: '12 ก.ค. 2568',
   showDigitalSign: true
 };
 

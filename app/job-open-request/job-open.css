@@ -244,7 +244,7 @@
   background: #ffffff;
   color: #000000;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 16pt;
   line-height: 1.3;
   box-sizing: border-box;

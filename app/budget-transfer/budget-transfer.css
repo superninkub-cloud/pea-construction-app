@@ -1,2 +1,9 @@
 /* app/budget-transfer/budget-transfer.css */
-/* Styles for Budget Transfer are inherited from app/globals.css */
+.a4-page,
+.a4-page *,
+.a4-table,
+.a4-table *,
+.budget-transfer-container,
+.budget-transfer-container * {
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
+}

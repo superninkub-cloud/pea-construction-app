@@ -51,9 +51,9 @@ interface SectionMeta {
 
 const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileText },
-  { key: 'para1', title: '2. วรรคที่ ๑: แหล่งผลิต & งานโครงการ WBS', shortName: 'วรรค ๑ (โครงการ)', icon: Building },
+  { key: 'para1', title: '2. วรรคที่ 1: แหล่งผลิต & งานโครงการ WBS', shortName: 'วรรค 1 (โครงการ)', icon: Building },
   { key: 'table', title: '3. ตารางผลิตภัณฑ์คอนกรีตที่ขอโอน', shortName: 'ตารางคอนกรีต', icon: Package },
-  { key: 'para2', title: '4. วรรคที่ ๒: ผู้ประสานงานขนย้าย', shortName: 'ผู้ประสานงาน', icon: UserCheck },
+  { key: 'para2', title: '4. วรรคที่ 2: ผู้ประสานงานขนย้าย', shortName: 'ผู้ประสานงาน', icon: UserCheck },
   { key: 'signer', title: '5. ผู้ลงนามหลัก (อก.รย. / รก.รย.)', shortName: 'ผู้ลงนาม', icon: CheckCircle2 },
   { key: 'inform', title: '6. ส่วนส่งต่อเพื่อโปรดทราบ (แจ้งพื้นที่)', shortName: 'ส่งต่อเพื่อทราบ', icon: Share2 },
   { key: 'stamps', title: '7. เกษียนหนังสือ (หผ.กร. / ชผ.กร.)', shortName: 'เกษียนหนังสือ', icon: Info },
@@ -66,7 +66,7 @@ export default function ConcreteTransferPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [activeEditSection, setActiveEditSection] = useState<EditSectionKey>(null);
-  const [isThaiNumerals, setIsThaiNumerals] = useState<boolean>(true);
+  const [isThaiNumerals, setIsThaiNumerals] = useState<boolean>(false);
 
   // WBS Search state
   const [searchWbsQuery, setSearchWbsQuery] = useState<string>('');
@@ -647,7 +647,7 @@ export default function ConcreteTransferPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร.) - ๒๒๓๘/๒๕๖๙"
+                      placeholder="เช่น ก.3 กรย.(กร.) - 2238/2569"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -658,7 +658,7 @@ export default function ConcreteTransferPage() {
                         className="a4-live-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น ๕ ต.ค. ๒๕๖๙"
+                        placeholder="เช่น 5 ต.ค. 2569"
                       />
                       <button
                         type="button"
@@ -718,10 +718,10 @@ export default function ConcreteTransferPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para1')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๑ แหล่งผลิต & งานโครงการ WBS"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 1 แหล่งผลิต & งานโครงการ WBS"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๑ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 1 (ขยายใหญ่)
             </span>
 
             <div className="a4-text-indent" style={{ lineHeight: '1.45' }}>
@@ -871,7 +871,7 @@ export default function ConcreteTransferPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para2')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๒ ผู้ประสานงานขนย้าย"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 2 ผู้ประสานงานขนย้าย"
           >
             <span className="section-edit-badge no-print">
               <Edit3 size={11} /> จิ้มแก้ไขผู้ประสานงาน (ขยายใหญ่)
@@ -956,7 +956,7 @@ export default function ConcreteTransferPage() {
                     style={{ textAlign: 'center', width: '160pt' }}
                     value={formData.signerDate}
                     onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                    placeholder="๕ ต.ค. ๖๙"
+                    placeholder="5 ต.ค. 69"
                   />
                 </div>
               </div>
@@ -984,7 +984,7 @@ export default function ConcreteTransferPage() {
                     style={{ width: '250px' }}
                     value={formData.informDocNo}
                     onChange={(e) => setFormData({ ...formData, informDocNo: e.target.value })}
-                    placeholder="ก.3 กรย.(กร.) ๒๒๓๘/๒๕๖๙"
+                    placeholder="ก.3 กรย.(กร.) 2238/2569"
                   />
                   <span style={{ fontWeight: 'bold' }}>วันที่:</span>
                   <input
@@ -993,7 +993,7 @@ export default function ConcreteTransferPage() {
                     style={{ width: '120px' }}
                     value={formData.informDate}
                     onChange={(e) => setFormData({ ...formData, informDate: e.target.value })}
-                    placeholder="๕ ต.ค. ๖๙"
+                    placeholder="5 ต.ค. 69"
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '2pt' }}>
@@ -1182,14 +1182,14 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>เลขที่หนังสือ</span>
-                        <span className="big-label-hint">เช่น ก.3 กรย.(กร.) - ๒๒๓๘/๒๕๖๙</span>
+                        <span className="big-label-hint">เช่น ก.3 กรย.(กร.) - 2238/2569</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร.) - ๒๒๓๘/๒๕๖๙"
+                        placeholder="ก.3 กรย.(กร.) - 2238/2569"
                       />
                     </div>
 
@@ -1217,7 +1217,7 @@ export default function ConcreteTransferPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="๕ ต.ค. ๒๕๖๙"
+                        placeholder="5 ต.ค. 2569"
                       />
                     </div>
                   </div>
@@ -1507,14 +1507,14 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ลงนาม</span>
-                        <span className="big-label-hint">เช่น ๕ ต.ค. ๖๙</span>
+                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.signerDate}
                         onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                        placeholder="๕ ต.ค. ๖๙"
+                        placeholder="5 ต.ค. 69"
                       />
                     </div>
                   </div>
@@ -1528,28 +1528,28 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>เลขที่หนังสือส่งต่อ</span>
-                        <span className="big-label-hint">เช่น ก.3 กรย.(กร.) ๒๒๓๘/๒๕๖๙</span>
+                        <span className="big-label-hint">เช่น ก.3 กรย.(กร.) 2238/2569</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.informDocNo}
                         onChange={(e) => setFormData({ ...formData, informDocNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร.) ๒๒๓๘/๒๕๖๙"
+                        placeholder="ก.3 กรย.(กร.) 2238/2569"
                       />
                     </div>
 
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ส่งต่อ</span>
-                        <span className="big-label-hint">เช่น ๕ ต.ค. ๖๙</span>
+                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.informDate}
                         onChange={(e) => setFormData({ ...formData, informDate: e.target.value })}
-                        placeholder="๕ ต.ค. ๖๙"
+                        placeholder="5 ต.ค. 69"
                       />
                     </div>
                   </div>
@@ -1590,28 +1590,28 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน หผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น ๕ ต.ค. ๖๙</span>
+                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampHpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                        placeholder="๕ ต.ค. ๖๙"
+                        placeholder="5 ต.ค. 69"
                       />
                     </div>
 
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน ชผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น ๕ ต.ค. ๖๙</span>
+                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="๕ ต.ค. ๖๙"
+                        placeholder="5 ต.ค. 69"
                       />
                     </div>
                   </div>

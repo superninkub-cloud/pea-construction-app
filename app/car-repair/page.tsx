@@ -66,7 +66,7 @@ export default function CarRepairPage() {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [activeEditSection, setActiveEditSection] = useState<EditSectionKey>(null);
   const [newDefectInput, setNewDefectInput] = useState<string>('');
-  const [isThaiNum, setIsThaiNum] = useState<boolean>(true);
+  const [isThaiNum, setIsThaiNum] = useState<boolean>(false);
   const [bodyMode, setBodyMode] = useState<'guided' | 'freeform'>('guided');
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function CarRepairPage() {
           if (parsed.proposerName === 'นายพิสันต์ จิตต์ปลื้ม' || !parsed.proposerName) {
             parsed.proposerName = 'นายพิสันติ์ จิตต์ปลื้ม';
           }
-          if (parsed.proposerPosition === 'หน.กร.(ก๓)' || parsed.proposerPosition === 'หน.กร.(ก3)' || !parsed.proposerPosition) {
+          if (parsed.proposerPosition === 'หน.กร.(ก3)' || parsed.proposerPosition === 'หน.กร.(ก3)' || !parsed.proposerPosition) {
             parsed.proposerPosition = 'หผ.กร.(ก3)';
           }
           if (parsed.budgetSource === 'งบทำการของ ผยก.' || !parsed.budgetSource) {
@@ -98,7 +98,7 @@ export default function CarRepairPage() {
             parsed.commandText = 'ดำเนินการต่อไป';
           }
           if (!parsed.commanderDate) {
-            parsed.commanderDate = '๑๙ ต.ค. ๖๓';
+            parsed.commanderDate = '19 ต.ค. 63';
           }
           setFormData(parsed);
         }
@@ -187,7 +187,7 @@ export default function CarRepairPage() {
       commanderDate: convert(prev.commanderDate),
       defectItems: prev.defectItems.map(item => convert(item))
     }));
-    showToast(nextState ? '✓ แปลงเป็นเลขไทย (๑ ๒ ๓) แล้ว' : '✓ แปลงเป็นเลขอารบิก (1 2 3) แล้ว');
+    showToast(nextState ? '✓ แปลงเป็นเลขไทย (1 2 3) แล้ว' : '✓ แปลงเป็นเลขอารบิก (1 2 3) แล้ว');
   };
 
   const handleAddDefect = (text: string) => {
@@ -279,14 +279,14 @@ export default function CarRepairPage() {
                 className={`a4-preset-chip ${formData.repairCase === 'vehicle_dept' ? 'active' : ''}`}
                 onClick={() => handleSelectCase('vehicle_dept')}
               >
-                กรณี ๑: ผยค.(ก3) ซ่อม (งบทำการ)
+                กรณี 1: ผยค.(ก3) ซ่อม (งบทำการ)
               </button>
               <button
                 type="button"
                 className={`a4-preset-chip ${formData.repairCase === 'pea_area' ? 'active' : ''}`}
                 onClick={() => handleSelectCase('pea_area')}
               >
-                กรณี ๒: กฟฟ.พื้นที่ซ่อม (งบ WBS)
+                กรณี 2: กฟฟ.พื้นที่ซ่อม (งบ WBS)
               </button>
             </div>
           </div>
@@ -304,9 +304,9 @@ export default function CarRepairPage() {
               type="button"
               className="a4-action-btn a4-btn-muted"
               onClick={handleToggleNumerals}
-              title="สลับเลขไทย ๑๒๓ และเลขอารบิก 123"
+              title="สลับเลขไทย 123 และเลขอารบิก 123"
             >
-              {isThaiNum ? 'เลขไทย ๑ ๒ ๓' : '123 อารบิก'}
+              {isThaiNum ? 'เลขไทย 1 2 3' : '123 อารบิก'}
             </button>
             <button
               type="button"
@@ -420,7 +420,7 @@ export default function CarRepairPage() {
                           value={formData.docNo}
                           onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น ก.3 กรย.(กร)- ๒๔๓๗/๒๕๖๓"
+                          placeholder="เช่น ก.3 กรย.(กร)- 2437/2563"
                           title="เลขที่หนังสือ (จุดที่ต้องแก้ไขแต่ละครั้ง)"
                         />
                       </div>
@@ -435,7 +435,7 @@ export default function CarRepairPage() {
                           value={formData.docDate}
                           onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น ๑๗ ต.ค. ๖๓"
+                          placeholder="เช่น 17 ต.ค. 63"
                           title="วันที่ในหนังสือ (จุดที่ต้องแก้ไขแต่ละครั้ง)"
                         />
                         <button
@@ -475,7 +475,7 @@ export default function CarRepairPage() {
                             e.stopPropagation();
                             handleSelectCase(formData.repairCase === 'vehicle_dept' ? 'pea_area' : 'vehicle_dept');
                           }}
-                          title="คลิกเพื่อสลับระหว่าง กรณี ๑ (ผยค.(ก3) ซ่อม) ↔ กรณี ๒ (กฟฟ.พื้นที่ซ่อม)"
+                          title="คลิกเพื่อสลับระหว่าง กรณี 1 (ผยค.(ก3) ซ่อม) ↔ กรณี 2 (กฟฟ.พื้นที่ซ่อม)"
                         >
                           {formData.repairCase === 'vehicle_dept' ? '🚚 ผยค.(ก3) ซ่อม' : '🏢 กฟฟ.พื้นที่'}
                         </span>
@@ -631,7 +631,7 @@ export default function CarRepairPage() {
                   <div style={{ margin: '8pt 0 8pt 3cm', lineHeight: 1.6 }}>
                     {formData.defectItems.map((defect, idx) => (
                       <div key={idx} style={{ marginBottom: '2pt' }}>
-                        {toThaiNumerals(idx + 1)}.{' '}
+                        {isThaiNum ? toThaiNumerals(idx + 1) : (idx + 1)}.{' '}
                         <span
                           className="a4-var-spot blue cursor-pointer"
                           style={{ fontWeight: 600 }}
@@ -714,7 +714,7 @@ export default function CarRepairPage() {
                   <div style={{ margin: '6pt 0 6pt 3cm', lineHeight: 1.6 }}>
                     {formData.defectItems.map((item, idx) => (
                       <div key={idx} style={{ marginBottom: '2pt' }}>
-                        {toThaiNumerals(idx + 1)}.{' '}
+                        {isThaiNum ? toThaiNumerals(idx + 1) : (idx + 1)}.{' '}
                         <span
                           className="a4-var-spot blue cursor-pointer"
                           style={{ fontWeight: 600 }}
@@ -727,7 +727,7 @@ export default function CarRepairPage() {
                   </div>
 
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginTop: '6pt' }}>
-                    กรย.(ก๓) มีความประสงค์ขอความอนุเคราะห์จาก {formData.peaAreaName} พิจารณาจัดซ่อมรถยนต์คันดังกล่าว โดยขอเบิกจ่ายค่าใช้จ่ายจากหมายเลขงาน (WBS){' '}
+                    กรย.(ก3) มีความประสงค์ขอความอนุเคราะห์จาก {formData.peaAreaName} พิจารณาจัดซ่อมรถยนต์คันดังกล่าว โดยขอเบิกจ่ายค่าใช้จ่ายจากหมายเลขงาน (WBS){' '}
                     <span
                       className="a4-var-spot orange cursor-pointer"
                       style={{ fontWeight: 600 }}
@@ -852,16 +852,16 @@ export default function CarRepairPage() {
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docFrom: 'ผกร.กรย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, docFrom: 'ผกร.กรย.(ก3)' })}
                         >
-                          📌 ผกร.กรย.(ก๓)
+                          📌 ผกร.กรย.(ก3)
                         </button>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docFrom: 'กรย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, docFrom: 'กรย.(ก3)' })}
                         >
-                          📌 กรย.(ก๓)
+                          📌 กรย.(ก3)
                         </button>
                       </div>
                     </div>
@@ -886,9 +886,9 @@ export default function CarRepairPage() {
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docTo: 'กรย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, docTo: 'กรย.(ก3)' })}
                         >
-                          📌 กรย.(ก๓)
+                          📌 กรย.(ก3)
                         </button>
                         <button
                           type="button"
@@ -914,15 +914,15 @@ export default function CarRepairPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น ก.3 กรย.(กร)- ๒๔๓๗/๒๕๖๓"
+                        placeholder="เช่น ก.3 กรย.(กร)- 2437/2563"
                       />
                       <div className="var-quick-options">
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docNo: 'ก.๓ กรย.(กร)- ' })}
+                          onClick={() => setFormData({ ...formData, docNo: 'ก.3 กรย.(กร)- ' })}
                         >
-                          📌 ก.๓ กรย.(กร)-
+                          📌 ก.3 กรย.(กร)-
                         </button>
                         <button
                           type="button"
@@ -940,7 +940,7 @@ export default function CarRepairPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น ๑๗ ต.ค. ๖๓"
+                        placeholder="เช่น 17 ต.ค. 63"
                       />
                       <div className="var-quick-options">
                         <button
@@ -1156,10 +1156,10 @@ export default function CarRepairPage() {
                         </div>
                       </div>
 
-                      {/* Card 1: จุดที่ ๑: ข้อมูลยานพาหนะ & ทะเบียน */}
+                      {/* Card 1: จุดที่ 1: ข้อมูลยานพาหนะ & ทะเบียน */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-blue">จุดที่ ๑</span>
+                          <span className="variable-badge-num badge-blue">จุดที่ 1</span>
                           <strong style={{ fontSize: '14px', color: '#1d4ed8' }}>ชนิดยานพาหนะ, หมายเลขทะเบียน และสังกัด</strong>
                         </div>
                         <div className="big-grid-2">
@@ -1170,22 +1170,22 @@ export default function CarRepairPage() {
                               className="big-input"
                               value={formData.vehicleType}
                               onChange={(e) => handleUpdateVariable('vehicleType', e.target.value)}
-                              placeholder="เช่น รถเครน TADANO ขนาดพิกัด ๓๐ ตัน/เมตร"
+                              placeholder="เช่น รถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร"
                             />
                             <div className="var-quick-options" style={{ marginTop: '6px' }}>
                               <button
                                 type="button"
                                 className="var-quick-opt-btn"
-                                onClick={() => handleUpdateVariable('vehicleType', 'รถเครน TADANO ขนาดพิกัด ๓๐ ตัน/เมตร')}
+                                onClick={() => handleUpdateVariable('vehicleType', 'รถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร')}
                               >
-                                + รถเครน ๓๐ ตัน
+                                + รถเครน 30 ตัน
                               </button>
                               <button
                                 type="button"
                                 className="var-quick-opt-btn"
-                                onClick={() => handleUpdateVariable('vehicleType', 'รถเครน ขนาดพิกัด ๒๕ ตัน')}
+                                onClick={() => handleUpdateVariable('vehicleType', 'รถเครน ขนาดพิกัด 25 ตัน')}
                               >
-                                + รถเครน ๒๕ ตัน
+                                + รถเครน 25 ตัน
                               </button>
                               <button
                                 type="button"
@@ -1197,9 +1197,9 @@ export default function CarRepairPage() {
                               <button
                                 type="button"
                                 className="var-quick-opt-btn"
-                                onClick={() => handleUpdateVariable('vehicleType', 'รถบรรทุก ๖ ล้อ ติดเครน ๕ ตัน')}
+                                onClick={() => handleUpdateVariable('vehicleType', 'รถบรรทุก 6 ล้อ ติดเครน 5 ตัน')}
                               >
-                                + รถบรรทุก ๖ ล้อ
+                                + รถบรรทุก 6 ล้อ
                               </button>
                               <button
                                 type="button"
@@ -1211,9 +1211,9 @@ export default function CarRepairPage() {
                               <button
                                 type="button"
                                 className="var-quick-opt-btn"
-                                onClick={() => handleUpdateVariable('vehicleType', 'รถยนต์บรรทุกดีเซล ๔ ประตู')}
+                                onClick={() => handleUpdateVariable('vehicleType', 'รถยนต์บรรทุกดีเซล 4 ประตู')}
                               >
-                                + รถกระบะ ๔ ประตู
+                                + รถกระบะ 4 ประตู
                               </button>
                             </div>
                           </div>
@@ -1225,7 +1225,7 @@ export default function CarRepairPage() {
                               className="big-input"
                               value={formData.licensePlate}
                               onChange={(e) => handleUpdateVariable('licensePlate', e.target.value)}
-                              placeholder="เช่น ๙๐-๗๓๓๒ นฐ."
+                              placeholder="เช่น 90-7332 นฐ."
                             />
                             <div style={{ marginTop: '10px' }}>
                               <span style={{ fontSize: '12px', color: '#64748b' }}>ใช้งานประจำที่ (สังกัด)</span>
@@ -1247,9 +1247,9 @@ export default function CarRepairPage() {
                                 <button
                                   type="button"
                                   className="var-quick-opt-btn"
-                                  onClick={() => handleUpdateVariable('assignedUnit', 'กรย.(ก๓)')}
+                                  onClick={() => handleUpdateVariable('assignedUnit', 'กรย.(ก3)')}
                                 >
-                                  📌 กรย.(ก๓)
+                                  📌 กรย.(ก3)
                                 </button>
                               </div>
                             </div>
@@ -1257,10 +1257,10 @@ export default function CarRepairPage() {
                         </div>
                       </div>
 
-                      {/* Card 2: จุดที่ ๒: พนักงานขับรถยนต์ (พขร.) */}
+                      {/* Card 2: จุดที่ 2: พนักงานขับรถยนต์ (พขร.) */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-purple">จุดที่ ๒</span>
+                          <span className="variable-badge-num badge-purple">จุดที่ 2</span>
                           <strong style={{ fontSize: '14px', color: '#7c3aed' }}>พนักงานขับรถยนต์ (พขร.)</strong>
                         </div>
                         <div className="big-grid-2">
@@ -1334,10 +1334,10 @@ export default function CarRepairPage() {
                         </div>
                       </div>
 
-                      {/* Card 3: จุดที่ ๓: เลขไมล์ & ชั่วโมงการทำงาน */}
+                      {/* Card 3: จุดที่ 3: เลขไมล์ & ชั่วโมงการทำงาน */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-orange">จุดที่ ๓</span>
+                          <span className="variable-badge-num badge-orange">จุดที่ 3</span>
                           <strong style={{ fontSize: '14px', color: '#c2410c' }}>เลขไมล์ และชั่วโมงการทำงาน</strong>
                         </div>
                         <div className="big-grid-3">
@@ -1348,7 +1348,7 @@ export default function CarRepairPage() {
                               className="big-input"
                               value={formData.mileage}
                               onChange={(e) => handleUpdateVariable('mileage', e.target.value)}
-                              placeholder="เช่น ๕๔,๒๖๘"
+                              placeholder="เช่น 54,268"
                             />
                           </div>
                           <div>
@@ -1358,7 +1358,7 @@ export default function CarRepairPage() {
                               className="big-input"
                               value={formData.craneHours}
                               onChange={(e) => handleUpdateVariable('craneHours', e.target.value)}
-                              placeholder="เช่น ๑,๘๘๗"
+                              placeholder="เช่น 1,887"
                             />
                           </div>
                           <div>
@@ -1368,16 +1368,16 @@ export default function CarRepairPage() {
                               className="big-input"
                               value={formData.engineHours}
                               onChange={(e) => handleUpdateVariable('engineHours', e.target.value)}
-                              placeholder="เช่น ๓,๘๓๕.๕"
+                              placeholder="เช่น 3,835.5"
                             />
                           </div>
                         </div>
                       </div>
 
-                      {/* Card 4: จุดที่ ๔: รายการชำรุดและงานซ่อม */}
+                      {/* Card 4: จุดที่ 4: รายการชำรุดและงานซ่อม */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-green">จุดที่ ๔</span>
+                          <span className="variable-badge-num badge-green">จุดที่ 4</span>
                           <strong style={{ fontSize: '14px', color: '#15803d' }}>รายการชำรุดและงานซ่อม</strong>
                         </div>
 
@@ -1453,10 +1453,10 @@ export default function CarRepairPage() {
                         </div>
                       </div>
 
-                      {/* Card 5: จุดที่ ๕: แหล่งงบประมาณ & หน้างาน */}
+                      {/* Card 5: จุดที่ 5: แหล่งงบประมาณ & หน้างาน */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-teal">จุดที่ ๕</span>
+                          <span className="variable-badge-num badge-teal">จุดที่ 5</span>
                           <strong style={{ fontSize: '14px', color: '#0f766e' }}>แหล่งงบประมาณ & ข้อความปิดท้าย</strong>
                         </div>
                         <div className="big-field-group">
@@ -1529,19 +1529,19 @@ export default function CarRepairPage() {
                         {formData.repairCase === 'vehicle_dept' ? (
                           <>
                             <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px', lineHeight: 1.5 }}>
-                              <strong>ย่อหน้า ๑:</strong> {generateCase1BodyText(formData)}
+                              <strong>ย่อหน้า 1:</strong> {generateCase1BodyText(formData)}
                             </div>
                             <div style={{ fontSize: '12px', color: '#1e293b', lineHeight: 1.5 }}>
-                              <strong>ย่อหน้า ๒:</strong> จึงเรียนมาเพื่อโปรดพิจารณาส่งซ่อม โดยขอเบิกจ่ายค่าใช้จ่ายจาก {formData.budgetSource} ต่อไป
+                              <strong>ย่อหน้า 2:</strong> จึงเรียนมาเพื่อโปรดพิจารณาส่งซ่อม โดยขอเบิกจ่ายค่าใช้จ่ายจาก {formData.budgetSource} ต่อไป
                             </div>
                           </>
                         ) : (
                           <>
                             <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px', lineHeight: 1.5 }}>
-                              <strong>ย่อหน้า ๑:</strong> {generateCase2BodyParts(formData).intro}
+                              <strong>ย่อหน้า 1:</strong> {generateCase2BodyParts(formData).intro}
                             </div>
                             <div style={{ fontSize: '12px', color: '#1e293b', lineHeight: 1.5 }}>
-                              <strong>ย่อหน้า ๒:</strong> {generateCase2BodyParts(formData).request}
+                              <strong>ย่อหน้า 2:</strong> {generateCase2BodyParts(formData).request}
                             </div>
                           </>
                         )}
@@ -1772,7 +1772,7 @@ export default function CarRepairPage() {
                             className="big-input"
                             value={formData.networkNo}
                             onChange={(e) => setFormData({ ...formData, networkNo: e.target.value })}
-                            placeholder="เช่น ๗๐๐๑๑๑๗๓๖๙"
+                            placeholder="เช่น 7001117369"
                           />
                         </div>
                         <div className="big-field-group">
@@ -1782,7 +1782,7 @@ export default function CarRepairPage() {
                             className="big-input"
                             value={formData.activityNo}
                             onChange={(e) => setFormData({ ...formData, activityNo: e.target.value })}
-                            placeholder="เช่น ๐๐๕๐"
+                            placeholder="เช่น 0050"
                           />
                         </div>
                       </div>
@@ -1851,23 +1851,23 @@ export default function CarRepairPage() {
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, proposerPosition: 'หน.กร.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, proposerPosition: 'หน.กร.(ก3)' })}
                       >
-                        📌 หน.กร.(ก๓)
+                        📌 หน.กร.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, proposerPosition: 'ผห.กร.กรย.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, proposerPosition: 'ผห.กร.กรย.(ก3)' })}
                       >
-                        📌 ผห.กร.กรย.(ก๓)
+                        📌 ผห.กร.กรย.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, proposerPosition: 'ผกร.กรย.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, proposerPosition: 'ผกร.กรย.(ก3)' })}
                       >
-                        📌 ผกร.กรย.(ก๓)
+                        📌 ผกร.กรย.(ก3)
                       </button>
                     </div>
                   </div>
@@ -1879,7 +1879,7 @@ export default function CarRepairPage() {
                       className="big-input"
                       value={formData.proposerDate}
                       onChange={(e) => setFormData({ ...formData, proposerDate: e.target.value })}
-                      placeholder="เช่น ๑๗ ต.ค. ๖๓"
+                      placeholder="เช่น 17 ต.ค. 63"
                     />
                   </div>
 
@@ -1998,16 +1998,16 @@ export default function CarRepairPage() {
                                 <button
                                   type="button"
                                   className="var-quick-opt-btn"
-                                  onClick={() => setFormData({ ...formData, commanderPosition: 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)' })}
+                                  onClick={() => setFormData({ ...formData, commanderPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)' })}
                                 >
-                                  📌 รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)
+                                  📌 รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
                                 </button>
                                 <button
                                   type="button"
                                   className="var-quick-opt-btn"
-                                  onClick={() => setFormData({ ...formData, commanderPosition: 'อก.รย.(ก๓)' })}
+                                  onClick={() => setFormData({ ...formData, commanderPosition: 'อก.รย.(ก3)' })}
                                 >
-                                  📌 อก.รย.(ก๓)
+                                  📌 อก.รย.(ก3)
                                 </button>
                               </div>
                             </div>

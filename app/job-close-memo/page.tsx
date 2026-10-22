@@ -59,7 +59,7 @@ export default function JobCloseMemoPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [activeEditSection, setActiveEditSection] = useState<EditSectionKey>(null);
-  const [isThaiNum, setIsThaiNum] = useState<boolean>(true);
+  const [isThaiNum, setIsThaiNum] = useState<boolean>(false);
 
   // Supabase projects database
   const [dbProjects, setDbProjects] = useState<Array<{ wbs: string; name: string }>>([]);
@@ -92,7 +92,7 @@ export default function JobCloseMemoPage() {
     const countStr = isThaiNum ? toThaiNumerals(count) : count.toString();
     setFormData(prev => ({
       ...prev,
-      subject: `ขอนำส่งรายงานปิด กส.๓ จำนวน ${countStr} งาน`
+      subject: `ขอนำส่งรายงานปิด กส.3 จำนวน ${countStr} งาน`
     }));
     showToast(`✓ ประกอบชื่อเรื่องตามจำนวนงาน (${countStr} งาน) แล้ว`);
   };
@@ -163,7 +163,7 @@ export default function JobCloseMemoPage() {
         wbsNo: convert(job.wbsNo)
       }))
     }));
-    showToast(nextState ? '✓ แปลงเป็นเลขไทย (๑ ๒ ๓) แล้ว' : '✓ แปลงเป็นเลขอารบิก (1 2 3) แล้ว');
+    showToast(nextState ? '✓ แปลงเป็นเลขไทย (1 2 3) แล้ว' : '✓ แปลงเป็นเลขอารบิก (1 2 3) แล้ว');
   };
 
   const handleAddJob = (initial?: Partial<JobCloseItem>) => {
@@ -178,7 +178,7 @@ export default function JobCloseMemoPage() {
       return {
         ...prev,
         jobs: updatedJobs,
-        subject: `ขอนำส่งรายงานปิด กส.๓ จำนวน ${thaiCount} งาน`
+        subject: `ขอนำส่งรายงานปิด กส.3 จำนวน ${thaiCount} งาน`
       };
     });
     showToast('✓ เพิ่มรายการงานแล้ว');
@@ -186,7 +186,7 @@ export default function JobCloseMemoPage() {
 
   const handleRemoveJob = (index: number) => {
     if (formData.jobs.length <= 1) {
-      showToast('⚠️ ต้องมีงานอย่างน้อย ๑ รายการ');
+      showToast('⚠️ ต้องมีงานอย่างน้อย 1 รายการ');
       return;
     }
     setFormData(prev => {
@@ -195,7 +195,7 @@ export default function JobCloseMemoPage() {
       return {
         ...prev,
         jobs: updatedJobs,
-        subject: `ขอนำส่งรายงานปิด กส.๓ จำนวน ${thaiCount} งาน`
+        subject: `ขอนำส่งรายงานปิด กส.3 จำนวน ${thaiCount} งาน`
       };
     });
   };
@@ -289,9 +289,9 @@ export default function JobCloseMemoPage() {
               type="button"
               className="a4-action-btn a4-btn-muted"
               onClick={handleToggleNumerals}
-              title="สลับเลขไทย ๑๒๓ และเลขอารบิก 123"
+              title="สลับเลขไทย 123 และเลขอารบิก 123"
             >
-              {isThaiNum ? 'เลขไทย ๑ ๒ ๓' : '123 อารบิก'}
+              {isThaiNum ? 'เลขไทย 1 2 3' : '123 อารบิก'}
             </button>
             <button
               type="button"
@@ -405,7 +405,7 @@ export default function JobCloseMemoPage() {
                           value={formData.docNo}
                           onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น ก.3 กรย.(กร) ๒๓๘๓/๒๕๖๘"
+                          placeholder="เช่น ก.3 กรย.(กร) 2383/2568"
                           title="เลขที่หนังสือ (จุดที่ต้องแก้ไขแต่ละครั้ง)"
                         />
                       </div>
@@ -420,7 +420,7 @@ export default function JobCloseMemoPage() {
                           value={formData.docDate}
                           onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น ๑๒ ก.ค. ๒๕๖๘"
+                          placeholder="เช่น 12 ก.ค. 2568"
                           title="วันที่ในหนังสือ (จุดที่ต้องแก้ไขแต่ละครั้ง)"
                         />
                         <button
@@ -532,7 +532,7 @@ export default function JobCloseMemoPage() {
                 <div style={{ marginBottom: '10pt' }}>
                   {formData.jobs.map((job, idx) => (
                     <div key={job.id} style={{ textIndent: '2.5cm', marginBottom: '5pt', lineHeight: 1.6 }}>
-                      {toThaiNumerals(idx + 1)}.{' '}
+                      {isThaiNum ? toThaiNumerals(idx + 1) : (idx + 1)}.{' '}
                       <span
                         className="a4-var-spot blue cursor-pointer"
                         style={{ fontWeight: 500 }}
@@ -704,15 +704,15 @@ export default function JobCloseMemoPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น ก.3 กรย.(กร) ๒๓๘๓/๒๕๖๘"
+                        placeholder="เช่น ก.3 กรย.(กร) 2383/2568"
                       />
                       <div className="var-quick-options">
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docNo: 'ก.๓ กรย.(กร)- ' })}
+                          onClick={() => setFormData({ ...formData, docNo: 'ก.3 กรย.(กร)- ' })}
                         >
-                          📌 ก.๓ กรย.(กร)-
+                          📌 ก.3 กรย.(กร)-
                         </button>
                         <button
                           type="button"
@@ -731,7 +731,7 @@ export default function JobCloseMemoPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น ๑๒ ก.ค. ๒๕๖๘"
+                        placeholder="เช่น 12 ก.ค. 2568"
                       />
                       <div className="var-quick-options">
                         <button
@@ -1033,7 +1033,7 @@ export default function JobCloseMemoPage() {
                       className="big-input"
                       value={formData.signerDate}
                       onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                      placeholder="เช่น ๑๒ ก.ค. ๒๕๖๘"
+                      placeholder="เช่น 12 ก.ค. 2568"
                     />
                     <div className="var-quick-options">
                       <button

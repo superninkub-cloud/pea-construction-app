@@ -11,42 +11,42 @@ export interface ProcurementFormData {
   procurementType: ProcurementType; // 'buy' (จัดซื้อ) หรือ 'hire' (จัดจ้าง)
 
   // ส่วนหัวบันทึกข้อความ
-  docFrom: string;                  // จาก เช่น กรย.(ก๓)
-  docTo: string;                    // ถึง เช่น ผวบ.(ก๓)
+  docFrom: string;                  // จาก เช่น กรย.(ก3)
+  docTo: string;                    // ถึง เช่น ฝวบ.(ก3)
   docNo: string;                    // เลขที่หนังสือ (เว้นว่างไว้ตามค่าเริ่มต้น)
   docDate: string;                  // วันที่ (เว้นว่างไว้ตามค่าเริ่มต้น)
   subject: string;                  // เรื่อง
-  salutation: string;               // เรียน เช่น อผ.วบ.(ก๓) ผ่าน รผ.วบ.(ก๓)
+  salutation: string;               // เรียน เช่น อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)
 
   // ข้อมูลโครงการ
   wbsNo: string;                    // หมายเลขงาน WBS เช่น I-69-I-PSCXX.19.3909 หรือ I-69-I-KCI69.M4.1114
   networkNo: string;                // โครงข่าย เช่น 7001210932 หรือ เว้นว่าง
   activityNo: string;               // กิจกรรม เช่น 0050 หรือ เว้นว่าง
-  approvalDocRef: string;           // ตามอนุมัติเลขที่ เช่น ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙
-  projectName: string;              // ชื่องาน เช่น แผนงานพาดเพิ่ม ๒๒ เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม
-  workOpenerName: string;           // ผู้เปิดงาน เช่น นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓) หรือ นายอุดมศักดิ์ จันทร์กลิ่น พชง.๗ ผกร.กรย.(ก๓)
+  approvalDocRef: string;           // ตามอนุมัติเลขที่ เช่น ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 มกราคม 2569
+  projectName: string;              // ชื่องาน เช่น แผนงานพาดเพิ่ม 22 เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม
+  workOpenerName: string;           // ผู้เปิดงาน เช่น นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3) หรือ นายอุดมศักดิ์ จันทร์กลิ่น พชง.7 ผกร.กรย.(ก3)
 
   // รายละเอียดสิ่งของหรือบริการที่จัดซื้อ/จัดจ้าง
-  itemDescription: string;          // เช่น ดอกสว่าน BDS HKK-N ๐๒๒ ดอกเจ็ทบอช ๒๒ mm. เจาะลึก ๓๐ mm. จำนวน ๒ ดอก หรือ รถแบคโฮหัวกระแทก PC ๕๕ จำนวน ๑ คัน
-  targetDateOrPeriod: string;       // วันเวลาดำเนินการ เช่น ในวันจันทร์ที่ ๑๙ ตุลาคม ๒๕๖๙ หรือ ภายในกำหนดแผนงาน
+  itemDescription: string;          // เช่น ดอกสว่าน BDS HKK-N 022 ดอกเจ็ทบอช 22 mm. เจาะลึก 30 mm. จำนวน 2 ดอก หรือ รถแบคโฮหัวกระแทก PC 55 จำนวน 1 คัน
+  targetDateOrPeriod: string;       // วันเวลาดำเนินการ เช่น ในวันจันทร์ที่ 19 ตุลาคม 2569 หรือ ภายในกำหนดแผนงาน
   procurementMethod: string;        // วิธีจัดหา เช่น โดยวิธีเฉพาะเจาะจง
 
-  // เนื้อหา ๓ ตอน
-  backgroundText: string;           // ๑. เรื่องเดิม
-  factsText: string;                // ๒. ข้อเท็จจริง (เหตุผลความจำเป็น)
-  proposalText: string;             // ๓. ข้อเสนอเพื่อพิจารณา
+  // เนื้อหา 3 ตอน
+  backgroundText: string;           // 1. เรื่องเดิม
+  factsText: string;                // 2. ข้อเท็จจริง (เหตุผลความจำเป็น)
+  proposalText: string;             // 3. ข้อเสนอเพื่อพิจารณา
   delegationOrderText: string;      // ข้อความคำสั่งมอบอำนาจ กฟภ.
   closingText: string;              // จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป
 
   // ผู้ลงนามหลัก
   signerName: string;               // นายกำพล ตุ้ยเต็มวงศ์ หรือ นายอนันต์ กาญจนอุปถัมภ์
-  signerTitle: string;              // อก.รย.(ก๓) หรือ รก.กรย.(ก๓) ปฏิบัติงานแทน อก.กรย.(ก๓)
+  signerTitle: string;              // อก.รย.(ก3) หรือ รก.กรย.(ก3) ปฏิบัติงานแทน อก.กรย.(ก3)
   signerDate: string;               // วันที่กำกับลายเซ็น (เว้นว่างไว้)
 
   // เกษียน / ผู้อนุมัติ
   approverName: string;             // นายเมธี สุภาก่ำ
-  approverTitle: string;            // อฝ.วบ.(ก๓)
-  approverEndorsementTo?: string;   // สั่งการถึง เช่น - อก.รย.(ก๓)
+  approverTitle: string;            // อฝ.วบ.(ก3)
+  approverEndorsementTo?: string;   // สั่งการถึง เช่น - อก.รย.(ก3)
   approverDivisionText: string;     // อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง
 }
 
@@ -54,10 +54,10 @@ export interface ProcurementFormData {
  * Standard PEA Delegation of Authority text
  */
 export const DEFAULT_DELEGATION_ORDER = 
-  'ตามคำสั่งการไฟฟ้าส่วนภูมิภาคที่ พ.(ม) ๒๘/๒๕๖๘ ลงวันที่ ๑๗ พฤศจิกายน ๒๕๖๘ ซึ่งมอบอำนาจให้ ผู้อำนวยการกอง หรือ ผู้รักษาการแทนตำแหน่งดังกล่าว เป็นผู้มีอำนาจดำเนินการอนุมัติสั่งซื้อ/สั่งจ้าง/สั่งเช่า โดยวิธีเฉพาะเจาะจง ในวงเงินครั้งหนึ่งไม่เกิน ๑,๐๐๐,๐๐๐.-บาท (หนึ่งล้านบาทถ้วน) ตามข้อ ๕.๓';
+  'ตามคำสั่งการไฟฟ้าส่วนภูมิภาคที่ พ.(ม) 28/2568 ลงวันที่ 17 พฤศจิกายน 2568 ซึ่งมอบอำนาจให้ ผู้อำนวยการกอง หรือ ผู้รักษาการแทนตำแหน่งดังกล่าว เป็นผู้มีอำนาจดำเนินการอนุมัติสั่งซื้อ/สั่งจ้าง/สั่งเช่า โดยวิธีเฉพาะเจาะจง ในวงเงินครั้งหนึ่งไม่เกิน 1,000,000.-บาท (หนึ่งล้านบาทถ้วน) ตามข้อ 5.3';
 
 /**
- * Helper to compose standardized PEA "๑. เรื่องเดิม" from variable parts
+ * Helper to compose standardized PEA "1. เรื่องเดิม" from variable parts
  */
 export function composeProcurementBackground(params: {
   approvalDocRef?: string;
@@ -65,10 +65,10 @@ export function composeProcurementBackground(params: {
   workOpenerName?: string;
   dept?: string;
 }): string {
-  const ref = params.approvalDocRef || 'ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙';
-  const proj = params.projectName || 'แผนงานพาดเพิ่ม ๒๒ เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม';
-  const opener = params.workOpenerName || 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)';
-  const dept = params.dept || 'กรย.(ก๓)';
+  const ref = params.approvalDocRef || 'ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 มกราคม 2569';
+  const proj = params.projectName || 'แผนงานพาดเพิ่ม 22 เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม';
+  const opener = params.workOpenerName || 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)';
+  const dept = params.dept || 'กรย.(ก3)';
 
   const refPrefix = ref.startsWith('ตามอนุมัติ') || ref.startsWith('ตามหนังสือ') ? ref : `ตามอนุมัติเลขที่ ${ref}`;
 
@@ -76,7 +76,7 @@ export function composeProcurementBackground(params: {
 }
 
 /**
- * Helper to compose standardized PEA "๓. ข้อเสนอเพื่อพิจารณา" from variable parts
+ * Helper to compose standardized PEA "3. ข้อเสนอเพื่อพิจารณา" from variable parts
  */
 export function composeProcurementProposal(params: {
   procurementType?: 'buy' | 'hire';
@@ -89,7 +89,7 @@ export function composeProcurementProposal(params: {
   dept?: string;
 }): string {
   const isHire = params.procurementType === 'hire';
-  const dept = params.dept || 'กรย.(ก๓)';
+  const dept = params.dept || 'กรย.(ก3)';
   const proj = params.projectName || 'งานก่อสร้าง';
   const item = params.itemDescription || 'พัสดุ/บริการ';
   const targetDate = params.targetDateOrPeriod ? ` ${params.targetDateOrPeriod}` : '';
@@ -149,7 +149,7 @@ export const COMMON_PROCUREMENT_SUBJECT_PRESETS: SubjectPreset[] = [
     label: 'จัดซื้อดอกสว่านสำหรับเจาะเหล็กดัดแปลงอุปกรณ์หัวเสา',
     type: 'buy',
     subject: 'ขออนุมัติหลักการจัดซื้อดอกสว่านสำหรับเจาะเหล็กดัดแปลงอุปกรณ์หัวเสา โดยวิธีเฉพาะเจาะจง',
-    itemDescription: 'ดอกสว่าน BDS HKK-N ๐๒๒ ดอกเจ็ทบอช ๒๒ mm. เจาะลึก ๓๐ mm. จำนวน ๒ ดอก',
+    itemDescription: 'ดอกสว่าน BDS HKK-N 022 ดอกเจ็ทบอช 22 mm. เจาะลึก 30 mm. จำนวน 2 ดอก',
     method: 'โดยวิธีเฉพาะเจาะจง'
   },
   {
@@ -176,7 +176,7 @@ export const COMMON_PROCUREMENT_SUBJECT_PRESETS: SubjectPreset[] = [
     label: 'จัดจ้างรถแบคโฮหัวกระแทกเพื่อเข้างานก่อสร้าง',
     type: 'hire',
     subject: 'ขออนุมัติหลักการจัดจ้างรถแบคโฮหัวกระแทกเพื่อเข้างานก่อสร้าง โดยวิธีเฉพาะเจาะจง',
-    itemDescription: 'รถแบคโฮหัวกระแทก PC ๕๕ จำนวน ๑ คัน',
+    itemDescription: 'รถแบคโฮหัวกระแทก PC 55 จำนวน 1 คัน',
     method: 'โดยวิธีเฉพาะเจาะจง'
   },
   {
@@ -185,7 +185,7 @@ export const COMMON_PROCUREMENT_SUBJECT_PRESETS: SubjectPreset[] = [
     label: 'จัดจ้างรถเครนพร้อมพนักงานขับรถปฏิบัติงานก่อสร้าง',
     type: 'hire',
     subject: 'ขออนุมัติหลักการจัดจ้างรถเครนพร้อมพนักงานขับรถปฏิบัติงานก่อสร้าง โดยวิธีเฉพาะเจาะจง',
-    itemDescription: 'รถเครนขนาด ๒๕ ตัน พร้อมพนักงานขับรถ จำนวน ๑ คัน',
+    itemDescription: 'รถเครนขนาด 25 ตัน พร้อมพนักงานขับรถ จำนวน 1 คัน',
     method: 'โดยวิธีเฉพาะเจาะจง'
   },
   {
@@ -203,7 +203,7 @@ export const COMMON_PROCUREMENT_SUBJECT_PRESETS: SubjectPreset[] = [
     label: 'จัดจ้างรถบรรทุกขนส่งเสาและอุปกรณ์เข้าสถานที่ก่อสร้าง',
     type: 'hire',
     subject: 'ขออนุมัติหลักการจัดจ้างรถบรรทุกขนส่งเสาและอุปกรณ์เข้าสถานที่ก่อสร้าง โดยวิธีเฉพาะเจาะจง',
-    itemDescription: 'รถบรรทุก ๑๐ ล้อ พร้อมพนักงานขับรถ',
+    itemDescription: 'รถบรรทุก 10 ล้อ พร้อมพนักงานขับรถ',
     method: 'โดยวิธีเฉพาะเจาะจง'
   }
 ];
@@ -214,40 +214,40 @@ export const COMMON_PROCUREMENT_SUBJECT_PRESETS: SubjectPreset[] = [
 export const SAMPLE_BUY_DATA: ProcurementFormData = {
   procurementType: 'buy',
 
-  docFrom: 'กรย.(ก๓)',
-  docTo: 'ฝวบ.(ก๓)',
+  docFrom: 'กรย.(ก3)',
+  docTo: 'ฝวบ.(ก3)',
   docNo: '',                        // Blank by default
   docDate: '',                      // Blank by default
   subject: 'ขออนุมัติหลักการจัดซื้อดอกสว่านสำหรับเจาะเหล็กดัดแปลงอุปกรณ์หัวเสา โดยวิธีเฉพาะเจาะจง',
-  salutation: 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)',
+  salutation: 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)',
 
   wbsNo: 'I-69-I-PSCXX.19.3909',
   networkNo: '7001210932',
   activityNo: '0050',
-  approvalDocRef: 'ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙',
-  projectName: 'แผนงานพาดเพิ่ม ๒๒ เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม',
-  workOpenerName: 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)',
+  approvalDocRef: 'ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 มกราคม 2569',
+  projectName: 'แผนงานพาดเพิ่ม 22 เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม',
+  workOpenerName: 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)',
 
-  itemDescription: 'ดอกสว่าน BDS HKK-N ๐๒๒ ดอกเจ็ทบอช ๒๒ mm. เจาะลึก ๓๐ mm. จำนวน ๒ ดอก',
+  itemDescription: 'ดอกสว่าน BDS HKK-N 022 ดอกเจ็ทบอช 22 mm. เจาะลึก 30 mm. จำนวน 2 ดอก',
   targetDateOrPeriod: '',
   procurementMethod: 'โดยวิธีเฉพาะเจาะจง',
 
-  backgroundText: 'ตามอนุมัติเลขที่ ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙ ด้วย กรย.(ก๓) มีแผนงานพาดเพิ่ม ๒๒ เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม โดยมีนายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓) เป็นผู้เปิดงาน',
+  backgroundText: 'ตามอนุมัติเลขที่ ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 มกราคม 2569 ด้วย กรย.(ก3) มีแผนงานพาดเพิ่ม 22 เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม โดยมีนายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3) เป็นผู้เปิดงาน',
 
-  factsText: `๒.๑ งานก่อสร้างดังกล่าวออกแบบให้ใช้เหล็กรางน้ำขนาด ๔.๕๐ เมตร ในการติดตั้งอุปกรณ์ประกอบหัวเสา ซึ่งการนำเหล็กรางน้ำไปใช้งานนั้น จำเป็นต้องเจาะรูเพื่อให้นำไปติดตั้งใช้งานได้\n๒.๒ ดอกสว่านที่ใช้งานร่วมกับสว่านไฟฟ้า ที่ ผกร.กรย.(ก๓) มีใช้งานอยู่ปัจจุบันมีสภาพชำรุดไม่สามารถใช้งานได้ จึงจำเป็นต้องจัดหาทดแทน`,
+  factsText: `2.1 งานก่อสร้างดังกล่าวออกแบบให้ใช้เหล็กรางน้ำขนาด 4.50 เมตร ในการติดตั้งอุปกรณ์ประกอบหัวเสา ซึ่งการนำเหล็กรางน้ำไปใช้งานนั้น จำเป็นต้องเจาะรูเพื่อให้นำไปติดตั้งใช้งานได้\n2.2 ดอกสว่านที่ใช้งานร่วมกับสว่านไฟฟ้า ที่ ผกร.กรย.(ก3) มีใช้งานอยู่ปัจจุบันมีสภาพชำรุดไม่สามารถใช้งานได้ จึงจำเป็นต้องจัดหาทดแทน`,
 
-  proposalText: 'กรย.(ก๓) พิจารณาแล้ว เพื่อให้การก่อสร้างเป็นไปตามแผนงานและไม่กระทบงานก่อสร้างสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม เห็นควรให้อนุมัติจัดซื้อดอกสว่าน BDS HKK-N ๐๒๒ ดอกเจ็ทบอช ๒๒ mm. เจาะลึก ๓๐ mm. จำนวน ๒ ดอก โดยให้เบิกจ่ายจากหมายเลขงาน WBS: I-69-I-PSCXX.19.3909 โครงข่าย 7001210932 กิจกรรม 0050',
+  proposalText: 'กรย.(ก3) พิจารณาแล้ว เพื่อให้การก่อสร้างเป็นไปตามแผนงานและไม่กระทบงานก่อสร้างสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม เห็นควรให้อนุมัติจัดซื้อดอกสว่าน BDS HKK-N 022 ดอกเจ็ทบอช 22 mm. เจาะลึก 30 mm. จำนวน 2 ดอก โดยให้เบิกจ่ายจากหมายเลขงาน WBS: I-69-I-PSCXX.19.3909 โครงข่าย 7001210932 กิจกรรม 0050',
 
   delegationOrderText: DEFAULT_DELEGATION_ORDER,
   closingText: 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป',
 
   signerName: 'นายกำพล ตุ้ยเต็มวงศ์',
-  signerTitle: 'อก.รย.(ก๓)',
+  signerTitle: 'อก.รย.(ก3)',
   signerDate: '',
 
   approverName: 'นายเมธี สุภาก่ำ',
-  approverTitle: 'อฝ.วบ.(ก๓)',
-  approverEndorsementTo: '- อก.รย.(ก๓)',
+  approverTitle: 'อฝ.วบ.(ก3)',
+  approverEndorsementTo: '- อก.รย.(ก3)',
   approverDivisionText: 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'
 };
 
@@ -257,40 +257,40 @@ export const SAMPLE_BUY_DATA: ProcurementFormData = {
 export const SAMPLE_HIRE_DATA: ProcurementFormData = {
   procurementType: 'hire',
 
-  docFrom: 'กรย.(ก๓)',
-  docTo: 'ฝวบ.(ก๓)',
+  docFrom: 'กรย.(ก3)',
+  docTo: 'ฝวบ.(ก3)',
   docNo: '',                        // Blank by default
   docDate: '',                      // Blank by default
-  subject: 'ขออนุมัติหลักการจัดจ้างรถแบคโฮหัวกระแทก PC ๕๕ จำนวน ๑ คัน เพื่อเข้างานก่อสร้างงานย้ายแนวระบบสายส่ง ๑๑๕ kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี',
-  salutation: 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)',
+  subject: 'ขออนุมัติหลักการจัดจ้างรถแบคโฮหัวกระแทก PC 55 จำนวน 1 คัน เพื่อเข้างานก่อสร้างงานย้ายแนวระบบสายส่ง 115 kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี',
+  salutation: 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)',
 
   wbsNo: 'I-69-I-KCI69.M4.1114',
   networkNo: '',
   activityNo: '',
-  approvalDocRef: 'ก.๓ กวว.(ปร) ๖๑๔/๒๕๖๙ ลงวันที่ ๒๘ เมษายน ๒๕๖๙',
-  projectName: 'งานก่อสร้างย้ายแนวระบบสายส่ง ๑๑๕ kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี',
-  workOpenerName: 'นายอุดมศักดิ์ จันทร์กลิ่น พชง.๗ ผกร.กรย.(ก๓)',
+  approvalDocRef: 'ก.3 กวว.(ปร) 614/2569 ลงวันที่ 28 เมษายน 2569',
+  projectName: 'งานก่อสร้างย้ายแนวระบบสายส่ง 115 kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี',
+  workOpenerName: 'นายอุดมศักดิ์ จันทร์กลิ่น พชง.7 ผกร.กรย.(ก3)',
 
-  itemDescription: 'รถแบคโฮหัวกระแทก PC ๕๕ จำนวน ๑ คัน',
-  targetDateOrPeriod: 'ในวันจันทร์ที่ ๑๙ ตุลาคม ๒๕๖๙',
+  itemDescription: 'รถแบคโฮหัวกระแทก PC 55 จำนวน 1 คัน',
+  targetDateOrPeriod: 'ในวันจันทร์ที่ 19 ตุลาคม 2569',
   procurementMethod: 'โดยวิธีเฉพาะเจาะจง',
 
-  backgroundText: 'ตามอนุมัติเลขที่ ก.๓ กวว.(ปร) ๖๑๔/๒๕๖๙ ลงวันที่ ๒๘ เมษายน ๒๕๖๙ ด้วย กรย.(ก๓) มีแผนงานก่อสร้างย้ายแนวระบบสายส่ง ๑๑๕ kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี โดยมีนายอุดมศักดิ์ จันทร์กลิ่น พชง.๗ ผกร.กรย.(ก๓) เป็นผู้เปิดงาน',
+  backgroundText: 'ตามอนุมัติเลขที่ ก.3 กวว.(ปร) 614/2569 ลงวันที่ 28 เมษายน 2569 ด้วย กรย.(ก3) มีแผนงานก่อสร้างย้ายแนวระบบสายส่ง 115 kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี โดยมีนายอุดมศักดิ์ จันทร์กลิ่น พชง.7 ผกร.กรย.(ก3) เป็นผู้เปิดงาน',
 
-  factsText: 'ด้วย กรย.(ก๓) ได้ดำเนินการย้ายแนวระบบสายส่ง ๑๑๕ เควี บริเวณตรงข้ามวัดท่าน้ำตื้นถึง เมืองไทยสินเชื่อเงินด่วน แล้วเสร็จ ปัจจุบันยังคงเหลืองานรื้อถอนฐานรากชนิด F๒ จำนวน ๓ ฐาน และชนิด F๑/๑ จำนวน ๑ ฐาน ในการปฏิบัติงาน กรย.(ก๓) ไม่มีรถแบคโฮหัวกระแทก เพื่อให้งานรื้อถอนแล้วเสร็จตามแผนงานของกรมทางหลวง จำเป็นต้องดำเนินการโดยวิธีจ้างเหมาบุคคลภายนอกต่อไป เพื่อให้งานก่อสร้างย้ายแนวสายส่ง ๑๑๕ เควี แล้วเสร็จทันตามแผนงานและวันเวลาที่กำหนด จึงจัดจ้างรถแบคโฮหัวกระแทก PC ๕๕ จำนวน ๑ คัน ในวันจันทร์ที่ ๑๙ ตุลาคม ๒๕๖๙',
+  factsText: 'ด้วย กรย.(ก3) ได้ดำเนินการย้ายแนวระบบสายส่ง 115 เควี บริเวณตรงข้ามวัดท่าน้ำตื้นถึง เมืองไทยสินเชื่อเงินด่วน แล้วเสร็จ ปัจจุบันยังคงเหลืองานรื้อถอนฐานรากชนิด F2 จำนวน 3 ฐาน และชนิด F1/1 จำนวน 1 ฐาน ในการปฏิบัติงาน กรย.(ก3) ไม่มีรถแบคโฮหัวกระแทก เพื่อให้งานรื้อถอนแล้วเสร็จตามแผนงานของกรมทางหลวง จำเป็นต้องดำเนินการโดยวิธีจ้างเหมาบุคคลภายนอกต่อไป เพื่อให้งานก่อสร้างย้ายแนวสายส่ง 115 เควี แล้วเสร็จทันตามแผนงานและวันเวลาที่กำหนด จึงจัดจ้างรถแบคโฮหัวกระแทก PC 55 จำนวน 1 คัน ในวันจันทร์ที่ 19 ตุลาคม 2569',
 
-  proposalText: 'กรย.(ก๓) พิจารณาแล้ว เพื่อให้งานก่อสร้างย้ายแนวสายส่ง ๑๑๕ เควี เป็นไปด้วยความเรียบร้อย ในงานก่อสร้างย้ายแนวสายส่ง ๑๑๕ เควี ทันตามกำหนดตามแผนงานที่กำหนดไว้ จึงขออนุมัติหลักการจ้างรถแบคโฮหัวกระแทก PC ๕๕ จำนวน ๑ คัน ในวันจันทร์ที่ ๑๙ ตุลาคม ๒๕๖๙ โดยเบิกค่าใช้จ่ายจากงานก่อสร้างย้ายแนวระบบสายส่ง ๑๑๕ kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี หมายเลขงาน WBS: I-69-I-KCI69.M4.1114',
+  proposalText: 'กรย.(ก3) พิจารณาแล้ว เพื่อให้งานก่อสร้างย้ายแนวสายส่ง 115 เควี เป็นไปด้วยความเรียบร้อย ในงานก่อสร้างย้ายแนวสายส่ง 115 เควี ทันตามกำหนดตามแผนงานที่กำหนดไว้ จึงขออนุมัติหลักการจ้างรถแบคโฮหัวกระแทก PC 55 จำนวน 1 คัน ในวันจันทร์ที่ 19 ตุลาคม 2569 โดยเบิกค่าใช้จ่ายจากงานก่อสร้างย้ายแนวระบบสายส่ง 115 kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี หมายเลขงาน WBS: I-69-I-KCI69.M4.1114',
 
   delegationOrderText: DEFAULT_DELEGATION_ORDER,
   closingText: 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป',
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
-  signerTitle: 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)',
+  signerTitle: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
   signerDate: '',
 
   approverName: 'นายเมธี สุภาก่ำ',
-  approverTitle: 'อฝ.วบ.(ก๓)',
-  approverEndorsementTo: '- อก.รย.(ก๓)',
+  approverTitle: 'อฝ.วบ.(ก3)',
+  approverEndorsementTo: '- อก.รย.(ก3)',
   approverDivisionText: 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'
 };
 
@@ -343,13 +343,13 @@ PROVINCIAL ELECTRICITY AUTHORITY
 เรื่อง: ${data.subject || ''}
 เรียน: ${data.salutation || ''}
 
-๑. เรื่องเดิม
+1. เรื่องเดิม
     ${data.backgroundText || ''}
 
-๒. ข้อเท็จจริง
+2. ข้อเท็จจริง
     ${data.factsText || ''}
 
-๓. ข้อเสนอเพื่อพิจารณา
+3. ข้อเสนอเพื่อพิจารณา
     ${proposalCombined}
 
     ${data.closingText || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}
@@ -361,12 +361,12 @@ PROVINCIAL ELECTRICITY AUTHORITY
                              ${data.signerDate || ''}
 
 
-- ${data.approverEndorsementTo || '- อก.รย.(ก๓)'}
+- ${data.approverEndorsementTo || '- อก.รย.(ก3)'}
   ${data.approverDivisionText || 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'}
 
 
                                         (${data.approverName || 'นายเมธี สุภาก่ำ'})
-                             ${data.approverTitle || 'อฝ.วบ.(ก๓)'}
+                             ${data.approverTitle || 'อฝ.วบ.(ก3)'}
 `;
 }
 
@@ -382,7 +382,7 @@ export function generateProcurementWordDocument(data: ProcurementFormData): stri
       <meta charset='utf-8'>
       <title>${data.subject || 'บันทึกขออนุมัติหลักการจัดซื้อจัดจ้าง'}</title>
       <style>
-        body { font-family: 'TH Sarabun New', 'Cordia New', 'Sarabun', sans-serif; font-size: 16pt; line-height: 1.35; margin: 2cm; }
+        body { font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Sarabun', sans-serif; font-size: 16pt; line-height: 1.35; margin: 2cm; }
         p { margin: 4pt 0; text-align: justify; }
         .indent { text-indent: 40px; text-align: justify; }
         table.meta { width: 100%; border: none; margin-bottom: 16px; font-size: 16pt; }
@@ -428,13 +428,13 @@ export function generateProcurementWordDocument(data: ProcurementFormData): stri
       </table>
 
       <!-- Body 3 Paragraphs -->
-      <p style="font-weight: bold; margin-top: 14pt;"><u>๑. เรื่องเดิม</u></p>
+      <p style="font-weight: bold; margin-top: 14pt;"><u>1. เรื่องเดิม</u></p>
       <p class="indent">${data.backgroundText || ''}</p>
 
-      <p style="font-weight: bold; margin-top: 14pt;"><u>๒. ข้อเท็จจริง</u></p>
+      <p style="font-weight: bold; margin-top: 14pt;"><u>2. ข้อเท็จจริง</u></p>
       <p class="indent" style="white-space: pre-wrap;">${data.factsText || ''}</p>
 
-      <p style="font-weight: bold; margin-top: 14pt;"><u>๓. ข้อเสนอเพื่อพิจารณา</u></p>
+      <p style="font-weight: bold; margin-top: 14pt;"><u>3. ข้อเสนอเพื่อพิจารณา</u></p>
       <p class="indent">${proposalCombined}</p>
 
       <p class="indent" style="margin-top: 14pt;">${data.closingText || 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป'}</p>
@@ -451,16 +451,16 @@ export function generateProcurementWordDocument(data: ProcurementFormData): stri
       <table style="width: 100%; border: none; margin-top: 45px; font-size: 14pt;">
         <tr>
           <td style="width: 55%; vertical-align: top; border: none;">
-            <p>${data.approverEndorsementTo || '- อก.รย.(ก๓)'}</p>
+            <p>${data.approverEndorsementTo || '- อก.รย.(ก3)'}</p>
             <p style="margin-top: 6px;">${data.approverDivisionText || 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'}</p>
             <p style="margin-top: 35px;"><br/></p>
             <p>(${data.approverName || 'นายเมธี สุภาก่ำ'})</p>
-            <p>${data.approverTitle || 'อฝ.วบ.(ก๓)'}</p>
+            <p>${data.approverTitle || 'อฝ.วบ.(ก3)'}</p>
           </td>
           <td style="width: 45%; vertical-align: top; border: none; text-align: right;">
-            <p>รฝ.วบ.(ก๓) .............................. วันที่ ....../....../......</p>
-            <p style="margin-top: 10px;">ผห.กร.(ก๓) .............................. วันที่ ....../....../......</p>
-            <p style="margin-top: 10px;">ชผ.กร.(ก๓) .............................. วันที่ ....../....../......</p>
+            <p>รฝ.วบ.(ก3) .............................. วันที่ ....../....../......</p>
+            <p style="margin-top: 10px;">ผห.กร.(ก3) .............................. วันที่ ....../....../......</p>
+            <p style="margin-top: 10px;">ชผ.กร.(ก3) .............................. วันที่ ....../....../......</p>
           </td>
         </tr>
       </table>

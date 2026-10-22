@@ -341,7 +341,7 @@
   resize: vertical;
   background-color: #ffffff;
   transition: all 0.2s ease;
-  font-family: 'Sarabun', 'Prompt', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif;
   line-height: 1.6;
 }
 
@@ -471,7 +471,7 @@
   border: 1px solid #d1d5db;
   box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.12);
   border-radius: 4px;
-  font-family: 'Sarabun', 'TH Sarabun New', 'TH Sarabun PSK', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 15.5pt;
   line-height: 1.34;
   color: #000000;

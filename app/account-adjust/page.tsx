@@ -62,7 +62,7 @@ const SECTIONS_META: SectionMeta[] = [
   { key: 'reason', title: '2. เหตุผลความจำเป็นในการขอปรับปรุง', shortName: 'เหตุผล', icon: Building },
   { key: 'signer', title: '3. ผู้ลงนาม (อก.รย.)', shortName: 'ผู้ลงนาม', icon: UserCheck },
   { key: 'table_meta', title: '4. ข้อมูลหัวตารางแนบ (การไฟฟ้า & หน่วยงาน)', shortName: 'หัวตาราง', icon: TableIcon },
-  { key: 'items', title: '5. ตารางรายการทางบัญชี (เดิม vs ใหม่)', shortName: 'ตาราง ๑๐ ช่อง', icon: Calculator },
+  { key: 'items', title: '5. ตารางรายการทางบัญชี (เดิม vs ใหม่)', shortName: 'ตาราง 10 ช่อง', icon: Calculator },
 ];
 
 export default function AccountAdjustPage() {
@@ -79,28 +79,30 @@ export default function AccountAdjustPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.items && parsed.items.length > 0) {
-          let salutation = parsed.salutation || 'อก.บฟ.(ก๓)';
-          if (salutation === 'อก.กบฟ.(ก๓)' || salutation === 'อก.กบฟ.(ก3)') {
-            salutation = 'อก.บฟ.(ก๓)';
+          let salutation = parsed.salutation || 'อก.บฟ.(ก3)';
+          if (salutation === 'อก.กบฟ.(ก๓)' || salutation === 'อก.กบฟ.(ก3)' || salutation === 'อก.บฟ.(ก๓)') {
+            salutation = 'อก.บฟ.(ก3)';
           }
-          const docTo = parsed.docTo || 'กบฟ.(ก๓)';
+          const docTo = parsed.docTo === 'กบฟ.(ก๓)' ? 'กบฟ.(ก3)' : (parsed.docTo || 'กบฟ.(ก3)');
+          const docFrom = parsed.docFrom === 'กรย.(ก๓)' ? 'กรย.(ก3)' : (parsed.docFrom || 'กรย.(ก3)');
           setFormData({
             ...SAMPLE_ACCOUNT_ADJUST_DATA,
             ...parsed,
+            docFrom,
             salutation,
             docTo,
             reasonCategory: parsed.reasonCategory || 'vehicle',
             causeItem: parsed.causeItem || 'ค่าซ่อมยานพาหนะ',
             errorType: parsed.errorType || 'มีการบันทึกรายการทางบัญชีผิดพลาด',
             detailNote: parsed.detailNote || '',
-            purpose: parsed.purpose || 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้',
-            memoReason: parsed.memoReason || composeReasonText({
-              docFrom: parsed.docFrom,
+            purpose: parsed.purpose ? parsed.purpose.replace(/กส\.๓/g, 'กส.3') : 'เพื่อให้ดำเนินการปิด กส.3 ต่อไปได้',
+            memoReason: parsed.memoReason ? parsed.memoReason.replace(/ก๓/g, 'ก3').replace(/กส\.๓/g, 'กส.3') : composeReasonText({
+              docFrom: docFrom,
               docTo: docTo,
               causeItem: parsed.causeItem || 'ค่าซ่อมยานพาหนะ',
               errorType: parsed.errorType || 'มีการบันทึกรายการทางบัญชีผิดพลาด',
               detailNote: parsed.detailNote || '',
-              purpose: parsed.purpose || 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้'
+              purpose: 'เพื่อให้ดำเนินการปิด กส.3 ต่อไปได้'
             })
           });
         }
@@ -187,26 +189,26 @@ export default function AccountAdjustPage() {
 
   // Render on-screen reason with interactive color highlights
   const renderScreenReasonText = () => {
-    const from = formData.docFrom || 'กรย.(ก๓)';
-    const to = formData.docTo || 'กบฟ.(ก๓)';
+    const from = formData.docFrom || 'กรย.(ก3)';
+    const to = formData.docTo || 'กบฟ.(ก3)';
     const cause = formData.causeItem || 'ค่าใช้จ่ายดำเนินงาน';
     const err = formData.errorType || 'มีการบันทึกรายการทางบัญชีผิดพลาด';
     const note = formData.detailNote && formData.detailNote.trim() ? ` (${formData.detailNote.trim()})` : '';
-    const purp = formData.purpose || 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้';
+    const purp = formData.purpose || 'เพื่อให้ดำเนินการปิด กส.3 ต่อไปได้';
 
     return (
       <>
         <span>{from} ได้ตรวจสอบพบว่ามีการเบิกจ่าย</span>{' '}
         <span
           className="a4-var-spot"
-          title="🟡 จุดที่ ๑: รายการ/สิ่งที่เบิกผิด (คลิกแก้ไข)"
+          title="🟡 จุดที่ 1: รายการ/สิ่งที่เบิกผิด (คลิกแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
         >
           {cause}
         </span>{' '}
         <span
           className="a4-var-spot blue"
-          title="🔵 จุดที่ ๒: ลักษณะความผิดพลาด (คลิกแก้ไข)"
+          title="🔵 จุดที่ 2: ลักษณะความผิดพลาด (คลิกแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
         >
           {err}
@@ -216,7 +218,7 @@ export default function AccountAdjustPage() {
             {' '}
             <span
               className="a4-var-spot orange"
-              title="🟠 จุดที่ ๓: ระบุเจาะจง/หมายเลขงาน WBS (คลิกแก้ไข)"
+              title="🟠 จุดที่ 3: ระบุเจาะจง/หมายเลขงาน WBS (คลิกแก้ไข)"
               onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
             >
               {note}
@@ -226,7 +228,7 @@ export default function AccountAdjustPage() {
         <span> จึงจำเป็นต้องปรับปรุงรายการดังกล่าวให้ถูกต้อง ดังนั้น</span>{' '}
         <span
           className="a4-var-spot green"
-          title="🟢 จุดที่ ๔: วัตถุประสงค์ในการขอปรับปรุง (คลิกแก้ไข)"
+          title="🟢 จุดที่ 4: วัตถุประสงค์ในการขอปรับปรุง (คลิกแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
         >
           {purp}
@@ -345,14 +347,14 @@ export default function AccountAdjustPage() {
                 className={`a4-preset-chip ${activeSheet === 'memo' ? 'active' : ''}`}
                 onClick={() => setActiveSheet('memo')}
               >
-                หน้า ๑: บันทึกข้อความ
+                หน้า 1: บันทึกข้อความ
               </button>
               <button
                 type="button"
                 className={`a4-preset-chip ${activeSheet === 'table' ? 'active' : ''}`}
                 onClick={() => setActiveSheet('table')}
               >
-                หน้า ๒: แบบฟอร์ม ๑๐ ช่อง
+                หน้า 2: แบบฟอร์ม 10 ช่อง
               </button>
               <button
                 type="button"
@@ -482,7 +484,7 @@ export default function AccountAdjustPage() {
                           value={formData.docFrom}
                           onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น กรย.(ก๓)"
+                          placeholder="เช่น กรย.(ก3)"
                         />
                       </td>
                       <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
@@ -493,7 +495,7 @@ export default function AccountAdjustPage() {
                           value={formData.docTo}
                           onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น กบฟ.(ก๓)"
+                          placeholder="เช่น กบฟ.(ก3)"
                         />
                       </td>
                     </tr>
@@ -506,7 +508,7 @@ export default function AccountAdjustPage() {
                           value={formData.docNo}
                           onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น มท ๕๓๐๙.๑๖/..."
+                          placeholder="เช่น มท 5309.16/..."
                         />
                       </td>
                       <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -517,7 +519,7 @@ export default function AccountAdjustPage() {
                           value={formData.docDate}
                           onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                          placeholder="เช่น 4 ตุลาคม 2569"
                         />
                       </td>
                     </tr>
@@ -543,7 +545,7 @@ export default function AccountAdjustPage() {
                           value={formData.salutation}
                           onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น อก.บฟ.(ก๓)"
+                          placeholder="เช่น อก.บฟ.(ก3)"
                         />
                       </td>
                     </tr>
@@ -625,7 +627,7 @@ export default function AccountAdjustPage() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', fontSize: '13pt' }}>
                   <div>
-                    การไฟฟ้า: <b>{formData.peaBranch || 'ผกร.กรย.(ก๓)'}</b>&nbsp;&nbsp;&nbsp;&nbsp;ประเภทธุรกิจ: {formData.businessType || '........................'}<br/>
+                    การไฟฟ้า: <b>{formData.peaBranch || 'ผกร.กรย.(ก3)'}</b>&nbsp;&nbsp;&nbsp;&nbsp;ประเภทธุรกิจ: {formData.businessType || '........................'}<br/>
                     รายละเอียดค่าใช้จ่ายที่ต้องการปรับปรุงบัญชี เดือน: <b>{formData.expenseMonth} {formData.expenseYear}</b>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -634,7 +636,7 @@ export default function AccountAdjustPage() {
                       <div>{formData.routingType === 'wbs' ? '[✓]' : '[ ]'} WBS / โครงข่าย ส่ง ผบส.</div>
                     </div>
                     <div style={{ marginTop: '3pt', fontSize: '11pt' }}>
-                      หน่วยงานที่ปรับปรุงบัญชี: <b>{formData.adjustingDept || 'กบฟ.(ก๓)'}</b>
+                      หน่วยงานที่ปรับปรุงบัญชี: <b>{formData.adjustingDept || 'กบฟ.(ก3)'}</b>
                     </div>
                   </div>
                 </div>
@@ -644,11 +646,11 @@ export default function AccountAdjustPage() {
               <div
                 className="a4-section-hoverable"
                 onClick={() => setActiveEditSection('items')}
-                title="คลิกเพื่อแก้ไขตาราง ๑๐ ช่อง"
+                title="คลิกเพื่อแก้ไขตาราง 10 ช่อง"
                 style={{ marginTop: '8pt' }}
               >
                 <div className="section-edit-badge">
-                  <Edit3 size={12} /> จิ้มแก้ไขรายการตาราง ๑๐ ช่อง ({formData.items.length} แถว)
+                  <Edit3 size={12} /> จิ้มแก้ไขรายการตาราง 10 ช่อง ({formData.items.length} แถว)
                 </div>
 
                 <div 
@@ -658,10 +660,10 @@ export default function AccountAdjustPage() {
 
                 <div style={{ fontSize: '11pt', marginTop: '12pt', color: '#475569', lineHeight: 1.5 }}>
                   <b>หมายเหตุ</b><br/>
-                  ๑. กรณีปรับปรุงศูนย์ต้นทุนกับศูนย์ต้นทุนให้ทำเครื่องหมาย / ในช่องศูนย์ต้นทุนมุมบนขวา และจัดส่ง ผบต. นอกเหนือจากนี้ให้ส่ง ผบส.<br/>
-                  ๒. ช่องที่ ๔ ให้ทำเครื่องหมาย / หน้าข้อความที่บันทึกบัญชีไว้ผิด เช่น ผิดศูนย์ต้นทุนให้ทำเครื่องหมาย [/] ศูนย์ต้นทุน<br/>
-                  ๓. ช่องที่ ๗ ให้ทำเครื่องหมาย / หน้าข้อความที่ต้องการให้ปรับปรุงบัญชี เช่น ขอปรับปรุงเข้า โครงข่าย-กิจกรรม ให้ทำเครื่องหมาย [/]<br/>
-                  ๔. ให้แนบสำเนาใบสำคัญจ่ายที่บันทึกไว้ผิดบัญชีมาด้วยทุกครั้ง
+                  1. กรณีปรับปรุงศูนย์ต้นทุนกับศูนย์ต้นทุนให้ทำเครื่องหมาย / ในช่องศูนย์ต้นทุนมุมบนขวา และจัดส่ง ผบต. นอกเหนือจากนี้ให้ส่ง ผบส.<br/>
+                  2. ช่องที่ 4 ให้ทำเครื่องหมาย / หน้าข้อความที่บันทึกบัญชีไว้ผิด เช่น ผิดศูนย์ต้นทุนให้ทำเครื่องหมาย [/] ศูนย์ต้นทุน<br/>
+                  3. ช่องที่ 7 ให้ทำเครื่องหมาย / หน้าข้อความที่ต้องการให้ปรับปรุงบัญชี เช่น ขอปรับปรุงเข้า โครงข่าย-กิจกรรม ให้ทำเครื่องหมาย [/]<br/>
+                  4. ให้แนบสำเนาใบสำคัญจ่ายที่บันทึกไว้ผิดบัญชีมาด้วยทุกครั้ง
                 </div>
               </div>
             </div>
@@ -709,7 +711,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.docFrom}
                         onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
-                        placeholder="เช่น กรย.(ก๓)"
+                        placeholder="เช่น กรย.(ก3)"
                       />
                     </div>
                     <div className="big-field-group">
@@ -719,7 +721,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.docTo}
                         onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
-                        placeholder="เช่น กบฟ.(ก๓)"
+                        placeholder="เช่น กบฟ.(ก3)"
                       />
                     </div>
                   </div>
@@ -732,7 +734,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น ก.๓ กรย.(กร.) ๒๘๑๓/๒๕๖๘"
+                        placeholder="เช่น ก.3 กรย.(กร.) 2813/2568"
                       />
                     </div>
                     <div className="big-field-group">
@@ -742,7 +744,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </div>
                   </div>
@@ -764,7 +766,7 @@ export default function AccountAdjustPage() {
                       className="big-input"
                       value={formData.salutation}
                       onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
-                      placeholder="เช่น อก.บฟ.(ก๓)"
+                      placeholder="เช่น อก.บฟ.(ก3)"
                     />
                   </div>
                 </div>
@@ -822,23 +824,23 @@ export default function AccountAdjustPage() {
                           </span>
                         </div>
                         <div className="var-live-preview-text">
-                          <span>{formData.docFrom || 'กรย.(ก๓)'} ได้ตรวจสอบพบว่ามีการเบิกจ่าย</span>{' '}
-                          <span className="variable-badge-num badge-yellow" title="จุดที่ ๑">
-                            🟡 จุดที่ ๑: {formData.causeItem || 'ค่าใช้จ่าย'}
+                          <span>{formData.docFrom || 'กรย.(ก3)'} ได้ตรวจสอบพบว่ามีการเบิกจ่าย</span>{' '}
+                          <span className="variable-badge-num badge-yellow" title="จุดที่ 1">
+                            🟡 จุดที่ 1: {formData.causeItem || 'ค่าใช้จ่าย'}
                           </span>{' '}
-                          <span className="variable-badge-num badge-blue" title="จุดที่ ๒">
-                            🔵 จุดที่ ๒: {formData.errorType || 'บันทึกผิดพลาด'}
+                          <span className="variable-badge-num badge-blue" title="จุดที่ 2">
+                            🔵 จุดที่ 2: {formData.errorType || 'บันทึกผิดพลาด'}
                           </span>{' '}
                           {formData.detailNote ? (
-                            <span className="variable-badge-num badge-orange" title="จุดที่ ๓">
-                              🟠 จุดที่ ๓: {formData.detailNote}
+                            <span className="variable-badge-num badge-orange" title="จุดที่ 3">
+                              🟠 จุดที่ 3: {formData.detailNote}
                             </span>
                           ) : null}{' '}
                           <span>จึงจำเป็นต้องปรับปรุงรายการดังกล่าวให้ถูกต้อง ดังนั้น</span>{' '}
-                          <span className="variable-badge-num badge-green" title="จุดที่ ๔">
-                            🟢 จุดที่ ๔: {formData.purpose || 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้'}
+                          <span className="variable-badge-num badge-green" title="จุดที่ 4">
+                            🟢 จุดที่ 4: {formData.purpose || 'เพื่อให้ดำเนินการปิด กส.3 ต่อไปได้'}
                           </span>{' '}
-                          <span>จึงขอให้ {formData.docTo || 'กบฟ.(ก๓)'} ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้</span>
+                          <span>จึงขอให้ {formData.docTo || 'กบฟ.(ก3)'} ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้</span>
                         </div>
                       </div>
 
@@ -846,7 +848,7 @@ export default function AccountAdjustPage() {
                       <div className="variable-card">
                         <div className="variable-card-header">
                           <span className="variable-badge-num badge-yellow">
-                            🟡 จุดที่ ๑: สิ่งที่เบิกผิด / สาเหตุ
+                            🟡 จุดที่ 1: สิ่งที่เบิกผิด / สาเหตุ
                           </span>
                           <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>ระบุค่าใช้จ่ายที่พบข้อผิดพลาด</span>
                         </div>
@@ -908,7 +910,7 @@ export default function AccountAdjustPage() {
                       <div className="variable-card">
                         <div className="variable-card-header">
                           <span className="variable-badge-num badge-blue">
-                            🔵 จุดที่ ๒: ลักษณะความผิดพลาด
+                            🔵 จุดที่ 2: ลักษณะความผิดพลาด
                           </span>
                           <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>ระบุว่าผิดพลาดอย่างไร</span>
                         </div>
@@ -956,7 +958,7 @@ export default function AccountAdjustPage() {
                       <div className="variable-card">
                         <div className="variable-card-header">
                           <span className="variable-badge-num badge-orange">
-                            🟠 จุดที่ ๓: ระบุหมายเลขงาน / เจาะจงเพิ่มเติม (ถ้ามี)
+                            🟠 จุดที่ 3: ระบุหมายเลขงาน / เจาะจงเพิ่มเติม (ถ้ามี)
                           </span>
                           <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>ระบุ WBS/ศูนย์ต้นทุน หรือเว้นว่างได้</span>
                         </div>
@@ -973,7 +975,7 @@ export default function AccountAdjustPage() {
                       <div className="variable-card">
                         <div className="variable-card-header">
                           <span className="variable-badge-num badge-green">
-                            🟢 จุดที่ ๔: วัตถุประสงค์ในการขอปรับปรุง
+                            🟢 จุดที่ 4: วัตถุประสงค์ในการขอปรับปรุง
                           </span>
                           <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>ระบุเป้าหมายการปรับปรุง</span>
                         </div>
@@ -982,23 +984,23 @@ export default function AccountAdjustPage() {
                           className="big-input"
                           value={formData.purpose || ''}
                           onChange={(e) => handleUpdateVariable('purpose', e.target.value)}
-                          placeholder="เช่น เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้"
+                          placeholder="เช่น เพื่อให้ดำเนินการปิด กส.3 ต่อไปได้"
                         />
                         <div className="var-quick-options">
                           <span style={{ fontSize: '0.75rem', color: '#94a3b8', alignSelf: 'center' }}>ตัวเลือกด่วน:</span>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('purpose', 'เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้')}
+                            onClick={() => handleUpdateVariable('purpose', 'เพื่อให้ดำเนินการปิด กส.3 ต่อไปได้')}
                           >
-                            + เพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้
+                            + เพื่อให้ดำเนินการปิด กส.3 ต่อไปได้
                           </button>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('purpose', 'เพื่อให้การสรุปค่าใช้จ่ายโครงการมีความถูกต้องและปิด กส.๓ ได้ตามกำหนด')}
+                            onClick={() => handleUpdateVariable('purpose', 'เพื่อให้การสรุปค่าใช้จ่ายโครงการมีความถูกต้องและปิด กส.3 ได้ตามกำหนด')}
                           >
-                            + เพื่อสรุปค่าใช้จ่ายโครงการและปิด กส.๓
+                            + เพื่อสรุปค่าใช้จ่ายโครงการและปิด กส.3
                           </button>
                           <button
                             type="button"
@@ -1081,7 +1083,7 @@ export default function AccountAdjustPage() {
                       className="big-input"
                       value={formData.signerTitle}
                       onChange={(e) => setFormData({ ...formData, signerTitle: e.target.value })}
-                      placeholder="เช่น รก.กรย.(ก๓) ปฏิบัติงานแทน อก.กรย.(ก๓)"
+                      placeholder="เช่น รก.กรย.(ก3) ปฏิบัติงานแทน อก.กรย.(ก3)"
                     />
                   </div>
 
@@ -1092,7 +1094,7 @@ export default function AccountAdjustPage() {
                       className="big-input"
                       value={formData.signerDate}
                       onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                      placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                      placeholder="เช่น 4 ตุลาคม 2569"
                     />
                   </div>
                 </div>
@@ -1109,7 +1111,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.peaBranch}
                         onChange={(e) => setFormData({ ...formData, peaBranch: e.target.value })}
-                        placeholder="เช่น ผกร.กรย.(ก๓)"
+                        placeholder="เช่น ผกร.กรย.(ก3)"
                       />
                     </div>
                     <div className="big-field-group">
@@ -1142,7 +1144,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.expenseYear}
                         onChange={(e) => setFormData({ ...formData, expenseYear: e.target.value })}
-                        placeholder="เช่น ๒๕๖๗"
+                        placeholder="เช่น 2567"
                       />
                     </div>
                   </div>
@@ -1166,7 +1168,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.adjustingDept}
                         onChange={(e) => setFormData({ ...formData, adjustingDept: e.target.value })}
-                        placeholder="เช่น กบฟ.(ก๓)"
+                        placeholder="เช่น กบฟ.(ก3)"
                       />
                     </div>
                   </div>

@@ -78,21 +78,21 @@ export default function WireClarifyPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.items && parsed.items.length > 0) {
-          const fixedDocTo = parsed.docTo === 'ผวบ.(ก๓)' ? 'ฝวบ.(ก๓)' : (parsed.docTo || 'ฝวบ.(ก๓)');
+          const fixedDocTo = parsed.docTo === 'ผวบ.(ก3)' ? 'ฝวบ.(ก3)' : (parsed.docTo || 'ฝวบ.(ก3)');
           const fixedSalutation = parsed.salutation?.includes('อผ.วบ.')
-            ? 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)'
-            : (parsed.salutation || 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)');
+            ? 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)'
+            : (parsed.salutation || 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)');
           const fixedSignerTitle = (parsed.signerTitle?.includes('กรย.') || !parsed.signerTitle)
-            ? 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)'
+            ? 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)'
             : parsed.signerTitle;
-          const fixedApproverTitle = (parsed.approverTitle === 'อผ.วบ.(ก๓)' || !parsed.approverTitle)
-            ? 'อฝ.วบ.(ก๓)'
+          const fixedApproverTitle = (parsed.approverTitle === 'อผ.วบ.(ก3)' || !parsed.approverTitle)
+            ? 'อฝ.วบ.(ก3)'
             : parsed.approverTitle;
           const fixedConsideration = parsed.memoConsideration?.includes('ตามสภาพหน้างาน ดังนี้ ทั้งนี้')
             ? parsed.memoConsideration.replace('ตามสภาพหน้างาน ดังนี้ ทั้งนี้', 'ตามสภาพหน้างาน ทั้งนี้')
             : (parsed.memoConsideration || SAMPLE_WIRE_CLARIFY_DATA.memoConsideration);
-          const fixedApproverEndorsement = (parsed.approverEndorsementTo === '- กรย.(ก๓)' || !parsed.approverEndorsementTo)
-            ? '- อก.รย.(ก๓)'
+          const fixedApproverEndorsement = (parsed.approverEndorsementTo === '- กรย.(ก3)' || !parsed.approverEndorsementTo)
+            ? '- อก.รย.(ก3)'
             : parsed.approverEndorsementTo;
           const fixedApproverName = (parsed.approverName === 'นายเมธี สุกก่ำ' || parsed.approverName === 'นายเมธี สุภาก่า' || !parsed.approverName)
             ? 'นายเมธี สุภาก่ำ'
@@ -166,7 +166,7 @@ export default function WireClarifyPage() {
       const preset = PRESET_WIRE_REASONS.find(r => r.key === selectedReasonKey);
       const newFacts = composeWireFacts({
         projectName: updated.projectName,
-        dept: 'ผกร.กรย.(ก๓)',
+        dept: 'ผกร.กรย.(ก3)',
         factsDetail: preset?.factsDetail
       });
       return {
@@ -182,7 +182,7 @@ export default function WireClarifyPage() {
     setFormData(prev => {
       const newFacts = composeWireFacts({
         projectName: prev.projectName,
-        dept: 'ผกร.กรย.(ก๓)',
+        dept: 'ผกร.กรย.(ก3)',
         factsDetail: preset.factsDetail
       });
       return {
@@ -193,20 +193,20 @@ export default function WireClarifyPage() {
     showToast(`✓ เลือกสาเหตุ: ${preset.badge}`);
   };
 
-  // Render on-screen ๑. เรื่องเดิม with interactive color highlights
+  // Render on-screen 1. เรื่องเดิม with interactive color highlights
   const renderScreenBackgroundText = () => {
-    const ref = formData.approvalDocRef || 'ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗';
-    const proj = formData.projectName || 'ปรับปรุงระบบจำหน่าย ๒๒ เควี';
+    const ref = formData.approvalDocRef || 'ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 สิงหาคม 2567';
+    const proj = formData.projectName || 'ปรับปรุงระบบจำหน่าย 22 เควี';
     const wbs = formData.wbsNo || 'P-TDD02.3-I-LYAIA.0016';
     const name = formData.supervisorName || 'นายอุดมศักดิ์ จันทร์กลั่น';
-    const pos = formData.supervisorPosition || 'หชง.๔ ผกร.กรย.(ก๓)';
+    const pos = formData.supervisorPosition || 'หชง.4 ผกร.กรย.(ก3)';
 
     return (
       <>
         <span>ตามหนังสือที่ </span>
         <span
           className="a4-var-spot"
-          title="🟡 จุดที่ ๑: หนังสืออนุมัติงานเดิม (คลิกเพื่อแก้ไข)"
+          title="🟡 จุดที่ 1: หนังสืออนุมัติงานเดิม (คลิกเพื่อแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
         >
           {ref.replace(/^ตามหนังสือที่\s*/, '')}
@@ -214,7 +214,7 @@ export default function WireClarifyPage() {
         <span>อนุมัติให้</span>{' '}
         <span
           className="a4-var-spot blue"
-          title="🔵 จุดที่ ๒: ชื่องานและสถานที่ก่อสร้าง (คลิกเพื่อแก้ไข)"
+          title="🔵 จุดที่ 2: ชื่องานและสถานที่ก่อสร้าง (คลิกเพื่อแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
         >
           {proj}
@@ -222,7 +222,7 @@ export default function WireClarifyPage() {
         <span>หมายเลขงาน (WBS) : </span>{' '}
         <span
           className="a4-var-spot orange"
-          title="🟠 จุดที่ ๓: หมายเลขงาน WBS (คลิกเพื่อแก้ไข)"
+          title="🟠 จุดที่ 3: หมายเลขงาน WBS (คลิกเพื่อแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
         >
           {wbs}
@@ -230,7 +230,7 @@ export default function WireClarifyPage() {
         <span>โดยมี</span>{' '}
         <span
           className="a4-var-spot green"
-          title="🟢 จุดที่ ๔: ผู้ควบคุมงาน (คลิกเพื่อแก้ไข)"
+          title="🟢 จุดที่ 4: ผู้ควบคุมงาน (คลิกเพื่อแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('reason'); }}
         >
           {name} {pos}
@@ -456,7 +456,7 @@ export default function WireClarifyPage() {
                         value={formData.docFrom}
                         onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น กรย.(ก๓)"
+                        placeholder="เช่น กรย.(ก3)"
                       />
                     </td>
                     <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
@@ -467,7 +467,7 @@ export default function WireClarifyPage() {
                         value={formData.docTo}
                         onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น ฝวบ.(ก๓)"
+                        placeholder="เช่น ฝวบ.(ก3)"
                       />
                     </td>
                   </tr>
@@ -480,7 +480,7 @@ export default function WireClarifyPage() {
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เลขที่หนังสือ เช่น มท ๕๓๐๙.๑๖/..."
+                        placeholder="เลขที่หนังสือ เช่น มท 5309.16/..."
                       />
                     </td>
                     <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -491,7 +491,7 @@ export default function WireClarifyPage() {
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </td>
                   </tr>
@@ -517,7 +517,7 @@ export default function WireClarifyPage() {
                         value={formData.salutation}
                         onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)"
+                        placeholder="เช่น อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)"
                       />
                     </td>
                   </tr>
@@ -548,13 +548,13 @@ export default function WireClarifyPage() {
                     </span>
                   </div>
 
-                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๑. เรื่องเดิม</p>
+                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>1. เรื่องเดิม</p>
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
                     <span className="wc-print-only">{formData.memoBackground}</span>
                     <span className="no-print">{renderScreenBackgroundText()}</span>
                   </p>
 
-                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๒. ข้อเท็จจริง</p>
+                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>2. ข้อเท็จจริง</p>
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', whiteSpace: 'pre-line', marginBottom: '8pt' }}>
                     {formData.memoFacts}
                   </p>
@@ -630,7 +630,7 @@ export default function WireClarifyPage() {
 
               {formData.docLevel === 'division_memo' ? (
                 <>
-                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๓. ข้อพิจารณา</p>
+                  <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>3. ข้อพิจารณา</p>
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
                     {formData.memoConsideration}
                   </p>
@@ -679,7 +679,7 @@ export default function WireClarifyPage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '12pt' }}>
                 <div>
-                  <div style={{ fontWeight: 600 }}>{formData.approverEndorsementTo || '- อก.รย.(ก๓)'}</div>
+                  <div style={{ fontWeight: 600 }}>{formData.approverEndorsementTo || '- อก.รย.(ก3)'}</div>
                   <div style={{ marginTop: '3pt', color: '#475569' }}>อนุมัติ ดำเนินการตามเสนอ</div>
                   <div style={{ height: '30px' }}></div>
                   <div>({formData.approverName})</div>
@@ -687,9 +687,9 @@ export default function WireClarifyPage() {
                 </div>
 
                 <div style={{ textAlign: 'right', fontSize: '11pt', color: '#475569' }}>
-                  <div>รฝ.วบ.(ก๓) ............................ วันที่ ....../....../......</div>
-                  <div style={{ marginTop: '8pt' }}>ผห.กร.(ก๓) ............................ วันที่ ....../....../......</div>
-                  <div style={{ marginTop: '8pt' }}>ชผ.กร.(ก๓) ............................ วันที่ ....../....../......</div>
+                  <div>รฝ.วบ.(ก3) ............................ วันที่ ....../....../......</div>
+                  <div style={{ marginTop: '8pt' }}>ผห.กร.(ก3) ............................ วันที่ ....../....../......</div>
+                  <div style={{ marginTop: '8pt' }}>ชผ.กร.(ก3) ............................ วันที่ ....../....../......</div>
                 </div>
               </div>
 
@@ -741,7 +741,7 @@ export default function WireClarifyPage() {
                         className="big-input"
                         value={formData.docFrom}
                         onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
-                        placeholder="เช่น กรย.(ก๓)"
+                        placeholder="เช่น กรย.(ก3)"
                       />
                     </div>
                     <div className="big-field-group">
@@ -751,22 +751,22 @@ export default function WireClarifyPage() {
                         className="big-input"
                         value={formData.docTo}
                         onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
-                        placeholder="เช่น ฝวบ.(ก๓)"
+                        placeholder="เช่น ฝวบ.(ก3)"
                       />
                       <div className="var-quick-options" style={{ marginTop: '6px' }}>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docTo: 'ฝวบ.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, docTo: 'ฝวบ.(ก3)' })}
                         >
-                          📌 ฝวบ.(ก๓)
+                          📌 ฝวบ.(ก3)
                         </button>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docTo: 'ผกร.กรย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, docTo: 'ผกร.กรย.(ก3)' })}
                         >
-                          📌 ผกร.กรย.(ก๓)
+                          📌 ผกร.กรย.(ก3)
                         </button>
                       </div>
                     </div>
@@ -780,7 +780,7 @@ export default function WireClarifyPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น มท ๕๓๐๙.๑๖/..."
+                        placeholder="เช่น มท 5309.16/..."
                       />
                     </div>
                     <div className="big-field-group">
@@ -790,7 +790,7 @@ export default function WireClarifyPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </div>
                   </div>
@@ -812,22 +812,22 @@ export default function WireClarifyPage() {
                       className="big-input"
                       value={formData.salutation}
                       onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
-                      placeholder="เช่น อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)"
+                      placeholder="เช่น อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)"
                     />
                     <div className="var-quick-options" style={{ marginTop: '6px' }}>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, salutation: 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, salutation: 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)' })}
                       >
-                        📌 อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)
+                        📌 อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, salutation: 'ผห.กร.(ก๓) ผ่าน ชผ.กร.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, salutation: 'ผห.กร.(ก3) ผ่าน ชผ.กร.(ก3)' })}
                       >
-                        📌 ผห.กร.(ก๓) ผ่าน ชผ.กร.(ก๓)
+                        📌 ผห.กร.(ก3) ผ่าน ชผ.กร.(ก3)
                       </button>
                     </div>
                   </div>
@@ -855,7 +855,7 @@ export default function WireClarifyPage() {
                         className="big-input"
                         value={formData.approvalDocRef}
                         onChange={(e) => setFormData({ ...formData, approvalDocRef: e.target.value })}
-                        placeholder="เช่น ก.๓ กวว.(วร) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๖ สิงหาคม ๒๕๖๗"
+                        placeholder="เช่น ก.3 กวว.(วร) 1847/2567 ลงวันที่ 16 สิงหาคม 2567"
                       />
                     </div>
                   </div>
@@ -867,7 +867,7 @@ export default function WireClarifyPage() {
                       className="big-textarea"
                       value={formData.projectName}
                       onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
-                      placeholder="เช่น ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน..."
+                      placeholder="เช่น ปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน..."
                     />
                   </div>
 
@@ -878,7 +878,7 @@ export default function WireClarifyPage() {
                       className="big-input"
                       value={formData.networkNo}
                       onChange={(e) => setFormData({ ...formData, networkNo: e.target.value })}
-                      placeholder="เช่น โครงข่ายรื้อถอนแรงสูงภายนอก ๖๐๐๑๓๘๑๔๗๘"
+                      placeholder="เช่น โครงข่ายรื้อถอนแรงสูงภายนอก 6001381478"
                     />
                   </div>
                 </div>
@@ -991,13 +991,13 @@ export default function WireClarifyPage() {
                   {reasonMode === 'guided' ? (
                     <div>
                       <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        💡 <strong>ระบบสร้างข้อความอัตโนมัติ:</strong> แก้ไขตัวแปรทั้ง ๕ จุดด้านล่างนี้ ระบบจะนำไปประกอบเข้าเป็นย่อหน้า <strong>๑. เรื่องเดิม</strong> และ <strong>๒. ข้อเท็จจริง</strong> ในเอกสารให้อัตโนมัติทันที
+                        💡 <strong>ระบบสร้างข้อความอัตโนมัติ:</strong> แก้ไขตัวแปรทั้ง 5 จุดด้านล่างนี้ ระบบจะนำไปประกอบเข้าเป็นย่อหน้า <strong>1. เรื่องเดิม</strong> และ <strong>2. ข้อเท็จจริง</strong> ในเอกสารให้อัตโนมัติทันที
                       </div>
 
                       {/* Card 1: หนังสืออ้างอิงเดิม */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-yellow">จุดที่ ๑</span>
+                          <span className="variable-badge-num badge-yellow">จุดที่ 1</span>
                           <strong style={{ fontSize: '14px', color: '#b45309' }}>หนังสืออนุมัติงานเดิม (ที่อ้างถึง)</strong>
                         </div>
                         <input
@@ -1005,22 +1005,22 @@ export default function WireClarifyPage() {
                           className="big-input"
                           value={formData.approvalDocRef}
                           onChange={(e) => handleUpdateVariable('approvalDocRef', e.target.value)}
-                          placeholder="เช่น ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗"
+                          placeholder="เช่น ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 สิงหาคม 2567"
                         />
                         <div className="var-quick-options">
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗')}
+                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 สิงหาคม 2567')}
                           >
-                            ตัวอย่าง ๑: ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ ส.ค. ๖๗
+                            ตัวอย่าง 1: ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 ส.ค. 67
                           </button>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.๓ กวว.(วร) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๖ สิงหาคม ๒๕๖๗')}
+                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.3 กวว.(วร) 1847/2567 ลงวันที่ 16 สิงหาคม 2567')}
                           >
-                            ตัวอย่าง ๒: ก.๓ กวว.(วร) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๖ ส.ค. ๖๗
+                            ตัวอย่าง 2: ก.3 กวว.(วร) 1847/2567 ลงวันที่ 16 ส.ค. 67
                           </button>
                         </div>
                       </div>
@@ -1028,7 +1028,7 @@ export default function WireClarifyPage() {
                       {/* Card 2: ชื่องานและสถานที่ก่อสร้าง */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-blue">จุดที่ ๒</span>
+                          <span className="variable-badge-num badge-blue">จุดที่ 2</span>
                           <strong style={{ fontSize: '14px', color: '#1d4ed8' }}>ชื่องานและสถานที่ก่อสร้าง</strong>
                         </div>
                         <textarea
@@ -1036,14 +1036,14 @@ export default function WireClarifyPage() {
                           className="big-textarea"
                           value={formData.projectName}
                           onChange={(e) => handleUpdateVariable('projectName', e.target.value)}
-                          placeholder="เช่น ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี"
+                          placeholder="เช่น ปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง 2 อ.ศรีสวัสดิ์ จ.กาญจนบุรี"
                         />
                       </div>
 
                       {/* Card 3: หมายเลขงาน WBS */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-orange">จุดที่ ๓</span>
+                          <span className="variable-badge-num badge-orange">จุดที่ 3</span>
                           <strong style={{ fontSize: '14px', color: '#c2410c' }}>หมายเลขงาน WBS</strong>
                         </div>
                         <input
@@ -1058,7 +1058,7 @@ export default function WireClarifyPage() {
                       {/* Card 4: ผู้ควบคุมงาน */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-green">จุดที่ ๔</span>
+                          <span className="variable-badge-num badge-green">จุดที่ 4</span>
                           <strong style={{ fontSize: '14px', color: '#15803d' }}>ผู้ควบคุมงาน (ชื่อและตำแหน่ง)</strong>
                         </div>
                         <div className="big-grid-2">
@@ -1079,7 +1079,7 @@ export default function WireClarifyPage() {
                               className="big-input"
                               value={formData.supervisorPosition}
                               onChange={(e) => handleUpdateVariable('supervisorPosition', e.target.value)}
-                              placeholder="เช่น หชง.๔ ผกร.กรย.(ก๓)"
+                              placeholder="เช่น หชง.4 ผกร.กรย.(ก3)"
                             />
                           </div>
                         </div>
@@ -1087,23 +1087,23 @@ export default function WireClarifyPage() {
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('supervisorPosition', 'หชง.๔ ผกร.กรย.(ก๓)')}
+                            onClick={() => handleUpdateVariable('supervisorPosition', 'หชง.4 ผกร.กรย.(ก3)')}
                           >
-                            📌 หชง.๔ ผกร.กรย.(ก๓)
+                            📌 หชง.4 ผกร.กรย.(ก3)
                           </button>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('supervisorPosition', 'พชง.๗ ผกร.กรย.(ก๓)')}
+                            onClick={() => handleUpdateVariable('supervisorPosition', 'พชง.7 ผกร.กรย.(ก3)')}
                           >
-                            📌 พชง.๗ ผกร.กรย.(ก๓)
+                            📌 พชง.7 ผกร.กรย.(ก3)
                           </button>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('supervisorPosition', 'วศก.๔ ผกร.กรย.(ก๓)')}
+                            onClick={() => handleUpdateVariable('supervisorPosition', 'วศก.4 ผกร.กรย.(ก3)')}
                           >
-                            📌 วศก.๔ ผกร.กรย.(ก๓)
+                            📌 วศก.4 ผกร.กรย.(ก3)
                           </button>
                         </div>
                       </div>
@@ -1111,7 +1111,7 @@ export default function WireClarifyPage() {
                       {/* Card 5: สาเหตุที่ส่งคืนไม่ครบ */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num" style={{ background: '#7c3aed', color: '#fff' }}>จุดที่ ๕</span>
+                          <span className="variable-badge-num" style={{ background: '#7c3aed', color: '#fff' }}>จุดที่ 5</span>
                           <strong style={{ fontSize: '14px', color: '#7c3aed' }}>สาเหตุ/เหตุผลความจำเป็นที่ส่งคืนเศษสายไม่ครบ</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
@@ -1147,10 +1147,10 @@ export default function WireClarifyPage() {
                         />
                       </div>
 
-                      {/* Card 6: ๓. ข้อพิจารณา (วรรคสุดท้าย) */}
+                      {/* Card 6: 3. ข้อพิจารณา (วรรคสุดท้าย) */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num" style={{ background: '#0284c7', color: '#fff' }}>ข้อ ๓</span>
+                          <span className="variable-badge-num" style={{ background: '#0284c7', color: '#fff' }}>ข้อ 3</span>
                           <strong style={{ fontSize: '14px', color: '#0369a1' }}>ข้อพิจารณา (วรรคสรุปก่อนตาราง)</strong>
                         </div>
                         <textarea
@@ -1167,13 +1167,13 @@ export default function WireClarifyPage() {
                           <Sparkles size={14} /> ตัวอย่างข้อความที่จะปรากฏในบันทึกข้อความ (Live Preview):
                         </div>
                         <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
-                          <strong>๑. เรื่องเดิม:</strong> {formData.memoBackground}
+                          <strong>1. เรื่องเดิม:</strong> {formData.memoBackground}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
-                          <strong>๒. ข้อเท็จจริง:</strong> {formData.memoFacts}
+                          <strong>2. ข้อเท็จจริง:</strong> {formData.memoFacts}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1e293b' }}>
-                          <strong>๓. ข้อพิจารณา:</strong> {formData.memoConsideration}
+                          <strong>3. ข้อพิจารณา:</strong> {formData.memoConsideration}
                         </div>
                       </div>
                     </div>
@@ -1181,7 +1181,7 @@ export default function WireClarifyPage() {
                     <div>
                       {/* Freeform Editor */}
                       <div className="big-field-group">
-                        <label className="big-label">๑. เรื่องเดิม</label>
+                        <label className="big-label">1. เรื่องเดิม</label>
                         <textarea
                           rows={3}
                           className="big-textarea"
@@ -1191,7 +1191,7 @@ export default function WireClarifyPage() {
                       </div>
 
                       <div className="big-field-group">
-                        <label className="big-label">๒. ข้อเท็จจริง (เหตุผลความจำเป็นที่ส่งคืนไม่ครบ)</label>
+                        <label className="big-label">2. ข้อเท็จจริง (เหตุผลความจำเป็นที่ส่งคืนไม่ครบ)</label>
                         <textarea
                           rows={5}
                           className="big-textarea"
@@ -1202,7 +1202,7 @@ export default function WireClarifyPage() {
                       </div>
 
                       <div className="big-field-group">
-                        <label className="big-label">๓. ข้อพิจารณา</label>
+                        <label className="big-label">3. ข้อพิจารณา</label>
                         <textarea
                           rows={3}
                           className="big-textarea"
@@ -1246,29 +1246,29 @@ export default function WireClarifyPage() {
                       className="big-input"
                       value={formData.signerTitle}
                       onChange={(e) => setFormData({ ...formData, signerTitle: e.target.value })}
-                      placeholder="เช่น รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)"
+                      placeholder="เช่น รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)"
                     />
                     <div className="var-quick-options" style={{ marginTop: '6px' }}>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)' })}
                       >
-                        📌 รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)
+                        📌 รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, signerTitle: 'อก.รย.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, signerTitle: 'อก.รย.(ก3)' })}
                       >
-                        📌 อก.รย.(ก๓)
+                        📌 อก.รย.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก3)' })}
                       >
-                        📌 รก.รย.(ก๓)
+                        📌 รก.รย.(ก3)
                       </button>
                     </div>
                   </div>
@@ -1281,7 +1281,7 @@ export default function WireClarifyPage() {
                         className="big-input"
                         value={formData.signerDate}
                         onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </div>
                     <div className="big-field-group">
@@ -1291,7 +1291,7 @@ export default function WireClarifyPage() {
                         className="big-input"
                         value={formData.contactPhone}
                         onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                        placeholder="เช่น ๑๐๓๙๑"
+                        placeholder="เช่น 10391"
                       />
                     </div>
                   </div>
@@ -1315,22 +1315,22 @@ export default function WireClarifyPage() {
                           className="big-input"
                           value={formData.approverTitle}
                           onChange={(e) => setFormData({ ...formData, approverTitle: e.target.value })}
-                          placeholder="เช่น อฝ.วบ.(ก๓)"
+                          placeholder="เช่น อฝ.วบ.(ก3)"
                         />
                         <div className="var-quick-options" style={{ marginTop: '6px' }}>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => setFormData({ ...formData, approverTitle: 'อฝ.วบ.(ก๓)' })}
+                            onClick={() => setFormData({ ...formData, approverTitle: 'อฝ.วบ.(ก3)' })}
                           >
-                            📌 อฝ.วบ.(ก๓)
+                            📌 อฝ.วบ.(ก3)
                           </button>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => setFormData({ ...formData, approverTitle: 'รฝ.วบ.(ก๓)' })}
+                            onClick={() => setFormData({ ...formData, approverTitle: 'รฝ.วบ.(ก3)' })}
                           >
-                            📌 รฝ.วบ.(ก๓)
+                            📌 รฝ.วบ.(ก3)
                           </button>
                         </div>
                       </div>
@@ -1341,24 +1341,24 @@ export default function WireClarifyPage() {
                       <input
                         type="text"
                         className="big-input"
-                        value={formData.approverEndorsementTo || '- อก.รย.(ก๓)'}
+                        value={formData.approverEndorsementTo || '- อก.รย.(ก3)'}
                         onChange={(e) => setFormData({ ...formData, approverEndorsementTo: e.target.value })}
-                        placeholder="เช่น - อก.รย.(ก๓)"
+                        placeholder="เช่น - อก.รย.(ก3)"
                       />
                       <div className="var-quick-options" style={{ marginTop: '6px' }}>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- อก.รย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- อก.รย.(ก3)' })}
                         >
-                          📌 - อก.รย.(ก๓)
+                          📌 - อก.รย.(ก3)
                         </button>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- กรย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- กรย.(ก3)' })}
                         >
-                          📌 - กรย.(ก๓)
+                          📌 - กรย.(ก3)
                         </button>
                       </div>
                     </div>
