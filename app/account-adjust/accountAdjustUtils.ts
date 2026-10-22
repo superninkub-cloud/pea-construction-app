@@ -35,7 +35,7 @@ export interface AccountAdjustFormData {
   docNo: string;            // เลขที่ เช่น "ก.๓ กรย.(กร.) ๒๘๑๓/๒๕๖๘"
   docDate: string;          // วันที่ เช่น "๑๙ ต.ค. ๖๗"
   subject: string;          // เรื่อง เช่น "ขอให้ปรับปรุงรายการทางบัญชี"
-  salutation: string;       // คำขึ้นต้น เช่น "เรียน อก.กบฟ.(ก๓)"
+  salutation: string;       // คำขึ้นต้น เช่น "เรียน อก.บฟ.(ก๓)"
   memoReason: string;       // ข้อความเหตุผลฉบับเต็ม
   memoClosing: string;      // ข้อความปิดท้าย เช่น "จึงเรียนมาเพื่อโปรดพิจารณาดำเนินการต่อไป"
   signerName: string;       // ชื่อผู้ลงนาม เช่น "นายอนันต์ กาญจนอุปถัมภ์"
@@ -75,7 +75,7 @@ export const SAMPLE_ACCOUNT_ADJUST_DATA: AccountAdjustFormData = {
   docNo: "",
   docDate: "",
   subject: "ขอให้ปรับปรุงรายการทางบัญชี",
-  salutation: "อก.กบฟ.(ก๓)",
+  salutation: "อก.บฟ.(ก๓)",
   memoReason: "กรย.(ก๓) ได้ตรวจสอบพบว่ามีการเบิกจ่ายค่าซ่อมยานพาหนะ มีการบันทึกรายการทางบัญชีผิดพลาด จึงจำเป็นต้องปรับปรุงรายการดังกล่าวให้ถูกต้อง ดังนั้นเพื่อให้ดำเนินการปิด กส.๓ ต่อไปได้ จึงขอให้ กบฟ.(ก๓) ปรับปรุงรายการทางบัญชีโดยมีรายละเอียดตามเอกสารแนบที่ส่งมาด้วยนี้",
   memoClosing: "จึงเรียนมาเพื่อโปรดพิจารณาดำเนินการต่อไป",
   signerName: "นายอนันต์ กาญจนอุปถัมภ์",
@@ -366,7 +366,7 @@ PROVINCIAL ELECTRICITY AUTHORITY
 จาก: ${data.docFrom || ''}\t\tถึง: ${data.docTo || ''}
 เลขที่: ${data.docNo || ''}\t\tวันที่: ${data.docDate || ''}
 เรื่อง: ${data.subject || 'ขอให้ปรับปรุงรายการทางบัญชี'}
-เรียน: ${data.salutation || 'อก.กบฟ.(ก๓)'}
+เรียน: ${data.salutation || 'อก.บฟ.(ก๓)'}
 
     ${data.memoReason || ''}
 
@@ -495,7 +495,7 @@ export function generateWordDocumentContent(data: AccountAdjustFormData): string
         </tr>
         <tr>
           <td><b>เรียน</b></td>
-          <td colspan="3">${data.salutation || 'อก.กบฟ.(ก๓)'}</td>
+          <td colspan="3">${data.salutation || 'อก.บฟ.(ก๓)'}</td>
         </tr>
       </table>
 
