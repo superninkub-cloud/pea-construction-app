@@ -1,0 +1,647 @@
+/* app/demolish-scrap/demolish-scrap.css */
+/* Interactive Live A4 Editor for Dismantled Materials Scrapping Request Program */
+
+.demolish-container {
+  min-height: calc(100vh - 4rem);
+  padding: 1.5rem;
+  background: radial-gradient(circle at top right, rgba(234, 88, 12, 0.08), transparent 40%),
+              radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.05), transparent 40%);
+  color: #f1f5f9;
+}
+
+/* Page Header */
+.demolish-header {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.demolish-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.demolish-icon-badge {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.4);
+  color: #ffffff;
+}
+
+/* Preset Cards */
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.preset-card {
+  padding: 0.875rem 1.125rem;
+  border-radius: 0.875rem;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.preset-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(234, 88, 12, 0.4);
+  box-shadow: 0 12px 24px -8px rgba(234, 88, 12, 0.25);
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.preset-card.active {
+  border-color: #ea580c;
+  background: rgba(234, 88, 12, 0.14);
+  box-shadow: 0 0 0 1px #ea580c;
+}
+
+/* Floating Toolbar above A4 paper */
+.editor-toolbar {
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1rem;
+  padding: 0.875rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 1rem;
+  z-index: 40;
+}
+
+/* Action Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5625rem 1.125rem;
+  border-radius: 0.625rem;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5625rem 1rem;
+  border-radius: 0.625rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Quick Chips Bar */
+.chips-bar {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.875rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip-btn:hover {
+  background: rgba(234, 88, 12, 0.2);
+  border-color: rgba(234, 88, 12, 0.4);
+  color: #fb923c;
+}
+
+/* A4 Sheet Wrapper */
+.a4-wrapper {
+  background: #334155;
+  padding: 2rem 1rem;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+  overflow-x: auto;
+}
+
+.a4-page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 22mm 20mm 20mm 25mm;
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0,0,0,0.1);
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-size: 16pt;
+  line-height: 1.25;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Official Header in A4 */
+.a4-pea-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8pt;
+  position: relative;
+}
+
+.a4-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10pt;
+}
+
+.a4-info-table td {
+  padding: 2pt 4pt;
+  font-size: 16pt;
+  vertical-align: top;
+}
+
+.a4-text-indent {
+  text-indent: 2.5cm;
+  text-align: justify;
+  margin-bottom: 6pt;
+}
+
+/* Table in A4 */
+.a4-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10pt 0;
+}
+
+.a4-table th, .a4-table td {
+  border: 1pt solid #000000;
+  padding: 4pt 6pt;
+  font-size: 15pt;
+  vertical-align: middle;
+}
+
+.a4-table th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+  text-align: center;
+}
+
+.a4-approval-box {
+  margin-top: 18pt;
+  border-top: 1pt solid #000000;
+  padding-top: 10pt;
+}
+
+/* ========================================================== */
+/* INLINE EDITABLE A4 STYLES (แก้ตรงนี้เลยบนกระดาษ)            */
+/* ========================================================== */
+
+.a4-live-input {
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-size: 16pt;
+  line-height: 1.2;
+  color: #000000;
+  background: rgba(234, 88, 12, 0.04);
+  border: 1px dashed rgba(203, 213, 225, 0.8);
+  border-radius: 3px;
+  padding: 1px 4px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.a4-inline-input {
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-size: 16pt;
+  line-height: 1.2;
+  color: #000000;
+  background: rgba(234, 88, 12, 0.05);
+  border: 1px dashed #ea580c;
+  border-radius: 3px;
+  padding: 0 4px;
+  display: inline-block;
+  vertical-align: baseline;
+  box-sizing: border-box;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.a4-inline-input:hover {
+  background: rgba(234, 88, 12, 0.1);
+  border-color: #c2410c;
+}
+
+.a4-inline-input:focus {
+  outline: none;
+  background: #ffffff;
+  border: 1.5px solid #ea580c;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+}
+
+.a4-inline-input::placeholder {
+  color: #94a3b8;
+  font-size: 14pt;
+  font-style: italic;
+}
+
+.a4-live-textarea {
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-size: 16pt;
+  line-height: 1.25;
+  color: #000000;
+  background: rgba(234, 88, 12, 0.04);
+  border: 1px dashed rgba(203, 213, 225, 0.8);
+  border-radius: 4px;
+  padding: 4px 6px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+  resize: vertical;
+}
+
+.a4-live-textarea:hover {
+  background: rgba(234, 88, 12, 0.08);
+  border-color: #ea580c;
+}
+
+.a4-live-textarea:focus {
+  outline: none;
+  background: #ffffff;
+  border: 1.5px solid #ea580c;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+}
+
+.a4-table-input {
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-size: 15pt;
+  color: #000000;
+  background: transparent;
+  border: none;
+  width: 100%;
+  padding: 1px 2px;
+  box-sizing: border-box;
+}
+
+.a4-table-input:hover {
+  background: rgba(234, 88, 12, 0.06);
+  border-radius: 2px;
+}
+
+.a4-table-input:focus {
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 1.5px #ea580c;
+  border-radius: 2px;
+}
+
+.a4-table-select {
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-size: 14pt;
+  color: #000000;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 1px 2px;
+}
+
+.a4-table-select:focus {
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 1.5px #ea580c;
+}
+
+/* Row Action button */
+.row-del-btn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: all 0.15s ease;
+}
+
+.row-del-btn:hover {
+  opacity: 1;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ========================================================== */
+/* BIG SECTION POP-OUT EDITOR (จิ้มแล้วขยายใหญ่ แก้ไขง่าย)     */
+/* ========================================================== */
+
+.a4-section-hoverable {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.a4-section-hoverable:hover {
+  outline: 2px dashed #ea580c;
+  outline-offset: 4px;
+  background-color: rgba(234, 88, 12, 0.03);
+}
+
+.section-edit-badge {
+  position: absolute;
+  top: -10px;
+  right: 6px;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 20;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.a4-section-hoverable:hover .section-edit-badge {
+  opacity: 1;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.6);
+}
+
+/* Modal Overlay */
+.big-editor-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* Modal Window */
+.big-editor-modal {
+  background: #1e293b;
+  border: 1.5px solid rgba(234, 88, 12, 0.4);
+  border-radius: 1.25rem;
+  width: 100%;
+  max-width: 820px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.big-editor-header {
+  padding: 1.25rem 1.5rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.big-editor-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.big-editor-footer {
+  padding: 1rem 1.5rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Big Form Controls */
+.big-field-group {
+  margin-bottom: 1.25rem;
+}
+
+.big-label {
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #fed7aa;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.big-label-hint {
+  font-size: 0.8125rem;
+  font-weight: normal;
+  color: #94a3b8;
+}
+
+.big-input {
+  width: 100%;
+  padding: 0.875rem 1.125rem;
+  font-size: 1.125rem;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.75rem;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.big-input:focus {
+  outline: none;
+  border-color: #ea580c;
+  background: #0f172a;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.25);
+}
+
+.big-textarea {
+  width: 100%;
+  padding: 0.875rem 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #ffffff;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.75rem;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  resize: vertical;
+}
+
+.big-textarea:focus {
+  outline: none;
+  border-color: #ea580c;
+  background: #0f172a;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.25);
+}
+
+.big-table-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.875rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.big-table-card:hover {
+  border-color: rgba(234, 88, 12, 0.4);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+/* Stepper button */
+.stepper-btn {
+  min-width: 120px;
+  height: auto;
+  min-height: 2.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.625rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background: rgba(234, 88, 12, 0.25);
+  border-color: #ea580c;
+  color: #fb923c;
+}
+
+
+/* Print CSS */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .demolish-header,
+  .preset-grid,
+  .editor-toolbar,
+  .chips-bar,
+  .row-del-btn,
+  .add-row-bar,
+  .section-edit-badge,
+  .big-editor-overlay,
+  .no-print {
+    display: none !important;
+  }
+
+  .a4-section-hoverable {
+    outline: none !important;
+    background-color: transparent !important;
+    cursor: default !important;
+  }
+
+  .a4-wrapper {
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .a4-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 15mm 20mm 15mm 25mm !important;
+  }
+
+  .a4-live-input,
+  .a4-inline-input,
+  .a4-live-textarea,
+  .a4-table-input,
+  .a4-table-select {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
+

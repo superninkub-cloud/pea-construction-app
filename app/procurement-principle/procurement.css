@@ -551,3 +551,209 @@
     max-width: 100% !important;
   }
 }
+
+/* ==========================================================================
+   GUIDED VARIABLE BUILDER & ON-SCREEN A4 HIGHLIGHTS
+   ========================================================================== */
+
+.var-mode-toggle {
+  display: flex;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+}
+
+.var-mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.var-mode-btn.active {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
+}
+
+.var-mode-btn:hover:not(.active) {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.variable-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.variable-card:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.variable-badge-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.badge-yellow {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.badge-blue {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.badge-orange {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+
+.badge-green {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.badge-teal {
+  background: rgba(20, 184, 166, 0.2);
+  color: #5eead4;
+  border: 1px solid rgba(20, 184, 166, 0.35);
+}
+
+.badge-purple {
+  background: rgba(168, 85, 247, 0.2);
+  color: #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.var-quick-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.var-quick-opt-btn {
+  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.var-quick-opt-btn:hover {
+  background: rgba(16, 185, 129, 0.3);
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.var-live-preview-box {
+  background: #0f172a;
+  border: 1.5px solid #10b981;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* On-screen highlights on the A4 sheet to make variable spots crystal clear to staff */
+.a4-var-spot {
+  background: #fef08a;
+  color: #854d0e;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 600;
+  border-bottom: 1.5px dashed #ca8a04;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.a4-var-spot:hover {
+  background: #fde047;
+}
+
+.a4-var-spot.blue {
+  background: #dbeafe;
+  color: #1e40af;
+  border-bottom: 1.5px dashed #3b82f6;
+}
+
+.a4-var-spot.green {
+  background: #dcfce7;
+  color: #166534;
+  border-bottom: 1.5px dashed #22c55e;
+}
+
+.a4-var-spot.orange {
+  background: #ffedd5;
+  color: #9a3412;
+  border-bottom: 1.5px dashed #ea580c;
+}
+
+.a4-var-spot.purple {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border-bottom: 1.5px dashed #a855f7;
+}
+
+.a4-var-spot.subject {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px dashed #d97706;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.a4-var-spot.subject:hover {
+  background: #fde68a;
+}
+
+/* Strip highlights completely in print */
+@media print {
+  .a4-var-spot,
+  .a4-var-spot.blue,
+  .a4-var-spot.green,
+  .a4-var-spot.orange,
+  .a4-var-spot.purple,
+  .a4-var-spot.subject {
+    background: transparent !important;
+    color: #000000 !important;
+    border: none !important;
+    border-bottom: none !important;
+    padding: 0 !important;
+    font-weight: inherit !important;
+  }
+}
+
+

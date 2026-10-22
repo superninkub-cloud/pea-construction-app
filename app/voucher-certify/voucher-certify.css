@@ -1,0 +1,453 @@
+/* app/voucher-certify/voucher-certify.css */
+/* Styles for Payment Voucher Certification Program (โปรแกรมรับรองใบสำคัญจ่าย) */
+
+.voucher-container {
+  min-height: calc(100vh - 4rem);
+  padding: 1.5rem;
+  background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 40%),
+              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent 40%);
+  color: #f1f5f9;
+}
+
+/* Page Header */
+.voucher-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.voucher-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.voucher-icon-badge {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+  color: #ffffff;
+}
+
+/* Preset Cards */
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.preset-card {
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.preset-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 12px 24px -8px rgba(16, 185, 129, 0.25);
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.preset-card.active {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  box-shadow: 0 0 0 1px #10b981;
+}
+
+/* Navigation Tabs */
+.tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #94a3b8;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border-bottom: 2px solid #10b981;
+}
+
+/* Card Boxes */
+.content-box {
+  background: rgba(30, 41, 59, 0.65);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.box-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #f8fafc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.75rem;
+}
+
+/* Form Grid */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.input-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.625rem;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.input-field::placeholder {
+  color: #64748b;
+}
+
+/* Expense Summary Cards */
+.expense-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.expense-card {
+  padding: 1.125rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  transition: all 0.2s ease;
+}
+
+.expense-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(15, 23, 42, 0.85);
+}
+
+.expense-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.expense-tag {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.expense-amount-box {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+/* Data Table */
+.data-table-container {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.5);
+  margin-top: 1rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.data-table th {
+  background: rgba(30, 41, 59, 0.8);
+  padding: 0.75rem 0.875rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #f1f5f9;
+}
+
+.data-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Action Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* A4 Sheet Preview */
+.a4-wrapper {
+  background: #475569;
+  padding: 2rem 1rem;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  overflow-x: auto;
+}
+
+.a4-page {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 22mm 20mm 20mm 25mm;
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-size: 16pt;
+  line-height: 1.25;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Official Header in A4 */
+.a4-pea-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8pt;
+  position: relative;
+}
+
+.a4-garuda {
+  width: 2.8cm;
+  height: 2.8cm;
+  object-fit: contain;
+  margin-right: 1.2cm;
+}
+
+.a4-memo-title {
+  font-size: 29pt;
+  font-weight: bold;
+  text-align: center;
+  flex: 1;
+  padding-top: 0.8cm;
+  margin-right: 2.8cm;
+}
+
+.a4-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10pt;
+}
+
+.a4-info-table td {
+  padding: 2pt 4pt;
+  font-size: 16pt;
+  vertical-align: top;
+}
+
+.a4-text-indent {
+  text-indent: 2.5cm;
+  text-align: justify;
+  margin-bottom: 8pt;
+}
+
+/* A4 Table */
+.a4-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12pt 0;
+}
+
+.a4-table th, .a4-table td {
+  border: 1pt solid #000000;
+  padding: 5pt 8pt;
+  font-size: 15pt;
+  vertical-align: middle;
+}
+
+.a4-table th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+  text-align: center;
+}
+
+.a4-stamp-box {
+  border: 1pt solid #000000;
+  padding: 6pt;
+  font-size: 13pt;
+  width: 6.8cm;
+  border-collapse: collapse;
+}
+
+.a4-stamp-box td {
+  border: 1pt solid #000000;
+  padding: 3pt 6pt;
+}
+
+/* Certified Stamp Banner */
+.certified-banner {
+  border: 2pt solid #059669;
+  border-radius: 8pt;
+  padding: 12pt;
+  background-color: #f0fdf4;
+  margin-top: 15pt;
+}
+
+/* Print CSS */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .voucher-container,
+  .tabs-nav,
+  .voucher-header,
+  .preset-grid,
+  .box-title,
+  .content-box,
+  .btn-primary,
+  .btn-secondary,
+  .no-print {
+    display: none !important;
+  }
+
+  .a4-wrapper {
+    background: transparent !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  .a4-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 15mm 20mm 15mm 25mm !important;
+    page-break-after: always;
+  }
+}
