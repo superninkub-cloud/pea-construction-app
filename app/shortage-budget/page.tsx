@@ -54,8 +54,8 @@ interface SectionMeta {
 
 const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileText },
-  { key: 'para1', title: '2. วรรคที่ ๑: ข้อมูลโครงการและพัสดุขาดแคลน', shortName: 'วรรค ๑ (พัสดุ)', icon: Building },
-  { key: 'para2', title: '3. วรรคที่ ๒: แผนกเป้าหมายและจัดซื้อ', shortName: 'วรรค ๒ (จัดซื้อ)', icon: PackagePlus },
+  { key: 'para1', title: '2. วรรคที่ 1: ข้อมูลโครงการและพัสดุขาดแคลน', shortName: 'วรรค 1 (พัสดุ)', icon: Building },
+  { key: 'para2', title: '3. วรรคที่ 2: แผนกเป้าหมายและจัดซื้อ', shortName: 'วรรค 2 (จัดซื้อ)', icon: PackagePlus },
   { key: 'table', title: '4. ตารางรายการพัสดุขาดแคลนและงบประมาณ', shortName: 'ตารางพัสดุ', icon: Calculator },
   { key: 'proposer', title: '5. ผู้จัดทำ/ผู้เสนอลงนาม (หผ.กร.)', shortName: 'ผู้เสนอ', icon: UserCheck },
   { key: 'order', title: '6. คำสั่งการอนุมัติ (อก.รย.)', shortName: 'คำสั่งอนุมัติ', icon: CheckCircle2 },
@@ -603,7 +603,7 @@ export default function ShortageBudgetPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร) ๒๓๓๗/๒๕๖๙"
+                      placeholder="เช่น ก.3 กรย.(กร) 2337/2569"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -674,10 +674,10 @@ export default function ShortageBudgetPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para1')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๑ ข้อมูลโครงการและพัสดุขาดแคลน"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 1 ข้อมูลโครงการและพัสดุขาดแคลน"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๑ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 1 (ขยายใหญ่)
             </span>
 
             <div className="a4-text-indent" style={{ lineHeight: '1.45' }}>
@@ -782,10 +782,10 @@ export default function ShortageBudgetPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para2')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๒ แผนกเป้าหมายและจัดซื้อ"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 2 แผนกเป้าหมายและจัดซื้อ"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๒ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 2 (ขยายใหญ่)
             </span>
 
             <div className="a4-text-indent" style={{ lineHeight: '1.45' }}>
@@ -1220,14 +1220,14 @@ export default function ShortageBudgetPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>เลขที่หนังสือ</span>
-                        <span className="big-label-hint">เช่น ก.3 กรย.(กร) ๒๓๓๗/๒๕๖๙</span>
+                        <span className="big-label-hint">เช่น ก.3 กรย.(กร) 2337/2569</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร) ๒๓๓๗/๒๕๖๙"
+                        placeholder="ก.3 กรย.(กร) 2337/2569"
                       />
                     </div>
 

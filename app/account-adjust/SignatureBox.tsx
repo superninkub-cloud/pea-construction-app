@@ -144,7 +144,7 @@ export default function SignatureBox({
           ({signerName || '...................................................'})
         </div>
         <div className="aa-memo-sig-title-text">
-          {signerTitle || 'รก.กรย.(ก๓) ปฏิบัติงานแทน อก.กรย.(ก๓)'}
+          {signerTitle || 'รก.กรย.(ก3) ปฏิบัติงานแทน อก.กรย.(ก3)'}
         </div>
       </div>
 

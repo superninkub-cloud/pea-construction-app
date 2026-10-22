@@ -21,13 +21,13 @@ export interface ShortageBudgetFormData {
   // ส่วนหัวหนังสือ (บันทึกข้อความ)
   docFrom: string;              // จาก เช่น ผกร.กรย.(ก3)
   docTo: string;                // ถึง เช่น กรย.(ก3)
-  docNo: string;                // เลขที่หนังสือ เช่น ก.3 กรย.(กร) ๒๓๓๗/๒๕๖๙
+  docNo: string;                // เลขที่หนังสือ เช่น ก.3 กรย.(กร) 2337/2569
   docDate: string;              // วันที่
   subject: string;              // เรื่อง เช่น ขออนุมัติจัดสรรงบประมาณจัดซื้อพัสดุขาดแคลนสำหรับงานก่อสร้าง ตามแผนงาน คพจ.2.3
   salutation: string;           // เรียน เช่น อก.รย.(ก3)
   planName: string;             // ชื่อแผนงาน เช่น คพจ.2.3
 
-  // ข้อมูลโครงการและพัสดุที่ต้องการ (วรรคที่ ๑)
+  // ข้อมูลโครงการและพัสดุที่ต้องการ (วรรคที่ 1)
   projectDescription: string;   // เช่น ก่อสร้างปรับปรุงระบบจำหน่าย 22 เควี บริเวณสถานีไฟฟ้าบางเลน 3 ถึง ศาลาหมอฉ่ำ อ.บางเลน จ.นครปฐม
   peaArea: string;              // เช่น กฟส.บางเลน
   materialCategory: string;     // เช่น สายไฟแรงสูง
@@ -38,7 +38,7 @@ export interface ShortageBudgetFormData {
   supervisorPosition: string;   // เช่น พชง.6
   supervisorDept: string;       // เช่น ผกร.กรย.(ก3)
 
-  // ข้อมูลการจัดสรรงบประมาณ (วรรคที่ ๒)
+  // ข้อมูลการจัดสรรงบประมาณ (วรรคที่ 2)
   requestQuantity: string;      // เช่น 1,300
   requestUnit: string;          // เช่น เมตร
   targetDept: string;           // เช่น ผจร.กรย.(ก3)
@@ -138,7 +138,7 @@ export function toArabicNumerals(str: string | number | undefined | null): strin
   if (str === undefined || str === null) return '';
   const thaiToEng: Record<string, string> = {
     '๐': '0', '๑': '1', '๒': '2', '๓': '3', '๔': '4',
-    '๕': '5', '๖': '6', '๗': '7', '๘': '8', '๙': '9'
+    '5': '5', '6': '6', '7': '7', '8': '8', '9': '9'
   };
   return str.toString().replace(/[๐-๙]/g, (match) => thaiToEng[match] || match);
 }
@@ -265,7 +265,7 @@ export const POPULAR_PLANS = [
 export const SAMPLE_SHORTAGE_BUDGET_DATA: ShortageBudgetFormData = {
   docFrom: 'ผกร.กรย.(ก3)',
   docTo: 'กรย.(ก3)',
-  docNo: 'ก.3 กรย.(กร) ๒๓๓๗/๒๕๖๙',
+  docNo: 'ก.3 กรย.(กร) 2337/2569',
   docDate: '',
   subject: 'ขออนุมัติจัดสรรงบประมาณจัดซื้อพัสดุขาดแคลนสำหรับงานก่อสร้าง ตามแผนงาน คพจ.2.3',
   salutation: 'อก.รย.(ก3)',

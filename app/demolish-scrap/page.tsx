@@ -55,8 +55,8 @@ interface SectionMeta {
 
 const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileText },
-  { key: 'para1', title: '2. วรรคที่ ๑: ข้อมูลโครงการและหนังสืออ้างถึง', shortName: 'วรรค ๑ (WBS)', icon: Building },
-  { key: 'para2', title: '3. วรรคที่ ๒: สภาพหน้างานและเหตุผลทำลาย', shortName: 'วรรค ๒ (เหตุผล)', icon: AlertTriangle },
+  { key: 'para1', title: '2. วรรคที่ 1: ข้อมูลโครงการและหนังสืออ้างถึง', shortName: 'วรรค 1 (WBS)', icon: Building },
+  { key: 'para2', title: '3. วรรคที่ 2: สภาพหน้างานและเหตุผลทำลาย', shortName: 'วรรค 2 (เหตุผล)', icon: AlertTriangle },
   { key: 'table', title: '4. ตารางรายการพัสดุรื้อถอน (เสา/ตอม่อ)', shortName: 'ตารางพัสดุ', icon: Trash2 },
   { key: 'proposer', title: '5. ผู้จัดทำบันทึก / ผู้เสนอลงนาม (หผ.กร.)', shortName: 'ผู้เสนอ', icon: UserCheck },
   { key: 'approval', title: '6. ส่วนคำสั่งการอนุมัติ (อก.รย.)', shortName: 'คำสั่งอนุมัติ', icon: CheckCircle2 },
@@ -715,10 +715,10 @@ export default function DemolishScrapPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para1')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๑ ข้อมูลโครงการและหนังสืออ้างถึง"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 1 ข้อมูลโครงการและหนังสืออ้างถึง"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๑ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 1 (ขยายใหญ่)
             </span>
 
             <div className="a4-text-indent" style={{ lineHeight: '1.45' }}>
@@ -776,10 +776,10 @@ export default function DemolishScrapPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para2')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๒ สภาพหน้างานและเหตุผลขอส่งคืนแบบทำลาย"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 2 สภาพหน้างานและเหตุผลขอส่งคืนแบบทำลาย"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๒ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 2 (ขยายใหญ่)
             </span>
 
             <div style={{ lineHeight: '1.4' }}>
@@ -1360,7 +1360,7 @@ export default function DemolishScrapPage() {
                     color: '#cbd5e1',
                     lineHeight: 1.6
                   }}>
-                    <strong style={{ color: '#fed7aa' }}>ตัวอย่างประโยควรรคที่ ๑ บนกระดาษ A4:</strong>
+                    <strong style={{ color: '#fed7aa' }}>ตัวอย่างประโยควรรคที่ 1 บนกระดาษ A4:</strong>
                     <div style={{ marginTop: '0.375rem' }}>
                       ด้วย {formData.docFrom || '...'} ได้ดำเนินการ{formData.projectName || '...'} ตามหนังสือเลขที่ {formData.refDocNo || '...'} ลงวันที่ {formData.refDocDate || '...'} ตามหมายเลข (WBS) : {formData.wbsNumber || '...'} ซึ่งปัจจุบันได้ดำเนินการก่อสร้างแล้วเสร็จ และ อยู่ระหว่างการจัดทำเอกสารเพื่อปิด กส. นั้น
                     </div>

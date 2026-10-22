@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import TopBar from '../components/TopBar';
+import './budget-transfer.css';
 
 // Dynamically import Xarrow for client-side rendering only
 const Xarrow = dynamic(() => import('react-xarrows'), { ssr: false });
@@ -654,14 +655,14 @@ function BudgetTransferContent() {
                 className={`a4-preset-chip ${activeSheet === 'memo' ? 'active' : ''}`}
                 onClick={() => setActiveSheet('memo')}
               >
-                หน้า ๑: บันทึกข้อความ
+                หน้า 1: บันทึกข้อความ
               </button>
               <button
                 type="button"
                 className={`a4-preset-chip ${activeSheet === 'approval' ? 'active' : ''}`}
                 onClick={() => setActiveSheet('approval')}
               >
-                หน้า ๒: แบบฟอร์มขออนุมัติ
+                หน้า 2: แบบฟอร์มขออนุมัติ
               </button>
               <button
                 type="button"
@@ -839,7 +840,7 @@ function BudgetTransferContent() {
                             value={docDate}
                             onChange={(e) => setDocDate(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
-                            placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                            placeholder="เช่น 4 ตุลาคม 2569"
                           />
                         </td>
                       </tr>
@@ -885,7 +886,7 @@ function BudgetTransferContent() {
 
                   {networkDataList.length > 0 ? (
                     <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
-                      ๑. ตามหนังสือ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
+                      1. ตามหนังสือ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
                       <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
                       <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{projectName}</span> หมายเลขงาน (WBS){' '}
                       <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{wbs}</span> โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน {fmt(calculateTotalProjectValue())}.- บาท แยกเป็นค่าพัสดุจำนวน {fmt(calculateBudgetByCategoryGroup(['พัสดุ']))}.- บาท ค่าใช้จ่ายหน้างาน เป็นเงิน {fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))}.- บาท และค่าดำเนินการ เป็นเงิน {fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}.- บาท ซึ่งมี{' '}
@@ -893,7 +894,7 @@ function BudgetTransferContent() {
                     </p>
                   ) : (
                     <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
-                      ๑. ตามหนังสือ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
+                      1. ตามหนังสือ <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
                       <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
                       <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{projectName}</span> หมายเลขงาน (WBS){' '}
                       <span style={{ fontWeight: 600, color: '#1e3a8a' }}>{wbs}</span> โดยมี{' '}
@@ -902,7 +903,7 @@ function BudgetTransferContent() {
                   )}
 
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginTop: '6pt' }}>
-                    ๒. {reasonText}
+                    2. {reasonText}
                   </p>
 
                   {/* Summary Callout for Deficits */}
@@ -933,7 +934,7 @@ function BudgetTransferContent() {
                         return (
                           <div key={net.network} style={{ marginBottom: '14pt', pageBreakInside: 'avoid' }}>
                             <div style={{ fontSize: '12.5pt', color: '#0f172a', fontWeight: 600, marginBottom: '4pt' }}>
-                              ๒.{i + 1} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}
+                              2.{i + 1} {getFullNetworkName(net.networkName)} โครงข่าย {net.network}
                               {hasDeficit ? (
                                 <span style={{ color: '#dc2626', fontWeight: 600, fontSize: '11pt', marginLeft: '8px' }}>
                                   (งบประมาณไม่เพียงพอ: {deficits.map(d => `${d.category} ขาด ${fmt(Math.abs(d.remaining))} บาท`).join(', ')})
@@ -1007,7 +1008,7 @@ function BudgetTransferContent() {
                   </div>
 
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
-                    ๓. กรย.(ก3) พิจารณาแล้ว เพื่อให้การเบิกจ่ายค่าใช้จ่ายหน้างานเป็นไปด้วยความเรียบร้อย จึงเห็นควรขออนุมัติโอนงบค่าใช้จ่ายหน้างาน ดังนี้
+                    3. กรย.(ก3) พิจารณาแล้ว เพื่อให้การเบิกจ่ายค่าใช้จ่ายหน้างานเป็นไปด้วยความเรียบร้อย จึงเห็นควรขออนุมัติโอนงบค่าใช้จ่ายหน้างาน ดังนี้
                   </p>
 
                   <div style={{ margin: '6pt 0 10pt 2.5cm', lineHeight: 1.6 }}>
@@ -1019,7 +1020,7 @@ function BudgetTransferContent() {
 
                       return (
                         <div key={t.id} style={{ marginBottom: '4pt' }}>
-                          ๓.{idx + 1} โอน{t.categoryFrom} {fromLabel} ไปเป็น {t.categoryTo} {toLabel} จำนวน <span style={{ fontWeight: 600, color: '#15803d' }}>{fmt(t.amount)}</span> บาท
+                          3.{idx + 1} โอน{t.categoryFrom} {fromLabel} ไปเป็น {t.categoryTo} {toLabel} จำนวน <span style={{ fontWeight: 600, color: '#15803d' }}>{fmt(t.amount)}</span> บาท
                         </div>
                       );
                     })}
@@ -1045,15 +1046,15 @@ function BudgetTransferContent() {
                                 <tr>
                                   <th rowSpan={2} style={{ width: '22%' }}>รายการ</th>
                                   <th colSpan={3} style={{ textAlign: 'center' }}>ประมาณการและผลการเบิกจ่าย</th>
-                                  <th rowSpan={2} style={{ width: '15%', textAlign: 'center' }}>รายการเพิ่ม-ลด<br />(๔)</th>
+                                  <th rowSpan={2} style={{ width: '15%', textAlign: 'center' }}>รายการเพิ่ม-ลด<br />(4)</th>
                                   <th colSpan={2} style={{ textAlign: 'center' }}>รายละเอียดหลังเพิ่ม-ลด</th>
                                 </tr>
                                 <tr>
-                                  <th style={{ textAlign: 'right', width: '13%' }}>ประมาณการ (๑)</th>
-                                  <th style={{ textAlign: 'right', width: '13%' }}>เบิกจ่ายจริง (๒)</th>
-                                  <th style={{ textAlign: 'right', width: '13%' }}>คงเหลือ (๓)</th>
-                                  <th style={{ textAlign: 'right', width: '12%' }}>อนุมัติครั้งนี้ (๕)</th>
-                                  <th style={{ textAlign: 'right', width: '12%' }}>คงเหลือ (๖)</th>
+                                  <th style={{ textAlign: 'right', width: '13%' }}>ประมาณการ (1)</th>
+                                  <th style={{ textAlign: 'right', width: '13%' }}>เบิกจ่ายจริง (2)</th>
+                                  <th style={{ textAlign: 'right', width: '13%' }}>คงเหลือ (3)</th>
+                                  <th style={{ textAlign: 'right', width: '12%' }}>อนุมัติครั้งนี้ (5)</th>
+                                  <th style={{ textAlign: 'right', width: '12%' }}>คงเหลือ (6)</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -1883,7 +1884,7 @@ function BudgetTransferContent() {
                         className="big-input"
                         value={docDate}
                         onChange={(e) => setDocDate(e.target.value)}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </div>
                   </div>
@@ -2000,7 +2001,7 @@ function BudgetTransferContent() {
               {activeEditSection === 'reason' && (
                 <div>
                   <div className="big-field-group">
-                    <label className="big-label">เหตุผลความจำเป็นในการขอโอนงบ (ข้อ ๒)</label>
+                    <label className="big-label">เหตุผลความจำเป็นในการขอโอนงบ (ข้อ 2)</label>
                     <textarea
                       rows={5}
                       className="big-textarea"
@@ -2012,7 +2013,7 @@ function BudgetTransferContent() {
                   {networkDataList.length > 0 && (
                     <div style={{ marginTop: '16px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
                       <label className="big-label" style={{ color: '#0f172a' }}>
-                        ข้อมูลโครงข่ายและงบประมาณที่ไม่เพียงพอ (ข้อ ๒.๑ - ๒.{networkDataList.length})
+                        ข้อมูลโครงข่ายและงบประมาณที่ไม่เพียงพอ (ข้อ 2.1 - 2.{networkDataList.length})
                       </label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {networkDataList.map((net, i) => {
@@ -2033,7 +2034,7 @@ function BudgetTransferContent() {
                             >
                               <div>
                                 <span style={{ fontWeight: 600, color: hasDeficit ? '#991b1b' : '#334155' }}>
-                                  ๒.{i + 1} {getFullNetworkName(net.networkName)} ({net.network})
+                                  2.{i + 1} {getFullNetworkName(net.networkName)} ({net.network})
                                 </span>
                               </div>
                               <div>

@@ -59,8 +59,8 @@ interface SectionMeta {
 
 const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileText },
-  { key: 'para1', title: '2. วรรคที่ ๑: ผู้ควบคุมงานและโครงการ', shortName: 'วรรค ๑ (โครงการ)', icon: Building },
-  { key: 'para2', title: '3. วรรคที่ ๒: วัตถุประสงค์การขอรับรอง', shortName: 'วรรค ๒ (วัตถุประสงค์)', icon: AlertTriangle },
+  { key: 'para1', title: '2. วรรคที่ 1: ผู้ควบคุมงานและโครงการ', shortName: 'วรรค 1 (โครงการ)', icon: Building },
+  { key: 'para2', title: '3. วรรคที่ 2: วัตถุประสงค์การขอรับรอง', shortName: 'วรรค 2 (วัตถุประสงค์)', icon: AlertTriangle },
   { key: 'wbs', title: '4. ตารางงานและหมายเลข WBS', shortName: 'ตาราง WBS', icon: Receipt },
   { key: 'expenses', title: '5. สรุปหมวดค่าใช้จ่ายและยอดเงิน', shortName: 'หมวดค่าใช้จ่าย', icon: DollarSign },
   { key: 'signer', title: '6. ผู้ลงนามหลัก (หผ.กร.)', shortName: 'ผู้ลงนาม', icon: UserCheck },
@@ -704,10 +704,10 @@ export default function VoucherCertifyPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para1')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๑ ผู้ควบคุมงาน & ข้อมูลโครงการ"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 1 ผู้ควบคุมงาน & ข้อมูลโครงการ"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๑ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 1 (ขยายใหญ่)
             </span>
 
             <div className="a4-text-indent" style={{ lineHeight: '1.45' }}>
@@ -755,10 +755,10 @@ export default function VoucherCertifyPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para2')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๒ วัตถุประสงค์การขอรับรอง"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 2 วัตถุประสงค์การขอรับรอง"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๒ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 2 (ขยายใหญ่)
             </span>
 
             <div className="a4-text-indent" style={{ lineHeight: '1.45' }}>

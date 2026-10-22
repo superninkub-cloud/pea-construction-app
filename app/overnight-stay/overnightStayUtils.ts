@@ -16,7 +16,7 @@ export interface OvernightStayFormData {
   // ข้อมูลส่วนหัวหนังสือ (บันทึกข้อความ)
   docFrom: string;              // จาก เช่น กรย.(ก3)
   docTo: string;                // ถึง เช่น กฟก.3
-  docNo: string;                // เลขที่หนังสือ เช่น ก.3 กรย.(กร) ๒๓๖๐/๒๕๖๙
+  docNo: string;                // เลขที่หนังสือ เช่น ก.3 กรย.(กร) 2360/2569
   docDate: string;              // วันที่
   subject: string;              // เรื่อง เช่น ขออนุมัติพักแรมหน้างาน
   salutation: string;           // เรียน เช่น ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)
@@ -25,39 +25,39 @@ export interface OvernightStayFormData {
   travelOrderNo: string;        // เช่น TI26234411 กรย.(ก3)
   workArea: string;             // พื้นที่ปฏิบัติงาน เช่น กฟจ.สมุทรสาคร และการไฟฟ้าในสังกัด กฟก.3
   constructionDescription: string; // รายละเอียดงานก่อสร้าง เช่น รื้อถอนสถานีไฟฟ้าสมุทรสาคร 10...
-  workStartDate: string;        // ๔ ตุลาคม ๒๕๖๙
-  workEndDate: string;          // ๓๑ ตุลาคม ๒๕๖๙
-  roundTripDistanceKm: string;  // ระยะทางไป-กลับ เช่น ๖๐ กม.
+  workStartDate: string;        // 4 ตุลาคม 2569
+  workEndDate: string;          // 31 ตุลาคม 2569
+  roundTripDistanceKm: string;  // ระยะทางไป-กลับ เช่น 60 กม.
 
   // รายการขออนุมัติ (วรรคที่ 2)
   persons: StayPerson[];        // รายชื่อพนักงานที่ขออนุมัติพักแรม
-  vehicles: string[];           // หมายเลขทะเบียนรถ กฟภ. เช่น ["๙๐-๒๒๒๘ นฐ.", "๙๐-๑๘๔๕ นฐ."]
+  vehicles: string[];           // หมายเลขทะเบียนรถ กฟภ. เช่น ["90-2228 นฐ.", "90-1845 นฐ."]
   caretakerName: string;        // ผู้ดูแลรักษารถยนต์ เช่น นายศุภวิชญ์ เกาะลอย
-  stayStartDate: string;        // ๔ ตุลาคม ๒๕๖๙
-  stayEndDate: string;          // ๓๑ ตุลาคม ๒๕๖๙
-  totalDays: string;            // ๒๗ วัน
+  stayStartDate: string;        // 4 ตุลาคม 2569
+  stayEndDate: string;          // 31 ตุลาคม 2569
+  totalDays: string;            // 27 วัน
 
   // ผู้ลงนามเสนอ (ขวากลาง)
   proposerName: string;         // นายอนันต์ กาญจนอุปถัมภ์
   proposerPosition: string;     // รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
-  proposerDate: string;         // ๙ ต.ค. ๖๙
+  proposerDate: string;         // 9 ต.ค. 69
 
   // ผู้อนุมัติ (ซ้ายล่าง)
   approvalCommand: string;      // อนุมัติ
   approverName: string;         // นายเมธี สุกก่ำ หรือ นายธานิน พ่วงบุญมาก
   approverPosition: string;     // อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)
-  approverDate: string;         // ๑๒ ต.ค. ๒๕๖๙
+  approverDate: string;         // 12 ต.ค. 2569
 
   // เกษียนหนังสือ (ขวาล่าง)
   hasRoutingStamps: boolean;    // แสดงตารางเกษียนหรือไม่
-  stampRwWbDate: string;        // รฝ.วบ.(ก3) เช่น ๑๒ ต.ค. ๖๙
-  stampRkRyDate: string;        // รก.รย.(ก3) เช่น ๙ ต.ค. ๖๙
-  stampHpKrDate: string;        // หผ.กร.(ก3) เช่น ๙ ต.ค. ๖๙
-  stampCpKrDate: string;        // ชผ.กร.(ก3) เช่น ๙/๑๐/๒๕๖๙
+  stampRwWbDate: string;        // รฝ.วบ.(ก3) เช่น 12 ต.ค. 69
+  stampRkRyDate: string;        // รก.รย.(ก3) เช่น 9 ต.ค. 69
+  stampHpKrDate: string;        // หผ.กร.(ก3) เช่น 9 ต.ค. 69
+  stampCpKrDate: string;        // ชผ.กร.(ก3) เช่น 9/10/2569
 
   // ท้ายกระดาษ (Footer)
   contactDepartment: string;    // แผนกก่อสร้างระบบไฟฟ้า
-  contactPhone: string;         // ๑๐๑๗๑
+  contactPhone: string;         // 10171
 }
 
 /**
@@ -76,7 +76,7 @@ export function toArabicNumerals(str: string | number | undefined | null): strin
   if (str === undefined || str === null) return '';
   const thaiToEng: Record<string, string> = {
     '๐': '0', '๑': '1', '๒': '2', '๓': '3', '๔': '4',
-    '๕': '5', '๖': '6', '๗': '7', '๘': '8', '๙': '9'
+    '5': '5', '6': '6', '7': '7', '8': '8', '9': '9'
   };
   return str.toString().replace(/[๐-๙]/g, (match) => thaiToEng[match] || match);
 }
@@ -115,7 +115,7 @@ export function getTodayThaiDate(format: 'short' | 'full' | 'thai_num' = 'short'
 export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟก.3',
-  docNo: 'ก.3 กรย.(กร) ๒๓๖๐/๒๕๖๙',
+  docNo: 'ก.3 กรย.(กร) 2360/2569',
   docDate: '',
   subject: 'ขออนุมัติพักแรมหน้างาน',
   salutation: 'ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)',
@@ -123,9 +123,9 @@ export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
   travelOrderNo: 'TI26234411 กรย.(ก3)',
   workArea: 'กฟจ.สมุทรสาคร และการไฟฟ้าในสังกัด กฟก.3',
   constructionDescription: 'รื้อถอนสถานีไฟฟ้าสมุทรสาคร 10 (ชั่วคราว), รื้อถอนสถานีไฟฟ้าสมุทรสาคร 16 (ชั่วคราว) และก่อสร้างสถานีไฟฟ้าสมุทรสาคร 18 (ชั่วคราว)',
-  workStartDate: '๔ ตุลาคม ๒๕๖๙',
-  workEndDate: '๓๑ ตุลาคม ๒๕๖๙',
-  roundTripDistanceKm: '๖๐',
+  workStartDate: '4 ตุลาคม 2569',
+  workEndDate: '31 ตุลาคม 2569',
+  roundTripDistanceKm: '60',
 
   persons: [
     {
@@ -136,34 +136,34 @@ export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
     }
   ],
   vehicles: [
-    '๙๐-๒๒๒๘ นฐ.',
-    '๙๐-๑๘๔๕ นฐ.',
-    '๘๔-๑๖๔๓ นฐ.',
-    '๘๔-๔๗๑๕ นฐ.',
-    '๙๐-๗๓๑๒ นฐ.'
+    '90-2228 นฐ.',
+    '90-1845 นฐ.',
+    '84-1643 นฐ.',
+    '84-4715 นฐ.',
+    '90-7312 นฐ.'
   ],
   caretakerName: 'นายศุภวิชญ์ เกาะลอย',
-  stayStartDate: '๔ ตุลาคม ๒๕๖๙',
-  stayEndDate: '๓๑ ตุลาคม ๒๕๖๙',
-  totalDays: '๒๗',
+  stayStartDate: '4 ตุลาคม 2569',
+  stayEndDate: '31 ตุลาคม 2569',
+  totalDays: '27',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '๙ ต.ค. ๖๙',
+  proposerDate: '9 ต.ค. 69',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '๑๒ ต.ค. ๒๕๖๙',
+  approverDate: '12 ต.ค. 2569',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '๑๒ ต.ค. ๖๙',
+  stampRwWbDate: '12 ต.ค. 69',
   stampRkRyDate: '',
-  stampHpKrDate: '๙ ต.ค. ๖๙',
-  stampCpKrDate: '๙/๑๐/๒๕๖๙',
+  stampHpKrDate: '9 ต.ค. 69',
+  stampCpKrDate: '9/10/2569',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
-  contactPhone: '๑๐๑๗๑'
+  contactPhone: '10171'
 };
 
 /**
@@ -172,7 +172,7 @@ export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
 export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟก.3',
-  docNo: 'ก.3 กรย.(กร) ๒๓๕๘/๒๕๖๙',
+  docNo: 'ก.3 กรย.(กร) 2358/2569',
   docDate: '',
   subject: 'ขออนุมัติพักแรมหน้างาน',
   salutation: 'ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)',
@@ -180,9 +180,9 @@ export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
   travelOrderNo: 'TI26234410 กรย.(ก3)',
   workArea: 'กฟส.พุทธมณฑล และ กฟส.สมุทรสาคร 2 (บ้านแพ้ว) และการไฟฟ้าในสังกัด กฟก.3',
   constructionDescription: 'งานปรับปรุงระบบจำหน่าย 22 เควี (ใต้ไลน์สายส่งระบบ 115 เควี) ตามแนวทางหลวงหมายเลข 35 ช่วงจุดแบ่งแดน กฟส.สมุทรสาคร ถึง คลองท่าแร้ง (ฝั่งสถานี) ต.ชัยมงคล อ.เมือง จ.สมุทรสาคร และงานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ 1-2) หมู่ 1 ต.ศาลายา อ.พุทธมณฑล จ.นครปฐม',
-  workStartDate: '๔ ตุลาคม ๒๕๖๙',
-  workEndDate: '๓๑ ตุลาคม ๒๕๖๙',
-  roundTripDistanceKm: '๖๐',
+  workStartDate: '4 ตุลาคม 2569',
+  workEndDate: '31 ตุลาคม 2569',
+  roundTripDistanceKm: '60',
 
   persons: [
     {
@@ -193,33 +193,33 @@ export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
     }
   ],
   vehicles: [
-    '๙๐-๒๒๓๕ นฐ.',
-    '๘๙-๕๗๖๙ นฐ.',
-    '๙๐-๓๕๑๕ นฐ.',
-    '๙๐-๗๓๑๑ นฐ.'
+    '90-2235 นฐ.',
+    '89-5769 นฐ.',
+    '90-3515 นฐ.',
+    '90-7311 นฐ.'
   ],
   caretakerName: 'นายวีรพัฒน์ นาคลมัย',
-  stayStartDate: '๔ ตุลาคม ๒๕๖๙',
-  stayEndDate: '๓๑ ตุลาคม ๒๕๖๙',
-  totalDays: '๒๗',
+  stayStartDate: '4 ตุลาคม 2569',
+  stayEndDate: '31 ตุลาคม 2569',
+  totalDays: '27',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '๙ ต.ค. ๖๙',
+  proposerDate: '9 ต.ค. 69',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '๑๒ ต.ค. ๒๕๖๙',
+  approverDate: '12 ต.ค. 2569',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '๑๒ ต.ค. ๖๙',
+  stampRwWbDate: '12 ต.ค. 69',
   stampRkRyDate: '',
-  stampHpKrDate: '๙ ต.ค. ๖๙',
-  stampCpKrDate: '๙/๑๐/๒๕๖๙',
+  stampHpKrDate: '9 ต.ค. 69',
+  stampCpKrDate: '9/10/2569',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
-  contactPhone: '๑๐๑๗๑'
+  contactPhone: '10171'
 };
 
 /**
@@ -228,7 +228,7 @@ export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
 export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟก.3',
-  docNo: 'ก.3 กรย.(กร) ๒๓๕๙/๒๕๖๙',
+  docNo: 'ก.3 กรย.(กร) 2359/2569',
   docDate: '',
   subject: 'ขออนุมัติพักแรมหน้างาน',
   salutation: 'ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)',
@@ -236,9 +236,9 @@ export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
   travelOrderNo: 'TI26237986 กรย.(ก3)',
   workArea: 'กฟส.บางเลน และการไฟฟ้าในสังกัด กฟก.3',
   constructionDescription: 'ปรับปรุงระบบจำหน่าย 22 เควี ช่วงบริเวณยงคอนกรีต ถึง คลองโต๊ะนุ้ย อ.บางเลน จ.นครปฐม',
-  workStartDate: '๑ ตุลาคม ๒๕๖๙',
-  workEndDate: '๓๑ ตุลาคม ๒๕๖๙',
-  roundTripDistanceKm: '๗๐',
+  workStartDate: '1 ตุลาคม 2569',
+  workEndDate: '31 ตุลาคม 2569',
+  roundTripDistanceKm: '70',
 
   persons: [
     {
@@ -249,33 +249,33 @@ export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
     }
   ],
   vehicles: [
-    '๙๐-๑๘๔๔ นฐ.',
-    '๙๐-๒๒๓๐ นฐ.',
-    '๙๐-๒๙๕๒ นฐ.',
-    '๙๐-๘๘๙๖ นฐ.'
+    '90-1844 นฐ.',
+    '90-2230 นฐ.',
+    '90-2952 นฐ.',
+    '90-8896 นฐ.'
   ],
   caretakerName: 'นายศราวุฒิ เกิดสีเล็ก',
-  stayStartDate: '๔ ตุลาคม ๒๕๖๙',
-  stayEndDate: '๓๑ ตุลาคม ๒๕๖๙',
-  totalDays: '๒๘',
+  stayStartDate: '4 ตุลาคม 2569',
+  stayEndDate: '31 ตุลาคม 2569',
+  totalDays: '28',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '๑๒ ต.ค. ๖๙',
+  proposerDate: '12 ต.ค. 69',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '๑๒ ต.ค. ๒๕๖๙',
+  approverDate: '12 ต.ค. 2569',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '๑๒ ต.ค. ๖๙',
+  stampRwWbDate: '12 ต.ค. 69',
   stampRkRyDate: '',
-  stampHpKrDate: '๙ ต.ค. ๖๙',
+  stampHpKrDate: '9 ต.ค. 69',
   stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
-  contactPhone: '๑๐๑๗๑'
+  contactPhone: '10171'
 };
 
 /**
@@ -284,7 +284,7 @@ export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
 export const SAMPLE_KWANNAKORN_DATA: OvernightStayFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟก.3',
-  docNo: 'ก.3 กรย.(กร) ๒๓๖๑/๒๕๖๙',
+  docNo: 'ก.3 กรย.(กร) 2361/2569',
   docDate: '',
   subject: 'ขออนุมัติพักแรมหน้างาน',
   salutation: 'ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)',
@@ -292,9 +292,9 @@ export const SAMPLE_KWANNAKORN_DATA: OvernightStayFormData = {
   travelOrderNo: 'TI26238042 กรย.(ก3)',
   workArea: 'กฟส.สมุทรสาคร 2 (บ้านแพ้ว) และการไฟฟ้าในสังกัด กฟก.3',
   constructionDescription: 'ปรับปรุงระบบจำหน่ายคลอง D4 ช่วงแยกดอนราว',
-  workStartDate: '๑ ตุลาคม ๒๕๖๙',
-  workEndDate: '๓๑ ตุลาคม ๒๕๖๙',
-  roundTripDistanceKm: '๘๗',
+  workStartDate: '1 ตุลาคม 2569',
+  workEndDate: '31 ตุลาคม 2569',
+  roundTripDistanceKm: '87',
 
   persons: [
     {
@@ -305,35 +305,35 @@ export const SAMPLE_KWANNAKORN_DATA: OvernightStayFormData = {
     }
   ],
   vehicles: [
-    '๙๐-๑๘๔๓ นฐ.',
-    '๕๓-๓๗๓๕ นฐ.',
-    '๙๐-๐๔๒๓ นฐ.',
-    '๘๕-๓๐๙๐ นฐ.',
-    '๙๐-๒๙๕๑ นฐ.',
-    '๙๐-๗๓๑๐ นฐ.'
+    '90-1843 นฐ.',
+    '53-3735 นฐ.',
+    '90-0423 นฐ.',
+    '85-3090 นฐ.',
+    '90-2951 นฐ.',
+    '90-7310 นฐ.'
   ],
   caretakerName: 'นายขวัญนคร ศรีจันทร์อินทร์',
-  stayStartDate: '๔ ตุลาคม ๒๕๖๙',
-  stayEndDate: '๓๑ ตุลาคม ๒๕๖๙',
-  totalDays: '๒๘',
+  stayStartDate: '4 ตุลาคม 2569',
+  stayEndDate: '31 ตุลาคม 2569',
+  totalDays: '28',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '๙ ต.ค. ๖๙',
+  proposerDate: '9 ต.ค. 69',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '๑๒ ต.ค. ๒๕๖๙',
+  approverDate: '12 ต.ค. 2569',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '๑๒ ต.ค. ๖๙',
+  stampRwWbDate: '12 ต.ค. 69',
   stampRkRyDate: '',
-  stampHpKrDate: '๙ ต.ค. ๖๙',
+  stampHpKrDate: '9 ต.ค. 69',
   stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
-  contactPhone: '๑๐๑๗๑'
+  contactPhone: '10171'
 };
 
 /**
@@ -356,17 +356,17 @@ export function generateOvernightStayMemoPlainText(data: OvernightStayFormData):
   // ข้อ 1
   if (data.persons.length === 1) {
     const p = data.persons[0];
-    content += `     ๑. ขออนุมัติให้${p.name} ตำแหน่ง ${p.position} สังกัด ${p.department} พักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ\n`;
+    content += `     1. ขออนุมัติให้${p.name} ตำแหน่ง ${p.position} สังกัด ${p.department} พักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ\n`;
   } else {
-    content += `     ๑. ขออนุมัติให้พนักงานสังกัด ${data.persons[0]?.department || 'ผกร.กรย.(ก3)'} พักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ ดังนี้\n`;
+    content += `     1. ขออนุมัติให้พนักงานสังกัด ${data.persons[0]?.department || 'ผกร.กรย.(ก3)'} พักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ ดังนี้\n`;
     data.persons.forEach((p, idx) => {
-      content += `        ๑.${toThaiNumerals(idx + 1)} ${p.name} ตำแหน่ง ${p.position}\n`;
+      content += `        1.${toThaiNumerals(idx + 1)} ${p.name} ตำแหน่ง ${p.position}\n`;
     });
   }
 
   // ข้อ 2
   const vehicleList = data.vehicles.join(', ');
-  content += `     ๒. ขออนุมัตินำรถยนต์ กฟภ. หมายเลขทะเบียน ${vehicleList} จอดเก็บรักษาหลังจากเลิกปฏิบัติงาน โดยให้อยู่ในความดูแลรับผิดชอบของ ${data.caretakerName}\n\n`;
+  content += `     2. ขออนุมัตินำรถยนต์ กฟภ. หมายเลขทะเบียน ${vehicleList} จอดเก็บรักษาหลังจากเลิกปฏิบัติงาน โดยให้อยู่ในความดูแลรับผิดชอบของ ${data.caretakerName}\n\n`;
 
   // รวมวัน
   content += `     ทั้งนี้ตั้งแต่วันที่ ${data.stayStartDate} ถึงวันที่ ${data.stayEndDate} รวม ${data.totalDays} วัน\n\n`;
@@ -396,17 +396,17 @@ export function generateOvernightStayWordDocument(data: OvernightStayFormData): 
     const p = data.persons[0];
     personSectionHtml = `
       <div style="text-indent: 3cm; margin-bottom: 6pt; text-align: justify; line-height: 1.6;">
-        ๑. ขออนุมัติให้${p.name} ตำแหน่ง ${p.position} สังกัด ${p.department} พักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ
+        1. ขออนุมัติให้${p.name} ตำแหน่ง ${p.position} สังกัด ${p.department} พักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ
       </div>
     `;
   } else {
     personSectionHtml = `
       <div style="text-indent: 3cm; margin-bottom: 4pt; text-align: justify; line-height: 1.6;">
-        ๑. ขออนุมัติให้พนักงานพักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ ดังนี้
+        1. ขออนุมัติให้พนักงานพักแรมหน้างาน โดยขอเบิกจ่ายค่าเบี้ยเลี้ยง และค่าที่พักแรมจากงานที่ปฏิบัติ ดังนี้
       </div>
       ${data.persons.map((p, idx) => `
         <div style="text-indent: 3.5cm; margin-bottom: 3pt; line-height: 1.5;">
-          ๑.${toThaiNumerals(idx + 1)} ${p.name} ตำแหน่ง ${p.position} สังกัด ${p.department}
+          1.${toThaiNumerals(idx + 1)} ${p.name} ตำแหน่ง ${p.position} สังกัด ${p.department}
         </div>
       `).join('')}
     `;
@@ -493,7 +493,7 @@ export function generateOvernightStayWordDocument(data: OvernightStayFormData): 
       ${personSectionHtml}
 
       <div style="text-indent: 3cm; margin-bottom: 10pt; text-align: justify; line-height: 1.6;">
-        ๒. ขออนุมัตินำรถยนต์ กฟภ. หมายเลขทะเบียน ${vehicleList} จอดเก็บรักษาหลังจากเลิกปฏิบัติงาน โดยให้อยู่ในความดูแลรับผิดชอบของ ${data.caretakerName}
+        2. ขออนุมัตินำรถยนต์ กฟภ. หมายเลขทะเบียน ${vehicleList} จอดเก็บรักษาหลังจากเลิกปฏิบัติงาน โดยให้อยู่ในความดูแลรับผิดชอบของ ${data.caretakerName}
       </div>
 
       <!-- Dates & Total Days -->

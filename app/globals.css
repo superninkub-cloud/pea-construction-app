@@ -1616,11 +1616,51 @@ body {
   background: #ffffff;
   color: #000000;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0,0,0,0.1);
-  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 16pt;
   line-height: 1.25;
   box-sizing: border-box;
   position: relative;
+}
+
+.a4-page *,
+.a4-table,
+.a4-table *,
+.a4-info-table,
+.a4-info-table *,
+.print-document,
+.print-document *,
+.ct-doc-container,
+.ct-doc-container *,
+.wc-doc-preview-wrapper,
+.wc-doc-preview-wrapper *,
+.sb-doc-container,
+.sb-doc-container *,
+.os-doc-container,
+.os-doc-container *,
+.jc-doc-container,
+.jc-doc-container *,
+.jo-doc-container,
+.jo-doc-container *,
+.cr-doc-container,
+.cr-doc-container *,
+.se-doc-container,
+.se-doc-container *,
+.ds-doc-container,
+.ds-doc-container *,
+.pp-doc-preview-wrapper,
+.pp-doc-preview-wrapper *,
+.vc-doc-container,
+.vc-doc-container *,
+.aa-doc-container,
+.aa-doc-container *,
+.memo-preview,
+.memo-preview *,
+.doc-preview,
+.doc-preview *,
+.sarabun-font,
+.sarabun-font * {
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
 }
 
 .a4-pea-header {
@@ -1674,7 +1714,7 @@ body {
 }
 
 .a4-live-input {
-  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 16pt;
   line-height: 1.2;
   color: #000000;
@@ -1695,7 +1735,7 @@ body {
 }
 
 .a4-inline-input {
-  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 16pt;
   line-height: 1.2;
   color: #000000;
@@ -1718,7 +1758,7 @@ body {
 }
 
 .a4-live-textarea {
-  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 16pt;
   line-height: 1.25;
   color: #000000;
@@ -1740,7 +1780,7 @@ body {
 }
 
 .a4-table-input {
-  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 15pt;
   color: #000000;
   background: transparent;
@@ -1758,7 +1798,7 @@ body {
 }
 
 .a4-table-select {
-  font-family: 'TH Sarabun PSK', 'TH Sarabun New', 'Angsana New', sans-serif;
+  font-family: 'TH Sarabun PSK', 'TH Sarabun New', var(--font-sarabun), 'Sarabun', sans-serif !important;
   font-size: 14pt;
   color: #000000;
   background: transparent;

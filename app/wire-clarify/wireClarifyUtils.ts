@@ -21,47 +21,47 @@ export interface WireClarifyFormData {
 
   // ข้อมูลทั่วไปของโครงการ
   wbsNo: string;                // หมายเลขงาน WBS เช่น P-TDD02.3-I-LYAIA.0016
-  projectName: string;          // ชื่องาน เช่น ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี
-  approvalDocRef: string;       // หนังสืออนุมัติงาน เช่น ก.๓ กวว.(วร) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๖ สิงหาคม ๒๕๖๗
-  networkNo: string;            // หมายเลขโครงข่าย เช่น โครงข่ายรื้อถอนแรงสูงภายนอก ๖๐๐๑๓๘๑๔๗๘
+  projectName: string;          // ชื่องาน เช่น ปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง 2 อ.ศรีสวัสดิ์ จ.กาญจนบุรี
+  approvalDocRef: string;       // หนังสืออนุมัติงาน เช่น ก.3 กวว.(วร) 1847/2567 ลงวันที่ 16 สิงหาคม 2567
+  networkNo: string;            // หมายเลขโครงข่าย เช่น โครงข่ายรื้อถอนแรงสูงภายนอก 6001381478
   
   // ข้อมูลส่วนหัวหนังสือ (บันทึกข้อความ)
-  docFrom: string;              // จาก เช่น กรย.(ก๓) หรือ พชง.ผู้ควบคุมงาน (อุดมศักดิ์)
-  docTo: string;                // ถึง เช่น ผวบ.(ก๓) หรือ ผกร.กรย.(ก๓)
+  docFrom: string;              // จาก เช่น กรย.(ก3) หรือ พชง.ผู้ควบคุมงาน (อุดมศักดิ์)
+  docTo: string;                // ถึง เช่น ผวบ.(ก3) หรือ ผกร.กรย.(ก3)
   docNo: string;                // เลขที่หนังสือ (เว้นว่างไว้ตามที่ผู้ใช้ร้องขอ)
   docDate: string;              // วันที่ (เว้นว่างไว้ตามที่ผู้ใช้ร้องขอ)
   subject: string;              // เรื่อง
-  salutation: string;           // เรียน เช่น อผ.วบ.(ก๓) ผ่าน รผ.วบ.(ก๓) หรือ ผห.กร.กรย.(ก๓) ผ่าน ชผ.กร.กรย.(ก๓)
+  salutation: string;           // เรียน เช่น อผ.วบ.(ก3) ผ่าน รผ.วบ.(ก3) หรือ ผห.กร.กรย.(ก3) ผ่าน ชผ.กร.กรย.(ก3)
 
-  // เนื้อหาบันทึกข้อความ ๓ ตอน (แบบที่ ๑: บันทึกกอง กรย.)
-  memoBackground: string;       // ๑. เรื่องเดิม
-  memoFacts: string;            // ๒. ข้อเท็จจริง
-  memoConsideration: string;    // ๓. ข้อพิจารณา
+  // เนื้อหาบันทึกข้อความ 3 ตอน (แบบที่ 1: บันทึกกอง กรย.)
+  memoBackground: string;       // 1. เรื่องเดิม
+  memoFacts: string;            // 2. ข้อเท็จจริง
+  memoConsideration: string;    // 3. ข้อพิจารณา
   memoClosing: string;          // ข้อความปิดท้าย
 
-  // เนื้อหาบันทึกข้อความ (แบบที่ ๒: บันทึกผู้ควบคุมงาน)
+  // เนื้อหาบันทึกข้อความ (แบบที่ 2: บันทึกผู้ควบคุมงาน)
   supervisorBody: string;       // เนื้อความรายงานของผู้ควบคุมงาน
   supervisorClosing: string;    // ข้อความปิดท้ายของผู้ควบคุมงาน
 
   // ผู้ควบคุมงาน
   supervisorName: string;       // นายอุดมศักดิ์ จันทร์กลิ่น
-  supervisorPosition: string;   // พชง.๗ ผกร.กรย.(ก๓)
+  supervisorPosition: string;   // พชง.7 ผกร.กรย.(ก3)
 
   // ผู้ลงนามหลัก (ผกร. หรือ รก.กรย.)
   signerName: string;           // นายอนันต์ กาญจนอุปถัมภ์
-  signerTitle: string;          // รก.กรย.(ก๓) ปฏิบัติงานแทน อก.กรย.(ก๓)
+  signerTitle: string;          // รก.กรย.(ก3) ปฏิบัติงานแทน อก.กรย.(ก3)
   signerDate: string;           // วันที่กำกับลายเซ็น (เว้นว่างไว้ตามค่าเริ่มต้น)
 
   // เกษียน / ผู้ตรวจทาน / ผู้อนุมัติ
   headOfSectionName: string;    // นายชานินทร์ ศรีสวัสดิ์
-  headOfSectionTitle: string;   // ชผ.กร.กรย.(ก๓) ปฏิบัติงานแทน ผห.กร.กรย.(ก๓)
+  headOfSectionTitle: string;   // ชผ.กร.กรย.(ก3) ปฏิบัติงานแทน ผห.กร.กรย.(ก3)
   approverName: string;         // นายเมธี สุภาก่ำ
-  approverTitle: string;        // อฝ.วบ.(ก๓)
-  approverEndorsementTo?: string; // สั่งการถึง เช่น - อก.รย.(ก๓)
+  approverTitle: string;        // อฝ.วบ.(ก3)
+  approverEndorsementTo?: string; // สั่งการถึง เช่น - อก.รย.(ก3)
 
   // ท้ายกระดาษ (Footer)
   contactDepartment: string;    // แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา
-  contactPhone: string;         // ๑๐๓๙๑
+  contactPhone: string;         // 10391
 
   // รายการเศษสาย
   items: WireItem[];
@@ -116,55 +116,55 @@ export const PRESET_WIRE_REASONS = [
 
 /**
  * Standard pre-filled sample matching official scanned memo and correct abbreviations:
- * - ถึง: ฝวบ.(ก๓)
- * - เรียน: อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)
- * - ตำแหน่งผู้ลงนาม: รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)
- * - ตำแหน่งผู้อนุมัติ: อฝ.วบ.(ก๓)
+ * - ถึง: ฝวบ.(ก3)
+ * - เรียน: อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)
+ * - ตำแหน่งผู้ลงนาม: รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
+ * - ตำแหน่งผู้อนุมัติ: อฝ.วบ.(ก3)
  */
 export const SAMPLE_WIRE_CLARIFY_DATA: WireClarifyFormData = {
   docLevel: 'division_memo',
 
   wbsNo: 'P-TDD02.3-I-LYAIA.0016',
-  projectName: 'ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี',
-  approvalDocRef: 'ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗',
-  networkNo: 'โครงข่ายรื้อถอนแรงสูงภายนอก ๖๐๐๑๓๘๑๔๗๘',
+  projectName: 'ปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง 2 อ.ศรีสวัสดิ์ จ.กาญจนบุรี',
+  approvalDocRef: 'ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 สิงหาคม 2567',
+  networkNo: 'โครงข่ายรื้อถอนแรงสูงภายนอก 6001381478',
 
-  docFrom: 'กรย.(ก๓)',
-  docTo: 'ฝวบ.(ก๓)',
+  docFrom: 'กรย.(ก3)',
+  docTo: 'ฝวบ.(ก3)',
   docNo: '',                    // Blank by default as requested
   docDate: '',                  // Blank by default as requested
   subject: 'ขออนุมัตินำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอน',
-  salutation: 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)',
+  salutation: 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)',
 
-  // ๓ ตอนมาตรฐานตามเอกสารสแกนหน้า ๑
-  memoBackground: 'ตามหนังสือที่ ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗ อนุมัติให้ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี หมายเลขงาน (WBS) : P-TDD02.3-I-LYAIA.0016 โดยมีนายอุดมศักดิ์ จันทร์กลั่น หชง.๔ ผกร.กรย.(ก๓) เป็นผู้ควบคุมงาน นั้น',
+  // 3 ตอนมาตรฐานตามเอกสารสแกนหน้า 1
+  memoBackground: 'ตามหนังสือที่ ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 สิงหาคม 2567 อนุมัติให้ปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง 2 อ.ศรีสวัสดิ์ จ.กาญจนบุรี หมายเลขงาน (WBS) : P-TDD02.3-I-LYAIA.0016 โดยมีนายอุดมศักดิ์ จันทร์กลั่น หชง.4 ผกร.กรย.(ก3) เป็นผู้ควบคุมงาน นั้น',
 
-  memoFacts: 'เนื่องจาก ผกร.กรย.(ก๓) มีแผนงานก่อสร้างปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี ให้แล้วเสร็จโดยเร็ว ตามแผนงานที่กำหนด ทั้งนี้ปริมาณงานของงานก่อสร้าง มีปริมาณมากในการทำการรื้อถอนจะมีเศษสายบางส่วนที่จำเป็นต้องตัดทิ้งเป็นเศษสั้นๆ เช่น อุปกรณ์การเข้าปลายสาย อุปกรณ์ช่วงต่อสาย และอุปกรณ์ต่อแยกสาย เพื่อความสะดวกรวดเร็วในการรื้อถอน จึงทำให้ไม่สามารถส่งคืนพัสดุรื้อถอน ได้ครบตามประมาณการ',
+  memoFacts: 'เนื่องจาก ผกร.กรย.(ก3) มีแผนงานก่อสร้างปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง 2 อ.ศรีสวัสดิ์ จ.กาญจนบุรี ให้แล้วเสร็จโดยเร็ว ตามแผนงานที่กำหนด ทั้งนี้ปริมาณงานของงานก่อสร้าง มีปริมาณมากในการทำการรื้อถอนจะมีเศษสายบางส่วนที่จำเป็นต้องตัดทิ้งเป็นเศษสั้นๆ เช่น อุปกรณ์การเข้าปลายสาย อุปกรณ์ช่วงต่อสาย และอุปกรณ์ต่อแยกสาย เพื่อความสะดวกรวดเร็วในการรื้อถอน จึงทำให้ไม่สามารถส่งคืนพัสดุรื้อถอน ได้ครบตามประมาณการ',
 
-  memoConsideration: 'กรย.(ก๓) พิจารณาแล้ว เนื่องจากต้องดำเนินการก่อสร้างภายใต้ระยะเวลาที่จำกัดเพื่อจ่ายไฟคืนให้กับผู้ใช้ไฟฟ้าภายในระยะเวลาที่กำหนด เพื่อสร้างความเชื่อมั่น สามารถปรับปรุงระบบจำหน่ายได้แล้วเสร็จตามที่แผนงานกำหนด และภาพลักษณ์ที่ดีของ กฟภ. โดย กรย.(ก๓) จึงขออนุมัตินำส่งคืนพัสดุรื้อถอนเศษสายชำรุดไม่ครบถ้วนตามประมาณการ โดยส่งคืนเท่าจำนวนที่สามารถรื้อถอนได้จริงตามสภาพหน้างาน ทั้งนี้ ได้แนบเอกสารใบรับคืนและเอกสารส่งคืนของคณะกรรมการรื้อถอน มาด้วยแล้ว',
+  memoConsideration: 'กรย.(ก3) พิจารณาแล้ว เนื่องจากต้องดำเนินการก่อสร้างภายใต้ระยะเวลาที่จำกัดเพื่อจ่ายไฟคืนให้กับผู้ใช้ไฟฟ้าภายในระยะเวลาที่กำหนด เพื่อสร้างความเชื่อมั่น สามารถปรับปรุงระบบจำหน่ายได้แล้วเสร็จตามที่แผนงานกำหนด และภาพลักษณ์ที่ดีของ กฟภ. โดย กรย.(ก3) จึงขออนุมัตินำส่งคืนพัสดุรื้อถอนเศษสายชำรุดไม่ครบถ้วนตามประมาณการ โดยส่งคืนเท่าจำนวนที่สามารถรื้อถอนได้จริงตามสภาพหน้างาน ทั้งนี้ ได้แนบเอกสารใบรับคืนและเอกสารส่งคืนของคณะกรรมการรื้อถอน มาด้วยแล้ว',
 
   memoClosing: 'จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป',
 
-  // เนื้อหาสำหรับบันทึกผู้ควบคุมงาน (เอกสารสแกนหน้า ๒)
-  supervisorBody: 'ด้วยข้าพเจ้าได้ดำเนินการงานก่อสร้างปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี ปัจจุบันดำเนินการก่อสร้างแล้วเสร็จ ตามแผนงานที่กำหนด ทั้งนี้ปริมาณงานของงานก่อสร้าง มีปริมาณมากในการทำการรื้อถอนจะมีเศษสายบางส่วนที่จำเป็นต้องตัดทิ้งเป็นเศษสั้นๆ เช่น อุปกรณ์การเข้าปลายสาย อุปกรณ์ช่วงต่อสาย และอุปกรณ์ต่อแยกสาย เพื่อความสะดวกรวดเร็วในการรื้อถอน โดยมีรายละเอียดการส่งคืนพัสดุรื้อถอนดังนี้',
+  // เนื้อหาสำหรับบันทึกผู้ควบคุมงาน (เอกสารสแกนหน้า 2)
+  supervisorBody: 'ด้วยข้าพเจ้าได้ดำเนินการงานก่อสร้างปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง 2 อ.ศรีสวัสดิ์ จ.กาญจนบุรี ปัจจุบันดำเนินการก่อสร้างแล้วเสร็จ ตามแผนงานที่กำหนด ทั้งนี้ปริมาณงานของงานก่อสร้าง มีปริมาณมากในการทำการรื้อถอนจะมีเศษสายบางส่วนที่จำเป็นต้องตัดทิ้งเป็นเศษสั้นๆ เช่น อุปกรณ์การเข้าปลายสาย อุปกรณ์ช่วงต่อสาย และอุปกรณ์ต่อแยกสาย เพื่อความสะดวกรวดเร็วในการรื้อถอน โดยมีรายละเอียดการส่งคืนพัสดุรื้อถอนดังนี้',
 
   supervisorClosing: 'ทั้งนี้จึงขอรายงานผลการนำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอน เพื่อให้ส่วนเกี่ยวข้องช่วยพิจารณาดำเนินการต่อไป\n\nจึงเรียนมาเพื่อโปรดทราบและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป',
 
   supervisorName: 'นายอุดมศักดิ์ จันทร์กลั่น',
-  supervisorPosition: 'หชง.๔ ผกร.กรย.(ก๓)',
+  supervisorPosition: 'หชง.4 ผกร.กรย.(ก3)',
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
-  signerTitle: 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)',
+  signerTitle: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
   signerDate: '',
 
   headOfSectionName: 'นายชานินทร์ ศรีสวัสดิ์',
-  headOfSectionTitle: 'ชผ.กร.กรย.(ก๓) ปฏิบัติงานแทน ผห.กร.กรย.(ก๓)',
+  headOfSectionTitle: 'ชผ.กร.กรย.(ก3) ปฏิบัติงานแทน ผห.กร.กรย.(ก3)',
   approverName: 'นายเมธี สุภาก่ำ',
-  approverTitle: 'อฝ.วบ.(ก๓)',
-  approverEndorsementTo: '- อก.รย.(ก๓)',
+  approverTitle: 'อฝ.วบ.(ก3)',
+  approverEndorsementTo: '- อก.รย.(ก3)',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา',
-  contactPhone: '๑๐๓๙๑',
+  contactPhone: '10391',
 
   items: [
     {
@@ -178,7 +178,7 @@ export const SAMPLE_WIRE_CLARIFY_DATA: WireClarifyFormData = {
 };
 
 /**
- * Helper to compose standardized PEA "๑. เรื่องเดิม" from variable parts
+ * Helper to compose standardized PEA "1. เรื่องเดิม" from variable parts
  */
 export function composeWireBackground(params: {
   approvalDocRef?: string;
@@ -187,11 +187,11 @@ export function composeWireBackground(params: {
   supervisorName?: string;
   supervisorPosition?: string;
 }): string {
-  const ref = params.approvalDocRef || 'ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗';
-  const proj = params.projectName || 'ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี';
+  const ref = params.approvalDocRef || 'ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 สิงหาคม 2567';
+  const proj = params.projectName || 'ปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง 2 อ.ศรีสวัสดิ์ จ.กาญจนบุรี';
   const wbs = params.wbsNo || 'P-TDD02.3-I-LYAIA.0016';
   const name = params.supervisorName || 'นายอุดมศักดิ์ จันทร์กลั่น';
-  const pos = params.supervisorPosition || 'หชง.๔ ผกร.กรย.(ก๓)';
+  const pos = params.supervisorPosition || 'หชง.4 ผกร.กรย.(ก3)';
 
   const refPrefix = ref.startsWith('ตามหนังสือ') ? ref : `ตามหนังสือที่ ${ref}`;
 
@@ -199,15 +199,15 @@ export function composeWireBackground(params: {
 }
 
 /**
- * Helper to compose standardized PEA "๒. ข้อเท็จจริง" from variable parts
+ * Helper to compose standardized PEA "2. ข้อเท็จจริง" from variable parts
  */
 export function composeWireFacts(params: {
   projectName?: string;
   dept?: string;
   factsDetail?: string;
 }): string {
-  const dept = params.dept || 'ผกร.กรย.(ก๓)';
-  const proj = params.projectName || 'ปรับปรุงระบบจำหน่าย ๒๒ เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง ๒ อ.ศรีสวัสดิ์ จ.กาญจนบุรี';
+  const dept = params.dept || 'ผกร.กรย.(ก3)';
+  const proj = params.projectName || 'ปรับปรุงระบบจำหน่าย 22 เควี ช่วงแยกเข้าอำเภอ ถึง อบต.นาสวน ช่วง 2 อ.ศรีสวัสดิ์ จ.กาญจนบุรี';
   const detail = params.factsDetail || 'ทั้งนี้ปริมาณงานของงานก่อสร้าง มีปริมาณมากในการทำการรื้อถอนจะมีเศษสายบางส่วนที่จำเป็นต้องตัดทิ้งเป็นเศษสั้นๆ เช่น อุปกรณ์การเข้าปลายสาย อุปกรณ์ช่วงต่อสาย และอุปกรณ์ต่อแยกสาย เพื่อความสะดวกรวดเร็วในการรื้อถอน จึงทำให้ไม่สามารถส่งคืนพัสดุรื้อถอน ได้ครบตามประมาณการ';
 
   return `เนื่องจาก ${dept} มีแผนงานก่อสร้าง${proj} ให้แล้วเสร็จโดยเร็ว ตามแผนงานที่กำหนด ${detail}`;
@@ -292,13 +292,13 @@ export function generateWireClarifyMemoPlainText(data: WireClarifyFormData): str
 
   let bodyText = '';
   if (isDiv) {
-    bodyText = `๑. เรื่องเดิม
+    bodyText = `1. เรื่องเดิม
     ${data.memoBackground || ''}
 
-๒. ข้อเท็จจริง
+2. ข้อเท็จจริง
     ${data.memoFacts || ''}
 
-๓. ข้อพิจารณา
+3. ข้อพิจารณา
     ${data.memoConsideration || ''}
 
     จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติและแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป`;
@@ -348,7 +348,7 @@ export function generateWireClarifyTableHtmlForWord(data: WireClarifyFormData): 
   }).join('');
 
   return `
-    <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: 'TH Sarabun New', 'Cordia New', sans-serif; font-size: 15pt; margin: 15px 0;">
+    <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: 'TH Sarabun PSK', 'TH Sarabun New', sans-serif; font-size: 15pt; margin: 15px 0;">
       <thead>
         <tr style="background-color: #f1f5f9; font-weight: bold; text-align: center;">
           <th style="border: 1px solid black; width: 8%; text-align: center; padding: 6px;">ลำดับ</th>
@@ -381,13 +381,13 @@ export function generateWireClarifyWordDocument(data: WireClarifyFormData): stri
   let bodyContent = '';
   if (isDiv) {
     bodyContent = `
-      <p style="font-weight: bold; margin-top: 14pt;"><u>๑. เรื่องเดิม</u></p>
+      <p style="font-weight: bold; margin-top: 14pt;"><u>1. เรื่องเดิม</u></p>
       <p style="text-indent: 40px; text-align: justify;">${data.memoBackground || ''}</p>
 
-      <p style="font-weight: bold; margin-top: 14pt;"><u>๒. ข้อเท็จจริง</u></p>
+      <p style="font-weight: bold; margin-top: 14pt;"><u>2. ข้อเท็จจริง</u></p>
       <p style="text-indent: 40px; text-align: justify;">${data.memoFacts || ''}</p>
 
-      <p style="font-weight: bold; margin-top: 14pt;"><u>๓. ข้อพิจารณา</u></p>
+      <p style="font-weight: bold; margin-top: 14pt;"><u>3. ข้อพิจารณา</u></p>
       <p style="text-indent: 40px; text-align: justify;">${data.memoConsideration || ''}</p>
 
       ${tableHtml}
@@ -405,16 +405,16 @@ export function generateWireClarifyWordDocument(data: WireClarifyFormData): stri
       <table style="width: 100%; border: none; margin-top: 50px; font-size: 14pt;">
         <tr>
           <td style="width: 50%; vertical-align: top; border: none;">
-            <p><b>${data.approverEndorsementTo || '- อก.รย.(ก๓)'}</b></p>
+            <p><b>${data.approverEndorsementTo || '- อก.รย.(ก3)'}</b></p>
             <p style="margin-top: 8px;">อนุมัติ ดำเนินการตามเสนอ</p>
             <p style="margin-top: 35px;"><br/></p>
             <p>(${data.approverName || 'นายเมธี สุภาก่ำ'})</p>
-            <p>${data.approverTitle || 'อฝ.วบ.(ก๓)'}</p>
+            <p>${data.approverTitle || 'อฝ.วบ.(ก3)'}</p>
           </td>
           <td style="width: 50%; vertical-align: top; border: none; text-align: right;">
-            <p>รฝ.วบ.(ก๓) .............................. วันที่ ....../....../......</p>
-            <p style="margin-top: 10px;">ผห.กร.(ก๓) .............................. วันที่ ....../....../......</p>
-            <p style="margin-top: 10px;">ชผ.กร.(ก๓) .............................. วันที่ ....../....../......</p>
+            <p>รฝ.วบ.(ก3) .............................. วันที่ ....../....../......</p>
+            <p style="margin-top: 10px;">ผห.กร.(ก3) .............................. วันที่ ....../....../......</p>
+            <p style="margin-top: 10px;">ชผ.กร.(ก3) .............................. วันที่ ....../....../......</p>
           </td>
         </tr>
       </table>
@@ -443,12 +443,12 @@ export function generateWireClarifyWordDocument(data: WireClarifyFormData): stri
         <p>ทราบ ดำเนินการต่อไป</p>
         <p style="margin-bottom: 25px;"><br/></p>
         <p>(${data.headOfSectionName || 'นายชานินทร์ ศรีสวัสดิ์'})</p>
-        <p>${data.headOfSectionTitle || 'ชผ.กร. ปฏิบัติงานแทน ผห.กร.(ก๓)'}</p>
+        <p>${data.headOfSectionTitle || 'ชผ.กร. ปฏิบัติงานแทน ผห.กร.(ก3)'}</p>
       </div>
 
       <div style="margin-top: 60px; font-size: 11pt; color: #64748b; border-top: 1px solid #cbd5e1; padding-top: 8px;">
         <p>${data.contactDepartment || 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา'}</p>
-        <p>โทรศัพท์ ${data.contactPhone || '๑๐๓๙๑'}</p>
+        <p>โทรศัพท์ ${data.contactPhone || '10391'}</p>
       </div>
     `;
   }
@@ -459,7 +459,7 @@ export function generateWireClarifyWordDocument(data: WireClarifyFormData): stri
       <meta charset='utf-8'>
       <title>บันทึกชี้แจงส่งคืนเศษสายไม่ครบ</title>
       <style>
-        body { font-family: 'TH Sarabun New', 'Cordia New', sans-serif; font-size: 16pt; line-height: 1.35; margin: 2cm; }
+        body { font-family: 'TH Sarabun PSK', 'TH Sarabun New', sans-serif; font-size: 16pt; line-height: 1.35; margin: 2cm; }
         p { margin: 4pt 0; text-align: justify; }
         table.meta { width: 100%; border: none; margin-bottom: 16px; font-size: 16pt; }
         table.meta td { border: none; padding: 2px 0; vertical-align: top; }

@@ -51,7 +51,7 @@ const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileCheck },
   { key: 'project', title: '2. อ้างอิงโครงการ & WBS', shortName: 'โครงการ & WBS', icon: Briefcase },
   { key: 'item', title: '3. รายละเอียดพัสดุ/บริการที่ขอจัดหา', shortName: 'สิ่งของ/บริการ', icon: ShoppingBag },
-  { key: 'body', title: '4. เนื้อหา ๓ ตอน (เรื่องเดิม-ข้อเท็จจริง-ข้อเสนอ)', shortName: 'เนื้อหา ๓ ตอน', icon: Building },
+  { key: 'body', title: '4. เนื้อหา 3 ตอน (เรื่องเดิม-ข้อเท็จจริง-ข้อเสนอ)', shortName: 'เนื้อหา 3 ตอน', icon: Building },
   { key: 'signer', title: '5. ผู้ลงนามและผู้อนุมัติ', shortName: 'ผู้ลงนาม & อนุมัติ', icon: UserCheck },
 ];
 
@@ -68,24 +68,24 @@ export default function ProcurementPrinciplePage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.subject) {
-          if (parsed.docNo && (parsed.docNo.includes('๑๑๗๘') || parsed.docNo.includes('๒๔๒๖'))) {
+          if (parsed.docNo && (parsed.docNo.includes('1178') || parsed.docNo.includes('2426') || parsed.docNo.includes('1178') || parsed.docNo.includes('2426'))) {
             parsed.docNo = '';
           }
           if (parsed.docDate && (parsed.docDate.includes('พ.ย.') || parsed.docDate.includes('ต.ค.'))) {
             parsed.docDate = '';
           }
-          const fixedDocTo = (parsed.docTo === 'ผวบ.(ก๓)' || !parsed.docTo) ? 'ฝวบ.(ก๓)' : parsed.docTo;
+          const fixedDocTo = (parsed.docTo === 'ผวบ.(ก3)' || parsed.docTo === 'ผวบ.(ก3)' || !parsed.docTo) ? 'ฝวบ.(ก3)' : parsed.docTo;
           const fixedSalutation = parsed.salutation?.includes('อผ.วบ.')
-            ? 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)'
-            : (parsed.salutation || 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)');
-          const fixedApproverTitle = (parsed.approverTitle === 'อผ.วบ.(ก๓)' || !parsed.approverTitle)
-            ? 'อฝ.วบ.(ก๓)'
+            ? 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)'
+            : (parsed.salutation || 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)');
+          const fixedApproverTitle = (parsed.approverTitle === 'อผ.วบ.(ก3)' || parsed.approverTitle === 'อผ.วบ.(ก3)' || !parsed.approverTitle)
+            ? 'อฝ.วบ.(ก3)'
             : parsed.approverTitle;
           const fixedApproverName = (parsed.approverName === 'นายเมธี สุกก่ำ' || !parsed.approverName)
             ? 'นายเมธี สุภาก่ำ'
             : parsed.approverName;
-          const fixedApproverEndorsement = (parsed.approverEndorsementTo === '- กรย.(ก๓)' || !parsed.approverEndorsementTo)
-            ? '- อก.รย.(ก๓)'
+          const fixedApproverEndorsement = (parsed.approverEndorsementTo === '- กรย.(ก3)' || parsed.approverEndorsementTo === '- กรย.(ก3)' || !parsed.approverEndorsementTo)
+            ? '- อก.รย.(ก3)'
             : parsed.approverEndorsementTo;
 
           setFormData({
@@ -146,7 +146,7 @@ export default function ProcurementPrinciplePage() {
         wbsNo: updated.wbsNo,
         networkNo: updated.networkNo,
         activityNo: updated.activityNo,
-        dept: updated.docFrom || 'กรย.(ก๓)'
+        dept: updated.docFrom || 'กรย.(ก3)'
       });
       return {
         ...updated,
@@ -173,7 +173,7 @@ export default function ProcurementPrinciplePage() {
         wbsNo: updated.wbsNo,
         networkNo: updated.networkNo,
         activityNo: updated.activityNo,
-        dept: updated.docFrom || 'กรย.(ก๓)'
+        dept: updated.docFrom || 'กรย.(ก3)'
       });
       return {
         ...updated,
@@ -213,7 +213,7 @@ export default function ProcurementPrinciplePage() {
         approvalDocRef: updated.approvalDocRef,
         projectName: updated.projectName,
         workOpenerName: updated.workOpenerName,
-        dept: updated.docFrom || 'กรย.(ก๓)'
+        dept: updated.docFrom || 'กรย.(ก3)'
       });
       const newProposal = composeProcurementProposal({
         procurementType: updated.procurementType,
@@ -223,7 +223,7 @@ export default function ProcurementPrinciplePage() {
         wbsNo: updated.wbsNo,
         networkNo: updated.networkNo,
         activityNo: updated.activityNo,
-        dept: updated.docFrom || 'กรย.(ก๓)'
+        dept: updated.docFrom || 'กรย.(ก3)'
       });
       return {
         ...updated,
@@ -233,26 +233,26 @@ export default function ProcurementPrinciplePage() {
     });
   };
 
-  // Render on-screen ๑. เรื่องเดิม with interactive color highlights
+  // Render on-screen 1. เรื่องเดิม with interactive color highlights
   const renderScreenBackgroundText = () => {
-    const ref = formData.approvalDocRef || 'ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙';
-    const proj = formData.projectName || 'แผนงานพาดเพิ่ม ๒๒ เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม';
-    const opener = formData.workOpenerName || 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)';
+    const ref = formData.approvalDocRef || 'ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 มกราคม 2569';
+    const proj = formData.projectName || 'แผนงานพาดเพิ่ม 22 เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม';
+    const opener = formData.workOpenerName || 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)';
 
     return (
       <>
         <span>ตามอนุมัติเลขที่ </span>
         <span
           className="a4-var-spot"
-          title="🟡 จุดที่ ๑: หนังสืออนุมัติงานเดิม (คลิกเพื่อแก้ไข)"
+          title="🟡 จุดที่ 1: หนังสืออนุมัติงานเดิม (คลิกเพื่อแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
         >
           {ref.replace(/^(ตามอนุมัติเลขที่|ตามหนังสือที่)\s*/, '')}
         </span>{' '}
-        <span>ด้วย {formData.docFrom || 'กรย.(ก๓)'} มี</span>{' '}
+        <span>ด้วย {formData.docFrom || 'กรย.(ก3)'} มี</span>{' '}
         <span
           className="a4-var-spot blue"
-          title="🔵 จุดที่ ๒: ชื่องานและสถานที่ก่อสร้าง (คลิกเพื่อแก้ไข)"
+          title="🔵 จุดที่ 2: ชื่องานและสถานที่ก่อสร้าง (คลิกเพื่อแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
         >
           {proj}
@@ -260,7 +260,7 @@ export default function ProcurementPrinciplePage() {
         <span>โดยมี</span>{' '}
         <span
           className="a4-var-spot green"
-          title="🟢 จุดที่ ๓: ผู้เปิดงาน (คลิกเพื่อแก้ไข)"
+          title="🟢 จุดที่ 3: ผู้เปิดงาน (คลิกเพื่อแก้ไข)"
           onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
         >
           {opener}
@@ -270,10 +270,10 @@ export default function ProcurementPrinciplePage() {
     );
   };
 
-  // Render on-screen ๓. ข้อเสนอเพื่อพิจารณา with interactive color highlights
+  // Render on-screen 3. ข้อเสนอเพื่อพิจารณา with interactive color highlights
   const renderScreenProposalText = () => {
     const isHire = formData.procurementType === 'hire';
-    const dept = formData.docFrom || 'กรย.(ก๓)';
+    const dept = formData.docFrom || 'กรย.(ก3)';
     const proj = formData.projectName || 'งานก่อสร้าง';
     const item = formData.itemDescription || 'พัสดุ/บริการ';
     const targetDate = formData.targetDateOrPeriod ? ` ${formData.targetDateOrPeriod}` : '';
@@ -290,7 +290,7 @@ export default function ProcurementPrinciplePage() {
             <span>เพื่อให้งานก่อสร้างเป็นไปด้วยความเรียบร้อย และแล้วเสร็จทันตามกำหนดตามแผนงานที่กำหนดไว้ จึงขออนุมัติหลักการจ้าง</span>{' '}
             <span
               className="a4-var-spot purple"
-              title="🟣 จุดที่ ๕: รายการบริการที่ขอจัดจ้าง (คลิกเพื่อแก้ไข)"
+              title="🟣 จุดที่ 5: รายการบริการที่ขอจัดจ้าง (คลิกเพื่อแก้ไข)"
               onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
             >
               {item}{targetDate}
@@ -298,14 +298,14 @@ export default function ProcurementPrinciplePage() {
             <span>โดยเบิกค่าใช้จ่ายจาก</span>{' '}
             <span
               className="a4-var-spot blue"
-              title="🔵 จุดที่ ๒: ชื่องาน (คลิกเพื่อแก้ไข)"
+              title="🔵 จุดที่ 2: ชื่องาน (คลิกเพื่อแก้ไข)"
               onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
             >
               {proj}
             </span>{' '}
             <span
               className="a4-var-spot orange"
-              title="🟠 จุดที่ ๔: บัญชีและหมายเลขงาน WBS (คลิกเพื่อแก้ไข)"
+              title="🟠 จุดที่ 4: บัญชีและหมายเลขงาน WBS (คลิกเพื่อแก้ไข)"
               onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
             >
               {accountInfo}
@@ -316,7 +316,7 @@ export default function ProcurementPrinciplePage() {
             <span>เพื่อให้การก่อสร้างเป็นไปตามแผนงานและไม่กระทบงานก่อสร้าง</span>{' '}
             <span
               className="a4-var-spot blue"
-              title="🔵 จุดที่ ๒: ชื่องาน (คลิกเพื่อแก้ไข)"
+              title="🔵 จุดที่ 2: ชื่องาน (คลิกเพื่อแก้ไข)"
               onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
             >
               {proj}
@@ -324,7 +324,7 @@ export default function ProcurementPrinciplePage() {
             <span>เห็นควรให้อนุมัติจัดซื้อ</span>{' '}
             <span
               className="a4-var-spot purple"
-              title="🟣 จุดที่ ๕: รายการพัสดุที่ขอจัดซื้อ (คลิกเพื่อแก้ไข)"
+              title="🟣 จุดที่ 5: รายการพัสดุที่ขอจัดซื้อ (คลิกเพื่อแก้ไข)"
               onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
             >
               {item}{targetDate}
@@ -332,7 +332,7 @@ export default function ProcurementPrinciplePage() {
             <span>โดยให้เบิกจ่ายจาก</span>{' '}
             <span
               className="a4-var-spot orange"
-              title="🟠 จุดที่ ๔: บัญชีและหมายเลขงาน WBS (คลิกเพื่อแก้ไข)"
+              title="🟠 จุดที่ 4: บัญชีและหมายเลขงาน WBS (คลิกเพื่อแก้ไข)"
               onClick={(e) => { e.stopPropagation(); setActiveEditSection('body'); }}
             >
               {accountInfo}
@@ -513,7 +513,7 @@ export default function ProcurementPrinciplePage() {
                         value={formData.docFrom}
                         onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น กรย.(ก๓)"
+                        placeholder="เช่น กรย.(ก3)"
                       />
                     </td>
                     <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
@@ -524,7 +524,7 @@ export default function ProcurementPrinciplePage() {
                         value={formData.docTo}
                         onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น ฝวบ.(ก๓)"
+                        placeholder="เช่น ฝวบ.(ก3)"
                       />
                     </td>
                   </tr>
@@ -537,7 +537,7 @@ export default function ProcurementPrinciplePage() {
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น มท ๕๓๐๙.๑๖/..."
+                        placeholder="เช่น มท 5309.16/..."
                       />
                     </td>
                     <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -548,7 +548,7 @@ export default function ProcurementPrinciplePage() {
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </td>
                   </tr>
@@ -612,7 +612,7 @@ export default function ProcurementPrinciplePage() {
                         value={formData.salutation}
                         onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)"
+                        placeholder="เช่น อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)"
                       />
                     </td>
                   </tr>
@@ -624,11 +624,11 @@ export default function ProcurementPrinciplePage() {
             <div
               className="a4-section-hoverable"
               onClick={() => setActiveEditSection('body')}
-              title="คลิกเพื่อแก้ไขเนื้อหา ๓ ตอน"
+              title="คลิกเพื่อแก้ไขเนื้อหา 3 ตอน"
               style={{ marginTop: '14pt' }}
             >
               <div className="section-edit-badge">
-                <Edit3 size={12} /> จิ้มแก้ไขเนื้อหา ๓ ตอน (เรื่องเดิม-ข้อเท็จจริง-ข้อเสนอ)
+                <Edit3 size={12} /> จิ้มแก้ไขเนื้อหา 3 ตอน (เรื่องเดิม-ข้อเท็จจริง-ข้อเสนอ)
               </div>
 
               {/* Dynamic Variable Hint on Screen */}
@@ -641,21 +641,21 @@ export default function ProcurementPrinciplePage() {
                 </span>
               </div>
 
-              {/* ๑. เรื่องเดิม */}
-              <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๑. เรื่องเดิม</p>
+              {/* 1. เรื่องเดิม */}
+              <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>1. เรื่องเดิม</p>
               <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '8pt' }}>
                 <span className="pp-print-only">{formData.backgroundText}</span>
                 <span className="pp-no-print">{renderScreenBackgroundText()}</span>
               </p>
 
-              {/* ๒. ข้อเท็จจริง */}
-              <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๒. ข้อเท็จจริง</p>
+              {/* 2. ข้อเท็จจริง */}
+              <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>2. ข้อเท็จจริง</p>
               <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', whiteSpace: 'pre-line', marginBottom: '8pt' }}>
                 {formData.factsText}
               </p>
 
-              {/* ๓. ข้อเสนอเพื่อพิจารณา */}
-              <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>๓. ข้อเสนอเพื่อพิจารณา</p>
+              {/* 3. ข้อเสนอเพื่อพิจารณา */}
+              <p style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}>3. ข้อเสนอเพื่อพิจารณา</p>
               <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginBottom: '6pt' }}>
                 <span className="pp-print-only">{formData.proposalText}</span>
                 <span className="pp-no-print">{renderScreenProposalText()}</span>
@@ -703,7 +703,7 @@ export default function ProcurementPrinciplePage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '20px' }}>
                 <div style={{ fontSize: '13pt' }}>
-                  <div style={{ fontWeight: 600 }}>{formData.approverEndorsementTo || '- อก.รย.(ก๓)'}</div>
+                  <div style={{ fontWeight: 600 }}>{formData.approverEndorsementTo || '- อก.รย.(ก3)'}</div>
                   <div style={{ marginTop: '4pt', color: '#1e293b' }}>
                     {formData.approverDivisionText || 'อนุมัติ ดำเนินการในส่วนที่เกี่ยวข้อง'}
                   </div>
@@ -713,9 +713,9 @@ export default function ProcurementPrinciplePage() {
                 </div>
 
                 <div style={{ fontSize: '11pt', border: '1px solid #94a3b8', borderRadius: '4px', padding: '8pt 10pt' }}>
-                  <div style={{ marginBottom: '6pt' }}>รฝ.วบ.(ก๓) ................... วันที่ ....../....../......</div>
-                  <div style={{ marginBottom: '6pt' }}>ผห.กร.(ก๓) ................... วันที่ ....../....../......</div>
-                  <div>ชผ.กร.(ก๓) ................... วันที่ ....../....../......</div>
+                  <div style={{ marginBottom: '6pt' }}>รฝ.วบ.(ก3) ................... วันที่ ....../....../......</div>
+                  <div style={{ marginBottom: '6pt' }}>ผห.กร.(ก3) ................... วันที่ ....../....../......</div>
+                  <div>ชผ.กร.(ก3) ................... วันที่ ....../....../......</div>
                 </div>
               </div>
             </div>
@@ -763,7 +763,7 @@ export default function ProcurementPrinciplePage() {
                         className="big-input"
                         value={formData.docFrom}
                         onChange={(e) => setFormData({ ...formData, docFrom: e.target.value })}
-                        placeholder="เช่น กรย.(ก๓)"
+                        placeholder="เช่น กรย.(ก3)"
                       />
                     </div>
                     <div className="big-field-group">
@@ -773,22 +773,22 @@ export default function ProcurementPrinciplePage() {
                         className="big-input"
                         value={formData.docTo}
                         onChange={(e) => setFormData({ ...formData, docTo: e.target.value })}
-                        placeholder="เช่น ฝวบ.(ก๓)"
+                        placeholder="เช่น ฝวบ.(ก3)"
                       />
                       <div className="var-quick-options" style={{ marginTop: '6px' }}>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docTo: 'ฝวบ.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, docTo: 'ฝวบ.(ก3)' })}
                         >
-                          📌 ฝวบ.(ก๓)
+                          📌 ฝวบ.(ก3)
                         </button>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, docTo: 'ผกร.กรย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, docTo: 'ผกร.กรย.(ก3)' })}
                         >
-                          📌 ผกร.กรย.(ก๓)
+                          📌 ผกร.กรย.(ก3)
                         </button>
                       </div>
                     </div>
@@ -802,7 +802,7 @@ export default function ProcurementPrinciplePage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น มท ๕๓๐๙.๑๖/..."
+                        placeholder="เช่น มท 5309.16/..."
                       />
                     </div>
                     <div className="big-field-group">
@@ -812,7 +812,7 @@ export default function ProcurementPrinciplePage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น 4 ตุลาคม 2569"
                       />
                     </div>
                   </div>
@@ -906,22 +906,22 @@ export default function ProcurementPrinciplePage() {
                       className="big-input"
                       value={formData.salutation}
                       onChange={(e) => setFormData({ ...formData, salutation: e.target.value })}
-                      placeholder="เช่น อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)"
+                      placeholder="เช่น อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)"
                     />
                     <div className="var-quick-options" style={{ marginTop: '6px' }}>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, salutation: 'อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, salutation: 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)' })}
                       >
-                        📌 อฝ.วบ.(ก๓) ผ่าน รฝ.วบ.(ก๓)
+                        📌 อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, salutation: 'ผห.กร.(ก๓) ผ่าน ชผ.กร.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, salutation: 'ผห.กร.(ก3) ผ่าน ชผ.กร.(ก3)' })}
                       >
-                        📌 ผห.กร.(ก๓) ผ่าน ชผ.กร.(ก๓)
+                        📌 ผห.กร.(ก3) ผ่าน ชผ.กร.(ก3)
                       </button>
                     </div>
                   </div>
@@ -971,7 +971,7 @@ export default function ProcurementPrinciplePage() {
                       className="big-input"
                       value={formData.approvalDocRef}
                       onChange={(e) => handleUpdateVariable('approvalDocRef', e.target.value)}
-                      placeholder="เช่น ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙"
+                      placeholder="เช่น ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 มกราคม 2569"
                     />
                   </div>
 
@@ -982,7 +982,7 @@ export default function ProcurementPrinciplePage() {
                       className="big-textarea"
                       value={formData.projectName}
                       onChange={(e) => handleUpdateVariable('projectName', e.target.value)}
-                      placeholder="เช่น แผนงานพาดเพิ่ม ๒๒ เควี รองรับสถานีอัดประจุ ต.พระประโทน อ.เมือง จ.นครปฐม"
+                      placeholder="เช่น แผนงานพาดเพิ่ม 22 เควี รองรับสถานีอัดประจุ ต.พระประโทน อ.เมือง จ.นครปฐม"
                     />
                   </div>
 
@@ -993,22 +993,22 @@ export default function ProcurementPrinciplePage() {
                       className="big-input"
                       value={formData.workOpenerName}
                       onChange={(e) => handleUpdateVariable('workOpenerName', e.target.value)}
-                      placeholder="เช่น นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)"
+                      placeholder="เช่น นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)"
                     />
                     <div className="var-quick-options" style={{ marginTop: '6px' }}>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => handleUpdateVariable('workOpenerName', 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)')}
+                        onClick={() => handleUpdateVariable('workOpenerName', 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)')}
                       >
-                        📌 นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)
+                        📌 นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => handleUpdateVariable('workOpenerName', 'นายอุดมศักดิ์ จันทร์กลั่น หชง.๔ ผกร.กรย.(ก๓)')}
+                        onClick={() => handleUpdateVariable('workOpenerName', 'นายอุดมศักดิ์ จันทร์กลั่น หชง.4 ผกร.กรย.(ก3)')}
                       >
-                        📌 นายอุดมศักดิ์ จันทร์กลั่น หชง.๔ ผกร.กรย.(ก๓)
+                        📌 นายอุดมศักดิ์ จันทร์กลั่น หชง.4 ผกร.กรย.(ก3)
                       </button>
                     </div>
                   </div>
@@ -1025,7 +1025,7 @@ export default function ProcurementPrinciplePage() {
                       className="big-textarea"
                       value={formData.itemDescription}
                       onChange={(e) => handleUpdateVariable('itemDescription', e.target.value)}
-                      placeholder="เช่น ดอกสว่าน BDS HKK-N ๐๒๒ ดอกเจ็ทบอช ๒๒ mm. จำนวน ๒ ดอก"
+                      placeholder="เช่น ดอกสว่าน BDS HKK-N 022 ดอกเจ็ทบอช 22 mm. จำนวน 2 ดอก"
                     />
                   </div>
 
@@ -1056,7 +1056,7 @@ export default function ProcurementPrinciplePage() {
                         className="big-input"
                         value={formData.targetDateOrPeriod || ''}
                         onChange={(e) => handleUpdateVariable('targetDateOrPeriod', e.target.value)}
-                        placeholder="เช่น ในวันจันทร์ที่ ๑๙ ตุลาคม ๒๕๖๙"
+                        placeholder="เช่น ในวันจันทร์ที่ 19 ตุลาคม 2569"
                       />
                     </div>
                   </div>
@@ -1087,7 +1087,7 @@ export default function ProcurementPrinciplePage() {
                   {bodyMode === 'guided' ? (
                     <div>
                       <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px', background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        💡 <strong>ระบบสร้างข้อความอัตโนมัติ:</strong> แก้ไขตัวแปรในแต่ละจุดด้านล่างนี้ ระบบจะนำไปประกอบเข้าเป็นชื่อเรื่อง, ย่อหน้า <strong>๑. เรื่องเดิม</strong> และ <strong>๓. ข้อเสนอเพื่อพิจารณา</strong> ในเอกสารให้อัตโนมัติทันที
+                        💡 <strong>ระบบสร้างข้อความอัตโนมัติ:</strong> แก้ไขตัวแปรในแต่ละจุดด้านล่างนี้ ระบบจะนำไปประกอบเข้าเป็นชื่อเรื่อง, ย่อหน้า <strong>1. เรื่องเดิม</strong> และ <strong>3. ข้อเสนอเพื่อพิจารณา</strong> ในเอกสารให้อัตโนมัติทันที
                       </div>
 
                       {/* Card 0: เรื่อง (ขออนุมัติหลักการจัดซื้อ / จัดจ้าง) */}
@@ -1174,10 +1174,10 @@ export default function ProcurementPrinciplePage() {
                         </div>
                       </div>
 
-                      {/* Card 1: จุดที่ ๑: หนังสืออนุมัติงานเดิม */}
+                      {/* Card 1: จุดที่ 1: หนังสืออนุมัติงานเดิม */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-yellow">จุดที่ ๑</span>
+                          <span className="variable-badge-num badge-yellow">จุดที่ 1</span>
                           <strong style={{ fontSize: '14px', color: '#b45309' }}>หนังสืออนุมัติงานเดิม (ที่อ้างถึง)</strong>
                         </div>
                         <input
@@ -1185,30 +1185,30 @@ export default function ProcurementPrinciplePage() {
                           className="big-input"
                           value={formData.approvalDocRef}
                           onChange={(e) => handleUpdateVariable('approvalDocRef', e.target.value)}
-                          placeholder="เช่น ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙"
+                          placeholder="เช่น ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 มกราคม 2569"
                         />
                         <div className="var-quick-options">
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ มกราคม ๒๕๖๙')}
+                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 มกราคม 2569')}
                           >
-                            ตัวอย่าง ๑: ก.๓ กวว.(วร) ๓๓๒/๒๕๖๙ ลงวันที่ ๒๙ ม.ค. ๖๙
+                            ตัวอย่าง 1: ก.3 กวว.(วร) 332/2569 ลงวันที่ 29 ม.ค. 69
                           </button>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ สิงหาคม ๒๕๖๗')}
+                            onClick={() => handleUpdateVariable('approvalDocRef', 'ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 สิงหาคม 2567')}
                           >
-                            ตัวอย่าง ๒: ก.๓ กวว.(ว) ๑๘๔๗/๒๕๖๗ ลงวันที่ ๑๒ ส.ค. ๖๗
+                            ตัวอย่าง 2: ก.3 กวว.(ว) 1847/2567 ลงวันที่ 12 ส.ค. 67
                           </button>
                         </div>
                       </div>
 
-                      {/* Card 2: จุดที่ ๒: ชื่องานและสถานที่ก่อสร้าง */}
+                      {/* Card 2: จุดที่ 2: ชื่องานและสถานที่ก่อสร้าง */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-blue">จุดที่ ๒</span>
+                          <span className="variable-badge-num badge-blue">จุดที่ 2</span>
                           <strong style={{ fontSize: '14px', color: '#1d4ed8' }}>ชื่องานและสถานที่ก่อสร้าง</strong>
                         </div>
                         <textarea
@@ -1216,14 +1216,14 @@ export default function ProcurementPrinciplePage() {
                           className="big-textarea"
                           value={formData.projectName}
                           onChange={(e) => handleUpdateVariable('projectName', e.target.value)}
-                          placeholder="เช่น แผนงานพาดเพิ่ม ๒๒ เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม"
+                          placeholder="เช่น แผนงานพาดเพิ่ม 22 เควี รองรับสถานีอัดประจุ สถานที่ก่อสร้าง ต.พระประโทน อ.เมือง จ.นครปฐม"
                         />
                       </div>
 
-                      {/* Card 3: จุดที่ ๓: ผู้เปิดงาน */}
+                      {/* Card 3: จุดที่ 3: ผู้เปิดงาน */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-green">จุดที่ ๓</span>
+                          <span className="variable-badge-num badge-green">จุดที่ 3</span>
                           <strong style={{ fontSize: '14px', color: '#15803d' }}>ผู้เปิดงาน (ชื่อและตำแหน่ง)</strong>
                         </div>
                         <input
@@ -1231,30 +1231,30 @@ export default function ProcurementPrinciplePage() {
                           className="big-input"
                           value={formData.workOpenerName}
                           onChange={(e) => handleUpdateVariable('workOpenerName', e.target.value)}
-                          placeholder="เช่น นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)"
+                          placeholder="เช่น นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)"
                         />
                         <div className="var-quick-options">
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('workOpenerName', 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)')}
+                            onClick={() => handleUpdateVariable('workOpenerName', 'นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)')}
                           >
-                            📌 นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก๓)
+                            📌 นายพิสันติ์ จิตต์ปลื้ม ผห.กร.กรย.(ก3)
                           </button>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => handleUpdateVariable('workOpenerName', 'นายอุดมศักดิ์ จันทร์กลั่น หชง.๔ ผกร.กรย.(ก๓)')}
+                            onClick={() => handleUpdateVariable('workOpenerName', 'นายอุดมศักดิ์ จันทร์กลั่น หชง.4 ผกร.กรย.(ก3)')}
                           >
-                            📌 นายอุดมศักดิ์ จันทร์กลั่น หชง.๔ ผกร.กรย.(ก๓)
+                            📌 นายอุดมศักดิ์ จันทร์กลั่น หชง.4 ผกร.กรย.(ก3)
                           </button>
                         </div>
                       </div>
 
-                      {/* Card 4: จุดที่ ๔: บัญชีและหมายเลขงาน WBS / โครงข่าย / กิจกรรม */}
+                      {/* Card 4: จุดที่ 4: บัญชีและหมายเลขงาน WBS / โครงข่าย / กิจกรรม */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-orange">จุดที่ ๔</span>
+                          <span className="variable-badge-num badge-orange">จุดที่ 4</span>
                           <strong style={{ fontSize: '14px', color: '#c2410c' }}>บัญชีและหมายเลขงาน WBS / โครงข่าย / กิจกรรม</strong>
                         </div>
                         <div className="big-grid-3">
@@ -1291,10 +1291,10 @@ export default function ProcurementPrinciplePage() {
                         </div>
                       </div>
 
-                      {/* Card 5: จุดที่ ๕: สิ่งของหรือบริการที่จัดซื้อ/จัดจ้าง */}
+                      {/* Card 5: จุดที่ 5: สิ่งของหรือบริการที่จัดซื้อ/จัดจ้าง */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-purple">จุดที่ ๕</span>
+                          <span className="variable-badge-num badge-purple">จุดที่ 5</span>
                           <strong style={{ fontSize: '14px', color: '#7c3aed' }}>
                             {formData.procurementType === 'buy' ? 'พัสดุ/อุปกรณ์ที่ขอจัดซื้อ' : 'งานจ้าง/เครื่องจักรที่ขอจัดจ้าง'}
                           </strong>
@@ -1306,7 +1306,7 @@ export default function ProcurementPrinciplePage() {
                             className="big-textarea"
                             value={formData.itemDescription}
                             onChange={(e) => handleUpdateVariable('itemDescription', e.target.value)}
-                            placeholder={formData.procurementType === 'buy' ? 'เช่น ดอกสว่าน BDS HKK-N ๐๒๒ ดอกเจ็ทบอช ๒๒ mm. เจาะลึก ๓๐ mm. จำนวน ๒ ดอก' : 'เช่น รถเครนขนาด ๒๕ ตัน พร้อมพนักงานขับรถ จำนวน ๑ คัน'}
+                            placeholder={formData.procurementType === 'buy' ? 'เช่น ดอกสว่าน BDS HKK-N 022 ดอกเจ็ทบอช 22 mm. เจาะลึก 30 mm. จำนวน 2 ดอก' : 'เช่น รถเครนขนาด 25 ตัน พร้อมพนักงานขับรถ จำนวน 1 คัน'}
                           />
                         </div>
                         <div className="big-grid-2">
@@ -1336,24 +1336,24 @@ export default function ProcurementPrinciplePage() {
                               className="big-input"
                               value={formData.targetDateOrPeriod || ''}
                               onChange={(e) => handleUpdateVariable('targetDateOrPeriod', e.target.value)}
-                              placeholder="เช่น ในวันจันทร์ที่ ๑๙ ตุลาคม ๒๕๖๙"
+                              placeholder="เช่น ในวันจันทร์ที่ 19 ตุลาคม 2569"
                             />
                           </div>
                         </div>
                       </div>
 
-                      {/* Card 6: ๒. ข้อเท็จจริง (เหตุผลความจำเป็น) */}
+                      {/* Card 6: 2. ข้อเท็จจริง (เหตุผลความจำเป็น) */}
                       <div className="variable-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                          <span className="variable-badge-num badge-teal">ข้อ ๒</span>
-                          <strong style={{ fontSize: '14px', color: '#0f766e' }}>๒. ข้อเท็จจริง (เหตุผลความจำเป็นในการจัดซื้อ/จัดจ้าง)</strong>
+                          <span className="variable-badge-num badge-teal">ข้อ 2</span>
+                          <strong style={{ fontSize: '14px', color: '#0f766e' }}>2. ข้อเท็จจริง (เหตุผลความจำเป็นในการจัดซื้อ/จัดจ้าง)</strong>
                         </div>
                         <textarea
                           rows={4}
                           className="big-textarea"
                           value={formData.factsText}
                           onChange={(e) => setFormData({ ...formData, factsText: e.target.value })}
-                          placeholder="ระบุเหตุผลความจำเป็น เช่น งานก่อสร้างออกแบบให้ใช้เหล็กรางน้ำขนาด ๔.๕๐ เมตร... จำเป็นต้องเจาะรู... ดอกสว่านเดิมชำรุดไม่สามารถใช้งานได้"
+                          placeholder="ระบุเหตุผลความจำเป็น เช่น งานก่อสร้างออกแบบให้ใช้เหล็กรางน้ำขนาด 4.50 เมตร... จำเป็นต้องเจาะรู... ดอกสว่านเดิมชำรุดไม่สามารถใช้งานได้"
                         />
                       </div>
 
@@ -1363,20 +1363,20 @@ export default function ProcurementPrinciplePage() {
                           <Sparkles size={14} /> ตัวอย่างข้อความที่จะปรากฏในบันทึกข้อความ (Live Preview):
                         </div>
                         <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
-                          <strong>๑. เรื่องเดิม:</strong> {formData.backgroundText}
+                          <strong>1. เรื่องเดิม:</strong> {formData.backgroundText}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1e293b', marginBottom: '6px' }}>
-                          <strong>๒. ข้อเท็จจริง:</strong> {formData.factsText}
+                          <strong>2. ข้อเท็จจริง:</strong> {formData.factsText}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1e293b' }}>
-                          <strong>๓. ข้อเสนอเพื่อพิจารณา:</strong> {formData.proposalText}
+                          <strong>3. ข้อเสนอเพื่อพิจารณา:</strong> {formData.proposalText}
                         </div>
                       </div>
                     </div>
                   ) : (
                     <div>
                       <div className="big-field-group">
-                        <label className="big-label">๑. เรื่องเดิม</label>
+                        <label className="big-label">1. เรื่องเดิม</label>
                         <textarea
                           rows={3}
                           className="big-textarea"
@@ -1386,7 +1386,7 @@ export default function ProcurementPrinciplePage() {
                       </div>
 
                       <div className="big-field-group">
-                        <label className="big-label">๒. ข้อเท็จจริง (เหตุผลความจำเป็น)</label>
+                        <label className="big-label">2. ข้อเท็จจริง (เหตุผลความจำเป็น)</label>
                         <textarea
                           rows={4}
                           className="big-textarea"
@@ -1396,7 +1396,7 @@ export default function ProcurementPrinciplePage() {
                       </div>
 
                       <div className="big-field-group">
-                        <label className="big-label">๓. ข้อเสนอเพื่อพิจารณา</label>
+                        <label className="big-label">3. ข้อเสนอเพื่อพิจารณา</label>
                         <textarea
                           rows={3}
                           className="big-textarea"
@@ -1450,29 +1450,29 @@ export default function ProcurementPrinciplePage() {
                       className="big-input"
                       value={formData.signerTitle}
                       onChange={(e) => setFormData({ ...formData, signerTitle: e.target.value })}
-                      placeholder="เช่น อก.รย.(ก๓)"
+                      placeholder="เช่น อก.รย.(ก3)"
                     />
                     <div className="var-quick-options" style={{ marginTop: '6px' }}>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, signerTitle: 'อก.รย.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, signerTitle: 'อก.รย.(ก3)' })}
                       >
-                        📌 อก.รย.(ก๓)
+                        📌 อก.รย.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)' })}
                       >
-                        📌 รก.รย.(ก๓) ปฏิบัติงานแทน อก.รย.(ก๓)
+                        📌 รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
                       </button>
                       <button
                         type="button"
                         className="var-quick-opt-btn"
-                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก๓)' })}
+                        onClick={() => setFormData({ ...formData, signerTitle: 'รก.รย.(ก3)' })}
                       >
-                        📌 รก.รย.(ก๓)
+                        📌 รก.รย.(ก3)
                       </button>
                     </div>
                   </div>
@@ -1484,7 +1484,7 @@ export default function ProcurementPrinciplePage() {
                       className="big-input"
                       value={formData.signerDate}
                       onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                      placeholder="เช่น ๔ ตุลาคม ๒๕๖๙"
+                      placeholder="เช่น 4 ตุลาคม 2569"
                     />
                   </div>
 
@@ -1507,22 +1507,22 @@ export default function ProcurementPrinciplePage() {
                           className="big-input"
                           value={formData.approverTitle}
                           onChange={(e) => setFormData({ ...formData, approverTitle: e.target.value })}
-                          placeholder="เช่น อฝ.วบ.(ก๓)"
+                          placeholder="เช่น อฝ.วบ.(ก3)"
                         />
                         <div className="var-quick-options" style={{ marginTop: '6px' }}>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => setFormData({ ...formData, approverTitle: 'อฝ.วบ.(ก๓)' })}
+                            onClick={() => setFormData({ ...formData, approverTitle: 'อฝ.วบ.(ก3)' })}
                           >
-                            📌 อฝ.วบ.(ก๓)
+                            📌 อฝ.วบ.(ก3)
                           </button>
                           <button
                             type="button"
                             className="var-quick-opt-btn"
-                            onClick={() => setFormData({ ...formData, approverTitle: 'รฝ.วบ.(ก๓)' })}
+                            onClick={() => setFormData({ ...formData, approverTitle: 'รฝ.วบ.(ก3)' })}
                           >
-                            📌 รฝ.วบ.(ก๓)
+                            📌 รฝ.วบ.(ก3)
                           </button>
                         </div>
                       </div>
@@ -1533,24 +1533,24 @@ export default function ProcurementPrinciplePage() {
                       <input
                         type="text"
                         className="big-input"
-                        value={formData.approverEndorsementTo || '- อก.รย.(ก๓)'}
+                        value={formData.approverEndorsementTo || '- อก.รย.(ก3)'}
                         onChange={(e) => setFormData({ ...formData, approverEndorsementTo: e.target.value })}
-                        placeholder="เช่น - อก.รย.(ก๓)"
+                        placeholder="เช่น - อก.รย.(ก3)"
                       />
                       <div className="var-quick-options" style={{ marginTop: '6px' }}>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- อก.รย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- อก.รย.(ก3)' })}
                         >
-                          📌 - อก.รย.(ก๓)
+                          📌 - อก.รย.(ก3)
                         </button>
                         <button
                           type="button"
                           className="var-quick-opt-btn"
-                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- ผกร.กรย.(ก๓)' })}
+                          onClick={() => setFormData({ ...formData, approverEndorsementTo: '- ผกร.กรย.(ก3)' })}
                         >
-                          📌 - ผกร.กรย.(ก๓)
+                          📌 - ผกร.กรย.(ก3)
                         </button>
                       </div>
                     </div>

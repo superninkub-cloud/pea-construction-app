@@ -18,12 +18,12 @@ export interface ConcreteTransferFormData {
   // ส่วนหัวบันทึกข้อความ
   docFrom: string;              // จาก เช่น กรย.(ก3)
   docTo: string;                // ถึง เช่น กผภ.
-  docNo: string;                // เลขที่หนังสือ เช่น ก.3 กรย.(กร.) - ๒๒๓๘/๒๕๖๙
-  docDate: string;              // วันที่ เช่น ๕ ต.ค. ๒๕๖๙
+  docNo: string;                // เลขที่หนังสือ เช่น ก.3 กรย.(กร.) - 2238/2569
+  docDate: string;              // วันที่ เช่น 5 ต.ค. 2569
   subject: string;              // เรื่อง เช่น ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.กจ., รบ. มาใช้งานพื้นที่ กฟก.3
   salutation: string;           // เรียน เช่น อก.ผภ.
 
-  // แหล่งที่มาและงานโครงการ (วรรคที่ ๑)
+  // แหล่งที่มาและงานโครงการ (วรรคที่ 1)
   sourceUnits: string;          // เช่น ผรค.รบ.,กจ. หรือ ผรค.กจ. หรือ ผรค.รบ.
   planDescription: string;      // เช่น กฟก.3 มีแผนงานก่อสร้างย้ายแนว 115 เควี คลองท่าแร้ง ฝั่งขาออก กทม. จ.สมุทรสาคร
   wbsNo: string;                // เช่น I-69-I-SM269.M4.1105
@@ -41,21 +41,21 @@ export interface ConcreteTransferFormData {
   // ผู้ลงนามหลัก (ขวากลาง)
   signerName: string;           // นายอนันต์ กาญจนอุปถัมภ์
   signerPosition: string;       // รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
-  signerDate: string;           // ๕ ต.ค. ๖๙
+  signerDate: string;           // 5 ต.ค. 69
 
   // ส่วนส่งต่อเพื่อโปรดทราบ (ซ้ายล่าง)
   hasInformSection: boolean;    // true
-  informDocNo: string;          // ที่ ก.3 กรย.(กร.) ๒๒๓๘/๒๕๖๙
+  informDocNo: string;          // ที่ ก.3 กรย.(กร.) 2238/2569
   informReceivers: string;      // เช่น ผจก.กฟจ.สมุทรสาคร, ผจก.กฟส.สมุทรสาคร 2
   informActionText: string;     // เพื่อโปรดทราบ และแจ้ง ผคพ. พร้อมส่วนเกี่ยวข้องต่อไป
   informSignerName: string;     // นายอนันต์ กาญจนอุปถัมภ์
   informSignerPosition: string; // รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
-  informDate: string;           // ๕ ต.ค. ๖๙
+  informDate: string;           // 5 ต.ค. 69
 
   // เกษียนหนังสือ (ขวาล่าง)
   hasRoutingStamps: boolean;    // true
-  stampHpKrDate: string;        // หผ. เช่น ๕ ต.ค. ๖๙
-  stampCpKrDate: string;        // ชผ. เช่น ๕ ต.ค. ๖๙
+  stampHpKrDate: string;        // หผ. เช่น 5 ต.ค. 69
+  stampCpKrDate: string;        // ชผ. เช่น 5 ต.ค. 69
 
   // ท้ายกระดาษ
   contactDepartment: string;    // แผนกก่อสร้างระบบไฟฟ้า
@@ -77,7 +77,7 @@ export function toArabicNumerals(str: string | number | undefined | null): strin
   if (str === undefined || str === null) return '';
   const thaiToEng: Record<string, string> = {
     '๐': '0', '๑': '1', '๒': '2', '๓': '3', '๔': '4',
-    '๕': '5', '๖': '6', '๗': '7', '๘': '8', '๙': '9'
+    '5': '5', '6': '6', '7': '7', '8': '8', '9': '9'
   };
   return str.toString().replace(/[๐-๙]/g, (match) => thaiToEng[match] || match);
 }
@@ -132,8 +132,8 @@ export const POPULAR_CONCRETE_PRODUCTS = [
 export const SAMPLE_CONCRETE_TRANSFER_1: ConcreteTransferFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กผภ.',
-  docNo: 'ก.3 กรย.(กร.) - ๒๒๓๘/๒๕๖๙',
-  docDate: '๕ ต.ค. ๒๕๖๙',
+  docNo: 'ก.3 กรย.(กร.) - 2238/2569',
+  docDate: '5 ต.ค. 2569',
   subject: 'ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.กจ., รบ. มาใช้งานพื้นที่ กฟก.3',
   salutation: 'อก.ผภ.',
 
@@ -157,19 +157,19 @@ export const SAMPLE_CONCRETE_TRANSFER_1: ConcreteTransferFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '๕ ต.ค. ๖๙',
+  signerDate: '5 ต.ค. 69',
 
   hasInformSection: true,
-  informDocNo: 'ก.3 กรย.(กร.) ๒๒๓๘/๒๕๖๙',
+  informDocNo: 'ก.3 กรย.(กร.) 2238/2569',
   informReceivers: 'ผจก.กฟจ.สมุทรสาคร, ผจก.กฟส.สมุทรสาคร 2',
   informActionText: 'เพื่อโปรดทราบ และแจ้ง ผคพ. พร้อมส่วนเกี่ยวข้องต่อไป',
   informSignerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   informSignerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  informDate: '๕ ต.ค. ๖๙',
+  informDate: '5 ต.ค. 69',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '๕ ต.ค. ๖๙',
-  stampCpKrDate: '๕ ต.ค. ๖๙',
+  stampHpKrDate: '5 ต.ค. 69',
+  stampCpKrDate: '5 ต.ค. 69',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า'
 };
@@ -180,8 +180,8 @@ export const SAMPLE_CONCRETE_TRANSFER_1: ConcreteTransferFormData = {
 export const SAMPLE_CONCRETE_TRANSFER_2: ConcreteTransferFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กผภ.',
-  docNo: 'ก.3 กรย.(กร) ๒๔๒๑/๒๕๖๙',
-  docDate: '๑๔ ต.ค. ๒๕๖๙',
+  docNo: 'ก.3 กรย.(กร) 2421/2569',
+  docDate: '14 ต.ค. 2569',
   subject: 'ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.กจ. มาใช้งานพื้นที่ กฟก.3',
   salutation: 'อก.ผภ.',
 
@@ -201,19 +201,19 @@ export const SAMPLE_CONCRETE_TRANSFER_2: ConcreteTransferFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '๑๔ ต.ค. ๖๙',
+  signerDate: '14 ต.ค. 69',
 
   hasInformSection: true,
-  informDocNo: 'ก.3 กรย.(กร) ๒๔๒๑/๒๕๖๙',
+  informDocNo: 'ก.3 กรย.(กร) 2421/2569',
   informReceivers: 'ผจก.กฟจ.กาญจนบุรี',
   informActionText: 'เพื่อโปรดทราบ และแจ้ง ผคพ.ดำเนินการในส่วนเกี่ยวข้องต่อไป',
   informSignerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   informSignerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  informDate: '๑๔ ต.ค. ๖๙',
+  informDate: '14 ต.ค. 69',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '๑๔/๑๐/๖๙',
-  stampCpKrDate: '๑๖/๑๐/๒๕๖๙',
+  stampHpKrDate: '14/10/69',
+  stampCpKrDate: '16/10/2569',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า'
 };
@@ -224,8 +224,8 @@ export const SAMPLE_CONCRETE_TRANSFER_2: ConcreteTransferFormData = {
 export const SAMPLE_CONCRETE_TRANSFER_3: ConcreteTransferFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กผภ.',
-  docNo: 'ก.3 กรย.(กร.) - ๒๔๒๑/๒๕๖๙',
-  docDate: '๑๔ ต.ค. ๒๕๖๙',
+  docNo: 'ก.3 กรย.(กร.) - 2421/2569',
+  docDate: '14 ต.ค. 2569',
   subject: 'ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.รบ. มาใช้งานพื้นที่ กฟก.3',
   salutation: 'อก.ผภ.',
 
@@ -245,19 +245,19 @@ export const SAMPLE_CONCRETE_TRANSFER_3: ConcreteTransferFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '๑๔ ต.ค. ๖๙',
+  signerDate: '14 ต.ค. 69',
 
   hasInformSection: true,
-  informDocNo: 'ก.3 กรย.(กร) ๒๔๒๑/๒๕๖๙',
+  informDocNo: 'ก.3 กรย.(กร) 2421/2569',
   informReceivers: 'ผจก.กฟจ.สมุทรสาคร, ผจก.กฟส.สมุทรสาคร 2',
   informActionText: 'เพื่อโปรดทราบ และแจ้ง ผคพ. พร้อมส่วนเกี่ยวข้องต่อไป',
   informSignerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   informSignerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  informDate: '๑๔ ต.ค. ๖๙',
+  informDate: '14 ต.ค. 69',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '๑๔/๑๐/๖๙',
-  stampCpKrDate: '๑๖/๑๐/๒๕๖๙',
+  stampHpKrDate: '14/10/69',
+  stampCpKrDate: '16/10/2569',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า'
 };

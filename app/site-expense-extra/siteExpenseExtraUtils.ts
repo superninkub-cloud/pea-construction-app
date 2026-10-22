@@ -9,7 +9,7 @@
 export interface SiteExpenseJobItem {
   id: string;
   itemNo?: number;
-  jobName: string;              // เช่น งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ ๑)
+  jobName: string;              // เช่น งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ 1)
   wbsNumber: string;            // เช่น P-TDD02.3-I-PMNIA.0019
   initialPercent: number;       // เช่น 80
   initialAmount: number;        // เช่น 636788
@@ -28,22 +28,22 @@ export interface SiteExpenseExtraFormData {
   subject: string;              // ขอให้จัดสรรงบประมาณค่าใช้จ่ายหน้างานเพิ่มเติม
   salutation: string;           // อก.วว.(ก3)
 
-  // หนังสืออ้างถึงเดิม (วรรคที่ ๑)
+  // หนังสืออ้างถึงเดิม (วรรคที่ 1)
   refDocNo: string;             // ก.3 กวว.(วร) 826/2568
   refDocDate: string;           // 2 พฤษภาคม 2568
-  projectName: string;          // งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ ๑, ๒)
+  projectName: string;          // งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ 1, 2)
   programName: string;          // โครงการ คพจ.2
 
   // รายการโครงการและงบประมาณเดิม
   jobItems: SiteExpenseJobItem[];
 
-  // รายละเอียดการดำเนินงานและเหตุผลความจำเป็น (วรรคที่ ๒)
+  // รายละเอียดการดำเนินงานและเหตุผลความจำเป็น (วรรคที่ 2)
   supervisorName: string;       // นายวีรพัฒน์ นาลดมัย
   supervisorPosition: string;   // ผพง.6 ผกร.กรย.(ก3)
   progressPercent: number;      // 80
   justificationReason: string;  // แต่เนื่องจากงานก่อสร้างดังกล่าวเป็นงานก่อสร้างปรับปรุงระบบจำหน่าย มีความจำเป็นต้องระดมชุดปฏิบัติงานก่อสร้างจาก กรย.(ก3) และ กฟฟ. ใกล้เคียงเข้าร่วมปฏิบัติงานในช่วงวันหยุดราชการทำให้สิ้นเปลืองค่าใช้จ่าย ทำให้งบประมาณได้รับจัดสรรไม่เพียงพอต่อการดำเนินการก่อสร้าง
 
-  // คำขออนุมัติจัดสรรงบประมาณ (วรรคที่ ๓)
+  // คำขออนุมัติจัดสรรงบประมาณ (วรรคที่ 3)
   requestObjective: string;     // ดังนั้นเพื่อให้ดำเนินการก่อสร้างได้แล้วเสร็จ และมีงบประมาณเพียงพอต่อการดำเนินงาน จึงขอให้ กวว.(ก3) พิจารณาจัดสรรงบประมาณค่าใช้จ่ายหน้างานเพิ่มเติมเป็น 100 % จำนวน 2 งานดังนี้
 
   // ผู้ลงนามหลัก
@@ -76,7 +76,7 @@ export function toArabicNumerals(str: string | number | undefined | null): strin
   if (str === undefined || str === null) return '';
   const thaiToEng: Record<string, string> = {
     '๐': '0', '๑': '1', '๒': '2', '๓': '3', '๔': '4',
-    '๕': '5', '๖': '6', '๗': '7', '๘': '8', '๙': '9'
+    '5': '5', '6': '6', '7': '7', '8': '8', '9': '9'
   };
   return str.toString().replace(/[๐-๙]/g, (match) => thaiToEng[match] || match);
 }
@@ -129,13 +129,13 @@ export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
 
   refDocNo: 'ก.3 กวว.(วร) 826/2568',
   refDocDate: '2 พฤษภาคม 2568',
-  projectName: 'งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ ๑, ๒)',
+  projectName: 'งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ 1, 2)',
   programName: 'โครงการ คพจ.2',
 
   jobItems: [
     {
       id: 'job-1',
-      jobName: 'งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ ๑)',
+      jobName: 'งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ 1)',
       wbsNumber: 'P-TDD02.3-I-PMNIA.0019',
       initialPercent: 80,
       initialAmount: 636788,
@@ -145,7 +145,7 @@ export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
     },
     {
       id: 'job-2',
-      jobName: 'งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ ๒)',
+      jobName: 'งานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ 2)',
       wbsNumber: 'P-TDD02.3-I-PMNIA.0020',
       initialPercent: 80,
       initialAmount: 839645,
@@ -284,7 +284,7 @@ export function generateSiteExpenseWordHtml(data: SiteExpenseExtraFormData): str
 
   <p><span class="bold">เรียน</span> ${data.salutation}</p>
 
-  <!-- วรรคที่ ๑: อ้างถึงหนังสือเดิมและแสดงรายการ 80% -->
+  <!-- วรรคที่ 1: อ้างถึงหนังสือเดิมและแสดงรายการ 80% -->
   <p class="indent">
     ตามหนังสือเลขที่ ${tn(data.refDocNo)} ลงวันที่ ${tn(data.refDocDate)} ตามอนุมัติหลักการประมาณการ${data.projectName} ตาม${data.programName} ดังนี้
   </p>
@@ -295,12 +295,12 @@ export function generateSiteExpenseWordHtml(data: SiteExpenseExtraFormData): str
   </p>
   `).join('')}
 
-  <!-- วรรคที่ ๒: สถานะการดำเนินงานและเหตุผลความจำเป็น -->
+  <!-- วรรคที่ 2: สถานะการดำเนินงานและเหตุผลความจำเป็น -->
   <p class="indent" style="margin-top: 8pt;">
     ${data.projectName} ดำเนินการก่อสร้างโดยชุดงาน${data.supervisorName} ${data.supervisorPosition} ปัจจุบันดำเนินการไปประมาณ ${tn(data.progressPercent)}% ${data.justificationReason}
   </p>
 
-  <!-- วรรคที่ ๓: คำขออนุมัติจัดสรรเพิ่มเติมเป็น 100% -->
+  <!-- วรรคที่ 3: คำขออนุมัติจัดสรรเพิ่มเติมเป็น 100% -->
   <p class="indent" style="margin-top: 8pt;">
     ${data.requestObjective}
   </p>

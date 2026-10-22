@@ -21,12 +21,18 @@ import AuthWrapper from "./components/AuthWrapper";
 import ClientLayout from "./components/ClientLayout";
 
 
-import { Prompt } from 'next/font/google';
+import { Prompt, Sarabun } from 'next/font/google';
 
 const prompt = Prompt({
   subsets: ['latin', 'thai'],
   weight: ['300', '400', '500', '600', '700', '800', '900'],
   variable: '--font-prompt',
+});
+
+const sarabun = Sarabun({
+  subsets: ['latin', 'thai'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-sarabun',
 });
 
 export default function RootLayout({
@@ -35,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="th" className={prompt.variable}>
+    <html lang="th" className={`${prompt.variable} ${sarabun.variable}`}>
       <body className={`${prompt.className} font-sans`}>
         <AuthWrapper>
           <ClientLayout>

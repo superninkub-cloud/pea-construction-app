@@ -15,28 +15,28 @@ export interface CarRepairFormData {
   docFrom: string;              // จาก เช่น ผกร. หรือ กรย.(ก3)
   docTo: string;                // ถึง เช่น กรย.(ก3) หรือ กฟส.สค.2(บพว.)
   docNo: string;                // เลขที่หนังสือ เช่น ก.3 กรย.(กร)- หรือ ก.3 กรย.(กร)
-  docDate: string;              // วันที่ เช่น ๒๐ ต.ค. ๒๕๖๗
+  docDate: string;              // วันที่ เช่น 20 ต.ค. 2567
   subject: string;              // เรื่อง
   salutation: string;           // เรียน เช่น อก.รย.(ก3) ผ่าน รก.รย.(ก3) หรือ ผจก.กฟส.สค.2(บพว.)
 
   // Vehicle Information
-  vehicleType: string;          // ชนิดรถ เช่น รถเครน TADANO ขนาดพิกัด ๓๐ ตัน/เมตร, รถยนต์เทรลเลอร์
-  licensePlate: string;         // ทะเบียนรถ เช่น ๙๐-๗๓๓๒ นฐ., ๘๕-๓๐๙๐ นฐ.
+  vehicleType: string;          // ชนิดรถ เช่น รถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร, รถยนต์เทรลเลอร์
+  licensePlate: string;         // ทะเบียนรถ เช่น 90-7332 นฐ., 85-3090 นฐ.
   assignedUnit: string;         // สังกัด/ใช้งานประจำ เช่น ผกร. หรือ กรย.(ก3)
   driverName: string;           // ชื่อพนักงานขับรถ เช่น นายขวัญเรือน มีถาวร, นายธวัชชัย โต๊ะศรีสุข
   driverPosition: string;       // ตำแหน่ง เช่น พขร.(บ)
   
   // Meter & Usage (กรณีที่ 1 พบบ่อย)
-  mileage: string;              // เลขไมล์ เช่น ๕๔,๒๖๘
-  craneHours: string;           // ชั่วโมงเครน เช่น ๑,๘๙๙
-  engineHours: string;          // ชั่วโมงเครื่อง เช่น ๓,๘๓๕.๕
+  mileage: string;              // เลขไมล์ เช่น 54,268
+  craneHours: string;           // ชั่วโมงเครน เช่น 1,899
+  engineHours: string;          // ชั่วโมงเครื่อง เช่น 3,835.5
 
   // Work & Site Details (กรณีที่ 2 พบบ่อย)
   peaAreaName: string;          // การไฟฟ้าพื้นที่ เช่น กฟส.สค.2(บพว.)
   workDetails: string;          // รายละเอียดงาน เช่น ก่อสร้างปรับปรุงระบบจำหน่าย (บริเวณช่วงแยกดอนราวถึงวัดหลักสี่) ต.ยกกระบัตร อ.บ้านแพ้ว จ.สมุทรสาคร
   wbsNo: string;                // หมายเลขงาน WBS เช่น I-68-I-SM2'A.IQ.2001
-  networkNo: string;            // โครงข่าย เช่น ๗๐๐๑๑๑๗๓๖๙
-  activityNo: string;           // กิจกรรม เช่น ๐๐๕๐
+  networkNo: string;            // โครงข่าย เช่น 7001117369
+  activityNo: string;           // กิจกรรม เช่น 0050
 
   // Breakdown & Repair items
   defectItems: string[];        // รายการชำรุด เช่น ["สายวัดความยาวบูมชำรุด", "ข้อต่อท่อไอเสียชำรุด"]
@@ -57,7 +57,7 @@ export interface CarRepairFormData {
   commandText: string;          // ข้อความสั่งการ เช่น ดำเนินการต่อไป
   commanderName: string;        // เช่น นายอนันต์ กาญจนอุปถัมภ์
   commanderPosition: string;    // เช่น รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)
-  commanderDate: string;        // เช่น ๑๙ ต.ค. ๖๗
+  commanderDate: string;        // เช่น 19 ต.ค. 67
 
   // Visual Digital Signature Flags
   showProposerDigitalSign: boolean;
@@ -80,7 +80,7 @@ export function toArabicNumerals(str: string | number | undefined | null): strin
   if (str === undefined || str === null) return '';
   const thaiToEng: Record<string, string> = {
     '๐': '0', '๑': '1', '๒': '2', '๓': '3', '๔': '4',
-    '๕': '5', '๖': '6', '๗': '7', '๘': '8', '๙': '9'
+    '5': '5', '6': '6', '7': '7', '8': '8', '9': '9'
   };
   return str.toString().replace(/[๐-๙]/g, (match) => thaiToEng[match] || match);
 }
@@ -117,15 +117,15 @@ export function getTodayThaiDate(format: 'short' | 'full' | 'thai_num' = 'short'
  * Popular PEA Vehicle Types
  */
 export const POPULAR_VEHICLE_TYPES = [
-  'รถเครน TADANO ขนาดพิกัด ๓๐ ตัน/เมตร',
-  'รถเครน ขนาดพิกัด ๒๕ ตัน',
+  'รถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร',
+  'รถเครน ขนาดพิกัด 25 ตัน',
   'รถยนต์เทรลเลอร์',
-  'รถบรรทุก ๖ ล้อ ติดเครน ๕ ตัน',
-  'รถบรรทุก ๖ ล้อ เทท้าย',
-  'รถบรรทุก ๑๐ ล้อ หัวลาก',
+  'รถบรรทุก 6 ล้อ ติดเครน 5 ตัน',
+  'รถบรรทุก 6 ล้อ เทท้าย',
+  'รถบรรทุก 10 ล้อ หัวลาก',
   'รถขุดตีนตะขาบ (Excavator)',
   'รถขุดล้อยาง (Backhoe)',
-  'รถยนต์บรรทุกดีเซล ๔ ประตู (Double Cab)',
+  'รถยนต์บรรทุกดีเซล 4 ประตู (Double Cab)',
   'รถยนต์บรรทุกดีเซล ตอนเดียว',
   'รถเจาะหลุมติดตั้งเสาไฟฟ้า',
   'รถกระเช้าซ่อมแซมระบบไฟฟ้า'
@@ -185,71 +185,71 @@ export interface VehiclePreset {
 export const COMMON_VEHICLE_PRESETS: VehiclePreset[] = [
   {
     key: 'tadano-crane',
-    badge: '🏗️ รถเครน TADANO ๓๐ ตัน/เมตร (๙๐-๗๓๓๒ นฐ.)',
-    vehicleType: 'รถเครน TADANO ขนาดพิกัด ๓๐ ตัน/เมตร',
-    licensePlate: '๙๐-๗๓๓๒ นฐ.',
+    badge: '🏗️ รถเครน TADANO 30 ตัน/เมตร (90-7332 นฐ.)',
+    vehicleType: 'รถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร',
+    licensePlate: '90-7332 นฐ.',
     driverName: 'นายขวัญเรือน มีถาวร',
     driverPosition: 'พขร.(บ)',
-    mileage: '๕๔,๒๖๘',
-    craneHours: '๑,๘๘๗',
-    engineHours: '๓,๘๓๕.๕',
-    subject: 'ขอแจ้งซ่อมรถเครน TADANO ขนาดพิกัด ๓๐ ตัน/เมตร หมายเลขทะเบียน ๙๐-๗๓๓๒ นฐ.'
+    mileage: '54,268',
+    craneHours: '1,887',
+    engineHours: '3,835.5',
+    subject: 'ขอแจ้งซ่อมรถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร หมายเลขทะเบียน 90-7332 นฐ.'
   },
   {
     key: 'kato-crane',
-    badge: '🏗️ รถเครน KATO ๒๕ ตัน (๘๑-๔๕๒๐ นฐ.)',
-    vehicleType: 'รถเครน KATO ขนาดพิกัด ๒๕ ตัน',
-    licensePlate: '๘๑-๔๕๒๐ นฐ.',
+    badge: '🏗️ รถเครน KATO 25 ตัน (81-4520 นฐ.)',
+    vehicleType: 'รถเครน KATO ขนาดพิกัด 25 ตัน',
+    licensePlate: '81-4520 นฐ.',
     driverName: 'นายสมบัติ ศรีสุข',
     driverPosition: 'พขร.(บ)',
-    mileage: '๗๘,๔๐๐',
-    craneHours: '๒,๑๕๐',
-    engineHours: '๔,๒๐๐',
-    subject: 'ขอแจ้งซ่อมรถเครน KATO ขนาดพิกัด ๒๕ ตัน หมายเลขทะเบียน ๘๑-๔๕๒๐ นฐ.'
+    mileage: '78,400',
+    craneHours: '2,150',
+    engineHours: '4,200',
+    subject: 'ขอแจ้งซ่อมรถเครน KATO ขนาดพิกัด 25 ตัน หมายเลขทะเบียน 81-4520 นฐ.'
   },
   {
     key: 'trailer-truck',
-    badge: '🚛 รถยนต์เทรลเลอร์ (๘๕-๓๐๙๐ นฐ.)',
+    badge: '🚛 รถยนต์เทรลเลอร์ (85-3090 นฐ.)',
     vehicleType: 'รถยนต์เทรลเลอร์',
-    licensePlate: '๘๕-๓๐๙๐ นฐ.',
+    licensePlate: '85-3090 นฐ.',
     driverName: 'นายธวัชชัย โต๊ะศรีสุข',
     driverPosition: 'พขร.(บ)',
-    mileage: '๑๒๔,๕๕๐',
-    engineHours: '๕,๑๒๐',
-    subject: 'ขอแจ้งซ่อมรถยนต์เทรลเลอร์ หมายเลขทะเบียน ๘๕-๓๐๙๐ นฐ.'
+    mileage: '124,550',
+    engineHours: '5,120',
+    subject: 'ขอแจ้งซ่อมรถยนต์เทรลเลอร์ หมายเลขทะเบียน 85-3090 นฐ.'
   },
   {
     key: 'six-wheel-crane',
-    badge: '🚚 รถบรรทุก ๖ ล้อ ติดเครน ๕ ตัน (๘๒-๑๑๔๕ นฐ.)',
-    vehicleType: 'รถบรรทุก ๖ ล้อ ติดเครน ๕ ตัน',
-    licensePlate: '๘๒-๑๑๔๕ นฐ.',
+    badge: '🚚 รถบรรทุก 6 ล้อ ติดเครน 5 ตัน (82-1145 นฐ.)',
+    vehicleType: 'รถบรรทุก 6 ล้อ ติดเครน 5 ตัน',
+    licensePlate: '82-1145 นฐ.',
     driverName: 'นายวันชัย พึ่งสุข',
     driverPosition: 'พขร.(บ)',
-    mileage: '๙๒,๑๐๐',
-    craneHours: '๙๕๐',
-    engineHours: '๒,๘๐๐',
-    subject: 'ขอแจ้งซ่อมรถบรรทุก ๖ ล้อ ติดเครน ๕ ตัน หมายเลขทะเบียน ๘๒-๑๑๔๕ นฐ.'
+    mileage: '92,100',
+    craneHours: '950',
+    engineHours: '2,800',
+    subject: 'ขอแจ้งซ่อมรถบรรทุก 6 ล้อ ติดเครน 5 ตัน หมายเลขทะเบียน 82-1145 นฐ.'
   },
   {
     key: 'pickup-4door',
-    badge: '🛻 รถกระบะ ๔ ประตู (Double Cab)',
-    vehicleType: 'รถยนต์บรรทุกดีเซล ๔ ประตู (Double Cab)',
-    licensePlate: 'กค ๕๖๗๘ นฐ.',
+    badge: '🛻 รถกระบะ 4 ประตู (Double Cab)',
+    vehicleType: 'รถยนต์บรรทุกดีเซล 4 ประตู (Double Cab)',
+    licensePlate: 'กค 5678 นฐ.',
     driverName: 'นายศักดิ์ดา ทองดี',
     driverPosition: 'พขร.(บ)',
-    mileage: '๑๔๕,๘๐๐',
-    subject: 'ขอแจ้งซ่อมรถยนต์บรรทุกดีเซล ๔ ประตู (Double Cab) หมายเลขทะเบียน กค ๕๖๗๘ นฐ.'
+    mileage: '145,800',
+    subject: 'ขอแจ้งซ่อมรถยนต์บรรทุกดีเซล 4 ประตู (Double Cab) หมายเลขทะเบียน กค 5678 นฐ.'
   },
   {
     key: 'aerial-bucket',
-    badge: '🪜 รถกระเช้าซ่อมแซมระบบไฟฟ้า (๘๔-๗๗๘๙ นฐ.)',
+    badge: '🪜 รถกระเช้าซ่อมแซมระบบไฟฟ้า (84-7789 นฐ.)',
     vehicleType: 'รถกระเช้าซ่อมแซมระบบไฟฟ้า',
-    licensePlate: '๘๔-๗๗๘๙ นฐ.',
+    licensePlate: '84-7789 นฐ.',
     driverName: 'นายบุญเลิศ มีชัย',
     driverPosition: 'พขร.(บ)',
-    mileage: '๖๘,๓๐๐',
-    engineHours: '๑,๙๕๐',
-    subject: 'ขอแจ้งซ่อมรถกระเช้าซ่อมแซมระบบไฟฟ้า หมายเลขทะเบียน ๘๔-๗๗๘๙ นฐ.'
+    mileage: '68,300',
+    engineHours: '1,950',
+    subject: 'ขอแจ้งซ่อมรถกระเช้าซ่อมแซมระบบไฟฟ้า หมายเลขทะเบียน 84-7789 นฐ.'
   }
 ];
 
@@ -261,20 +261,20 @@ export const SAMPLE_CASE1_VEHICLE_DEPT_DATA: CarRepairFormData = {
   repairCase: 'vehicle_dept',
   docFrom: 'ผกร.',
   docTo: 'กรย.(ก3)',
-  docNo: 'ก.๓ กรย.(กร)- ๒๔๓๗/๒๕๖๓',
-  docDate: '๑๗ ต.ค. ๖๓',
-  subject: 'ขอแจ้งซ่อมรถเครน TADANO ขนาดพิกัด ๓๐ ตัน/เมตร หมายเลขทะเบียน ๙๐-๗๓๓๒ นฐ.',
+  docNo: 'ก.3 กรย.(กร)- 2437/2563',
+  docDate: '17 ต.ค. 63',
+  subject: 'ขอแจ้งซ่อมรถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร หมายเลขทะเบียน 90-7332 นฐ.',
   salutation: 'อก.รย.(ก3) ผ่าน รก.รย.(ก3)',
 
-  vehicleType: 'รถเครน TADANO ขนาดพิกัด ๓๐ ตัน/เมตร',
-  licensePlate: '๙๐-๗๓๓๒ นฐ.',
+  vehicleType: 'รถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร',
+  licensePlate: '90-7332 นฐ.',
   assignedUnit: 'ผกร.',
   driverName: 'นายขวัญเรือน มีถาวร',
   driverPosition: 'พขร.(บ)',
 
-  mileage: '๕๔,๒๖๘',
-  craneHours: '๑,๘๘๗',
-  engineHours: '๓,๘๓๕.๕',
+  mileage: '54,268',
+  craneHours: '1,887',
+  engineHours: '3,835.5',
 
   peaAreaName: '',
   workDetails: '',
@@ -299,7 +299,7 @@ export const SAMPLE_CASE1_VEHICLE_DEPT_DATA: CarRepairFormData = {
   commandText: 'ดำเนินการต่อไป',
   commanderName: 'นายอนันต์ กาญจนอุปถัมภ์',
   commanderPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  commanderDate: '๑๙ ต.ค. ๖๓',
+  commanderDate: '19 ต.ค. 63',
 
   showProposerDigitalSign: true,
   showCommanderDigitalSign: true
@@ -313,13 +313,13 @@ export const SAMPLE_CASE2_PEA_AREA_DATA: CarRepairFormData = {
   repairCase: 'pea_area',
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟส.สค.2(บพว.)',
-  docNo: 'ก.3 กรย.(กร) ๒๔๔๓/๒๕๖๑',
-  docDate: '๒๐ ต.ค. ๖๑',
-  subject: 'ขอความอนุเคราะห์จัดซ่อมรถยนต์เทรลเลอร์ หมายเลขทะเบียน ๘๕-๓๐๙๐ นฐ.',
+  docNo: 'ก.3 กรย.(กร) 2443/2561',
+  docDate: '20 ต.ค. 61',
+  subject: 'ขอความอนุเคราะห์จัดซ่อมรถยนต์เทรลเลอร์ หมายเลขทะเบียน 85-3090 นฐ.',
   salutation: 'ผจก.กฟส.สค.2(บพว.)',
 
   vehicleType: 'รถยนต์เทรลเลอร์',
-  licensePlate: '๘๕-๓๐๙๐ นฐ.',
+  licensePlate: '85-3090 นฐ.',
   assignedUnit: 'กรย.(ก3)',
   driverName: 'นายธวัชชัย โต๊ะศรีสุข',
   driverPosition: 'พขร.(บ)',
@@ -331,19 +331,19 @@ export const SAMPLE_CASE2_PEA_AREA_DATA: CarRepairFormData = {
   peaAreaName: 'กฟส.สค.2(บพว.)',
   workDetails: 'ก่อสร้างปรับปรุงระบบจำหน่าย (บริเวณช่วงแยกดอนราวถึงวัดหลักสี่) ต.ยกกระบัตร อ.บ้านแพ้ว จ.สมุทรสาคร',
   wbsNo: 'I-68-I-SM2\'A.IQ.2001',
-  networkNo: '๗๐๐๑๑๑๗๓๖๙',
-  activityNo: '๐๐๕๐',
+  networkNo: '7001117369',
+  activityNo: '0050',
 
   defectItems: [
     'วาล์วลมเบรก'
   ],
 
-  budgetSource: 'หมายเลขงาน (WBS): I-68-I-SM2\'A.IQ.2001 โครงข่าย ๗๐๐๑๑๑๗๓๖๙ กิจกรรม ๐๐๕๐',
+  budgetSource: 'หมายเลขงาน (WBS): I-68-I-SM2\'A.IQ.2001 โครงข่าย 7001117369 กิจกรรม 0050',
   closingStatement: 'จึงเรียนมาเพื่อโปรดพิจารณา และดำเนินการให้ต่อไปด้วย',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '๒๐ ต.ค. ๖๑',
+  proposerDate: '20 ต.ค. 61',
 
   hasCommanderOrder: false,
   commanderTarget: '',

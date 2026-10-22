@@ -55,8 +55,8 @@ interface SectionMeta {
 
 const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileText },
-  { key: 'para1', title: '2. วรรคที่ ๑: หนังสืออ้างถึงเดิม & โครงการ', shortName: 'วรรค ๑ (อ้างถึง)', icon: Building },
-  { key: 'para2', title: '3. วรรคที่ ๒: ผู้ควบคุมงาน & เหตุผลความจำเป็น', shortName: 'วรรค ๒ (เหตุผล)', icon: AlertTriangle },
+  { key: 'para1', title: '2. วรรคที่ 1: หนังสืออ้างถึงเดิม & โครงการ', shortName: 'วรรค 1 (อ้างถึง)', icon: Building },
+  { key: 'para2', title: '3. วรรคที่ 2: ผู้ควบคุมงาน & เหตุผลความจำเป็น', shortName: 'วรรค 2 (เหตุผล)', icon: AlertTriangle },
   { key: 'table', title: '4. ตารางจัดสรรงบประมาณเพิ่มเติม (100%)', shortName: 'ตารางงบประมาณ', icon: Calculator },
   { key: 'signer', title: '5. ผู้ลงนามหลัก (อก.รย. / รก.รย.)', shortName: 'ผู้ลงนาม', icon: UserCheck },
   { key: 'stamps', title: '6. เกษียนหนังสือ (หผ.กร. / ชผ.กร.)', shortName: 'เกษียนหนังสือ', icon: Info },
@@ -361,7 +361,7 @@ export default function SiteExpenseExtraPage() {
             <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>คพจ.2</span>
           </div>
           <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
-            หลังสนามกอล์ฟ - ซอยดาวทอง (จุดที่ ๑, ๒)
+            หลังสนามกอล์ฟ - ซอยดาวทอง (จุดที่ 1, 2)
           </div>
           <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
             งบขอเพิ่ม: <span style={{ color: '#38bdf8' }}>318,394 บาท</span> • รวม 1,591,970 บาท
@@ -379,7 +379,7 @@ export default function SiteExpenseExtraPage() {
             <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>1 จุด</span>
           </div>
           <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
-            ปรับปรุงระบบจำหน่าย (จุดที่ ๑)
+            ปรับปรุงระบบจำหน่าย (จุดที่ 1)
           </div>
           <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
             งบขอเพิ่ม: <span style={{ color: '#38bdf8' }}>159,197 บาท</span> • รวม 795,985 บาท
@@ -712,10 +712,10 @@ export default function SiteExpenseExtraPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para1')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๑ หนังสืออ้างถึงเดิม & ข้อมูลโครงการ"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 1 หนังสืออ้างถึงเดิม & ข้อมูลโครงการ"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๑ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 1 (ขยายใหญ่)
             </span>
 
             <div className="a4-text-indent" style={{ lineHeight: '1.45' }}>
@@ -766,10 +766,10 @@ export default function SiteExpenseExtraPage() {
             className="a4-section-hoverable"
             onClick={() => setActiveEditSection('para2')}
             style={{ marginTop: '8pt', padding: '2pt 4pt' }}
-            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ ๒ ผู้ควบคุมงาน & เหตุผลความจำเป็น"
+            title="จิ้มเพื่อขยายแก้ไข: วรรคที่ 2 ผู้ควบคุมงาน & เหตุผลความจำเป็น"
           >
             <span className="section-edit-badge no-print">
-              <Edit3 size={11} /> จิ้มแก้ไขวรรค ๒ (ขยายใหญ่)
+              <Edit3 size={11} /> จิ้มแก้ไขวรรค 2 (ขยายใหญ่)
             </span>
 
             <div className="a4-text-indent" style={{ lineHeight: '1.45' }}>
@@ -1331,7 +1331,7 @@ export default function SiteExpenseExtraPage() {
 
                   <div className="big-field-group">
                     <label className="big-label">
-                      <span>คำขออนุมัติจัดสรรงบประมาณ (วรรคที่ ๓)</span>
+                      <span>คำขออนุมัติจัดสรรงบประมาณ (วรรคที่ 3)</span>
                     </label>
                     <textarea
                       rows={3}
