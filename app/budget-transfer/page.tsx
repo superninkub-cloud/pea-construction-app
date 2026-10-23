@@ -165,8 +165,10 @@ function BudgetTransferContent() {
   const [refDocNo, setRefDocNo] = useState('กวว.(วร) 380/2567');
   const [refDocDate, setRefDocDate] = useState('16 สิงหาคม 2567');
   const [peaOffice, setPeaOffice] = useState('กฟส.ลญ.');
+  const [managerTitle, setManagerTitle] = useState('ผจก.กฟส.ลญ.');
   const [supervisorName, setSupervisorName] = useState('นายอุดมศักดิ์ จันทร์กลิ่น');
-  const [supervisorLevel, setSupervisorLevel] = useState('7');
+  const [supervisorLevel, setSupervisorLevel] = useState('6');
+  const [supervisorPosition, setSupervisorPosition] = useState('พชง.6 ผกร.กรย.(ก3)');
 
   // Project Expense Breakdown (Customizable & Editable)
   const [totalExpense, setTotalExpense] = useState('1,915,387.03');
@@ -244,8 +246,29 @@ function BudgetTransferContent() {
         if (parsed.refDocNo) setRefDocNo(parsed.refDocNo);
         if (parsed.refDocDate) setRefDocDate(parsed.refDocDate);
         if (parsed.peaOffice) setPeaOffice(parsed.peaOffice);
+        if (parsed.managerTitle) {
+          setManagerTitle(parsed.managerTitle);
+        } else if (parsed.peaOffice) {
+          if (parsed.peaOffice.startsWith('ผจก.')) {
+            setManagerTitle(parsed.peaOffice);
+          } else {
+            setManagerTitle(`ผจก.${parsed.peaOffice}`);
+          }
+        }
         if (parsed.supervisorName) setSupervisorName(parsed.supervisorName);
         if (parsed.supervisorLevel) setSupervisorLevel(parsed.supervisorLevel);
+        if (parsed.supervisorPosition) {
+          setSupervisorPosition(parsed.supervisorPosition);
+        } else if (parsed.supervisorLevel) {
+          if (parsed.supervisorLevel === '7') {
+            setSupervisorPosition('พชง.6 ผกร.กรย.(ก3)');
+            setSupervisorLevel('6');
+          } else if (parsed.supervisorLevel.startsWith('พชง.') || parsed.supervisorLevel.startsWith('ผพง.')) {
+            setSupervisorPosition(parsed.supervisorLevel);
+          } else {
+            setSupervisorPosition(`พชง.${parsed.supervisorLevel} ผกร.กรย.(ก3)`);
+          }
+        }
         if (parsed.totalExpense !== undefined) setTotalExpense(parsed.totalExpense);
         if (parsed.materialExpense !== undefined) setMaterialExpense(parsed.materialExpense);
         if (parsed.siteExpense !== undefined) setSiteExpense(parsed.siteExpense);
@@ -269,7 +292,7 @@ function BudgetTransferContent() {
     try {
       const payload = {
         projectName, wbs, docNo, docDate, docTo, docFrom, subject, salutation,
-        refDocNo, refDocDate, peaOffice, supervisorName, supervisorLevel,
+        refDocNo, refDocDate, peaOffice, managerTitle, supervisorName, supervisorLevel, supervisorPosition,
         totalExpense, materialExpense, siteExpense, operatingExpense,
         reasonText, signer1Name, signer1Title, signer2Name, signer2Title,
         transfers, networkDataList
@@ -280,7 +303,7 @@ function BudgetTransferContent() {
     }
   }, [
     projectName, wbs, docNo, docDate, docTo, docFrom, subject, salutation,
-    refDocNo, refDocDate, peaOffice, supervisorName, supervisorLevel,
+    refDocNo, refDocDate, peaOffice, managerTitle, supervisorName, supervisorLevel, supervisorPosition,
     totalExpense, materialExpense, siteExpense, operatingExpense,
     reasonText, signer1Name, signer1Title, signer2Name, signer2Title,
     transfers, networkDataList
@@ -681,8 +704,10 @@ function BudgetTransferContent() {
       setRefDocNo('กวว.(วร) 380/2567');
       setRefDocDate('16 สิงหาคม 2567');
       setPeaOffice('กฟส.ลญ.');
+      setManagerTitle('ผจก.กฟส.ลญ.');
       setSupervisorName('นายอุดมศักดิ์ จันทร์กลิ่น');
-      setSupervisorLevel('7');
+      setSupervisorPosition('พชง.6 ผกร.กรย.(ก3)');
+      setSupervisorLevel('6');
       setReasonText('ปัจจุบันงานก่อสร้างดังกล่าวได้ดำเนินการแล้วเสร็จและจ่ายไฟแล้ว แต่เนื่องจากในการดำเนินการก่อสร้างมีความจำเป็นต้องดับกระแสไฟและระดมชุดงานเพื่อปฏิบัติงานในวันอาทิตย์หลายครั้ง ซึ่งในการปฏิบัติงานวันอาทิตย์นั้น กฟภ.ต้องจ่ายค่าแรงงานเป็น 2 เท่าของค่าแรงงานปกติ จึงส่งผลให้ค่าใช้จ่ายหน้างานในบางส่วนไม่เพียงพอ');
       setSigner1Name('นายอนันต์ กาญจนอุปถัมภ์');
       setSigner1Title('รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)');
@@ -1000,7 +1025,30 @@ function BudgetTransferContent() {
                     >
                       {operatingExpense || fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}
                     </span>.- บาท ซึ่งมี{' '}
-                    <span className="a4-var-spot green" style={{ fontWeight: 600 }}>{supervisorName}</span> {supervisorLevel ? `พชง.${supervisorLevel}` : ''} เป็นผู้ควบคุมงาน นั้น
+                    <input
+                      type="text"
+                      className="a4-live-input"
+                      style={{ fontWeight: 600, width: '190px', textAlign: 'center', display: 'inline-block' }}
+                      value={supervisorName}
+                      onChange={(e) => setSupervisorName(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="นายอุดมศักดิ์ จันทร์กลิ่น"
+                      title="คลิกเพื่อแก้ไขชื่อผู้ควบคุมงาน"
+                    />{' '}
+                    <input
+                      type="text"
+                      className="a4-live-input"
+                      style={{ width: '170px', textAlign: 'center', display: 'inline-block' }}
+                      value={supervisorPosition}
+                      onChange={(e) => {
+                        setSupervisorPosition(e.target.value);
+                        setSupervisorLevel(e.target.value);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="พชง.6 ผกร.กรย.(ก3)"
+                      title="คลิกเพื่อแก้ไขตำแหน่งผู้ควบคุมงาน เช่น พชง.6 ผกร.กรย.(ก3)"
+                    />{' '}
+                    เป็นผู้ควบคุมงาน นั้น
                   </p>
 
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginTop: '6pt' }}>
@@ -1220,7 +1268,28 @@ function BudgetTransferContent() {
 
                   <div style={{ borderTop: '1px solid #cbd5e1', paddingTop: '10pt', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <div style={{ fontSize: '13pt' }}>
-                      <div style={{ fontWeight: 600 }}>- ผจก.{peaOffice || '........................'}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                        <span>-</span>
+                        <input
+                          type="text"
+                          className="a4-live-input"
+                          style={{
+                            fontWeight: 600,
+                            width: '240px',
+                            textAlign: 'left',
+                            fontSize: '13pt',
+                            padding: '1px 4px'
+                          }}
+                          value={managerTitle}
+                          onChange={(e) => {
+                            setManagerTitle(e.target.value);
+                            setPeaOffice(e.target.value.replace(/^ผจก\./, ''));
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          placeholder="ผจก.กฟส.ลญ."
+                          title="คลิกเพื่อพิมพ์แก้ไขตำแหน่ง/สังกัด ผจก. เช่น ผจก.กฟส.ลญ., ผจก.กฟจ.นฐ."
+                        />
+                      </div>
                       <div style={{ marginTop: '4pt', paddingLeft: '1cm' }}>อนุมัติ และให้ดำเนินการในส่วนเกี่ยวข้องต่อไป</div>
                     </div>
                     <div style={{ textAlign: 'center', minWidth: '250px' }}>
@@ -1400,8 +1469,28 @@ function BudgetTransferContent() {
                   <p className="a4-text-indent" style={{ lineHeight: 1.6, marginBottom: '6pt' }}>
                     จึงเรียนมาเพื่อโปรดพิจารณาอนุมัติค่าใช้จ่ายหน้างานเป็นเงิน {fmt(totalAmount)} บาท ({getThaiBahtText(totalAmount)})
                   </p>
-                  <p style={{ textIndent: '2.5cm', marginBottom: '24pt' }}>
-                    โดยให้ ผจก.{peaOffice || '........................'} เป็นผู้เบิกและสั่งจ่ายต่อไป
+                  <p style={{ textIndent: '2.5cm', marginBottom: '24pt', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    <span>โดยให้</span>
+                    <input
+                      type="text"
+                      className="a4-live-input"
+                      style={{
+                        fontWeight: 600,
+                        width: '180px',
+                        textAlign: 'center',
+                        fontSize: '13pt',
+                        padding: '1px 4px'
+                      }}
+                      value={managerTitle}
+                      onChange={(e) => {
+                        setManagerTitle(e.target.value);
+                        setPeaOffice(e.target.value.replace(/^ผจก\./, ''));
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="ผจก.กฟส.ลญ."
+                      title="คลิกเพื่อพิมพ์แก้ไขตำแหน่ง/สังกัด ผจก."
+                    />
+                    <span>เป็นผู้เบิกและสั่งจ่ายต่อไป</span>
                   </p>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20pt' }}>
@@ -2039,14 +2128,35 @@ function BudgetTransferContent() {
                       />
                     </div>
                     <div className="big-field-group">
-                      <label className="big-label">กฟฟ. ที่ขออนุมัติ (ผจก.)</label>
+                      <label className="big-label">
+                        <span>ตำแหน่ง / สังกัด ผจก. พื้นที่</span>
+                        <span className="big-label-hint">เช่น ผจก.กฟส.ลญ., ผจก.กฟจ.นฐ.</span>
+                      </label>
                       <input
                         type="text"
                         className="big-input"
-                        value={peaOffice}
-                        onChange={(e) => setPeaOffice(e.target.value)}
-                        placeholder="เช่น กฟส.ลญ."
+                        value={managerTitle}
+                        onChange={(e) => {
+                          setManagerTitle(e.target.value);
+                          setPeaOffice(e.target.value.replace(/^ผจก\./, ''));
+                        }}
+                        placeholder="เช่น ผจก.กฟส.ลญ."
                       />
+                      <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {['ผจก.กฟส.ลญ.', 'ผจก.กฟส.บางเลน', 'ผจก.กฟส.บพ.', 'ผจก.กฟจ.นฐ.', 'ผจก.กฟจ.รบ.', 'ผจก.กฟจ.สพ.', 'ผจก.กฟจ.กจ.', 'ผจก.กฟจ.สค.', 'ผจก.กฟส.อย.'].map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            className="var-tag-btn"
+                            onClick={() => {
+                              setManagerTitle(opt);
+                              setPeaOffice(opt.replace(/^ผจก\./, ''));
+                            }}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -2085,14 +2195,35 @@ function BudgetTransferContent() {
                       />
                     </div>
                     <div className="big-field-group">
-                      <label className="big-label">ตำแหน่ง / ระดับ พชง.</label>
+                      <label className="big-label">
+                        <span>ตำแหน่ง / สังกัด ผู้ควบคุมงาน</span>
+                        <span className="big-label-hint">เช่น พชง.6 ผกร.กรย.(ก3)</span>
+                      </label>
                       <input
                         type="text"
                         className="big-input"
-                        value={supervisorLevel}
-                        onChange={(e) => setSupervisorLevel(e.target.value)}
-                        placeholder="เช่น 7"
+                        value={supervisorPosition}
+                        onChange={(e) => {
+                          setSupervisorPosition(e.target.value);
+                          setSupervisorLevel(e.target.value);
+                        }}
+                        placeholder="เช่น พชง.6 ผกร.กรย.(ก3)"
                       />
+                      <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {['พชง.6 ผกร.กรย.(ก3)', 'ผพง.6 ผกร.กรย.(ก3)', 'พชง.7 ผกร.กรย.(ก3)', 'ชผ.กร.กรย.(ก3)', 'ผพง.7 ผกร.กรย.(ก3)'].map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            className="var-tag-btn"
+                            onClick={() => {
+                              setSupervisorPosition(opt);
+                              setSupervisorLevel(opt);
+                            }}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -2431,6 +2562,40 @@ function BudgetTransferContent() {
                         onChange={(e) => setSigner2Title(e.target.value)}
                         placeholder="เช่น อฝ.วบ.(ก3)"
                       />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '16px', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                    <div className="big-field-group">
+                      <label className="big-label">
+                        <span>ตำแหน่ง / สังกัด ผจก. พื้นที่ (ผู้รับคำสั่งอนุมัติและผู้เบิกสั่งจ่าย)</span>
+                        <span className="big-label-hint">เปลี่ยนตามพื้นที่ เช่น ผจก.กฟส.ลญ., ผจก.กฟจ.นฐ.</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="big-input"
+                        value={managerTitle}
+                        onChange={(e) => {
+                          setManagerTitle(e.target.value);
+                          setPeaOffice(e.target.value.replace(/^ผจก\./, ''));
+                        }}
+                        placeholder="เช่น ผจก.กฟส.ลญ."
+                      />
+                      <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {['ผจก.กฟส.ลญ.', 'ผจก.กฟส.บางเลน', 'ผจก.กฟส.บพ.', 'ผจก.กฟจ.นฐ.', 'ผจก.กฟจ.รบ.', 'ผจก.กฟจ.สพ.', 'ผจก.กฟจ.กจ.', 'ผจก.กฟจ.สค.', 'ผจก.กฟส.อย.'].map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            className="var-tag-btn"
+                            onClick={() => {
+                              setManagerTitle(opt);
+                              setPeaOffice(opt.replace(/^ผจก\./, ''));
+                            }}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
