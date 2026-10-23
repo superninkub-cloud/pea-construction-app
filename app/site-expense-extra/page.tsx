@@ -89,6 +89,15 @@ export default function SiteExpenseExtraPage() {
           if (parsed.docDate && (parsed.docDate.includes('8 ต.ค.') || parsed.docDate.includes('15 ต.ค.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
             parsed.docDate = '';
           }
+          if (parsed.signerDate && (parsed.signerDate.includes('ต.ค.') || parsed.signerDate.includes('69') || parsed.signerDate.includes('2569'))) {
+            parsed.signerDate = '';
+          }
+          if (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ต.ค.') || parsed.stampHpKrDate.includes('69') || parsed.stampHpKrDate.includes('2569') || parsed.stampHpKrDate.includes('7') || parsed.stampHpKrDate.includes('15'))) {
+            parsed.stampHpKrDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('69') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('7') || parsed.stampCpKrDate.includes('14'))) {
+            parsed.stampCpKrDate = '';
+          }
           setFormData(parsed);
         }
       }
@@ -1521,14 +1530,13 @@ export default function SiteExpenseExtraPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน หผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 7 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampHpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                        placeholder="7 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
 
@@ -1541,7 +1549,7 @@ export default function SiteExpenseExtraPage() {
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="วันที่"
+                        placeholder=""
                       />
                     </div>
                   </div>

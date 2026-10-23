@@ -146,7 +146,7 @@ export const SAMPLE_JOB_CLOSE_DATA: JobCloseFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '12 ก.ค. 2568',
+  signerDate: '',
   showDigitalSign: true
 };
 

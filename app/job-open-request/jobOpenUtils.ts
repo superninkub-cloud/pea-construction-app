@@ -110,11 +110,11 @@ export const SAMPLE_PRESET_SAMCHUK: JobOpenFormData = {
 
   signerName: 'นายกำพล ตุ้ยเต็มวงค์',
   signerPosition: 'อก.รย.(ก3)',
-  signerDate: '28 ก.ย. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '28 ก.ย. 69',
-  stampCpKrDate: '25 ก.ย. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   budgetAmount: 188743.00,
   budgetCostCenter: '7001248605',
@@ -148,11 +148,11 @@ export const SAMPLE_PRESET_KANCHANABURI: JobOpenFormData = {
 
   signerName: 'นายกำพล ตุ้ยเต็มวงค์',
   signerPosition: 'อก.รย.(ก3)',
-  signerDate: '28 ก.ย. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '25 ก.ย. 69',
-  stampCpKrDate: '25 ก.ย. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   budgetAmount: 147906.00,
   budgetCostCenter: '7001257238',
@@ -185,11 +185,11 @@ export const SAMPLE_PRESET_SAMUT: JobOpenFormData = {
 
   signerName: 'นายกำพล ตุ้ยเต็มวงค์',
   signerPosition: 'อก.รย.(ก3)',
-  signerDate: '05 ต.ค. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '05 ต.ค. 69',
-  stampCpKrDate: '05 ต.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   budgetAmount: 320000.00,
   budgetCostCenter: '7001264890',

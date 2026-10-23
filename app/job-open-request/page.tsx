@@ -83,6 +83,15 @@ export default function JobOpenRequestPage() {
           if (parsed.docDate && (parsed.docDate.includes('28 ก.ย.') || parsed.docDate.includes('05 ต.ค.') || parsed.docDate.includes('ก.ย.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
             parsed.docDate = '';
           }
+          if (parsed.signerDate && (parsed.signerDate.includes('ก.ย.') || parsed.signerDate.includes('ต.ค.') || parsed.signerDate.includes('2569') || parsed.signerDate.includes('69'))) {
+            parsed.signerDate = '';
+          }
+          if (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ก.ย.') || parsed.stampHpKrDate.includes('ต.ค.') || parsed.stampHpKrDate.includes('2569') || parsed.stampHpKrDate.includes('69'))) {
+            parsed.stampHpKrDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ก.ย.') || parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('69'))) {
+            parsed.stampCpKrDate = '';
+          }
           setFormData(parsed);
         }
       }
@@ -1226,14 +1235,13 @@ export default function JobOpenRequestPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ลงนาม</span>
-                        <span className="big-label-hint">เช่น 28 ก.ย. 2569</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.signerDate}
                         onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                        placeholder="28 ก.ย. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1247,28 +1255,26 @@ export default function JobOpenRequestPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน หผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 28 ก.ย. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampHpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                        placeholder="28 ก.ย. 69"
+                        placeholder=""
                       />
                     </div>
 
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน ชผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 25 ก.ย. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="25 ก.ย. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>

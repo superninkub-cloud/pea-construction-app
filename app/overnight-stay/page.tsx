@@ -79,11 +79,21 @@ export default function OvernightStayPage() {
           const fixedDocDate = (parsed.docDate && (parsed.docDate.includes('ตุลาคม') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙')))
             ? ''
             : (parsed.docDate || '');
+          const fixedProposerDate = (parsed.proposerDate && (parsed.proposerDate.includes('ต.ค.') || parsed.proposerDate.includes('69') || parsed.proposerDate.includes('2569'))) ? '' : (parsed.proposerDate || '');
+          const fixedApproverDate = (parsed.approverDate && (parsed.approverDate.includes('ต.ค.') || parsed.approverDate.includes('69') || parsed.approverDate.includes('2569'))) ? '' : (parsed.approverDate || '');
+          const fixedStampRwWb = (parsed.stampRwWbDate && (parsed.stampRwWbDate.includes('ต.ค.') || parsed.stampRwWbDate.includes('69') || parsed.stampRwWbDate.includes('2569'))) ? '' : (parsed.stampRwWbDate || '');
+          const fixedStampHpKr = (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ต.ค.') || parsed.stampHpKrDate.includes('69') || parsed.stampHpKrDate.includes('2569'))) ? '' : (parsed.stampHpKrDate || '');
+          const fixedStampCpKr = (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('69') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('/'))) ? '' : (parsed.stampCpKrDate || '');
           setFormData({
             ...SAMPLE_SUPAWIT_DATA,
             ...parsed,
             docNo: fixedDocNo,
             docDate: fixedDocDate,
+            proposerDate: fixedProposerDate,
+            approverDate: fixedApproverDate,
+            stampRwWbDate: fixedStampRwWb,
+            stampHpKrDate: fixedStampHpKr,
+            stampCpKrDate: fixedStampCpKr,
             docTo: parsed.docTo || 'กฟก.3'
           });
           setActivePreset('custom');
@@ -1048,7 +1058,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.proposerDate}
                         onChange={(e) => setFormData({ ...formData, proposerDate: e.target.value })}
-                        placeholder="เช่น 9 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                     <div className="big-field-group">
@@ -1097,7 +1107,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.approverDate}
                         onChange={(e) => setFormData({ ...formData, approverDate: e.target.value })}
-                        placeholder="เช่น 12 ต.ค. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1137,7 +1147,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampRwWbDate}
                             onChange={(e) => setFormData({ ...formData, stampRwWbDate: e.target.value })}
-                            placeholder="เช่น 12 ต.ค. 69"
+                            placeholder=""
                           />
                         </div>
                         <div className="big-field-group">
@@ -1147,7 +1157,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampHpKrDate}
                             onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                            placeholder="เช่น 9 ต.ค. 69"
+                            placeholder=""
                           />
                         </div>
                         <div className="big-field-group">
@@ -1157,7 +1167,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampCpKrDate}
                             onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                            placeholder="เช่น 9/10/2569"
+                            placeholder=""
                           />
                         </div>
                       </div>

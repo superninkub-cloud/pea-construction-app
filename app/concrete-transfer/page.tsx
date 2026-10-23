@@ -1064,7 +1064,7 @@ export default function ConcreteTransferPage() {
                     style={{ textAlign: 'center', width: '160pt' }}
                     value={formData.signerDate}
                     onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                    placeholder="5 ต.ค. 69"
+                    placeholder=""
                   />
                 </div>
               </div>
@@ -1101,7 +1101,7 @@ export default function ConcreteTransferPage() {
                     style={{ width: '120px' }}
                     value={formData.informDate}
                     onChange={(e) => setFormData({ ...formData, informDate: e.target.value })}
-                    placeholder="5 ต.ค. 69"
+                    placeholder=""
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '2pt' }}>
@@ -1669,14 +1669,13 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ลงนาม</span>
-                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.signerDate}
                         onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                        placeholder="5 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1704,14 +1703,13 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ส่งต่อ</span>
-                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.informDate}
                         onChange={(e) => setFormData({ ...formData, informDate: e.target.value })}
-                        placeholder="5 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1752,28 +1750,26 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน หผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampHpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                        placeholder="5 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
 
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน ชผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="5 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>

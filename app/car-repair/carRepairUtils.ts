@@ -299,7 +299,7 @@ export const SAMPLE_CASE1_VEHICLE_DEPT_DATA: CarRepairFormData = {
   commandText: 'ดำเนินการต่อไป',
   commanderName: 'นายอนันต์ กาญจนอุปถัมภ์',
   commanderPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  commanderDate: '19 ต.ค. 63',
+  commanderDate: '',
 
   showProposerDigitalSign: true,
   showCommanderDigitalSign: true
@@ -343,7 +343,7 @@ export const SAMPLE_CASE2_PEA_AREA_DATA: CarRepairFormData = {
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '20 ต.ค. 61',
+  proposerDate: '',
 
   hasCommanderOrder: false,
   commanderTarget: '',

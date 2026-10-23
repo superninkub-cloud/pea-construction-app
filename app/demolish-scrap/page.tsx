@@ -92,6 +92,12 @@ export default function DemolishScrapPage() {
           if (parsed.docDate && (parsed.docDate.includes('8 ต.ค.') || parsed.docDate.includes('15 ต.ค.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
             parsed.docDate = '';
           }
+          if (parsed.approverDate && (parsed.approverDate.includes('ต.ค.') || parsed.approverDate.includes('69') || parsed.approverDate.includes('2569'))) {
+            parsed.approverDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('69') || parsed.stampCpKrDate.includes('2569'))) {
+            parsed.stampCpKrDate = '';
+          }
           setFormData(parsed);
         }
       }

@@ -320,11 +320,11 @@ export const SAMPLE_PRESET_SUPHAN: VoucherCertifyFormData = {
 
   signerName: 'นายศราวุฒิ เกิดสีเล็ก',
   signerPosition: 'ผพง.6 ผกร.กรย.(ก3)',
-  signerDate: '22 ก.ค. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '22 ก.ค. 69',
-  stampCpKrDate: '22 ก.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา กฟก.3',
   contactPhone: '10171',
@@ -387,11 +387,11 @@ export const SAMPLE_PRESET_KAN: VoucherCertifyFormData = {
 
   signerName: 'นายชานินทร์ ศรีสวัสดิ์',
   signerPosition: 'ชผ.กร.กรย.(ก3)',
-  signerDate: '15 ส.ค. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '15 ส.ค. 69',
-  stampCpKrDate: '15 ส.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา กฟก.3',
   contactPhone: '099-1326977',
@@ -463,11 +463,11 @@ export const SAMPLE_PRESET_SAMUT: VoucherCertifyFormData = {
 
   signerName: 'นายสมพร เกตุวิทย์',
   signerPosition: 'ผพง.6 ผกร.กรย.(ก3)',
-  signerDate: '01 ก.ย. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '01 ก.ย. 69',
-  stampCpKrDate: '01 ก.ย. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา กฟก.3',
   contactPhone: '10171',

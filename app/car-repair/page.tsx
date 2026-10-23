@@ -97,8 +97,11 @@ export default function CarRepairPage() {
           if (!parsed.commandText) {
             parsed.commandText = 'ดำเนินการต่อไป';
           }
-          if (!parsed.commanderDate) {
-            parsed.commanderDate = '19 ต.ค. 63';
+          if (parsed.commanderDate && (parsed.commanderDate.includes('19 ต.ค.') || parsed.commanderDate.includes('63'))) {
+            parsed.commanderDate = '';
+          }
+          if (parsed.proposerDate && (parsed.proposerDate.includes('20 ต.ค.') || parsed.proposerDate.includes('61'))) {
+            parsed.proposerDate = '';
           }
           if (!parsed.docNo || parsed.docNo.includes('2437') || parsed.docNo.includes('2443') || parsed.docNo.includes('2563') || parsed.docNo.includes('2561') || parsed.docNo.includes('คชย')) {
             parsed.docNo = 'ก.3 กรย.(กร)';

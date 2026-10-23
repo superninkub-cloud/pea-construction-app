@@ -91,6 +91,18 @@ export default function ShortageBudgetPage() {
           if (parsed.docDate && (parsed.docDate.includes('8 ต.ค.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
             parsed.docDate = '';
           }
+          if (parsed.proposerDate && (parsed.proposerDate.includes('ต.ค.') || parsed.proposerDate.includes('69') || parsed.proposerDate.includes('2569'))) {
+            parsed.proposerDate = '';
+          }
+          if (parsed.commanderDate && (parsed.commanderDate.includes('ต.ค.') || parsed.commanderDate.includes('69') || parsed.commanderDate.includes('2569'))) {
+            parsed.commanderDate = '';
+          }
+          if (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ต.ค.') || parsed.stampHpKrDate.includes('69') || parsed.stampHpKrDate.includes('2569'))) {
+            parsed.stampHpKrDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('69') || parsed.stampCpKrDate.includes('2569'))) {
+            parsed.stampCpKrDate = '';
+          }
           setFormData(parsed);
         }
       }

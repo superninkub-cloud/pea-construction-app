@@ -94,6 +94,15 @@ export default function VoucherCertifyPage() {
           if (parsed.docDate && (parsed.docDate.includes('22 ก.ค.') || parsed.docDate.includes('15 ส.ค.') || parsed.docDate.includes('01 ก.ย.') || parsed.docDate.includes('8 ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
             parsed.docDate = '';
           }
+          if (parsed.signerDate && (parsed.signerDate.includes('ก.ค.') || parsed.signerDate.includes('ส.ค.') || parsed.signerDate.includes('ก.ย.') || parsed.signerDate.includes('2569') || parsed.signerDate.includes('69'))) {
+            parsed.signerDate = '';
+          }
+          if (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ก.ค.') || parsed.stampHpKrDate.includes('ส.ค.') || parsed.stampHpKrDate.includes('ก.ย.') || parsed.stampHpKrDate.includes('2569') || parsed.stampHpKrDate.includes('69'))) {
+            parsed.stampHpKrDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ก.ค.') || parsed.stampCpKrDate.includes('ส.ค.') || parsed.stampCpKrDate.includes('ก.ย.') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('69'))) {
+            parsed.stampCpKrDate = '';
+          }
           setFormData(parsed);
         }
       }

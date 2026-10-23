@@ -211,11 +211,11 @@ export const SAMPLE_PRESET_SINGLE_PROJECT: SiteExpenseExtraFormData = {
 
   signerName: 'นายกำพล ตุ้ยเต็มวงค์',
   signerPosition: 'อก.รย.(ก3)',
-  signerDate: '15 ต.ค. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '15 ต.ค. 69',
-  stampCpKrDate: '14 ต.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   isThaiNumerals: false,
 };

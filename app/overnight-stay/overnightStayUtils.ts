@@ -149,18 +149,18 @@ export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '9 ต.ค. 69',
+  proposerDate: '',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '12 ต.ค. 2569',
+  approverDate: '',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '12 ต.ค. 69',
+  stampRwWbDate: '',
   stampRkRyDate: '',
-  stampHpKrDate: '9 ต.ค. 69',
-  stampCpKrDate: '9/10/2569',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
   contactPhone: '10171'
@@ -205,18 +205,18 @@ export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '9 ต.ค. 69',
+  proposerDate: '',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '12 ต.ค. 2569',
+  approverDate: '',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '12 ต.ค. 69',
+  stampRwWbDate: '',
   stampRkRyDate: '',
-  stampHpKrDate: '9 ต.ค. 69',
-  stampCpKrDate: '9/10/2569',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
   contactPhone: '10171'
@@ -261,17 +261,17 @@ export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '12 ต.ค. 69',
+  proposerDate: '',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '12 ต.ค. 2569',
+  approverDate: '',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '12 ต.ค. 69',
+  stampRwWbDate: '',
   stampRkRyDate: '',
-  stampHpKrDate: '9 ต.ค. 69',
+  stampHpKrDate: '',
   stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
@@ -319,17 +319,17 @@ export const SAMPLE_KWANNAKORN_DATA: OvernightStayFormData = {
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '9 ต.ค. 69',
+  proposerDate: '',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '12 ต.ค. 2569',
+  approverDate: '',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '12 ต.ค. 69',
+  stampRwWbDate: '',
   stampRkRyDate: '',
-  stampHpKrDate: '9 ต.ค. 69',
+  stampHpKrDate: '',
   stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',

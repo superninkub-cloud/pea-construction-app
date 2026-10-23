@@ -84,6 +84,9 @@ export default function JobCloseMemoPage() {
           if (parsed.docDate && (parsed.docDate.includes('12 ก.ค.') || parsed.docDate.includes('ก.ค.') || parsed.docDate.includes('2568') || parsed.docDate.includes('๒๕๖๘'))) {
             parsed.docDate = '';
           }
+          if (parsed.signerDate && (parsed.signerDate.includes('ก.ค.') || parsed.signerDate.includes('2568') || parsed.signerDate.includes('2569'))) {
+            parsed.signerDate = '';
+          }
           setFormData(parsed);
         }
       }
