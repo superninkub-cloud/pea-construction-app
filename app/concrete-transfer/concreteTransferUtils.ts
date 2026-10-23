@@ -127,6 +127,19 @@ export const POPULAR_CONCRETE_PRODUCTS = [
 ];
 
 /**
+ * รายชื่อแผนกผลิตคอนกรีต (ผรค.) ยอดนิยมสำหรับเลือกใช้งาน
+ */
+export const CONCRETE_PLANTS = [
+  { id: 'กจ', name: 'ผรค.กจ.', fullName: 'ผรค.กจ. (กาญจนบุรี)' },
+  { id: 'รบ', name: 'ผรค.รบ.', fullName: 'ผรค.รบ. (ราชบุรี)' },
+  { id: 'อย', name: 'ผรค.อย.', fullName: 'ผรค.อย. (อยุธยา / อู่ยา)' },
+  { id: 'กจ_รบ', name: 'ผรค.กจ., รบ.', fullName: 'ผรค.กจ., รบ. (กาญจนบุรี + ราชบุรี)' },
+  { id: 'กจ_อย', name: 'ผรค.กจ., อย.', fullName: 'ผรค.กจ., อย. (กาญจนบุรี + อยุธยา)' },
+  { id: 'รบ_อย', name: 'ผรค.รบ., อย.', fullName: 'ผรค.รบ., อย. (ราชบุรี + อยุธยา)' },
+  { id: 'กจ_รบ_อย', name: 'ผรค.กจ., รบ., อย.', fullName: 'ผรค.กจ., รบ., อย. (กาญจนบุรี + ราชบุรี + อยุธยา)' },
+];
+
+/**
  * ตัวอย่างที่ 1: เสา 22 ม. + เสาเข็ม T1-T4 คลองท่าแร้ง สมุทรสาคร (ตรงตาม PDF 1)
  */
 export const SAMPLE_CONCRETE_TRANSFER_1: ConcreteTransferFormData = {
@@ -134,13 +147,13 @@ export const SAMPLE_CONCRETE_TRANSFER_1: ConcreteTransferFormData = {
   docTo: 'กผภ.',
   docNo: 'ก.3 กรย.(กร)',
   docDate: '',
-  subject: 'ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.กจ., รบ. มาใช้งานพื้นที่ กฟก.3',
+  subject: 'ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.กจ. มาใช้งานพื้นที่ กฟก.3',
   salutation: 'อก.ผภ.',
 
-  sourceUnits: 'ผรค.รบ.,กจ.',
+  sourceUnits: 'ผรค.กจ.',
   planDescription: 'เนื่องด้วย กฟก.3 มีแผนงานก่อสร้างย้ายแนว 115 เควี คลองท่าแร้ง ฝั่งขาออก กทม. จ.สมุทรสาคร หมายเลขงาน WBS : I-69-I-SM269.M4.1105',
   wbsNo: 'I-69-I-SM269.M4.1105',
-  objectivePurpose: 'ซึ่งมีความต้องการผลิตภัณฑ์คอนกรีต เพื่อใช้ในภารกิจงานย้ายแนวระบบจำหน่าย จึงมีความจำเป็นต้องขอโอนจาก ผรค.รบ.,กจ. ดังรายการต่อไปนี้',
+  objectivePurpose: 'ซึ่งมีความต้องการผลิตภัณฑ์คอนกรีต เพื่อใช้ในภารกิจงานย้ายแนวระบบจำหน่าย จึงมีความจำเป็นต้องขอโอนจาก ผรค.กจ. ดังรายการต่อไปนี้',
   workCategory: 'ระบบจำหน่าย',
 
   items: [
@@ -157,19 +170,19 @@ export const SAMPLE_CONCRETE_TRANSFER_1: ConcreteTransferFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '5 ต.ค. 69',
+  signerDate: '',
 
   hasInformSection: true,
-  informDocNo: 'ก.3 กรย.(กร.) 2238/2569',
+  informDocNo: 'ก.3 กรย.(กร)',
   informReceivers: 'ผจก.กฟจ.สมุทรสาคร, ผจก.กฟส.สมุทรสาคร 2',
   informActionText: 'เพื่อโปรดทราบ และแจ้ง ผคพ. พร้อมส่วนเกี่ยวข้องต่อไป',
   informSignerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   informSignerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  informDate: '5 ต.ค. 69',
+  informDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '5 ต.ค. 69',
-  stampCpKrDate: '5 ต.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า'
 };
@@ -201,19 +214,19 @@ export const SAMPLE_CONCRETE_TRANSFER_2: ConcreteTransferFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '14 ต.ค. 69',
+  signerDate: '',
 
   hasInformSection: true,
-  informDocNo: 'ก.3 กรย.(กร) 2421/2569',
+  informDocNo: 'ก.3 กรย.(กร)',
   informReceivers: 'ผจก.กฟจ.กาญจนบุรี',
   informActionText: 'เพื่อโปรดทราบ และแจ้ง ผคพ.ดำเนินการในส่วนเกี่ยวข้องต่อไป',
   informSignerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   informSignerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  informDate: '14 ต.ค. 69',
+  informDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '14/10/69',
-  stampCpKrDate: '16/10/2569',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า'
 };
@@ -245,19 +258,19 @@ export const SAMPLE_CONCRETE_TRANSFER_3: ConcreteTransferFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '14 ต.ค. 69',
+  signerDate: '',
 
   hasInformSection: true,
-  informDocNo: 'ก.3 กรย.(กร) 2421/2569',
+  informDocNo: 'ก.3 กรย.(กร)',
   informReceivers: 'ผจก.กฟจ.สมุทรสาคร, ผจก.กฟส.สมุทรสาคร 2',
   informActionText: 'เพื่อโปรดทราบ และแจ้ง ผคพ. พร้อมส่วนเกี่ยวข้องต่อไป',
   informSignerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   informSignerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  informDate: '14 ต.ค. 69',
+  informDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '14/10/69',
-  stampCpKrDate: '16/10/2569',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า'
 };
