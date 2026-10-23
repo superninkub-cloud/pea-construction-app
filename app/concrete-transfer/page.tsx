@@ -327,23 +327,29 @@ export default function ConcreteTransferPage() {
       )}
 
       {/* Main Header (Screen only) */}
+      {/* Main Header (Screen only) */}
       <div className="concrete-header no-print">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div className="concrete-header-title">
             <div className="concrete-icon-badge">
-              <Building size={26} />
+              <Building size={28} />
             </div>
             <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
-                โปรแกรมขอโอนคอนกรีตจาก กผภ. (ผรค.รบ./กจ.)
-              </h1>
-              <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '-0.02em' }}>
+                  โปรแกรมขอโอนคอนกรีตจาก กผภ.
+                </h1>
+                <span style={{ fontSize: '0.75rem', background: 'rgba(56, 189, 248, 0.18)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.35)', padding: '2px 9px', borderRadius: '6px', fontWeight: 600 }}>
+                  ผรค.กจ. / ผรค.รบ. / ผรค.อย.
+                </span>
+              </div>
+              <p style={{ fontSize: '0.84rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
                 ✏️ <strong>หน้าร่างเอกสาร A4 เสมือนจริง:</strong> จิ้มแตะส่วนที่ต้องการบนแผ่นกระดาษเพื่อ <strong>&ldquo;ขยายใหญ่แก้ไขชัดเจน&rdquo;</strong>
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* Toggle Thai Numerals */}
             <button
               onClick={handleToggleThaiNumerals}
@@ -363,7 +369,7 @@ export default function ConcreteTransferPage() {
               title="รีเซ็ตกลับไปเป็นค่าเริ่มต้น"
             >
               <RotateCcw size={16} />
-              <span>รีเซ็ต</span>
+              <span>รีเซ็ตแม่แบบ</span>
             </button>
           </div>
         </div>
@@ -371,57 +377,87 @@ export default function ConcreteTransferPage() {
 
       {/* Preset Cards (Screen only) */}
       <div className="preset-grid no-print">
+        {/* Preset 1 */}
         <div
           onClick={() => handleSelectPreset('preset1')}
           className={`preset-card ${activePreset === 'preset1' ? 'active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#60a5fa', background: 'rgba(59, 130, 246, 0.15)', padding: '2px 8px', borderRadius: '9999px' }}>
-              แม่แบบที่ 1 (ตัวอย่างจริง)
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+              แม่แบบที่ 1 (งานจริง)
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>สมุทรสาคร</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>📍 สมุทรสาคร</span>
+              {activePreset === 'preset1' && (
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, background: 'rgba(14, 165, 233, 0.25)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(14, 165, 233, 0.4)' }}>
+                  ✓ กำลังใช้งาน
+                </span>
+              )}
+            </div>
           </div>
-          <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
-            เสา 22 ม. คลองท่าแร้ง (ผรค.รบ.,กจ.)
+          <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#ffffff', lineHeight: 1.35 }}>
+            เสา 22 ม. คลองท่าแร้ง (ผรค.กจ., รบ.)
           </div>
-          <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
-            WBS: <span style={{ color: '#38bdf8' }}>I-69-I-SM269.M4.1105</span> • เสา 22 ม. 10 ต้น
+          <div style={{ fontSize: '0.8125rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'monospace', color: '#38bdf8', fontWeight: 600 }}>I-69-I-SM269.M4.1105</span>
+            <span>•</span>
+            <span style={{ color: '#cbd5e1' }}>เสา 22 ม. 10 ต้น + เสาเข็ม T1-T4</span>
           </div>
         </div>
 
+        {/* Preset 2 */}
         <div
           onClick={() => handleSelectPreset('preset2')}
           className={`preset-card ${activePreset === 'preset2' ? 'active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '9999px' }}>
-              แม่แบบที่ 2 (กาญจนบุรี)
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+              แม่แบบที่ 2 (สายส่ง 115 kV)
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>ท่าม่วง</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>📍 กาญจนบุรี</span>
+              {activePreset === 'preset2' && (
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, background: 'rgba(14, 165, 233, 0.25)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(14, 165, 233, 0.4)' }}>
+                  ✓ กำลังใช้งาน
+                </span>
+              )}
+            </div>
           </div>
-          <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
+          <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#ffffff', lineHeight: 1.35 }}>
             เสา 14.30 ม. ท่าม่วง (ผรค.กจ.)
           </div>
-          <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
-            WBS: <span style={{ color: '#38bdf8' }}>I-69-I-TMG69.M4.1018</span> • เสา 14.30 ม. 25 ต้น
+          <div style={{ fontSize: '0.8125rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'monospace', color: '#38bdf8', fontWeight: 600 }}>I-69-I-TMG69.M4.1018</span>
+            <span>•</span>
+            <span style={{ color: '#cbd5e1' }}>เสา 14.30 ม. 25 ต้น (สายส่ง 115 เควี)</span>
           </div>
         </div>
 
+        {/* Preset 3 */}
         <div
           onClick={() => handleSelectPreset('preset3')}
           className={`preset-card ${activePreset === 'preset3' ? 'active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a855f7', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: '9999px' }}>
-              แม่แบบที่ 3 (สุพรรณบุรี)
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#a855f7', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+              แม่แบบที่ 3 (ตอม่อ/ฐานราก)
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>อู่ทอง</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>📍 สุพรรณบุรี</span>
+              {activePreset === 'preset3' && (
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, background: 'rgba(14, 165, 233, 0.25)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(14, 165, 233, 0.4)' }}>
+                  ✓ กำลังใช้งาน
+                </span>
+              )}
+            </div>
           </div>
-          <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
-            เสา 12 ม. และตอม่อ (ผรค.รบ.)
+          <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#ffffff', lineHeight: 1.35 }}>
+            เสา 12 ม. และตอม่อ อู่ทอง (ผรค.รบ.)
           </div>
-          <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
-            WBS: <span style={{ color: '#38bdf8' }}>I-69-I-UTH69.M4.1045</span> • เสา 12 ม. + ตอม่อ
+          <div style={{ fontSize: '0.8125rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'monospace', color: '#38bdf8', fontWeight: 600 }}>I-69-I-UTH69.M4.1045</span>
+            <span>•</span>
+            <span style={{ color: '#cbd5e1' }}>ตอม่อ CONC. FOOTING 8 ชุด</span>
           </div>
         </div>
       </div>
@@ -555,33 +591,38 @@ export default function ConcreteTransferPage() {
       </div>
 
       {/* Guide Banner & Section Shortcut Pills (Screen only) */}
-      <div className="chips-bar no-print" style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+      <div className="chips-bar no-print">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 700, color: '#fed7aa' }}>
-            <Sparkles size={16} className="text-blue-400" />
-            <span>จิ้มส่วนที่ต้องการแก้ไข (จะเปิดหน้าต่างขยายใหญ่ให้แก้ไขชัดเจนสบายตา):</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#fef08a' }}>
+            <Sparkles size={17} className="text-amber-400" />
+            <span>แถบแก้ไขด่วน (จิ้มเปิดหน้าต่างขยายใหญ่ตามหัวข้อ หรือแตะที่กระดาษ A4 ได้โดยตรง):</span>
           </div>
           <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-            (หรือคลิกปุ่มลัดด้านล่างเพื่อเปิดหน้าต่างขยายใหญ่ตามหัวข้อ)
+            7 หมวดหมู่ข้อมูล
           </span>
         </div>
 
         <div className="chip-group">
           {SECTIONS_META.map((sec, idx) => {
             const Icon = sec.icon;
+            const isActive = activeEditSection === sec.key;
             return (
               <button
                 key={idx}
-                className="chip-btn"
+                type="button"
+                className={`chip-btn ${isActive ? 'active' : ''}`}
                 onClick={() => setActiveEditSection(sec.key)}
-                style={{
-                  background: activeEditSection === sec.key ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.08)',
-                  borderColor: activeEditSection === sec.key ? '#3b82f6' : 'rgba(255, 255, 255, 0.15)',
-                  color: activeEditSection === sec.key ? '#60a5fa' : '#f1f5f9',
-                  fontWeight: 600,
-                  padding: '0.4rem 0.85rem'
-                }}
               >
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  background: isActive ? 'rgba(255, 255, 255, 0.28)' : 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '4px',
+                  padding: '1px 5px',
+                  color: isActive ? '#ffffff' : '#93c5fd'
+                }}>
+                  {idx + 1}
+                </span>
                 <Icon size={14} />
                 <span>{sec.shortName}</span>
               </button>
