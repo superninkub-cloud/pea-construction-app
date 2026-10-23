@@ -154,7 +154,7 @@ function BudgetTransferContent() {
   // Document State
   const [docFrom, setDocFrom] = useState('กรย.(ก3)');
   const [docTo, setDocTo] = useState('ฝวบ.(ก3)');
-  const [docNo, setDocNo] = useState('ก.3กรย.(กร)          /2569');
+  const [docNo, setDocNo] = useState('ก.3 กรย.(กร)');
   const [docDate, setDocDate] = useState('');
   const [subject, setSubject] = useState('ขออนุมัติโอนค่าใช้จ่ายหน้างาน');
   const [salutation, setSalutation] = useState('อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)');
@@ -223,8 +223,20 @@ function BudgetTransferContent() {
         const parsed = JSON.parse(saved);
         if (parsed.projectName) setProjectName(parsed.projectName);
         if (parsed.wbs) setWbs(parsed.wbs);
-        if (parsed.docNo) setDocNo(parsed.docNo);
-        if (parsed.docDate !== undefined) setDocDate(parsed.docDate);
+        if (parsed.docNo) {
+          if (parsed.docNo.includes('คชย')) {
+            setDocNo('ก.3 กรย.(กร)');
+          } else {
+            setDocNo(parsed.docNo);
+          }
+        }
+        if (parsed.docDate !== undefined) {
+          if (parsed.docDate.includes('ตุลาคม') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙')) {
+            setDocDate('');
+          } else {
+            setDocDate(parsed.docDate);
+          }
+        }
         if (parsed.docTo) setDocTo(parsed.docTo);
         if (parsed.docFrom) setDocFrom(parsed.docFrom);
         if (parsed.subject) setSubject(parsed.subject);
@@ -660,7 +672,7 @@ function BudgetTransferContent() {
     if (confirm('ต้องการรีเซ็ตข้อมูลเป็นตัวอย่างเริ่มต้นใช่หรือไม่?')) {
       setDocFrom('กรย.(ก3)');
       setDocTo('ฝวบ.(ก3)');
-      setDocNo('ก.3กรย.(กร)          /2569');
+      setDocNo('ก.3 กรย.(กร)');
       setDocDate('');
       setSubject('ขออนุมัติโอนค่าใช้จ่ายหน้างาน');
       setSalutation('อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)');
@@ -864,8 +876,8 @@ function BudgetTransferContent() {
                   <table className="a4-info-table">
                     <tbody>
                       <tr>
-                        <td style={{ width: '10%', fontWeight: 'bold' }}>หน่วยงาน</td>
-                        <td style={{ width: '40%' }}>
+                        <td style={{ width: '8%', fontWeight: 'bold' }}>จาก</td>
+                        <td style={{ width: '42%' }}>
                           <input
                             type="text"
                             className="a4-live-input"
@@ -875,8 +887,8 @@ function BudgetTransferContent() {
                             placeholder="เช่น กรย.(ก3)"
                           />
                         </td>
-                        <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
-                        <td style={{ width: '40%' }}>
+                        <td style={{ width: '8%', fontWeight: 'bold' }}>ถึง</td>
+                        <td style={{ width: '42%' }}>
                           <input
                             type="text"
                             className="a4-live-input"
@@ -896,7 +908,7 @@ function BudgetTransferContent() {
                             value={docNo}
                             onChange={(e) => setDocNo(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
-                            placeholder="เช่น ก.3กรย.(กร)          /2569"
+                            placeholder="เช่น ก.3 กรย.(กร)"
                           />
                         </td>
                         <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -907,7 +919,7 @@ function BudgetTransferContent() {
                             value={docDate}
                             onChange={(e) => setDocDate(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
-                            placeholder="เช่น 4 ตุลาคม 2569"
+                            placeholder=""
                           />
                         </td>
                       </tr>
@@ -1963,7 +1975,7 @@ function BudgetTransferContent() {
                         className="big-input"
                         value={docNo}
                         onChange={(e) => setDocNo(e.target.value)}
-                        placeholder="เช่น ก.3กรย.(กร)          /2569"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
                     <div className="big-field-group">
@@ -1973,7 +1985,7 @@ function BudgetTransferContent() {
                         className="big-input"
                         value={docDate}
                         onChange={(e) => setDocDate(e.target.value)}
-                        placeholder="เช่น 4 ตุลาคม 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>

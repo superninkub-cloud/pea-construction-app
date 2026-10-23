@@ -476,8 +476,8 @@ export default function AccountAdjustPage() {
                 <table className="a4-info-table">
                   <tbody>
                     <tr>
-                      <td style={{ width: '10%', fontWeight: 'bold' }}>หน่วยงาน</td>
-                      <td style={{ width: '40%' }}>
+                      <td style={{ width: '8%', fontWeight: 'bold' }}>จาก</td>
+                      <td style={{ width: '42%' }}>
                         <input
                           type="text"
                           className="a4-live-input"
@@ -487,8 +487,8 @@ export default function AccountAdjustPage() {
                           placeholder="เช่น กรย.(ก3)"
                         />
                       </td>
-                      <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
-                      <td style={{ width: '40%' }}>
+                      <td style={{ width: '8%', fontWeight: 'bold' }}>ถึง</td>
+                      <td style={{ width: '42%' }}>
                         <input
                           type="text"
                           className="a4-live-input"
@@ -519,7 +519,7 @@ export default function AccountAdjustPage() {
                           value={formData.docDate}
                           onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น 4 ตุลาคม 2569"
+                          placeholder=""
                         />
                       </td>
                     </tr>
@@ -744,7 +744,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 4 ตุลาคม 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1094,7 +1094,7 @@ export default function AccountAdjustPage() {
                       className="big-input"
                       value={formData.signerDate}
                       onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                      placeholder="เช่น 4 ตุลาคม 2569"
+                      placeholder=""
                     />
                   </div>
                 </div>

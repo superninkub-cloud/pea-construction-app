@@ -400,8 +400,8 @@ export default function OvernightStayPage() {
               <table className="a4-info-table">
                 <tbody>
                   <tr>
-                    <td style={{ width: '10%', fontWeight: 'bold' }}>หน่วยงาน</td>
-                    <td style={{ width: '40%' }}>
+                    <td style={{ width: '8%', fontWeight: 'bold' }}>จาก</td>
+                    <td style={{ width: '42%' }}>
                       <input
                         type="text"
                         className="a4-live-input"
@@ -411,8 +411,8 @@ export default function OvernightStayPage() {
                         placeholder="หน่วยงานเจ้าของเรื่อง เช่น แผนกก่อสร้างระบบไฟฟ้า..."
                       />
                     </td>
-                    <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
-                    <td style={{ width: '40%' }}>
+                    <td style={{ width: '8%', fontWeight: 'bold' }}>ถึง</td>
+                    <td style={{ width: '42%' }}>
                       <input
                         type="text"
                         className="a4-live-input"
@@ -443,7 +443,7 @@ export default function OvernightStayPage() {
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น 4 ตุลาคม 2569"
+                        placeholder=""
                       />
                     </td>
                   </tr>
@@ -690,7 +690,7 @@ export default function OvernightStayPage() {
                 <div>
                   <div className="big-grid-2">
                     <div className="big-field-group">
-                      <label className="big-label">หน่วยงานเจ้าของเรื่อง (จาก)</label>
+                      <label className="big-label">จาก (หน่วยงานเจ้าของเรื่อง)</label>
                       <input
                         type="text"
                         className="big-input"
@@ -729,7 +729,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 4 ตุลาคม 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -813,7 +813,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.workStartDate}
                         onChange={(e) => setFormData({ ...formData, workStartDate: e.target.value })}
-                        placeholder="เช่น 4 ตุลาคม 2569"
+                        placeholder=""
                       />
                     </div>
                     <div className="big-field-group">
@@ -823,7 +823,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.workEndDate}
                         onChange={(e) => setFormData({ ...formData, workEndDate: e.target.value })}
-                        placeholder="เช่น 31 ตุลาคม 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -841,7 +841,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.stayStartDate}
                         onChange={(e) => setFormData({ ...formData, stayStartDate: e.target.value })}
-                        placeholder="เช่น 4 ตุลาคม 2569"
+                        placeholder=""
                       />
                     </div>
                     <div className="big-field-group">
@@ -851,7 +851,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.stayEndDate}
                         onChange={(e) => setFormData({ ...formData, stayEndDate: e.target.value })}
-                        placeholder="เช่น 31 ตุลาคม 2569"
+                        placeholder=""
                       />
                     </div>
                     <div className="big-field-group">
