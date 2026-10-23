@@ -47,9 +47,9 @@ interface SectionMeta {
 
 const SECTIONS_META: SectionMeta[] = [
   { key: 'header', title: '1. ข้อมูลส่วนหัวบันทึกข้อความ', shortName: 'ส่วนหัว', icon: FileText },
-  { key: 'project', title: '2. โครงการ, อ้างอิงเดิม & ค่าใช้จ่าย', shortName: 'โครงการ & ค่าใช้จ่าย', icon: Briefcase },
-  { key: 'reason', title: '3. เหตุผลความจำเป็นในการโอนงบ', shortName: 'เหตุผลชี้แจง', icon: Building },
-  { key: 'transfers', title: '4. รายการโอนงบประมาณระหว่างโครงข่าย', shortName: 'รายการโอนงบ', icon: ArrowRightLeft },
+  { key: 'project', title: '2. ข้อ 1: เรื่องเดิม (โครงการ, อ้างอิง & ค่าใช้จ่าย)', shortName: '1. เรื่องเดิม', icon: Briefcase },
+  { key: 'reason', title: '3. ข้อ 2: ข้อเท็จจริง (เหตุผลความจำเป็นในการโอนงบ)', shortName: '2. ข้อเท็จจริง', icon: Building },
+  { key: 'transfers', title: '4. ข้อ 3: ข้อพิจารณา-สรุป (รายการโอนงบประมาณ)', shortName: '3. ข้อพิจารณา-สรุป', icon: ArrowRightLeft },
   { key: 'signer', title: '5. ผู้เสนอและผู้อนุมัติ (อก.รย. & ฝวบ.)', shortName: 'ผู้เสนอ & อนุมัติ', icon: UserCheck },
 ];
 
@@ -176,6 +176,12 @@ function BudgetTransferContent() {
   const [siteExpense, setSiteExpense] = useState('479,162.00');
   const [operatingExpense, setOperatingExpense] = useState('78,753.00');
 
+  // Memo Section Headings (ข้อ 1 คือ เรื่องเดิม, 2 คือ ข้อเท็จจริง, 3 คือ ข้อพิจารณา-สรุป)
+  const [heading1, setHeading1] = useState('1. เรื่องเดิม');
+  const [heading2, setHeading2] = useState('2. ข้อเท็จจริง');
+  const [heading3, setHeading3] = useState('3. ข้อพิจารณา-สรุป');
+  const [headingStyle, setHeadingStyle] = useState<'standalone' | 'inline'>('standalone');
+
   // Reason
   const [reasonText, setReasonText] = useState('ปัจจุบันงานก่อสร้างดังกล่าวได้ดำเนินการแล้วเสร็จและจ่ายไฟแล้ว แต่เนื่องจากในการดำเนินการก่อสร้างมีความจำเป็นต้องดับกระแสไฟและระดมชุดงานเพื่อปฏิบัติงานในวันอาทิตย์หลายครั้ง ซึ่งในการปฏิบัติงานวันอาทิตย์นั้น กฟภ.ต้องจ่ายค่าแรงงานเป็น 2 เท่าของค่าแรงงานปกติ จึงส่งผลให้ค่าใช้จ่ายหน้างานในบางส่วนไม่เพียงพอ');
 
@@ -280,6 +286,10 @@ function BudgetTransferContent() {
         if (parsed.signer2Title) setSigner2Title(parsed.signer2Title);
         if (parsed.transfers && Array.isArray(parsed.transfers)) setTransfers(parsed.transfers);
         if (parsed.networkDataList && Array.isArray(parsed.networkDataList)) setNetworkDataList(parsed.networkDataList);
+        if (parsed.heading1) setHeading1(parsed.heading1);
+        if (parsed.heading2) setHeading2(parsed.heading2);
+        if (parsed.heading3) setHeading3(parsed.heading3);
+        if (parsed.headingStyle) setHeadingStyle(parsed.headingStyle);
       }
       const hist = localStorage.getItem("zpsr018_pull_history_budget") || "";
       setPullHistory(hist);
@@ -294,6 +304,7 @@ function BudgetTransferContent() {
         projectName, wbs, docNo, docDate, docTo, docFrom, subject, salutation,
         refDocNo, refDocDate, peaOffice, managerTitle, supervisorName, supervisorLevel, supervisorPosition,
         totalExpense, materialExpense, siteExpense, operatingExpense,
+        heading1, heading2, heading3, headingStyle,
         reasonText, signer1Name, signer1Title, signer2Name, signer2Title,
         transfers, networkDataList
       };
@@ -305,6 +316,7 @@ function BudgetTransferContent() {
     projectName, wbs, docNo, docDate, docTo, docFrom, subject, salutation,
     refDocNo, refDocDate, peaOffice, managerTitle, supervisorName, supervisorLevel, supervisorPosition,
     totalExpense, materialExpense, siteExpense, operatingExpense,
+    heading1, heading2, heading3, headingStyle,
     reasonText, signer1Name, signer1Title, signer2Name, signer2Title,
     transfers, networkDataList
   ]);
@@ -714,6 +726,10 @@ function BudgetTransferContent() {
       setSigner2Name('นายเมธี สุกก่ำ');
       setSigner2Title('อฝ.วบ.(ก3)');
       setNetworkDataList(SAMPLE_ZPSR_DATA);
+      setHeading1('1. เรื่องเดิม');
+      setHeading2('2. ข้อเท็จจริง');
+      setHeading3('3. ข้อพิจารณา-สรุป');
+      setHeadingStyle('standalone');
       const calculated = autoCalculateTransfers(SAMPLE_ZPSR_DATA);
       setTransfers(calculated);
       showToast('✓ รีเซ็ตเป็นตัวอย่างเริ่มต้นแล้ว');
@@ -785,6 +801,34 @@ function BudgetTransferContent() {
                 <RotateCcw size={13} /> รีเซ็ต
               </button>
             </div>
+
+            {activeSheet === 'memo' && (
+              <div className="a4-preset-group no-print" style={{ marginLeft: '4px' }}>
+                <span className="text-xs text-slate-300 font-medium">รูปแบบหัวข้อ:</span>
+                <button
+                  type="button"
+                  className={`a4-preset-chip ${headingStyle === 'standalone' ? 'active' : ''}`}
+                  onClick={() => {
+                    setHeadingStyle('standalone');
+                    showToast('✓ สลับเป็น: หัวข้อขึ้นบรรทัดใหม่ ขีดเส้นใต้ (มาตรฐานทางการ กฟภ.)');
+                  }}
+                  title="รูปแบบทางการ: 1. เรื่องเดิม, 2. ข้อเท็จจริง, 3. ข้อพิจารณา-สรุป ขึ้นบรรทัดใหม่มีขีดเส้นใต้"
+                >
+                  ขึ้นบรรทัดใหม่ (มาตรฐาน)
+                </button>
+                <button
+                  type="button"
+                  className={`a4-preset-chip ${headingStyle === 'inline' ? 'active' : ''}`}
+                  onClick={() => {
+                    setHeadingStyle('inline');
+                    showToast('✓ สลับเป็น: หัวข้อต่อวรรคเดียวกัน (Inline)');
+                  }}
+                  title="รูปแบบกระชับ: 1. เรื่องเดิม, 2. ข้อเท็จจริง, 3. ข้อพิจารณา-สรุป ต่อท้ายในบรรทัดเดียวกัน"
+                >
+                  ต่อวรรคเดียวกัน (Inline)
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="a4-action-right">
@@ -977,83 +1021,182 @@ function BudgetTransferContent() {
                   </table>
                 </div>
 
-                {/* 2. PROJECT & REASON SECTION */}
+                {/* 1. เรื่องเดิม (PROJECT & REF) */}
                 <div
                   className="a4-section-hoverable"
                   onClick={() => setActiveEditSection('project')}
-                  title="คลิกเพื่อแก้ไขข้อมูลโครงการ, หนังสืออ้างอิง และค่าใช้จ่าย"
+                  title="คลิกเพื่อแก้ไขข้อ 1. เรื่องเดิม (โครงการ, หนังสืออ้างอิง และค่าใช้จ่าย)"
                   style={{ marginTop: '12pt' }}
                 >
                   <div className="section-edit-badge">
-                    <Edit3 size={12} /> จิ้มแก้ไขข้อมูลโครงการ, อ้างอิง & ค่าใช้จ่าย
+                    <Edit3 size={12} /> จิ้มแก้ไขข้อ 1. เรื่องเดิม (โครงการ & อ้างอิง)
                   </div>
 
-                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
-                    1. ตามหนังสือ <span className="a4-var-spot" style={{ fontWeight: 600 }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
-                    <span className="a4-var-spot" style={{ fontWeight: 600 }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
-                    <span className="a4-var-spot blue" style={{ fontWeight: 600 }}>{projectName}</span> หมายเลขงาน (WBS){' '}
-                    <span className="a4-var-spot orange" style={{ fontWeight: 600 }}>{wbs}</span> โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน{' '}
-                    <span
-                      className="a4-var-spot blue cursor-pointer"
-                      style={{ fontWeight: 600 }}
-                      onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
-                      title="คลิกเพื่อแก้ไขค่าใช้จ่ายทั้งสิ้น"
-                    >
-                      {totalExpense || fmt(calculateTotalProjectValue())}
-                    </span>.- บาท แยกเป็นค่าพัสดุจำนวน{' '}
-                    <span
-                      className="a4-var-spot purple cursor-pointer"
-                      style={{ fontWeight: 600 }}
-                      onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
-                      title="คลิกเพื่อแก้ไขค่าพัสดุ"
-                    >
-                      {materialExpense || fmt(calculateBudgetByCategoryGroup(['พัสดุ']))}
-                    </span>.- บาท ค่าใช้จ่ายหน้างาน เป็นเงิน{' '}
-                    <span
-                      className="a4-var-spot orange cursor-pointer"
-                      style={{ fontWeight: 600 }}
-                      onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
-                      title="คลิกเพื่อแก้ไขค่าใช้จ่ายหน้างาน"
-                    >
-                      {siteExpense || fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))}
-                    </span>.- บาท และค่าดำเนินการ เป็นเงิน{' '}
-                    <span
-                      className="a4-var-spot teal cursor-pointer"
-                      style={{ fontWeight: 600 }}
-                      onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
-                      title="คลิกเพื่อแก้ไขค่าดำเนินการ"
-                    >
-                      {operatingExpense || fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}
-                    </span>.- บาท ซึ่งมี{' '}
-                    <input
-                      type="text"
-                      className="a4-live-input"
-                      style={{ fontWeight: 600, width: '190px', textAlign: 'center', display: 'inline-block' }}
-                      value={supervisorName}
-                      onChange={(e) => setSupervisorName(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                      placeholder="นายอุดมศักดิ์ จันทร์กลิ่น"
-                      title="คลิกเพื่อแก้ไขชื่อผู้ควบคุมงาน"
-                    />{' '}
-                    <input
-                      type="text"
-                      className="a4-live-input"
-                      style={{ width: '170px', textAlign: 'center', display: 'inline-block' }}
-                      value={supervisorPosition}
-                      onChange={(e) => {
-                        setSupervisorPosition(e.target.value);
-                        setSupervisorLevel(e.target.value);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      placeholder="พชง.6 ผกร.กรย.(ก3)"
-                      title="คลิกเพื่อแก้ไขตำแหน่งผู้ควบคุมงาน เช่น พชง.6 ผกร.กรย.(ก3)"
-                    />{' '}
-                    เป็นผู้ควบคุมงาน นั้น
-                  </p>
+                  {headingStyle === 'standalone' ? (
+                    <>
+                      <p
+                        style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}
+                      >
+                        {heading1}
+                      </p>
+                      <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
+                        ตามหนังสือ <span className="a4-var-spot" style={{ fontWeight: 600 }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
+                        <span className="a4-var-spot" style={{ fontWeight: 600 }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
+                        <span className="a4-var-spot blue" style={{ fontWeight: 600 }}>{projectName}</span> หมายเลขงาน (WBS){' '}
+                        <span className="a4-var-spot orange" style={{ fontWeight: 600 }}>{wbs}</span> โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน{' '}
+                        <span
+                          className="a4-var-spot blue cursor-pointer"
+                          style={{ fontWeight: 600 }}
+                          onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                          title="คลิกเพื่อแก้ไขค่าใช้จ่ายทั้งสิ้น"
+                        >
+                          {totalExpense || fmt(calculateTotalProjectValue())}
+                        </span>.- บาท แยกเป็นค่าพัสดุจำนวน{' '}
+                        <span
+                          className="a4-var-spot purple cursor-pointer"
+                          style={{ fontWeight: 600 }}
+                          onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                          title="คลิกเพื่อแก้ไขค่าพัสดุ"
+                        >
+                          {materialExpense || fmt(calculateBudgetByCategoryGroup(['พัสดุ']))}
+                        </span>.- บาท ค่าใช้จ่ายหน้างาน เป็นเงิน{' '}
+                        <span
+                          className="a4-var-spot orange cursor-pointer"
+                          style={{ fontWeight: 600 }}
+                          onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                          title="คลิกเพื่อแก้ไขค่าใช้จ่ายหน้างาน"
+                        >
+                          {siteExpense || fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))}
+                        </span>.- บาท และค่าดำเนินการ เป็นเงิน{' '}
+                        <span
+                          className="a4-var-spot teal cursor-pointer"
+                          style={{ fontWeight: 600 }}
+                          onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                          title="คลิกเพื่อแก้ไขค่าดำเนินการ"
+                        >
+                          {operatingExpense || fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}
+                        </span>.- บาท ซึ่งมี{' '}
+                        <input
+                          type="text"
+                          className="a4-live-input"
+                          style={{ fontWeight: 600, width: '190px', textAlign: 'center', display: 'inline-block' }}
+                          value={supervisorName}
+                          onChange={(e) => setSupervisorName(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          placeholder="นายอุดมศักดิ์ จันทร์กลิ่น"
+                          title="คลิกเพื่อแก้ไขชื่อผู้ควบคุมงาน"
+                        />{' '}
+                        <input
+                          type="text"
+                          className="a4-live-input"
+                          style={{ width: '170px', textAlign: 'center', display: 'inline-block' }}
+                          value={supervisorPosition}
+                          onChange={(e) => {
+                            setSupervisorPosition(e.target.value);
+                            setSupervisorLevel(e.target.value);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          placeholder="พชง.6 ผกร.กรย.(ก3)"
+                          title="คลิกเพื่อแก้ไขตำแหน่งผู้ควบคุมงาน เช่น พชง.6 ผกร.กรย.(ก3)"
+                        />{' '}
+                        เป็นผู้ควบคุมงาน นั้น
+                      </p>
+                    </>
+                  ) : (
+                    <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
+                      <strong style={{ textDecoration: 'underline', marginRight: '8px' }}>{heading1}</strong>
+                      ตามหนังสือ <span className="a4-var-spot" style={{ fontWeight: 600 }}>{refDocNo || '..................'}</span> ลงวันที่{' '}
+                      <span className="a4-var-spot" style={{ fontWeight: 600 }}>{refDocDate || '..................'}</span> อนุมัติให้งาน{' '}
+                      <span className="a4-var-spot blue" style={{ fontWeight: 600 }}>{projectName}</span> หมายเลขงาน (WBS){' '}
+                      <span className="a4-var-spot orange" style={{ fontWeight: 600 }}>{wbs}</span> โดยมีค่าใช้จ่ายทั้งสิ้นเป็นเงิน{' '}
+                      <span
+                        className="a4-var-spot blue cursor-pointer"
+                        style={{ fontWeight: 600 }}
+                        onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                        title="คลิกเพื่อแก้ไขค่าใช้จ่ายทั้งสิ้น"
+                      >
+                        {totalExpense || fmt(calculateTotalProjectValue())}
+                      </span>.- บาท แยกเป็นค่าพัสดุจำนวน{' '}
+                      <span
+                        className="a4-var-spot purple cursor-pointer"
+                        style={{ fontWeight: 600 }}
+                        onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                        title="คลิกเพื่อแก้ไขค่าพัสดุ"
+                      >
+                        {materialExpense || fmt(calculateBudgetByCategoryGroup(['พัสดุ']))}
+                      </span>.- บาท ค่าใช้จ่ายหน้างาน เป็นเงิน{' '}
+                      <span
+                        className="a4-var-spot orange cursor-pointer"
+                        style={{ fontWeight: 600 }}
+                        onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                        title="คลิกเพื่อแก้ไขค่าใช้จ่ายหน้างาน"
+                      >
+                        {siteExpense || fmt(calculateBudgetByCategoryGroup(['แรง', 'ควบคุมงาน', 'ขนส่ง', 'เบ็ดเตล็ด']))}
+                      </span>.- บาท และค่าดำเนินการ เป็นเงิน{' '}
+                      <span
+                        className="a4-var-spot teal cursor-pointer"
+                        style={{ fontWeight: 600 }}
+                        onClick={(e) => { e.stopPropagation(); setActiveEditSection('project'); }}
+                        title="คลิกเพื่อแก้ไขค่าดำเนินการ"
+                      >
+                        {operatingExpense || fmt(calculateBudgetByCategoryGroup(['ดำเนินการ']))}
+                      </span>.- บาท ซึ่งมี{' '}
+                      <input
+                        type="text"
+                        className="a4-live-input"
+                        style={{ fontWeight: 600, width: '190px', textAlign: 'center', display: 'inline-block' }}
+                        value={supervisorName}
+                        onChange={(e) => setSupervisorName(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="นายอุดมศักดิ์ จันทร์กลิ่น"
+                        title="คลิกเพื่อแก้ไขชื่อผู้ควบคุมงาน"
+                      />{' '}
+                      <input
+                        type="text"
+                        className="a4-live-input"
+                        style={{ width: '170px', textAlign: 'center', display: 'inline-block' }}
+                        value={supervisorPosition}
+                        onChange={(e) => {
+                          setSupervisorPosition(e.target.value);
+                          setSupervisorLevel(e.target.value);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="พชง.6 ผกร.กรย.(ก3)"
+                        title="คลิกเพื่อแก้ไขตำแหน่งผู้ควบคุมงาน เช่น พชง.6 ผกร.กรย.(ก3)"
+                      />{' '}
+                      เป็นผู้ควบคุมงาน นั้น
+                    </p>
+                  )}
+                </div>
 
-                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify', marginTop: '6pt' }}>
-                    2. {reasonText}
-                  </p>
+                {/* 2. ข้อเท็จจริง (REASON & DEFICITS) */}
+                <div
+                  className="a4-section-hoverable"
+                  onClick={() => setActiveEditSection('reason')}
+                  title="คลิกเพื่อแก้ไขข้อ 2. ข้อเท็จจริง (เหตุผลความจำเป็นในการโอนงบ)"
+                  style={{ marginTop: '8pt' }}
+                >
+                  <div className="section-edit-badge">
+                    <Edit3 size={12} /> จิ้มแก้ไขข้อ 2. ข้อเท็จจริง
+                  </div>
+
+                  {headingStyle === 'standalone' ? (
+                    <>
+                      <p
+                        style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}
+                      >
+                        {heading2}
+                      </p>
+                      <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
+                        {reasonText}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
+                      <strong style={{ textDecoration: 'underline', marginRight: '8px' }}>{heading2}</strong>
+                      {reasonText}
+                    </p>
+                  )}
 
                   {/* Summary Callout for Deficits */}
                   {networkDataList.some(net => getNetworkDeficits(net).length > 0) && (
@@ -1153,12 +1296,26 @@ function BudgetTransferContent() {
                   style={{ marginTop: '8pt' }}
                 >
                   <div className="section-edit-badge">
-                    <Edit3 size={12} /> จิ้มแก้ไขรายการโอนงบ ({transfers.length} รายการ)
+                    <Edit3 size={12} /> จิ้มแก้ไขข้อ 3. ข้อพิจารณา-สรุป ({transfers.length} รายการ)
                   </div>
 
-                  <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
-                    3. กรย.(ก3) พิจารณาแล้ว เพื่อให้การเบิกจ่ายค่าใช้จ่ายหน้างานเป็นไปด้วยความเรียบร้อย จึงเห็นควรขออนุมัติโอนงบค่าใช้จ่ายหน้างาน ดังนี้
-                  </p>
+                  {headingStyle === 'standalone' ? (
+                    <>
+                      <p
+                        style={{ fontWeight: 'bold', textDecoration: 'underline', marginBottom: '4pt' }}
+                      >
+                        {heading3}
+                      </p>
+                      <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
+                        กรย.(ก3) พิจารณาแล้ว เพื่อให้การเบิกจ่ายค่าใช้จ่ายหน้างานเป็นไปด้วยความเรียบร้อย จึงเห็นควรขออนุมัติโอนงบค่าใช้จ่ายหน้างาน ดังนี้
+                      </p>
+                    </>
+                  ) : (
+                    <p className="a4-text-indent" style={{ lineHeight: 1.6, textAlign: 'justify' }}>
+                      <strong style={{ textDecoration: 'underline', marginRight: '8px' }}>{heading3}</strong>
+                      กรย.(ก3) พิจารณาแล้ว เพื่อให้การเบิกจ่ายค่าใช้จ่ายหน้างานเป็นไปด้วยความเรียบร้อย จึงเห็นควรขออนุมัติโอนงบค่าใช้จ่ายหน้างาน ดังนี้
+                    </p>
+                  )}
 
                   <div style={{ margin: '6pt 0 10pt 2.5cm', lineHeight: 1.6 }}>
                     {transfers.map((t, idx) => {
@@ -2102,9 +2259,40 @@ function BudgetTransferContent() {
                 </div>
               )}
 
-              {/* SECTION 2: PROJECT & WBS */}
+              {/* SECTION 2: PROJECT & WBS (ข้อ 1: เรื่องเดิม) */}
               {activeEditSection === 'project' && (
                 <div>
+                  <div style={{ marginBottom: '14px', padding: '10px 14px', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label className="big-label" style={{ color: '#0369a1', margin: 0 }}>
+                        <span>📌 หัวข้อที่ 1 (เรื่องเดิม)</span>
+                      </label>
+                      <span style={{ fontSize: '11px', color: '#0284c7' }}>คลิกปุ่มลัดเพื่อเปลี่ยนได้ทันที</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        className="big-input"
+                        style={{ fontWeight: 600, color: '#0369a1' }}
+                        value={heading1}
+                        onChange={(e) => setHeading1(e.target.value)}
+                        placeholder="1. เรื่องเดิม"
+                      />
+                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                        {['1. เรื่องเดิม', 'เรื่องเดิม', '1. ข้อความเดิม'].map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            className="var-tag-btn"
+                            onClick={() => setHeading1(opt)}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="big-field-group">
                     <label className="big-label">ชื่องาน / โครงการ</label>
                     <input
@@ -2328,9 +2516,40 @@ function BudgetTransferContent() {
                 </div>
               )}
 
-              {/* SECTION 3: REASON */}
+              {/* SECTION 3: REASON (ข้อ 2: ข้อเท็จจริง) */}
               {activeEditSection === 'reason' && (
                 <div>
+                  <div style={{ marginBottom: '14px', padding: '10px 14px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label className="big-label" style={{ color: '#15803d', margin: 0 }}>
+                        <span>📌 หัวข้อที่ 2 (ข้อเท็จจริง)</span>
+                      </label>
+                      <span style={{ fontSize: '11px', color: '#16a34a' }}>คลิกปุ่มลัดเพื่อเปลี่ยนได้ทันที</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        className="big-input"
+                        style={{ fontWeight: 600, color: '#15803d' }}
+                        value={heading2}
+                        onChange={(e) => setHeading2(e.target.value)}
+                        placeholder="2. ข้อเท็จจริง"
+                      />
+                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                        {['2. ข้อเท็จจริง', 'ข้อเท็จจริง', '2. ความเป็นมา'].map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            className="var-tag-btn"
+                            onClick={() => setHeading2(opt)}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="big-field-group">
                     <label className="big-label">เหตุผลความจำเป็นในการขอโอนงบ (ข้อ 2)</label>
                     <textarea
@@ -2388,9 +2607,40 @@ function BudgetTransferContent() {
                 </div>
               )}
 
-              {/* SECTION 4: TRANSFERS */}
+              {/* SECTION 4: TRANSFERS (ข้อ 3: ข้อพิจารณา-สรุป) */}
               {activeEditSection === 'transfers' && (
                 <div>
+                  <div style={{ marginBottom: '14px', padding: '10px 14px', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label className="big-label" style={{ color: '#7e22ce', margin: 0 }}>
+                        <span>📌 หัวข้อที่ 3 (ข้อพิจารณา-สรุป)</span>
+                      </label>
+                      <span style={{ fontSize: '11px', color: '#9333ea' }}>คลิกปุ่มลัดเพื่อเปลี่ยนได้ทันที</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        className="big-input"
+                        style={{ fontWeight: 600, color: '#7e22ce' }}
+                        value={heading3}
+                        onChange={(e) => setHeading3(e.target.value)}
+                        placeholder="3. ข้อพิจารณา-สรุป"
+                      />
+                      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                        {['3. ข้อพิจารณา-สรุป', '3. ข้อพิจารณา', '3. ข้อเสนอเพื่อพิจารณา', 'ข้อพิจารณาและสรุป'].map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            className="var-tag-btn"
+                            onClick={() => setHeading3(opt)}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   {/* ZPSR018 Trigger inside Modal */}
                   <div style={{ backgroundColor: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: '8px', padding: '12px 14px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
