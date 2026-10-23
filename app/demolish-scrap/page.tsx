@@ -86,6 +86,12 @@ export default function DemolishScrapPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.items && parsed.items.length > 0) {
+          if (!parsed.docNo || parsed.docNo.includes('1638') || parsed.docNo.includes('1712') || parsed.docNo.includes('2569') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('8 ต.ค.') || parsed.docDate.includes('15 ต.ค.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
+            parsed.docDate = '';
+          }
           setFormData(parsed);
         }
       }
@@ -644,7 +650,7 @@ export default function DemolishScrapPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร) 1638/2569"
+                      placeholder="เช่น ก.3 กรย.(กร)"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -655,7 +661,7 @@ export default function DemolishScrapPage() {
                         className="a4-live-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 8 ต.ค. 2569"
+                        placeholder=""
                       />
                       <button
                         type="button"
@@ -1026,7 +1032,7 @@ export default function DemolishScrapPage() {
                     style={{ textAlign: 'center', width: '140pt' }}
                     value={formData.approverDate}
                     onChange={(e) => setFormData({ ...formData, approverDate: e.target.value })}
-                    placeholder="เช่น 8 ต.ค. 69"
+                    placeholder=""
                   />
                 </div>
               </div>
@@ -1076,7 +1082,7 @@ export default function DemolishScrapPage() {
                     style={{ fontSize: '13pt', width: '90px' }}
                     value={formData.stampCpKrDate}
                     onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                    placeholder="8 ต.ค. 69"
+                    placeholder=""
                   />
                 </div>
               )}
@@ -1226,7 +1232,7 @@ export default function DemolishScrapPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร) 1638/2569"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
 
@@ -1254,7 +1260,7 @@ export default function DemolishScrapPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 8 ต.ค. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1663,14 +1669,13 @@ export default function DemolishScrapPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่อนุมัติ</span>
-                        <span className="big-label-hint">เช่น 8 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.approverDate}
                         onChange={(e) => setFormData({ ...formData, approverDate: e.target.value })}
-                        placeholder="8 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1725,14 +1730,13 @@ export default function DemolishScrapPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน ชผ.กร.(ก3) (มุมขวาล่าง)</span>
-                        <span className="big-label-hint">เช่น 8 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="8 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>

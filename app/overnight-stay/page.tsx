@@ -73,9 +73,17 @@ export default function OvernightStayPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.subject) {
+          const fixedDocNo = (!parsed.docNo || parsed.docNo.includes('2360') || parsed.docNo.includes('2358') || parsed.docNo.includes('2359') || parsed.docNo.includes('2361') || parsed.docNo.includes('5309') || parsed.docNo.includes('คชย'))
+            ? 'ก.3 กรย.(กร)'
+            : parsed.docNo;
+          const fixedDocDate = (parsed.docDate && (parsed.docDate.includes('ตุลาคม') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙')))
+            ? ''
+            : (parsed.docDate || '');
           setFormData({
             ...SAMPLE_SUPAWIT_DATA,
             ...parsed,
+            docNo: fixedDocNo,
+            docDate: fixedDocDate,
             docTo: parsed.docTo || 'กฟก.3'
           });
           setActivePreset('custom');
@@ -432,7 +440,7 @@ export default function OvernightStayPage() {
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เลขที่หนังสือ เช่น มท 5309.16/..."
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </td>
                     <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -719,7 +727,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น มท 5309.16/2360"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
                     <div className="big-field-group">

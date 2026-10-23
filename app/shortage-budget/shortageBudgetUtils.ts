@@ -265,7 +265,7 @@ export const POPULAR_PLANS = [
 export const SAMPLE_SHORTAGE_BUDGET_DATA: ShortageBudgetFormData = {
   docFrom: 'ผกร.กรย.(ก3)',
   docTo: 'กรย.(ก3)',
-  docNo: 'ก.3 กรย.(กร) 2337/2569',
+  docNo: 'ก.3 กรย.(กร)',
   docDate: '',
   subject: 'ขออนุมัติจัดสรรงบประมาณจัดซื้อพัสดุขาดแคลนสำหรับงานก่อสร้าง ตามแผนงาน คพจ.2.3',
   salutation: 'อก.รย.(ก3)',
@@ -302,17 +302,17 @@ export const SAMPLE_SHORTAGE_BUDGET_DATA: ShortageBudgetFormData = {
 
   proposerName: 'นายพิสันต์ จิตต์ปลื้ม',
   proposerPosition: 'หผ.กร.กรย.(ก3)',
-  proposerDate: '8 ต.ค. 69',
+  proposerDate: '',
 
   hasCommanderOrder: true,
   orderTo: 'หผ.จร.กรย.(ก3)',
   orderText: 'แจ้งส่วนเกี่ยวข้องดำเนินการต่อไป',
   commanderName: 'นายอนันต์ กาญจนอุปถัมภ์',
   commanderPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  commanderDate: '9 ต.ค. 69',
+  commanderDate: '',
 
   stampCpKrDate: '',
-  stampPcKrDate: '8/10/69'
+  stampPcKrDate: ''
 };
 
 /**

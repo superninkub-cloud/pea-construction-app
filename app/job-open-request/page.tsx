@@ -77,6 +77,12 @@ export default function JobOpenRequestPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.wbsNumber) {
+          if (!parsed.docNo || parsed.docNo.includes('2249') || parsed.docNo.includes('2246') || parsed.docNo.includes('2195') || parsed.docNo.includes('2569') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('28 ก.ย.') || parsed.docDate.includes('05 ต.ค.') || parsed.docDate.includes('ก.ย.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
+            parsed.docDate = '';
+          }
           setFormData(parsed);
         }
       }
@@ -592,7 +598,7 @@ export default function JobOpenRequestPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร) 2249/2569"
+                      placeholder="เช่น ก.3 กรย.(กร)"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -603,7 +609,7 @@ export default function JobOpenRequestPage() {
                         className="a4-live-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 28 ก.ย. 2569"
+                        placeholder=""
                       />
                       <button
                         type="button"
@@ -993,7 +999,7 @@ export default function JobOpenRequestPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร) 2249/2569"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
 
@@ -1021,7 +1027,7 @@ export default function JobOpenRequestPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="28 ก.ย. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>

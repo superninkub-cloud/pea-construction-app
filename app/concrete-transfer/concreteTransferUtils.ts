@@ -132,8 +132,8 @@ export const POPULAR_CONCRETE_PRODUCTS = [
 export const SAMPLE_CONCRETE_TRANSFER_1: ConcreteTransferFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กผภ.',
-  docNo: 'ก.3 กรย.(กร.) - 2238/2569',
-  docDate: '5 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.กจ., รบ. มาใช้งานพื้นที่ กฟก.3',
   salutation: 'อก.ผภ.',
 
@@ -180,8 +180,8 @@ export const SAMPLE_CONCRETE_TRANSFER_1: ConcreteTransferFormData = {
 export const SAMPLE_CONCRETE_TRANSFER_2: ConcreteTransferFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กผภ.',
-  docNo: 'ก.3 กรย.(กร) 2421/2569',
-  docDate: '14 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.กจ. มาใช้งานพื้นที่ กฟก.3',
   salutation: 'อก.ผภ.',
 
@@ -224,8 +224,8 @@ export const SAMPLE_CONCRETE_TRANSFER_2: ConcreteTransferFormData = {
 export const SAMPLE_CONCRETE_TRANSFER_3: ConcreteTransferFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กผภ.',
-  docNo: 'ก.3 กรย.(กร.) - 2421/2569',
-  docDate: '14 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.รบ. มาใช้งานพื้นที่ กฟก.3',
   salutation: 'อก.ผภ.',
 

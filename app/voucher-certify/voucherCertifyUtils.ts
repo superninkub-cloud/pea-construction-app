@@ -303,8 +303,8 @@ export const DEFAULT_EXPENSE_CATEGORIES: ExpenseCategory[] = [
 export const SAMPLE_PRESET_SUPHAN: VoucherCertifyFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กบฟ.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2233 /2569',
-  docDate: '22 ก.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอรับรองสำเนาเอกสารใบสำคัญจ่าย',
   salutation: 'อก.บฟ.(ก3)',
 
@@ -338,8 +338,8 @@ export const SAMPLE_PRESET_SUPHAN: VoucherCertifyFormData = {
 export const SAMPLE_PRESET_KAN: VoucherCertifyFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กบฟ.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2415 /2569',
-  docDate: '15 ส.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอรับรองสำเนาเอกสารใบสำคัญจ่าย',
   salutation: 'อก.บฟ.(ก3)',
 
@@ -405,8 +405,8 @@ export const SAMPLE_PRESET_KAN: VoucherCertifyFormData = {
 export const SAMPLE_PRESET_SAMUT: VoucherCertifyFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กบฟ.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2190 /2569',
-  docDate: '01 ก.ย. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอรับรองสำเนาเอกสารใบสำคัญจ่าย',
   salutation: 'อก.บฟ.(ก3)',
 

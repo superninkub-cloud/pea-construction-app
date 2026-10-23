@@ -91,8 +91,8 @@ export function getTodayThaiDate(): string {
 export const SAMPLE_PRESET_SAMCHUK: JobOpenFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟส.สามชุก',
-  docNo: 'ก.3 กรย.(กร) 2249/2569',
-  docDate: '28 ก.ย. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอแจ้งเข้าดำเนินการงานก่อสร้างย้ายแนวระบบสายส่ง ช่วงงานก่อสร้างสะพานลอยหน้า ม.ราชมงคลสุวรรณภูมิศูนย์สุพรรณบุรี จ.สุพรรณบุรี',
   salutation: 'ผจก.กฟส.สามชุก',
 
@@ -129,8 +129,8 @@ export const SAMPLE_PRESET_SAMCHUK: JobOpenFormData = {
 export const SAMPLE_PRESET_KANCHANABURI: JobOpenFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟจ.กาญจนบุรี',
-  docNo: 'ก.3 กรย.(กร) 2246/2569',
-  docDate: '28 ก.ย. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอแจ้งเข้าดำเนินการงานก่อสร้างย้ายแนวระบบสายส่ง ช่วงงานก่อสร้างสะพานลอยบ้านห้วยตลุง จ.กาญจนบุรี',
   salutation: 'ผจก.กฟจ.กาญจนบุรี',
 
@@ -166,8 +166,8 @@ export const SAMPLE_PRESET_KANCHANABURI: JobOpenFormData = {
 export const SAMPLE_PRESET_SAMUT: JobOpenFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟจ.สมุทรสาคร',
-  docNo: 'ก.3 กรย.(กร) 2195/2569',
-  docDate: '05 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอแจ้งเข้าดำเนินการงานก่อสร้างย้ายแนวระบบสายส่ง 115 เควี คลองท่าแร้ง ฝั่งขาออก กทม. จ.สมุทรสาคร',
   salutation: 'ผจก.กฟจ.สมุทรสาคร',
 

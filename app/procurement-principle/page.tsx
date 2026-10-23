@@ -67,11 +67,10 @@ export default function ProcurementPrinciplePage() {
       const saved = localStorage.getItem('pea_procurement_principle_form');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.subject) {
-          if (parsed.docNo && (parsed.docNo.includes('1178') || parsed.docNo.includes('2426') || parsed.docNo.includes('1178') || parsed.docNo.includes('2426'))) {
-            parsed.docNo = '';
+          if (!parsed.docNo || parsed.docNo.includes('1178') || parsed.docNo.includes('2426') || parsed.docNo.includes('5309') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
           }
-          if (parsed.docDate && (parsed.docDate.includes('พ.ย.') || parsed.docDate.includes('ต.ค.'))) {
+          if (parsed.docDate && (parsed.docDate.includes('พ.ย.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('ตุลาคม') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
             parsed.docDate = '';
           }
           const fixedDocTo = (parsed.docTo === 'ผวบ.(ก3)' || parsed.docTo === 'ผวบ.(ก3)' || !parsed.docTo) ? 'ฝวบ.(ก3)' : parsed.docTo;
@@ -97,7 +96,6 @@ export default function ProcurementPrinciplePage() {
             approverEndorsementTo: fixedApproverEndorsement
           });
         }
-      }
     } catch (e) {
       console.error('Error loading stored procurement form:', e);
     }
@@ -640,7 +638,7 @@ export default function ProcurementPrinciplePage() {
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เช่น มท 5309.16/..."
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </td>
                     <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -899,7 +897,7 @@ export default function ProcurementPrinciplePage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น มท 5309.16/..."
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
                     <div className="big-field-group">

@@ -85,9 +85,18 @@ export default function AccountAdjustPage() {
           }
           const docTo = parsed.docTo === 'กบฟ.(ก๓)' ? 'กบฟ.(ก3)' : (parsed.docTo || 'กบฟ.(ก3)');
           const docFrom = parsed.docFrom === 'กรย.(ก๓)' ? 'กรย.(ก3)' : (parsed.docFrom || 'กรย.(ก3)');
+          const fixedDocNo = (!parsed.docNo || parsed.docNo.includes('5309') || parsed.docNo.includes('คชย') || parsed.docNo.includes('2813'))
+            ? 'ก.3 กรย.(กร)'
+            : parsed.docNo;
+          const fixedDocDate = (parsed.docDate && (parsed.docDate.includes('ตุลาคม') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙') || parsed.docDate.includes('ต.ค.')))
+            ? ''
+            : (parsed.docDate || '');
+
           setFormData({
             ...SAMPLE_ACCOUNT_ADJUST_DATA,
             ...parsed,
+            docNo: fixedDocNo,
+            docDate: fixedDocDate,
             docFrom,
             salutation,
             docTo,
@@ -508,7 +517,7 @@ export default function AccountAdjustPage() {
                           value={formData.docNo}
                           onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น มท 5309.16/..."
+                          placeholder="เช่น ก.3 กรย.(กร)"
                         />
                       </td>
                       <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -734,7 +743,7 @@ export default function AccountAdjustPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น ก.3 กรย.(กร.) 2813/2568"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
                     <div className="big-field-group">

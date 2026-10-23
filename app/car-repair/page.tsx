@@ -100,6 +100,12 @@ export default function CarRepairPage() {
           if (!parsed.commanderDate) {
             parsed.commanderDate = '19 ต.ค. 63';
           }
+          if (!parsed.docNo || parsed.docNo.includes('2437') || parsed.docNo.includes('2443') || parsed.docNo.includes('2563') || parsed.docNo.includes('2561') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('17 ต.ค.') || parsed.docDate.includes('20 ต.ค.') || parsed.docDate.includes('63') || parsed.docDate.includes('61'))) {
+            parsed.docDate = '';
+          }
           setFormData(parsed);
         }
       }
@@ -420,7 +426,7 @@ export default function CarRepairPage() {
                           value={formData.docNo}
                           onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น ก.3 กรย.(กร)- 2437/2563"
+                          placeholder="เช่น ก.3 กรย.(กร)"
                           title="เลขที่หนังสือ (จุดที่ต้องแก้ไขแต่ละครั้ง)"
                         />
                       </div>
@@ -435,7 +441,7 @@ export default function CarRepairPage() {
                           value={formData.docDate}
                           onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น 17 ต.ค. 63"
+                          placeholder=""
                           title="วันที่ในหนังสือ (จุดที่ต้องแก้ไขแต่ละครั้ง)"
                         />
                         <button
@@ -914,7 +920,7 @@ export default function CarRepairPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น ก.3 กรย.(กร)- 2437/2563"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                       <div className="var-quick-options">
                         <button
@@ -940,7 +946,7 @@ export default function CarRepairPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 17 ต.ค. 63"
+                        placeholder=""
                       />
                       <div className="var-quick-options">
                         <button
@@ -1879,7 +1885,7 @@ export default function CarRepairPage() {
                       className="big-input"
                       value={formData.proposerDate}
                       onChange={(e) => setFormData({ ...formData, proposerDate: e.target.value })}
-                      placeholder="เช่น 17 ต.ค. 63"
+                      placeholder=""
                     />
                   </div>
 

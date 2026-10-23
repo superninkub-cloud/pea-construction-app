@@ -216,8 +216,8 @@ export const SAMPLE_BUY_DATA: ProcurementFormData = {
 
   docFrom: 'กรย.(ก3)',
   docTo: 'ฝวบ.(ก3)',
-  docNo: '',                        // Blank by default
-  docDate: '',                      // Blank by default
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขออนุมัติหลักการจัดซื้อดอกสว่านสำหรับเจาะเหล็กดัดแปลงอุปกรณ์หัวเสา โดยวิธีเฉพาะเจาะจง',
   salutation: 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)',
 
@@ -259,8 +259,8 @@ export const SAMPLE_HIRE_DATA: ProcurementFormData = {
 
   docFrom: 'กรย.(ก3)',
   docTo: 'ฝวบ.(ก3)',
-  docNo: '',                        // Blank by default
-  docDate: '',                      // Blank by default
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขออนุมัติหลักการจัดจ้างรถแบคโฮหัวกระแทก PC 55 จำนวน 1 คัน เพื่อเข้างานก่อสร้างงานย้ายแนวระบบสายส่ง 115 kV. บริเวณตรงข้ามวัดท่าน้ำตื้นถึงเมืองไทยสินเชื่อเงินด่วน ต.ท่ามะขาม อ.เมือง จ.กาญจนบุรี',
   salutation: 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)',
 

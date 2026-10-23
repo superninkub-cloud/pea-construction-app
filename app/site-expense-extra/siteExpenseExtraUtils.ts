@@ -122,8 +122,8 @@ export function calculateTotals(items: SiteExpenseJobItem[]) {
 export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กวว.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2327/2569',
-  docDate: '8 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอให้จัดสรรงบประมาณค่าใช้จ่ายหน้างานเพิ่มเติม',
   salutation: 'อก.วว.(ก3)',
 
@@ -164,11 +164,11 @@ export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '8 ต.ค. 69',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '7 ต.ค. 69',
-  stampCpKrDate: '7 ต.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   isThaiNumerals: false,
 };
@@ -179,8 +179,8 @@ export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
 export const SAMPLE_PRESET_SINGLE_PROJECT: SiteExpenseExtraFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กวว.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2450/2569',
-  docDate: '15 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอให้จัดสรรงบประมาณค่าใช้จ่ายหน้างานเพิ่มเติม',
   salutation: 'อก.วว.(ก3)',
 

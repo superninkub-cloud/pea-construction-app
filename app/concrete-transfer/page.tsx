@@ -81,6 +81,12 @@ export default function ConcreteTransferPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.items && parsed.items.length > 0) {
+          if (!parsed.docNo || parsed.docNo.includes('2238') || parsed.docNo.includes('2421') || parsed.docNo.includes('2569') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('5 ต.ค.') || parsed.docDate.includes('14 ต.ค.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
+            parsed.docDate = '';
+          }
           setFormData(parsed);
           setActivePreset('custom');
         }
@@ -647,7 +653,7 @@ export default function ConcreteTransferPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร.) - 2238/2569"
+                      placeholder="เช่น ก.3 กรย.(กร)"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -658,7 +664,7 @@ export default function ConcreteTransferPage() {
                         className="a4-live-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 5 ต.ค. 2569"
+                        placeholder=""
                       />
                       <button
                         type="button"
@@ -1189,7 +1195,7 @@ export default function ConcreteTransferPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร.) - 2238/2569"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
 
@@ -1217,7 +1223,7 @@ export default function ConcreteTransferPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="5 ต.ค. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
