@@ -370,8 +370,8 @@ export default function JobCloseMemoPage() {
               <table className="a4-info-table">
                 <tbody>
                   <tr>
-                    <td style={{ width: '10%', fontWeight: 'bold' }}>หน่วยงาน</td>
-                    <td style={{ width: '40%' }}>
+                    <td style={{ width: '8%', fontWeight: 'bold' }}>จาก</td>
+                    <td style={{ width: '42%' }}>
                       <input
                         type="text"
                         className="a4-live-input"
@@ -381,8 +381,8 @@ export default function JobCloseMemoPage() {
                         placeholder="เช่น กรย.(ก3)"
                       />
                     </td>
-                    <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
-                    <td style={{ width: '40%' }}>
+                    <td style={{ width: '8%', fontWeight: 'bold' }}>ถึง</td>
+                    <td style={{ width: '42%' }}>
                       <input
                         type="text"
                         className="a4-live-input a4-var-spot yellow"
@@ -628,7 +628,7 @@ export default function JobCloseMemoPage() {
 
                   <div className="big-grid-2">
                     <div className="big-field-group">
-                      <label className="big-label">หน่วยงาน (จาก)</label>
+                      <label className="big-label">จาก (หน่วยงานเจ้าของเรื่อง)</label>
                       <input
                         type="text"
                         className="big-input"

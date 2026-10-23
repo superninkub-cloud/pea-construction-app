@@ -385,8 +385,8 @@ export default function CarRepairPage() {
               <table className="a4-info-table">
                 <tbody>
                   <tr>
-                    <td style={{ width: '10%', fontWeight: 'bold' }}>หน่วยงาน</td>
-                    <td style={{ width: '40%' }}>
+                    <td style={{ width: '8%', fontWeight: 'bold' }}>จาก</td>
+                    <td style={{ width: '42%' }}>
                       <input
                         type="text"
                         className="a4-live-input"
@@ -396,8 +396,8 @@ export default function CarRepairPage() {
                         placeholder="เช่น ผกร. หรือ กรย.(ก3)"
                       />
                     </td>
-                    <td style={{ width: '10%', fontWeight: 'bold' }}>ถึง</td>
-                    <td style={{ width: '40%' }}>
+                    <td style={{ width: '8%', fontWeight: 'bold' }}>ถึง</td>
+                    <td style={{ width: '42%' }}>
                       <input
                         type="text"
                         className="a4-live-input a4-var-spot yellow"
