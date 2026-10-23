@@ -98,6 +98,9 @@ export default function SiteExpenseExtraPage() {
           if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('69') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('7') || parsed.stampCpKrDate.includes('14'))) {
             parsed.stampCpKrDate = '';
           }
+          if (parsed.supervisorPosition) {
+            parsed.supervisorPosition = parsed.supervisorPosition.replace(/ผพง/g, 'พชง');
+          }
           setFormData(parsed);
         }
       }
@@ -806,7 +809,7 @@ export default function SiteExpenseExtraPage() {
                 style={{ width: '180px' }}
                 value={formData.supervisorPosition}
                 onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                placeholder="พชง.6 ผกร.กรย.(ก3)"
               />
               <span> ผู้ควบคุมงาน ได้รายงานผลการดำเนินงานก่อสร้างปัจจุบันมีความคืบหน้าประมาณ </span>
               <input
@@ -1305,14 +1308,14 @@ export default function SiteExpenseExtraPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>ตำแหน่งผู้ควบคุมงาน</span>
-                        <span className="big-label-hint">เช่น ผพง.6 ผกร.กรย.(ก3)</span>
+                        <span className="big-label-hint">เช่น พชง.6 ผกร.กรย.(ก3)</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.supervisorPosition}
                         onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                        placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                        placeholder="พชง.6 ผกร.กรย.(ก3)"
                       />
                     </div>
 

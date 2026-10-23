@@ -258,13 +258,13 @@ function BudgetTransferContent() {
         if (parsed.supervisorName) setSupervisorName(parsed.supervisorName);
         if (parsed.supervisorLevel) setSupervisorLevel(parsed.supervisorLevel);
         if (parsed.supervisorPosition) {
-          setSupervisorPosition(parsed.supervisorPosition);
+          setSupervisorPosition(parsed.supervisorPosition.replace(/ผพง/g, 'พชง'));
         } else if (parsed.supervisorLevel) {
           if (parsed.supervisorLevel === '7') {
             setSupervisorPosition('พชง.6 ผกร.กรย.(ก3)');
             setSupervisorLevel('6');
-          } else if (parsed.supervisorLevel.startsWith('พชง.') || parsed.supervisorLevel.startsWith('ผพง.')) {
-            setSupervisorPosition(parsed.supervisorLevel);
+          } else if (parsed.supervisorLevel.startsWith('พชง.') || parsed.supervisorLevel.startsWith('ผพง')) {
+            setSupervisorPosition(parsed.supervisorLevel.replace(/ผพง/g, 'พชง'));
           } else {
             setSupervisorPosition(`พชง.${parsed.supervisorLevel} ผกร.กรย.(ก3)`);
           }
@@ -2210,7 +2210,7 @@ function BudgetTransferContent() {
                         placeholder="เช่น พชง.6 ผกร.กรย.(ก3)"
                       />
                       <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                        {['พชง.6 ผกร.กรย.(ก3)', 'ผพง.6 ผกร.กรย.(ก3)', 'พชง.7 ผกร.กรย.(ก3)', 'ชผ.กร.กรย.(ก3)', 'ผพง.7 ผกร.กรย.(ก3)'].map((opt) => (
+                        {['พชง.6 ผกร.กรย.(ก3)', 'พชง.7 ผกร.กรย.(ก3)', 'พชง.5 ผกร.กรย.(ก3)', 'ชผ.กร.กรย.(ก3)', 'หผ.กร.กรย.(ก3)'].map((opt) => (
                           <button
                             key={opt}
                             type="button"

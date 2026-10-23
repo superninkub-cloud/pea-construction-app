@@ -103,6 +103,12 @@ export default function VoucherCertifyPage() {
           if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ก.ค.') || parsed.stampCpKrDate.includes('ส.ค.') || parsed.stampCpKrDate.includes('ก.ย.') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('69'))) {
             parsed.stampCpKrDate = '';
           }
+          if (parsed.supervisorPosition) {
+            parsed.supervisorPosition = parsed.supervisorPosition.replace(/ผพง/g, 'พชง');
+          }
+          if (parsed.signerPosition) {
+            parsed.signerPosition = parsed.signerPosition.replace(/ผพง/g, 'พชง');
+          }
           setFormData(parsed);
         }
       }
@@ -742,7 +748,7 @@ export default function VoucherCertifyPage() {
                 style={{ width: '180px' }}
                 value={formData.supervisorPosition}
                 onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                placeholder="พชง.6 ผกร.กรย.(ก3)"
               />
               <span> ได้ดำเนินการก่อสร้าง</span>
               <input
@@ -1158,14 +1164,14 @@ export default function VoucherCertifyPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>ตำแหน่งผู้ควบคุมงาน</span>
-                        <span className="big-label-hint">เช่น ผพง.6 ผกร.กรย.(ก3)</span>
+                        <span className="big-label-hint">เช่น พชง.6 ผกร.กรย.(ก3)</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.supervisorPosition}
                         onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                        placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                        placeholder="พชง.6 ผกร.กรย.(ก3)"
                       />
                     </div>
                   </div>

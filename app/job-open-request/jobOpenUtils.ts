@@ -25,7 +25,7 @@ export interface JobOpenFormData {
 
   // ผู้ควบคุมงาน
   supervisorName: string;       // เช่น นายศราวุฒิ เกิดสีเล็ก
-  supervisorPosition: string;   // เช่น ผพง.6 ผกร.กรย.(ก3)
+  supervisorPosition: string;   // เช่น พชง.6 ผกร.กรย.(ก3)
 
   // คำลงท้ายคำขออนุมัติ
   requestClosingText: string;   // เช่น และให้ กฟส.สามชุก อนุมัติเปิดงาน และดำเนินการในส่วนที่เกี่ยวข้องให้ต่อไป
@@ -104,7 +104,7 @@ export const SAMPLE_PRESET_SAMCHUK: JobOpenFormData = {
   wbsNumber: 'I-69-I-SMG69.M4.1116',
 
   supervisorName: 'นายศราวุฒิ เกิดสีเล็ก',
-  supervisorPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.6 ผกร.กรย.(ก3)',
 
   requestClosingText: 'และให้ กฟส.สามชุก อนุมัติเปิดงาน และดำเนินการในส่วนที่เกี่ยวข้องให้ต่อไป',
 
@@ -142,7 +142,7 @@ export const SAMPLE_PRESET_KANCHANABURI: JobOpenFormData = {
   wbsNumber: 'I-69-I-KCI69.M4.1125',
 
   supervisorName: 'นายอุดมศักดิ์ จันทร์กลิ่น',
-  supervisorPosition: 'ผพง.7 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.7 ผกร.กรย.(ก3)',
 
   requestClosingText: 'และให้ กฟจ.กาญจนบุรี อนุมัติเปิดงาน และดำเนินการในส่วนที่เกี่ยวข้องให้ต่อไป',
 

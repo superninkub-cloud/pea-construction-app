@@ -36,7 +36,7 @@ export interface VoucherCertifyFormData {
 
   // ข้อมูลผู้ควบคุมงานและโครงการ
   supervisorName: string;       // นายศราวุฒิ เกิดสีเล็ก
-  supervisorPosition: string;   // ผพง.6 ผกร.กรย.(ก3)
+  supervisorPosition: string;   // พชง.6 ผกร.กรย.(ก3)
   projectName: string;          // งานปรับปรุงระบบจำหน่าย 22 เควี บริเวณตามแนวทางหลวงหมายเลข 357 แยกทางหลวงหมายเลข 3318 ถึง สถานีไฟฟ้าสุพรรณบุรี 2 ต.รั้วใหญ่ อ.เมือง จ.สุพรรณบุรี
   shortProjectName: string;     // ปป. แยกทางหลวงหมายเลข 3318 - สฟ.สุพรรณบุรี 2
   wbsNumber: string;            // P-TD02.3-I-SPINA.0007
@@ -48,7 +48,7 @@ export interface VoucherCertifyFormData {
 
   // ผู้ลงนามหลัก (ผู้ควบคุมงาน)
   signerName: string;           // นายศราวุฒิ เกิดสีเล็ก
-  signerPosition: string;       // ผพง.6 ผกร.กรย.(ก3)
+  signerPosition: string;       // พชง.6 ผกร.กรย.(ก3)
   signerDate: string;           // 22 ก.ค. 2569
 
   // เกษียนหนังสือ (ขวาล่าง)
@@ -309,7 +309,7 @@ export const SAMPLE_PRESET_SUPHAN: VoucherCertifyFormData = {
   salutation: 'อก.บฟ.(ก3)',
 
   supervisorName: 'นายศราวุฒิ เกิดสีเล็ก',
-  supervisorPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.6 ผกร.กรย.(ก3)',
   projectName: 'งานปรับปรุงระบบจำหน่าย 22 เควี บริเวณตามแนวทางหลวงหมายเลข 357 แยกทางหลวงหมายเลข 3318 ถึง สถานีไฟฟ้าสุพรรณบุรี 2 ต.รั้วใหญ่ อ.เมือง จ.สุพรรณบุรี',
   shortProjectName: 'ปป. แยกทางหลวงหมายเลข 3318 - สฟ.สุพรรณบุรี 2',
   wbsNumber: 'P-TD02.3-I-SPINA.0007',
@@ -319,7 +319,7 @@ export const SAMPLE_PRESET_SUPHAN: VoucherCertifyFormData = {
   categories: JSON.parse(JSON.stringify(DEFAULT_EXPENSE_CATEGORIES)),
 
   signerName: 'นายศราวุฒิ เกิดสีเล็ก',
-  signerPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  signerPosition: 'พชง.6 ผกร.กรย.(ก3)',
   signerDate: '',
 
   hasRoutingStamps: true,
@@ -411,7 +411,7 @@ export const SAMPLE_PRESET_SAMUT: VoucherCertifyFormData = {
   salutation: 'อก.บฟ.(ก3)',
 
   supervisorName: 'นายสมพร เกตุวิทย์',
-  supervisorPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.6 ผกร.กรย.(ก3)',
   projectName: 'งานก่อสร้างย้ายแนวระบบสายส่ง 115 เควี บริเวณ คลองท่าแร้ง ฝั่งขาออก กทม. จ.สมุทรสาคร',
   shortProjectName: 'ย้ายแนว 115 kV คลองท่าแร้ง สมุทรสาคร',
   wbsNumber: 'I-69-I-SM269.M4.1105',
@@ -462,7 +462,7 @@ export const SAMPLE_PRESET_SAMUT: VoucherCertifyFormData = {
   ],
 
   signerName: 'นายสมพร เกตุวิทย์',
-  signerPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  signerPosition: 'พชง.6 ผกร.กรย.(ก3)',
   signerDate: '',
 
   hasRoutingStamps: true,
