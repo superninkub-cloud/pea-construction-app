@@ -11,29 +11,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'LINE_TARGET_ID is not set in env' }, { status: 500 });
     }
 
+    // แจ้งเตือนผ่าน LINE เฉพาะเมื่อมีการอัพเดทสถานะงานก่อสร้าง เท่านั้น (job_status หรือ photo_upload)
+    if (type !== 'job_status' && type !== 'photo_upload') {
+      return NextResponse.json({ 
+        success: true, 
+        message: `Notification for '${type}' is disabled. Only construction status updates are sent to LINE.` 
+      });
+    }
+
     let messages: any[] = [];
 
-    if (type === 'gas_report') {
-      const { license_plate, driver_name, fuel_liters, fuel_cost, usage_date } = payload;
-      
-      const dateStr = new Date(usage_date).toLocaleDateString('th-TH', { 
-        year: 'numeric', month: 'short', day: 'numeric' 
-      });
-
-      const messageText = `⛽ [แจ้งเตือน] มีรายงานน้ำมันใหม่!\n` +
-                          `🚗 ทะเบียน: ${license_plate}\n` +
-                          `👨‍🔧 ผู้ขับขี่: ${driver_name}\n` +
-                          `📅 วันที่: ${dateStr}\n` +
-                          `💧 จำนวน: ${fuel_liters || '-'} ลิตร\n` +
-                          `💰 ยอดเงิน: ${fuel_cost || '-'} บาท`;
-
-      messages = [
-        {
-          type: 'text',
-          text: messageText
-        }
-      ];
-    } else if (type === 'job_status') {
+    if (type === 'job_status') {
        const { wbs, status, project_name, remarks } = payload;
        let text = `📢 [อัพเดทสถานะงาน]\n📌 งาน: ${wbs}\n📑 ชื่อ: ${project_name || '-'}\n🔄 สถานะ: ${status || '-'}`;
        if (remarks) {
@@ -59,23 +47,6 @@ export async function POST(request: Request) {
            previewImageUrl: image_url
          }
        ];
-    } else if (type === 'safety_report') {
-       const { text, image_url } = payload;
-       messages = [
-         {
-           type: 'text',
-           text: text || '-'
-         }
-       ];
-       if (image_url && image_url.startsWith('http')) {
-         messages.push({
-           type: 'image',
-           originalContentUrl: image_url,
-           previewImageUrl: image_url
-         });
-       }
-    } else {
-      return NextResponse.json({ error: 'Unknown notification type' }, { status: 400 });
     }
 
     const result = await sendLinePushMessage(targetId, messages);
