@@ -24,6 +24,24 @@
   padding: 0;
 }
 
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(124, 58, 237, 0.45);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+button {
+  outline: none !important;
+}
+
+button:focus {
+  outline: none !important;
+}
+
 body {
   font-family: 'Prompt', sans-serif;
   background-color: var(--bg-main);
@@ -2087,5 +2105,37 @@ body {
   background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   box-shadow: 0 6px 16px rgba(234, 88, 12, 0.45);
   color: #ffffff;
+}
+
+/* Print Styles for Executive Presentation & Reports */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .sidebar,
+  .mobile-bottom-nav,
+  .sidebar-overlay,
+  button,
+  .no-print {
+    display: none !important;
+  }
+  .app-layout {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
 }
 
