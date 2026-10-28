@@ -119,8 +119,8 @@ export function getTodayThaiDate(): string {
 export const SAMPLE_PRESET_KAMPHAENGSAEN: DemolishScrapFormData = {
   docFrom: 'ผกร.กรย.(ก3)',
   docTo: 'กรย.(ก3)',
-  docNo: 'ก.3 กรย.(กร) 1638/2569',
-  docDate: '8 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอส่งคืนพัสดุรื้อถอน ประเภทเสา คอร., และเสาตอม่อ คอร. หักชำรุดและทุบทำลาย งานปรับปรุงระบบจำหน่าย 22 เควี ช่วงทางรถไฟทุ่งบัว ถึง แยก ม.เกษตรศาสตร์ อ.กำแพงแสน จ.นครปฐม ตามแผนงาน คพจ.2.3',
   salutation: 'อก.รย.(ก3) ผ่าน รก.รย.(ก3)',
 
@@ -196,13 +196,13 @@ export const SAMPLE_PRESET_KAMPHAENGSAEN: DemolishScrapFormData = {
   approverOrderNote: 'เรียน ผจก.กฟจ.นฐ. ผจก.กฟส.กพส.\nอนุมัติ และแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป',
   approverName: 'นายอนันต์ กาญจนอุปถัมภ์',
   approverPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  approverDate: '8 ต.ค. 69',
+  approverDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา กฟก.3',
   contactPhone: '10171',
 
   hasRoutingStamps: true,
-  stampCpKrDate: '8 ต.ค. 69',
+  stampCpKrDate: '',
 
   isThaiNumerals: false,
 };
@@ -213,8 +213,8 @@ export const SAMPLE_PRESET_KAMPHAENGSAEN: DemolishScrapFormData = {
 export const SAMPLE_PRESET_SAMCHUK_SCRAP: DemolishScrapFormData = {
   docFrom: 'ผกร.กรย.(ก3)',
   docTo: 'กรย.(ก3)',
-  docNo: 'ก.3 กรย.(กร) 1712/2569',
-  docDate: '15 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอส่งคืนพัสดุรื้อถอน ประเภทเสา คอร., และเสาตอม่อ คอร. หักชำรุดและทุบทำลาย งานย้ายแนวระบบสายส่ง 115 เควี หลบสะพานลอย ม.ราชมงคลสุวรรณภูมิ สุพรรณบุรี',
   salutation: 'อก.รย.(ก3) ผ่าน รก.รย.(ก3)',
 
@@ -263,13 +263,13 @@ export const SAMPLE_PRESET_SAMCHUK_SCRAP: DemolishScrapFormData = {
   approverOrderNote: 'เรียน ผจก.กฟส.สามชุก\nอนุมัติ และแจ้งส่วนเกี่ยวข้องดำเนินการต่อไป',
   approverName: 'นายกำพล ตุ้ยเต็มวงค์',
   approverPosition: 'อก.รย.(ก3)',
-  approverDate: '15 ต.ค. 69',
+  approverDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา กฟก.3',
   contactPhone: '10171',
 
   hasRoutingStamps: true,
-  stampCpKrDate: '15 ต.ค. 69',
+  stampCpKrDate: '',
 
   isThaiNumerals: false,
 };

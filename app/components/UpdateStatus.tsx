@@ -5,9 +5,15 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
-import { Plus, X, Users } from "lucide-react";
+import { Plus, X, Users, Camera, Upload, Trash2, ZoomIn, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, RotateCw, Image as ImageIcon, Download, AlertCircle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { wireDataList } from "../../lib/wireData";
+import {
+  compressMultipleImages,
+  parseProjectImages,
+  formatBytes,
+  CompressedImageResult
+} from "../utils/imageCompressor";
 
 const getLatestRemarkDetail = (remarks?: string) => {
   if (!remarks) return null;
@@ -79,9 +85,14 @@ export default function UpdateStatus() {
   const [scrapReturnedWeight, setScrapReturnedWeight] = useState<number | "">(
     "",
   );
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  // Multi-image management (up to 30 photos with auto-compression)
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newImages, setNewImages] = useState<CompressedImageResult[]>([]);
+  const [compressing, setCompressing] = useState(false);
+  const [compressionProgress, setCompressionProgress] = useState({ current: 0, total: 0, fileName: "" });
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [estSiteExpense, setEstSiteExpense] = useState("");
   const [allocatedSiteBudget, setAllocatedSiteBudget] = useState("");
   const [disbursedSiteExpense, setDisbursedSiteExpense] = useState("");
@@ -287,8 +298,15 @@ export default function UpdateStatus() {
             ? p.disbursed_operating_expense.toString()
             : "",
         );
-        setFile(null);
-        setPreviewUrl(p.image_url || "");
+
+        // Load existing images from database column
+        const imgs = parseProjectImages(p.image_url);
+        setExistingImages(imgs);
+        // Clear staged new images
+        newImages.forEach((item) => {
+          try { URL.revokeObjectURL(item.previewUrl); } catch (e) {}
+        });
+        setNewImages([]);
         setMessage({ text: "", type: "" });
       }
     } else {
@@ -361,12 +379,62 @@ export default function UpdateStatus() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-      setPreviewUrl(URL.createObjectURL(selectedFile));
+  // Handle selection of up to 30 photos with automatic client-side compression
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    const selectedFiles = Array.from(e.target.files);
+    e.target.value = ""; // Reset input so same files can be re-selected if desired
+
+    const currentTotal = existingImages.length + newImages.length;
+    const remainingSlots = Math.max(0, 30 - currentTotal);
+
+    if (remainingSlots <= 0) {
+      alert("ไม่สามารถเพิ่มรูปภาพได้ เนื่องจากมีรูปครบ 30 รูปแล้ว หากต้องการเพิ่มรูปใหม่ กรุณาลบรูปเดิมบางรูปออกก่อนครับ");
+      return;
     }
+
+    let filesToProcess = selectedFiles;
+    if (selectedFiles.length > remainingSlots) {
+      alert(
+        `คุณเลือก ${selectedFiles.length} รูป แต่ระบบอนุญาตให้เพิ่มได้อีก ${remainingSlots} รูป (สูงสุด 30 รูปต่อโครงการ)\nระบบจะบีบอัดและเพิ่มเฉพาะ ${remainingSlots} รูปแรกให้ครับ`
+      );
+      filesToProcess = selectedFiles.slice(0, remainingSlots);
+    }
+
+    setCompressing(true);
+    setCompressionProgress({ current: 0, total: filesToProcess.length, fileName: "" });
+
+    try {
+      const compressedList = await compressMultipleImages(
+        filesToProcess,
+        (current, total, fileName) => {
+          setCompressionProgress({ current, total, fileName });
+        },
+        { maxWidth: 1600, maxHeight: 1600, quality: 0.78 }
+      );
+
+      setNewImages((prev) => [...prev, ...compressedList]);
+    } catch (err: any) {
+      console.error("Image compression error:", err);
+      alert(`เกิดข้อผิดพลาดในการบีบอัดรูปภาพ: ${err.message || err}`);
+    } finally {
+      setCompressing(false);
+    }
+  };
+
+  const handleRemoveExistingImage = (indexToRemove: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== indexToRemove));
+  };
+
+  const handleRemoveNewImage = (indexToRemove: number) => {
+    setNewImages((prev) => {
+      const item = prev[indexToRemove];
+      if (item?.previewUrl) {
+        try { URL.revokeObjectURL(item.previewUrl); } catch (e) {}
+      }
+      return prev.filter((_, i) => i !== indexToRemove);
+    });
   };
 
   const handleSubmit = async () => {
@@ -375,21 +443,40 @@ export default function UpdateStatus() {
     setMessage({ text: "", type: "" });
 
     try {
-      let imageUrl = project.image_url;
+      // 1. Handle Multiple Image Uploads to Supabase Storage
+      let finalImages = [...existingImages];
 
-      if (file) {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${project.wbs}_${Date.now()}.${fileExt}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("project_images")
-          .upload(fileName, file, { cacheControl: "3600", upsert: false });
+      if (newImages.length > 0) {
+        const uploadedUrls: string[] = [];
+        for (let i = 0; i < newImages.length; i++) {
+          setUploadProgress({ current: i + 1, total: newImages.length });
+          const item = newImages[i];
+          const fileName = `${project.wbs}_${Date.now()}_${i + 1}.jpg`;
 
-        if (uploadError) throw uploadError;
+          const { error: uploadError } = await supabase.storage
+            .from("project_images")
+            .upload(fileName, item.file, { cacheControl: "3600", upsert: false });
 
-        const { data: publicUrlData } = supabase.storage
-          .from("project_images")
-          .getPublicUrl(fileName);
-        imageUrl = publicUrlData.publicUrl;
+          if (uploadError) {
+            console.error("Upload error for file:", fileName, uploadError);
+            throw uploadError;
+          }
+
+          const { data: publicUrlData } = supabase.storage
+            .from("project_images")
+            .getPublicUrl(fileName);
+
+          uploadedUrls.push(publicUrlData.publicUrl);
+        }
+        finalImages = [...finalImages, ...uploadedUrls];
+      }
+
+      // Format final image_url string for database
+      let finalImageUrlValue = "";
+      if (finalImages.length === 1) {
+        finalImageUrlValue = finalImages[0];
+      } else if (finalImages.length > 1) {
+        finalImageUrlValue = JSON.stringify(finalImages);
       }
 
       let combinedRemarks = oldRemarks;
@@ -453,7 +540,7 @@ export default function UpdateStatus() {
           scrap_wire_length: Number(scrapWireLength) || 0,
           scrap_returned_weight: Number(scrapReturnedWeight) || 0,
           remarks: combinedRemarks,
-          image_url: imageUrl,
+          image_url: finalImageUrlValue,
           est_site_expense: Number(estSiteExpense) || 0,
           allocated_site_budget: Number(allocatedSiteBudget) || 0,
           disbursed_site_expense: Number(disbursedSiteExpense) || 0,
@@ -487,13 +574,19 @@ export default function UpdateStatus() {
           });
         }
         
-        if (file && imageUrl) {
+        if (newImages.length > 0 && finalImages.length > 0) {
+          const latestImageUrl = finalImages[finalImages.length - 1];
           fetch('/api/notify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               type: 'photo_upload',
-              payload: { wbs: editWbs, project_name: editName, image_url: imageUrl }
+              payload: {
+                wbs: editWbs,
+                project_name: editName,
+                image_url: latestImageUrl,
+                image_count: finalImages.length
+              }
             })
           });
         }
@@ -502,12 +595,20 @@ export default function UpdateStatus() {
       }
 
       setMessage({
-        text: "บันทึกสถานะงานและเช็คลิสท์เรียบร้อยแล้ว",
+        text: `บันทึกสถานะงานและรูปภาพ (${finalImages.length} รูป) เรียบร้อยแล้ว`,
         type: "success",
       });
       setOldRemarks(combinedRemarks);
       setNewRemarks("");
-      setFile(null);
+
+      // Clean up staged local preview URLs
+      newImages.forEach((item) => {
+        try { URL.revokeObjectURL(item.previewUrl); } catch (e) {}
+      });
+      setExistingImages(finalImages);
+      setNewImages([]);
+      setUploadProgress({ current: 0, total: 0 });
+
       if (editWbs !== selectedWbs) {
         setSelectedWbs(editWbs);
       }
@@ -1882,61 +1983,378 @@ export default function UpdateStatus() {
               ))}
             </div>
 
-            <div
-              style={{
-                background: "#f8fafc",
-                padding: "24px",
-                borderRadius: "16px",
-                border: "1px dashed #cbd5e1",
-                marginBottom: "32px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <label className="form-label" style={{ marginBottom: "12px" }}>
-                📷 อัพโหลดภาพถ่ายหน้างาน (ไม่บังคับ)
-              </label>
-              <input
-                type="file"
-                className="form-control"
-                accept="image/*"
-                onChange={handleFileChange}
-                style={{ maxWidth: "400px" }}
-              />
-              {previewUrl && (
-                <div style={{ marginTop: "20px", textAlign: "center" }}>
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    onClick={() => setIsLightboxOpen(true)}
+            {/* =========================================================================
+                MULTI-PHOTO UPLOAD & GALLERY (UP TO 30 PHOTOS WITH COMPRESSION)
+                ========================================================================= */}
+            {(() => {
+              const allImagesList = [
+                ...existingImages.map((url, idx) => ({
+                  id: `existing-${idx}`,
+                  type: "existing" as const,
+                  url,
+                  originalIndex: idx,
+                  title: `ภาพที่บันทึกแล้ว #${idx + 1}`,
+                  subTitle: "จัดเก็บบนระบบคลาวด์เรียบร้อย",
+                  sizeBadge: null
+                })),
+                ...newImages.map((img, idx) => ({
+                  id: `new-${idx}`,
+                  type: "new" as const,
+                  url: img.previewUrl,
+                  originalIndex: idx,
+                  title: `ภาพใหม่ #${existingImages.length + idx + 1}`,
+                  subTitle: img.file.name,
+                  sizeBadge: `${formatBytes(img.compressedSize)} (-${img.compressionRatio}%)`
+                }))
+              ];
+
+              const totalImagesCount = existingImages.length + newImages.length;
+              const totalOriginalBytes = newImages.reduce((sum, it) => sum + it.originalSize, 0);
+              const totalCompressedBytes = newImages.reduce((sum, it) => sum + it.compressedSize, 0);
+              const totalSavedPercent = totalOriginalBytes > 0
+                ? Math.round((1 - totalCompressedBytes / totalOriginalBytes) * 100)
+                : 0;
+
+              return (
+                <div
+                  style={{
+                    background: "#f8fafc",
+                    padding: "24px",
+                    borderRadius: "20px",
+                    border: "1.5px dashed #cbd5e1",
+                    marginBottom: "32px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "16px",
+                  }}
+                >
+                  {/* Top Bar with Counter */}
+                  <div
                     style={{
-                      maxWidth: "100%",
-                      maxHeight: "250px",
-                      borderRadius: "12px",
-                      border: "4px solid white",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      cursor: "pointer",
-                      transition: "transform 0.2s ease"
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: "10px",
+                      borderBottom: "1px solid #e2e8f0",
+                      paddingBottom: "12px",
+                      width: "100%",
                     }}
-                    onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
-                    onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                  />
-                  {project?.image_url === previewUrl && project?.updated_at && (
-                    <div style={{ marginTop: "12px", fontSize: "14px", color: "#64748b", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                      อัพโหลดเมื่อวันที่ {new Date(project.updated_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.
+                  >
+                    <div>
+                      <div
+                        style={{
+                          fontSize: "1rem",
+                          fontWeight: 700,
+                          color: "#1e293b",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <Camera size={20} color="#7c3aed" />
+                        <span>ภาพถ่ายหน้างาน (ระบบบีบอัดอัตโนมัติ)</span>
+                      </div>
+                      <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "2px" }}>
+                        อัพโหลดได้สูงสุด 30 รูปต่อโครงการ • บีบอัดอัตโนมัติเพื่อประหยัดพื้นที่และโหลดไว
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                          padding: "4px 12px",
+                          borderRadius: "9999px",
+                          background: totalImagesCount >= 30 ? "#fee2e2" : totalImagesCount > 0 ? "#ede9fe" : "#f1f5f9",
+                          color: totalImagesCount >= 30 ? "#b91c1c" : totalImagesCount > 0 ? "#6d28d9" : "#475569",
+                          border: totalImagesCount >= 30 ? "1px solid #fca5a5" : totalImagesCount > 0 ? "1px solid #c4b5fd" : "1px solid #cbd5e1",
+                        }}
+                      >
+                        {totalImagesCount} / 30 รูป
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Compressing Feedback */}
+                  {compressing && (
+                    <div
+                      style={{
+                        background: "#eff6ff",
+                        border: "1px solid #bfdbfe",
+                        borderRadius: "12px",
+                        padding: "12px 16px",
+                        color: "#1e40af",
+                        fontSize: "0.85rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <RotateCw size={18} className="animate-spin" color="#2563eb" />
+                      <span>
+                        กำลังบีบอัดรูปภาพ ({compressionProgress.current} จาก {compressionProgress.total} รูป): {compressionProgress.fileName}...
+                      </span>
                     </div>
                   )}
-                  {file && previewUrl && previewUrl !== project?.image_url && (
-                    <div style={{ marginTop: "12px", fontSize: "14px", color: "#f59e0b", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                      รูปภาพใหม่ยังไม่ได้บันทึก
+
+                  {/* Uploading Feedback */}
+                  {loading && uploadProgress.total > 0 && (
+                    <div
+                      style={{
+                        background: "#ecfdf5",
+                        border: "1px solid #a7f3d0",
+                        borderRadius: "12px",
+                        padding: "12px 16px",
+                        color: "#065f46",
+                        fontSize: "0.85rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <RotateCw size={18} className="animate-spin" color="#059669" />
+                      <span>
+                        กำลังอัพโหลดรูปภาพขึ้นคลาวด์ ({uploadProgress.current} จาก {uploadProgress.total} รูป)...
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Compression Savings Summary */}
+                  {newImages.length > 0 && !compressing && (
+                    <div
+                      style={{
+                        background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)",
+                        border: "1px solid #bbf7d0",
+                        borderRadius: "12px",
+                        padding: "10px 14px",
+                        color: "#166534",
+                        fontSize: "0.85rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: "8px",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <Sparkles size={16} color="#16a34a" />
+                        <span>
+                          บีบอัดรูปภาพใหม่ <strong>{newImages.length} รูป</strong> เรียบร้อย: จาก {formatBytes(totalOriginalBytes)} เหลือ <strong>{formatBytes(totalCompressedBytes)}</strong> (ประหยัดพื้นที่ {totalSavedPercent}%)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          newImages.forEach((img) => {
+                            try { URL.revokeObjectURL(img.previewUrl); } catch (e) {}
+                          });
+                          setNewImages([]);
+                        }}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: "#dc2626",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        ยกเลิกรูปใหม่ทั้งหมด
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Dropzone Upload Trigger Area */}
+                  {totalImagesCount < 30 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: allImagesList.length > 0 ? "16px" : "28px",
+                        borderRadius: "14px",
+                        border: "2px dashed #a855f7",
+                        background: "rgba(168, 85, 247, 0.04)",
+                        cursor: "pointer",
+                        position: "relative",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,.heic,.heif"
+                        disabled={compressing || loading}
+                        onChange={handleFileChange}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          opacity: 0,
+                          cursor: "pointer",
+                        }}
+                        title="คลิกเพื่อเลือกรูปภาพ (เลือกพร้อมกันได้หลายรูป สูงสุด 30 รูป)"
+                      />
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          pointerEvents: "none",
+                          textAlign: "center",
+                          flexDirection: "column",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "44px",
+                            height: "44px",
+                            borderRadius: "12px",
+                            background: "#f3e8ff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#7e22ce",
+                          }}
+                        >
+                          <Upload size={22} />
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, color: "#4a044e", fontSize: "0.95rem" }}>
+                            คลิกเพื่อเลือกรูปภาพ หรือ ถ่ายรูปหน้างาน
+                          </div>
+                          <div style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "2px" }}>
+                            (เลือกพร้อมกันได้หลายรูป • รองรับไฟล์ JPEG, PNG, WEBP, HEIC จากโทรศัพท์ • สามารถเพิ่มได้อีก {30 - totalImagesCount} รูป)
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Thumbnails Grid */}
+                  {allImagesList.length > 0 && (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+                        gap: "12px",
+                        width: "100%",
+                        marginTop: "8px",
+                      }}
+                    >
+                      {allImagesList.map((item, idx) => (
+                        <div
+                          key={item.id}
+                          style={{
+                            position: "relative",
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            border: item.type === "new" ? "2px solid #8b5cf6" : "1px solid #cbd5e1",
+                            background: "#ffffff",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                            aspectRatio: "1/1",
+                            cursor: "pointer",
+                            transition: "transform 0.15s ease",
+                          }}
+                        >
+                          <img
+                            src={item.url}
+                            alt={item.title}
+                            onClick={() => setLightboxIndex(idx)}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              display: "block",
+                            }}
+                          />
+
+                          {/* Order Number Badge */}
+                          <span
+                            style={{
+                              position: "absolute",
+                              top: "6px",
+                              left: "6px",
+                              background: "rgba(0,0,0,0.65)",
+                              color: "white",
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              padding: "2px 6px",
+                              borderRadius: "6px",
+                              backdropFilter: "blur(2px)",
+                            }}
+                          >
+                            #{idx + 1}
+                          </span>
+
+                          {/* Status Tag */}
+                          <span
+                            style={{
+                              position: "absolute",
+                              bottom: "6px",
+                              left: "6px",
+                              background: item.type === "new" ? "rgba(124, 58, 237, 0.9)" : "rgba(16, 185, 129, 0.9)",
+                              color: "white",
+                              fontSize: "9px",
+                              fontWeight: 700,
+                              padding: "2px 6px",
+                              borderRadius: "6px",
+                              backdropFilter: "blur(2px)",
+                              maxWidth: "calc(100% - 12px)",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.type === "new" ? (item.sizeBadge || "ใหม่") : "บันทึกแล้ว"}
+                          </span>
+
+                          {/* Delete button */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (item.type === "existing") {
+                                if (confirm(`ต้องการลบรูปภาพ #${idx + 1} ออกจากโครงการนี้ใช่หรือไม่?`)) {
+                                  handleRemoveExistingImage(item.originalIndex);
+                                }
+                              } else {
+                                handleRemoveNewImage(item.originalIndex);
+                              }
+                            }}
+                            style={{
+                              position: "absolute",
+                              top: "6px",
+                              right: "6px",
+                              background: "rgba(239, 68, 68, 0.9)",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "50%",
+                              width: "24px",
+                              height: "24px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                            }}
+                            title="ลบรูปนี้"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
+              );
+            })()}
 
             <div
               style={{
@@ -2841,67 +3259,241 @@ export default function UpdateStatus() {
         </div>
       )}
 
-      {/* Lightbox for full screen image view */}
-      {isLightboxOpen && previewUrl && (
-        <div
-          onClick={() => setIsLightboxOpen(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0, 0, 0, 0.85)",
-            zIndex: 9999,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            cursor: "zoom-out",
-          }}
-        >
-          <img
-            src={previewUrl}
-            alt="Fullscreen Preview"
+      {/* =========================================================================
+          MULTI-IMAGE FULLSCREEN LIGHTBOX & SLIDESHOW
+          ========================================================================= */}
+      {(() => {
+        const allImagesList = [
+          ...existingImages.map((url, idx) => ({
+            id: `existing-${idx}`,
+            type: "existing" as const,
+            url,
+            originalIndex: idx,
+            title: `ภาพที่บันทึกแล้ว #${idx + 1}`,
+            subTitle: "จัดเก็บบนระบบคลาวด์เรียบร้อย",
+            sizeBadge: null
+          })),
+          ...newImages.map((img, idx) => ({
+            id: `new-${idx}`,
+            type: "new" as const,
+            url: img.previewUrl,
+            originalIndex: idx,
+            title: `ภาพใหม่ #${existingImages.length + idx + 1}`,
+            subTitle: img.file.name,
+            sizeBadge: `${formatBytes(img.compressedSize)} (-${img.compressionRatio}%)`
+          }))
+        ];
+
+        if (lightboxIndex === null || !allImagesList[lightboxIndex]) return null;
+        const currentItem = allImagesList[lightboxIndex];
+
+        return (
+          <div
+            onClick={() => setLightboxIndex(null)}
             style={{
-              maxWidth: "90%",
-              maxHeight: "85%",
-              objectFit: "contain",
-              borderRadius: "8px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.3)"
-            }}
-          />
-          {project?.image_url === previewUrl && project?.updated_at && (
-            <div style={{ color: "white", marginTop: "16px", fontSize: "16px", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
-              อัพโหลดเมื่อวันที่ {new Date(project.updated_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} น.
-            </div>
-          )}
-          <button
-            onClick={() => setIsLightboxOpen(false)}
-            style={{
-              position: "absolute",
-              top: "30px",
-              right: "40px",
-              background: "rgba(255,255,255,0.2)",
-              border: "none",
-              color: "white",
-              fontSize: "30px",
-              width: "50px",
-              height: "50px",
-              borderRadius: "50%",
-              cursor: "pointer",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              backgroundColor: "rgba(0, 0, 0, 0.92)",
+              zIndex: 9999,
               display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
               alignItems: "center",
-              justifyContent: "center",
-              transition: "background 0.2s ease"
+              padding: "20px",
+              boxSizing: "border-box",
+              userSelect: "none",
             }}
-            onMouseOver={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.4)")}
-            onMouseOut={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.2)")}
           >
-            ×
-          </button>
-        </div>
-      )}
+            {/* Top Bar inside Lightbox */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "100%",
+                maxWidth: "1000px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                color: "white",
+                paddingBottom: "10px",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: "16px", fontWeight: 700 }}>
+                  {currentItem.title} ({lightboxIndex + 1} / {allImagesList.length} รูป)
+                </div>
+                <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                  {currentItem.subTitle} {currentItem.sizeBadge ? `• ${currentItem.sizeBadge}` : ""}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <a
+                  href={currentItem.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  download={`photo_${lightboxIndex + 1}.jpg`}
+                  className="btn"
+                  style={{
+                    background: "rgba(255,255,255,0.15)",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    textDecoration: "none",
+                  }}
+                >
+                  <Download size={14} />
+                  <span>เปิดรูปเต็ม</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setLightboxIndex(null)}
+                  style={{
+                    background: "rgba(255,255,255,0.2)",
+                    border: "none",
+                    color: "white",
+                    fontSize: "24px",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Center Image Container with Previous & Next controls */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                flex: 1,
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {/* Prev Button */}
+              {lightboxIndex > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setLightboxIndex((prev) => (prev !== null ? prev - 1 : 0))}
+                  style={{
+                    position: "absolute",
+                    left: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "rgba(0,0,0,0.6)",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    color: "white",
+                    borderRadius: "50%",
+                    width: "50px",
+                    height: "50px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    zIndex: 10,
+                  }}
+                  title="รูปก่อนหน้า (ลูกศรซ้าย)"
+                >
+                  <ChevronLeft size={28} />
+                </button>
+              )}
+
+              <img
+                src={currentItem.url}
+                alt="Fullscreen Preview"
+                style={{
+                  maxWidth: "92%",
+                  maxHeight: "80vh",
+                  objectFit: "contain",
+                  borderRadius: "12px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                }}
+              />
+
+              {/* Next Button */}
+              {lightboxIndex < allImagesList.length - 1 && (
+                <button
+                  type="button"
+                  onClick={() => setLightboxIndex((prev) => (prev !== null ? prev + 1 : 0))}
+                  style={{
+                    position: "absolute",
+                    right: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "rgba(0,0,0,0.6)",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    color: "white",
+                    borderRadius: "50%",
+                    width: "50px",
+                    height: "50px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    zIndex: 10,
+                  }}
+                  title="รูปถัดไป (ลูกศรขวา)"
+                >
+                  <ChevronRight size={28} />
+                </button>
+              )}
+            </div>
+
+            {/* Bottom Thumbnails Strip */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "100%",
+                maxWidth: "800px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                overflowX: "auto",
+                paddingTop: "10px",
+              }}
+            >
+              {allImagesList.map((img, i) => (
+                <img
+                  key={img.id}
+                  src={img.url}
+                  alt="thumb"
+                  onClick={() => setLightboxIndex(i)}
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    objectFit: "cover",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    border: lightboxIndex === i ? "2px solid #a855f7" : "1px solid rgba(255,255,255,0.3)",
+                    opacity: lightboxIndex === i ? 1 : 0.6,
+                    transition: "all 0.15s ease",
+                    flexShrink: 0,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }

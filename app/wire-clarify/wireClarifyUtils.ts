@@ -131,8 +131,8 @@ export const SAMPLE_WIRE_CLARIFY_DATA: WireClarifyFormData = {
 
   docFrom: 'กรย.(ก3)',
   docTo: 'ฝวบ.(ก3)',
-  docNo: '',                    // Blank by default as requested
-  docDate: '',                  // Blank by default as requested
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขออนุมัตินำส่งคืนพัสดุชำรุดประเภทสายจากการรื้อถอนส่งคืนคลังไม่ครบตามประมาณการรื้อถอน',
   salutation: 'อฝ.วบ.(ก3) ผ่าน รฝ.วบ.(ก3)',
 

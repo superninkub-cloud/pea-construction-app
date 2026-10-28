@@ -261,8 +261,8 @@ export const SAMPLE_CASE1_VEHICLE_DEPT_DATA: CarRepairFormData = {
   repairCase: 'vehicle_dept',
   docFrom: 'ผกร.',
   docTo: 'กรย.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2437/2563',
-  docDate: '17 ต.ค. 63',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอแจ้งซ่อมรถเครน TADANO ขนาดพิกัด 30 ตัน/เมตร หมายเลขทะเบียน 90-7332 นฐ.',
   salutation: 'อก.รย.(ก3) ผ่าน รก.รย.(ก3)',
 
@@ -299,7 +299,7 @@ export const SAMPLE_CASE1_VEHICLE_DEPT_DATA: CarRepairFormData = {
   commandText: 'ดำเนินการต่อไป',
   commanderName: 'นายอนันต์ กาญจนอุปถัมภ์',
   commanderPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  commanderDate: '19 ต.ค. 63',
+  commanderDate: '',
 
   showProposerDigitalSign: true,
   showCommanderDigitalSign: true
@@ -313,8 +313,8 @@ export const SAMPLE_CASE2_PEA_AREA_DATA: CarRepairFormData = {
   repairCase: 'pea_area',
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟส.สค.2(บพว.)',
-  docNo: 'ก.3 กรย.(กร) 2443/2561',
-  docDate: '20 ต.ค. 61',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอความอนุเคราะห์จัดซ่อมรถยนต์เทรลเลอร์ หมายเลขทะเบียน 85-3090 นฐ.',
   salutation: 'ผจก.กฟส.สค.2(บพว.)',
 
@@ -343,7 +343,7 @@ export const SAMPLE_CASE2_PEA_AREA_DATA: CarRepairFormData = {
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '20 ต.ค. 61',
+  proposerDate: '',
 
   hasCommanderOrder: false,
   commanderTarget: '',

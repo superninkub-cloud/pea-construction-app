@@ -83,6 +83,24 @@ export default function SiteExpenseExtraPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.jobItems && parsed.jobItems.length > 0) {
+          if (!parsed.docNo || parsed.docNo.includes('2327') || parsed.docNo.includes('2450') || parsed.docNo.includes('2569') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('8 ต.ค.') || parsed.docDate.includes('15 ต.ค.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
+            parsed.docDate = '';
+          }
+          if (parsed.signerDate && (parsed.signerDate.includes('ต.ค.') || parsed.signerDate.includes('69') || parsed.signerDate.includes('2569'))) {
+            parsed.signerDate = '';
+          }
+          if (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ต.ค.') || parsed.stampHpKrDate.includes('69') || parsed.stampHpKrDate.includes('2569') || parsed.stampHpKrDate.includes('7') || parsed.stampHpKrDate.includes('15'))) {
+            parsed.stampHpKrDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('69') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('7') || parsed.stampCpKrDate.includes('14'))) {
+            parsed.stampCpKrDate = '';
+          }
+          if (parsed.supervisorPosition) {
+            parsed.supervisorPosition = parsed.supervisorPosition.replace(/ผพง/g, 'พชง');
+          }
           setFormData(parsed);
         }
       }
@@ -641,7 +659,7 @@ export default function SiteExpenseExtraPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร)- 2327/2569"
+                      placeholder="เช่น ก.3 กรย.(กร)"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -652,7 +670,7 @@ export default function SiteExpenseExtraPage() {
                         className="a4-live-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 8 ต.ค. 2569"
+                        placeholder=""
                       />
                       <button
                         type="button"
@@ -791,7 +809,7 @@ export default function SiteExpenseExtraPage() {
                 style={{ width: '180px' }}
                 value={formData.supervisorPosition}
                 onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                placeholder="พชง.6 ผกร.กรย.(ก3)"
               />
               <span> ผู้ควบคุมงาน ได้รายงานผลการดำเนินงานก่อสร้างปัจจุบันมีความคืบหน้าประมาณ </span>
               <input
@@ -1145,7 +1163,7 @@ export default function SiteExpenseExtraPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร)- 2327/2569"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
 
@@ -1173,7 +1191,7 @@ export default function SiteExpenseExtraPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="8 ต.ค. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1290,14 +1308,14 @@ export default function SiteExpenseExtraPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>ตำแหน่งผู้ควบคุมงาน</span>
-                        <span className="big-label-hint">เช่น ผพง.6 ผกร.กรย.(ก3)</span>
+                        <span className="big-label-hint">เช่น พชง.6 ผกร.กรย.(ก3)</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.supervisorPosition}
                         onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                        placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                        placeholder="พชง.6 ผกร.กรย.(ก3)"
                       />
                     </div>
 
@@ -1495,14 +1513,13 @@ export default function SiteExpenseExtraPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ลงนาม</span>
-                        <span className="big-label-hint">เช่น 8 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.signerDate}
                         onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                        placeholder="8 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1516,14 +1533,13 @@ export default function SiteExpenseExtraPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน หผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 7 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampHpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                        placeholder="7 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
 
@@ -1536,7 +1552,7 @@ export default function SiteExpenseExtraPage() {
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="วันที่"
+                        placeholder=""
                       />
                     </div>
                   </div>

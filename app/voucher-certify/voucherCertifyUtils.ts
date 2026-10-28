@@ -36,7 +36,7 @@ export interface VoucherCertifyFormData {
 
   // ข้อมูลผู้ควบคุมงานและโครงการ
   supervisorName: string;       // นายศราวุฒิ เกิดสีเล็ก
-  supervisorPosition: string;   // ผพง.6 ผกร.กรย.(ก3)
+  supervisorPosition: string;   // พชง.6 ผกร.กรย.(ก3)
   projectName: string;          // งานปรับปรุงระบบจำหน่าย 22 เควี บริเวณตามแนวทางหลวงหมายเลข 357 แยกทางหลวงหมายเลข 3318 ถึง สถานีไฟฟ้าสุพรรณบุรี 2 ต.รั้วใหญ่ อ.เมือง จ.สุพรรณบุรี
   shortProjectName: string;     // ปป. แยกทางหลวงหมายเลข 3318 - สฟ.สุพรรณบุรี 2
   wbsNumber: string;            // P-TD02.3-I-SPINA.0007
@@ -48,7 +48,7 @@ export interface VoucherCertifyFormData {
 
   // ผู้ลงนามหลัก (ผู้ควบคุมงาน)
   signerName: string;           // นายศราวุฒิ เกิดสีเล็ก
-  signerPosition: string;       // ผพง.6 ผกร.กรย.(ก3)
+  signerPosition: string;       // พชง.6 ผกร.กรย.(ก3)
   signerDate: string;           // 22 ก.ค. 2569
 
   // เกษียนหนังสือ (ขวาล่าง)
@@ -303,13 +303,13 @@ export const DEFAULT_EXPENSE_CATEGORIES: ExpenseCategory[] = [
 export const SAMPLE_PRESET_SUPHAN: VoucherCertifyFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กบฟ.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2233 /2569',
-  docDate: '22 ก.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอรับรองสำเนาเอกสารใบสำคัญจ่าย',
   salutation: 'อก.บฟ.(ก3)',
 
   supervisorName: 'นายศราวุฒิ เกิดสีเล็ก',
-  supervisorPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.6 ผกร.กรย.(ก3)',
   projectName: 'งานปรับปรุงระบบจำหน่าย 22 เควี บริเวณตามแนวทางหลวงหมายเลข 357 แยกทางหลวงหมายเลข 3318 ถึง สถานีไฟฟ้าสุพรรณบุรี 2 ต.รั้วใหญ่ อ.เมือง จ.สุพรรณบุรี',
   shortProjectName: 'ปป. แยกทางหลวงหมายเลข 3318 - สฟ.สุพรรณบุรี 2',
   wbsNumber: 'P-TD02.3-I-SPINA.0007',
@@ -319,12 +319,12 @@ export const SAMPLE_PRESET_SUPHAN: VoucherCertifyFormData = {
   categories: JSON.parse(JSON.stringify(DEFAULT_EXPENSE_CATEGORIES)),
 
   signerName: 'นายศราวุฒิ เกิดสีเล็ก',
-  signerPosition: 'ผพง.6 ผกร.กรย.(ก3)',
-  signerDate: '22 ก.ค. 2569',
+  signerPosition: 'พชง.6 ผกร.กรย.(ก3)',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '22 ก.ค. 69',
-  stampCpKrDate: '22 ก.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา กฟก.3',
   contactPhone: '10171',
@@ -338,8 +338,8 @@ export const SAMPLE_PRESET_SUPHAN: VoucherCertifyFormData = {
 export const SAMPLE_PRESET_KAN: VoucherCertifyFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กบฟ.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2415 /2569',
-  docDate: '15 ส.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอรับรองสำเนาเอกสารใบสำคัญจ่าย',
   salutation: 'อก.บฟ.(ก3)',
 
@@ -387,11 +387,11 @@ export const SAMPLE_PRESET_KAN: VoucherCertifyFormData = {
 
   signerName: 'นายชานินทร์ ศรีสวัสดิ์',
   signerPosition: 'ชผ.กร.กรย.(ก3)',
-  signerDate: '15 ส.ค. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '15 ส.ค. 69',
-  stampCpKrDate: '15 ส.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา กฟก.3',
   contactPhone: '099-1326977',
@@ -405,13 +405,13 @@ export const SAMPLE_PRESET_KAN: VoucherCertifyFormData = {
 export const SAMPLE_PRESET_SAMUT: VoucherCertifyFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กบฟ.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2190 /2569',
-  docDate: '01 ก.ย. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอรับรองสำเนาเอกสารใบสำคัญจ่าย',
   salutation: 'อก.บฟ.(ก3)',
 
   supervisorName: 'นายสมพร เกตุวิทย์',
-  supervisorPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.6 ผกร.กรย.(ก3)',
   projectName: 'งานก่อสร้างย้ายแนวระบบสายส่ง 115 เควี บริเวณ คลองท่าแร้ง ฝั่งขาออก กทม. จ.สมุทรสาคร',
   shortProjectName: 'ย้ายแนว 115 kV คลองท่าแร้ง สมุทรสาคร',
   wbsNumber: 'I-69-I-SM269.M4.1105',
@@ -462,12 +462,12 @@ export const SAMPLE_PRESET_SAMUT: VoucherCertifyFormData = {
   ],
 
   signerName: 'นายสมพร เกตุวิทย์',
-  signerPosition: 'ผพง.6 ผกร.กรย.(ก3)',
-  signerDate: '01 ก.ย. 2569',
+  signerPosition: 'พชง.6 ผกร.กรย.(ก3)',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '01 ก.ย. 69',
-  stampCpKrDate: '01 ก.ย. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า กองก่อสร้างระบบไฟฟ้าและงานโยธา กฟก.3',
   contactPhone: '10171',

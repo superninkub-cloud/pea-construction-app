@@ -25,7 +25,7 @@ export interface JobOpenFormData {
 
   // ผู้ควบคุมงาน
   supervisorName: string;       // เช่น นายศราวุฒิ เกิดสีเล็ก
-  supervisorPosition: string;   // เช่น ผพง.6 ผกร.กรย.(ก3)
+  supervisorPosition: string;   // เช่น พชง.6 ผกร.กรย.(ก3)
 
   // คำลงท้ายคำขออนุมัติ
   requestClosingText: string;   // เช่น และให้ กฟส.สามชุก อนุมัติเปิดงาน และดำเนินการในส่วนที่เกี่ยวข้องให้ต่อไป
@@ -91,8 +91,8 @@ export function getTodayThaiDate(): string {
 export const SAMPLE_PRESET_SAMCHUK: JobOpenFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟส.สามชุก',
-  docNo: 'ก.3 กรย.(กร) 2249/2569',
-  docDate: '28 ก.ย. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอแจ้งเข้าดำเนินการงานก่อสร้างย้ายแนวระบบสายส่ง ช่วงงานก่อสร้างสะพานลอยหน้า ม.ราชมงคลสุวรรณภูมิศูนย์สุพรรณบุรี จ.สุพรรณบุรี',
   salutation: 'ผจก.กฟส.สามชุก',
 
@@ -104,17 +104,17 @@ export const SAMPLE_PRESET_SAMCHUK: JobOpenFormData = {
   wbsNumber: 'I-69-I-SMG69.M4.1116',
 
   supervisorName: 'นายศราวุฒิ เกิดสีเล็ก',
-  supervisorPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.6 ผกร.กรย.(ก3)',
 
   requestClosingText: 'และให้ กฟส.สามชุก อนุมัติเปิดงาน และดำเนินการในส่วนที่เกี่ยวข้องให้ต่อไป',
 
   signerName: 'นายกำพล ตุ้ยเต็มวงค์',
   signerPosition: 'อก.รย.(ก3)',
-  signerDate: '28 ก.ย. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '28 ก.ย. 69',
-  stampCpKrDate: '25 ก.ย. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   budgetAmount: 188743.00,
   budgetCostCenter: '7001248605',
@@ -129,8 +129,8 @@ export const SAMPLE_PRESET_SAMCHUK: JobOpenFormData = {
 export const SAMPLE_PRESET_KANCHANABURI: JobOpenFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟจ.กาญจนบุรี',
-  docNo: 'ก.3 กรย.(กร) 2246/2569',
-  docDate: '28 ก.ย. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอแจ้งเข้าดำเนินการงานก่อสร้างย้ายแนวระบบสายส่ง ช่วงงานก่อสร้างสะพานลอยบ้านห้วยตลุง จ.กาญจนบุรี',
   salutation: 'ผจก.กฟจ.กาญจนบุรี',
 
@@ -142,17 +142,17 @@ export const SAMPLE_PRESET_KANCHANABURI: JobOpenFormData = {
   wbsNumber: 'I-69-I-KCI69.M4.1125',
 
   supervisorName: 'นายอุดมศักดิ์ จันทร์กลิ่น',
-  supervisorPosition: 'ผพง.7 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.7 ผกร.กรย.(ก3)',
 
   requestClosingText: 'และให้ กฟจ.กาญจนบุรี อนุมัติเปิดงาน และดำเนินการในส่วนที่เกี่ยวข้องให้ต่อไป',
 
   signerName: 'นายกำพล ตุ้ยเต็มวงค์',
   signerPosition: 'อก.รย.(ก3)',
-  signerDate: '28 ก.ย. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '25 ก.ย. 69',
-  stampCpKrDate: '25 ก.ย. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   budgetAmount: 147906.00,
   budgetCostCenter: '7001257238',
@@ -166,8 +166,8 @@ export const SAMPLE_PRESET_KANCHANABURI: JobOpenFormData = {
 export const SAMPLE_PRESET_SAMUT: JobOpenFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟจ.สมุทรสาคร',
-  docNo: 'ก.3 กรย.(กร) 2195/2569',
-  docDate: '05 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอแจ้งเข้าดำเนินการงานก่อสร้างย้ายแนวระบบสายส่ง 115 เควี คลองท่าแร้ง ฝั่งขาออก กทม. จ.สมุทรสาคร',
   salutation: 'ผจก.กฟจ.สมุทรสาคร',
 
@@ -185,11 +185,11 @@ export const SAMPLE_PRESET_SAMUT: JobOpenFormData = {
 
   signerName: 'นายกำพล ตุ้ยเต็มวงค์',
   signerPosition: 'อก.รย.(ก3)',
-  signerDate: '05 ต.ค. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '05 ต.ค. 69',
-  stampCpKrDate: '05 ต.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   budgetAmount: 320000.00,
   budgetCostCenter: '7001264890',

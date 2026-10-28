@@ -39,7 +39,7 @@ export interface SiteExpenseExtraFormData {
 
   // รายละเอียดการดำเนินงานและเหตุผลความจำเป็น (วรรคที่ 2)
   supervisorName: string;       // นายวีรพัฒน์ นาลดมัย
-  supervisorPosition: string;   // ผพง.6 ผกร.กรย.(ก3)
+  supervisorPosition: string;   // พชง.6 ผกร.กรย.(ก3)
   progressPercent: number;      // 80
   justificationReason: string;  // แต่เนื่องจากงานก่อสร้างดังกล่าวเป็นงานก่อสร้างปรับปรุงระบบจำหน่าย มีความจำเป็นต้องระดมชุดปฏิบัติงานก่อสร้างจาก กรย.(ก3) และ กฟฟ. ใกล้เคียงเข้าร่วมปฏิบัติงานในช่วงวันหยุดราชการทำให้สิ้นเปลืองค่าใช้จ่าย ทำให้งบประมาณได้รับจัดสรรไม่เพียงพอต่อการดำเนินการก่อสร้าง
 
@@ -122,8 +122,8 @@ export function calculateTotals(items: SiteExpenseJobItem[]) {
 export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กวว.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2327/2569',
-  docDate: '8 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอให้จัดสรรงบประมาณค่าใช้จ่ายหน้างานเพิ่มเติม',
   salutation: 'อก.วว.(ก3)',
 
@@ -156,7 +156,7 @@ export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
   ],
 
   supervisorName: 'นายวีรพัฒน์ นาลดมัย',
-  supervisorPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.6 ผกร.กรย.(ก3)',
   progressPercent: 80,
   justificationReason: 'แต่เนื่องจากงานก่อสร้างดังกล่าวเป็นงานก่อสร้างปรับปรุงระบบจำหน่าย มีความจำเป็นต้องระดมชุดปฏิบัติงานก่อสร้างจาก กรย.(ก3) และ กฟฟ. ใกล้เคียงเข้าร่วมปฏิบัติงานในช่วงวันหยุดราชการทำให้สิ้นเปลืองค่าใช้จ่าย ทำให้งบประมาณได้รับจัดสรรไม่เพียงพอต่อการดำเนินการก่อสร้าง',
 
@@ -164,11 +164,11 @@ export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '8 ต.ค. 69',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '7 ต.ค. 69',
-  stampCpKrDate: '7 ต.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   isThaiNumerals: false,
 };
@@ -179,8 +179,8 @@ export const SAMPLE_PRESET_GOLF_COURSE: SiteExpenseExtraFormData = {
 export const SAMPLE_PRESET_SINGLE_PROJECT: SiteExpenseExtraFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กวว.(ก3)',
-  docNo: 'ก.3 กรย.(กร)- 2450/2569',
-  docDate: '15 ต.ค. 2569',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอให้จัดสรรงบประมาณค่าใช้จ่ายหน้างานเพิ่มเติม',
   salutation: 'อก.วว.(ก3)',
 
@@ -203,7 +203,7 @@ export const SAMPLE_PRESET_SINGLE_PROJECT: SiteExpenseExtraFormData = {
   ],
 
   supervisorName: 'นายศราวุฒิ เกิดสีเล็ก',
-  supervisorPosition: 'ผพง.6 ผกร.กรย.(ก3)',
+  supervisorPosition: 'พชง.6 ผกร.กรย.(ก3)',
   progressPercent: 75,
   justificationReason: 'เนื่องจากพื้นที่ก่อสร้างมีอุปสรรคทางกายภาพแนวท่อก๊าซและลำคลองสาธารณะ ต้องใช้เครื่องจักรกลพิเศษและชุดปฏิบัติงานเข้าดำเนินงานในเวลากลางคืนเพื่อหลีกเลี่ยงผลกระทบด้านการจราจร ทำให้มีค่าใช้จ่ายหน้างานสูงกว่ากรอบประมาณการเดิม 80%',
 
@@ -211,11 +211,11 @@ export const SAMPLE_PRESET_SINGLE_PROJECT: SiteExpenseExtraFormData = {
 
   signerName: 'นายกำพล ตุ้ยเต็มวงค์',
   signerPosition: 'อก.รย.(ก3)',
-  signerDate: '15 ต.ค. 2569',
+  signerDate: '',
 
   hasRoutingStamps: true,
-  stampHpKrDate: '15 ต.ค. 69',
-  stampCpKrDate: '14 ต.ค. 69',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   isThaiNumerals: false,
 };

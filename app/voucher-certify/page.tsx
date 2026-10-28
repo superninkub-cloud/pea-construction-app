@@ -88,6 +88,27 @@ export default function VoucherCertifyPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.categories) {
+          if (!parsed.docNo || parsed.docNo.includes('2233') || parsed.docNo.includes('2415') || parsed.docNo.includes('2190') || parsed.docNo.includes('2445') || parsed.docNo.includes('2569') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('22 ก.ค.') || parsed.docDate.includes('15 ส.ค.') || parsed.docDate.includes('01 ก.ย.') || parsed.docDate.includes('8 ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
+            parsed.docDate = '';
+          }
+          if (parsed.signerDate && (parsed.signerDate.includes('ก.ค.') || parsed.signerDate.includes('ส.ค.') || parsed.signerDate.includes('ก.ย.') || parsed.signerDate.includes('2569') || parsed.signerDate.includes('69'))) {
+            parsed.signerDate = '';
+          }
+          if (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ก.ค.') || parsed.stampHpKrDate.includes('ส.ค.') || parsed.stampHpKrDate.includes('ก.ย.') || parsed.stampHpKrDate.includes('2569') || parsed.stampHpKrDate.includes('69'))) {
+            parsed.stampHpKrDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ก.ค.') || parsed.stampCpKrDate.includes('ส.ค.') || parsed.stampCpKrDate.includes('ก.ย.') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('69'))) {
+            parsed.stampCpKrDate = '';
+          }
+          if (parsed.supervisorPosition) {
+            parsed.supervisorPosition = parsed.supervisorPosition.replace(/ผพง/g, 'พชง');
+          }
+          if (parsed.signerPosition) {
+            parsed.signerPosition = parsed.signerPosition.replace(/ผพง/g, 'พชง');
+          }
           setFormData(parsed);
         }
       }
@@ -633,7 +654,7 @@ export default function VoucherCertifyPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร) 2445/2569"
+                      placeholder="เช่น ก.3 กรย.(กร)"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -644,7 +665,7 @@ export default function VoucherCertifyPage() {
                         className="a4-live-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 8 ต.ค. 2569"
+                        placeholder=""
                       />
                       <button
                         type="button"
@@ -727,7 +748,7 @@ export default function VoucherCertifyPage() {
                 style={{ width: '180px' }}
                 value={formData.supervisorPosition}
                 onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                placeholder="พชง.6 ผกร.กรย.(ก3)"
               />
               <span> ได้ดำเนินการก่อสร้าง</span>
               <input
@@ -884,7 +905,7 @@ export default function VoucherCertifyPage() {
                     style={{ textAlign: 'center', width: '160pt' }}
                     value={formData.signerDate}
                     onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                    placeholder="8 ต.ค. 2569"
+                    placeholder=""
                   />
                 </div>
               </div>
@@ -1060,7 +1081,7 @@ export default function VoucherCertifyPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร) 2445/2569"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
 
@@ -1088,7 +1109,7 @@ export default function VoucherCertifyPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="8 ต.ค. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1143,14 +1164,14 @@ export default function VoucherCertifyPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>ตำแหน่งผู้ควบคุมงาน</span>
-                        <span className="big-label-hint">เช่น ผพง.6 ผกร.กรย.(ก3)</span>
+                        <span className="big-label-hint">เช่น พชง.6 ผกร.กรย.(ก3)</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.supervisorPosition}
                         onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                        placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                        placeholder="พชง.6 ผกร.กรย.(ก3)"
                       />
                     </div>
                   </div>
@@ -1313,14 +1334,13 @@ export default function VoucherCertifyPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ลงนาม</span>
-                        <span className="big-label-hint">เช่น 8 ต.ค. 2569</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.signerDate}
                         onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                        placeholder="8 ต.ค. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1366,7 +1386,7 @@ export default function VoucherCertifyPage() {
                         className="big-input"
                         value={formData.stampHpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                        placeholder="8 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
 
@@ -1379,7 +1399,7 @@ export default function VoucherCertifyPage() {
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="8 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>

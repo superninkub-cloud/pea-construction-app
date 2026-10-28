@@ -31,6 +31,7 @@ import {
   SAMPLE_CONCRETE_TRANSFER_2,
   SAMPLE_CONCRETE_TRANSFER_3,
   POPULAR_CONCRETE_PRODUCTS,
+  CONCRETE_PLANTS,
   toThaiNumerals,
   toArabicNumerals,
   getTodayThaiDate,
@@ -81,6 +82,27 @@ export default function ConcreteTransferPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.items && parsed.items.length > 0) {
+          if (!parsed.docNo || parsed.docNo.includes('2238') || parsed.docNo.includes('2421') || parsed.docNo.includes('2569') || parsed.docNo.includes('คชย') || parsed.docNo.includes('(กร.)') || parsed.docNo.includes('-')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('5 ต.ค.') || parsed.docDate.includes('14 ต.ค.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
+            parsed.docDate = '';
+          }
+          if (parsed.informDocNo && (parsed.informDocNo.includes('2238') || parsed.informDocNo.includes('2421') || parsed.informDocNo.includes('2569') || parsed.informDocNo.includes('(กร.)'))) {
+            parsed.informDocNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.signerDate && (parsed.signerDate.includes('ต.ค.') || parsed.signerDate.includes('69') || parsed.signerDate.includes('2569'))) {
+            parsed.signerDate = '';
+          }
+          if (parsed.informDate && (parsed.informDate.includes('ต.ค.') || parsed.informDate.includes('69') || parsed.informDate.includes('2569'))) {
+            parsed.informDate = '';
+          }
+          if (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ต.ค.') || parsed.stampHpKrDate.includes('69') || parsed.stampHpKrDate.includes('2569'))) {
+            parsed.stampHpKrDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('69') || parsed.stampCpKrDate.includes('2569'))) {
+            parsed.stampCpKrDate = '';
+          }
           setFormData(parsed);
           setActivePreset('custom');
         }
@@ -102,6 +124,17 @@ export default function ConcreteTransferPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Quick select ผรค. for subject and source units
+  const handleSelectSourceUnit = (unit: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      sourceUnits: unit,
+      subject: `ขอโอนผลิตภัณฑ์คอนกรีต จาก ${unit} มาใช้งานพื้นที่ กฟก.3`,
+      objectivePurpose: prev.objectivePurpose ? prev.objectivePurpose.replace(/จาก\s+ผรค\.[^\s]+/g, `จาก ${unit}`) : `ซึ่งมีความต้องการผลิตภัณฑ์คอนกรีต เพื่อใช้ในภารกิจ จึงมีความจำเป็นต้องขอโอนจาก ${unit} ดังรายการต่อไปนี้`
+    }));
+    showToast(`✓ เลือก ${unit} สำหรับเรื่องและแหล่งผลิตแล้ว`);
   };
 
   // Preset switch
@@ -294,23 +327,29 @@ export default function ConcreteTransferPage() {
       )}
 
       {/* Main Header (Screen only) */}
+      {/* Main Header (Screen only) */}
       <div className="concrete-header no-print">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div className="concrete-header-title">
             <div className="concrete-icon-badge">
-              <Building size={26} />
+              <Building size={28} />
             </div>
             <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc', margin: 0 }}>
-                โปรแกรมขอโอนคอนกรีตจาก กผภ. (ผรค.รบ./กจ.)
-              </h1>
-              <p style={{ fontSize: '0.875rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: '-0.02em' }}>
+                  โปรแกรมขอโอนคอนกรีตจาก กผภ.
+                </h1>
+                <span style={{ fontSize: '0.75rem', background: 'rgba(56, 189, 248, 0.18)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.35)', padding: '2px 9px', borderRadius: '6px', fontWeight: 600 }}>
+                  ผรค.กจ. / ผรค.รบ. / ผรค.อย.
+                </span>
+              </div>
+              <p style={{ fontSize: '0.84rem', color: '#94a3b8', margin: '4px 0 0 0' }}>
                 ✏️ <strong>หน้าร่างเอกสาร A4 เสมือนจริง:</strong> จิ้มแตะส่วนที่ต้องการบนแผ่นกระดาษเพื่อ <strong>&ldquo;ขยายใหญ่แก้ไขชัดเจน&rdquo;</strong>
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.625rem', alignItems: 'center', flexWrap: 'wrap' }}>
             {/* Toggle Thai Numerals */}
             <button
               onClick={handleToggleThaiNumerals}
@@ -330,7 +369,7 @@ export default function ConcreteTransferPage() {
               title="รีเซ็ตกลับไปเป็นค่าเริ่มต้น"
             >
               <RotateCcw size={16} />
-              <span>รีเซ็ต</span>
+              <span>รีเซ็ตแม่แบบ</span>
             </button>
           </div>
         </div>
@@ -338,57 +377,87 @@ export default function ConcreteTransferPage() {
 
       {/* Preset Cards (Screen only) */}
       <div className="preset-grid no-print">
+        {/* Preset 1 */}
         <div
           onClick={() => handleSelectPreset('preset1')}
           className={`preset-card ${activePreset === 'preset1' ? 'active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#60a5fa', background: 'rgba(59, 130, 246, 0.15)', padding: '2px 8px', borderRadius: '9999px' }}>
-              แม่แบบที่ 1 (ตัวอย่างจริง)
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+              แม่แบบที่ 1 (งานจริง)
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>สมุทรสาคร</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>📍 สมุทรสาคร</span>
+              {activePreset === 'preset1' && (
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, background: 'rgba(14, 165, 233, 0.25)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(14, 165, 233, 0.4)' }}>
+                  ✓ กำลังใช้งาน
+                </span>
+              )}
+            </div>
           </div>
-          <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
-            เสา 22 ม. คลองท่าแร้ง (ผรค.รบ.,กจ.)
+          <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#ffffff', lineHeight: 1.35 }}>
+            เสา 22 ม. คลองท่าแร้ง (ผรค.กจ., รบ.)
           </div>
-          <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
-            WBS: <span style={{ color: '#38bdf8' }}>I-69-I-SM269.M4.1105</span> • เสา 22 ม. 10 ต้น
+          <div style={{ fontSize: '0.8125rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'monospace', color: '#38bdf8', fontWeight: 600 }}>I-69-I-SM269.M4.1105</span>
+            <span>•</span>
+            <span style={{ color: '#cbd5e1' }}>เสา 22 ม. 10 ต้น + เสาเข็ม T1-T4</span>
           </div>
         </div>
 
+        {/* Preset 2 */}
         <div
           onClick={() => handleSelectPreset('preset2')}
           className={`preset-card ${activePreset === 'preset2' ? 'active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '9999px' }}>
-              แม่แบบที่ 2 (กาญจนบุรี)
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+              แม่แบบที่ 2 (สายส่ง 115 kV)
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>ท่าม่วง</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>📍 กาญจนบุรี</span>
+              {activePreset === 'preset2' && (
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, background: 'rgba(14, 165, 233, 0.25)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(14, 165, 233, 0.4)' }}>
+                  ✓ กำลังใช้งาน
+                </span>
+              )}
+            </div>
           </div>
-          <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
+          <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#ffffff', lineHeight: 1.35 }}>
             เสา 14.30 ม. ท่าม่วง (ผรค.กจ.)
           </div>
-          <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
-            WBS: <span style={{ color: '#38bdf8' }}>I-69-I-TMG69.M4.1018</span> • เสา 14.30 ม. 25 ต้น
+          <div style={{ fontSize: '0.8125rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'monospace', color: '#38bdf8', fontWeight: 600 }}>I-69-I-TMG69.M4.1018</span>
+            <span>•</span>
+            <span style={{ color: '#cbd5e1' }}>เสา 14.30 ม. 25 ต้น (สายส่ง 115 เควี)</span>
           </div>
         </div>
 
+        {/* Preset 3 */}
         <div
           onClick={() => handleSelectPreset('preset3')}
           className={`preset-card ${activePreset === 'preset3' ? 'active' : ''}`}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#a855f7', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: '9999px' }}>
-              แม่แบบที่ 3 (สุพรรณบุรี)
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#a855f7', background: 'rgba(168, 85, 247, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+              แม่แบบที่ 3 (ตอม่อ/ฐานราก)
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>อู่ทอง</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>📍 สุพรรณบุรี</span>
+              {activePreset === 'preset3' && (
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8', fontWeight: 700, background: 'rgba(14, 165, 233, 0.25)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(14, 165, 233, 0.4)' }}>
+                  ✓ กำลังใช้งาน
+                </span>
+              )}
+            </div>
           </div>
-          <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
-            เสา 12 ม. และตอม่อ (ผรค.รบ.)
+          <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#ffffff', lineHeight: 1.35 }}>
+            เสา 12 ม. และตอม่อ อู่ทอง (ผรค.รบ.)
           </div>
-          <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
-            WBS: <span style={{ color: '#38bdf8' }}>I-69-I-UTH69.M4.1045</span> • เสา 12 ม. + ตอม่อ
+          <div style={{ fontSize: '0.8125rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'monospace', color: '#38bdf8', fontWeight: 600 }}>I-69-I-UTH69.M4.1045</span>
+            <span>•</span>
+            <span style={{ color: '#cbd5e1' }}>ตอม่อ CONC. FOOTING 8 ชุด</span>
           </div>
         </div>
       </div>
@@ -522,33 +591,38 @@ export default function ConcreteTransferPage() {
       </div>
 
       {/* Guide Banner & Section Shortcut Pills (Screen only) */}
-      <div className="chips-bar no-print" style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+      <div className="chips-bar no-print">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 700, color: '#fed7aa' }}>
-            <Sparkles size={16} className="text-blue-400" />
-            <span>จิ้มส่วนที่ต้องการแก้ไข (จะเปิดหน้าต่างขยายใหญ่ให้แก้ไขชัดเจนสบายตา):</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', fontWeight: 700, color: '#fef08a' }}>
+            <Sparkles size={17} className="text-amber-400" />
+            <span>แถบแก้ไขด่วน (จิ้มเปิดหน้าต่างขยายใหญ่ตามหัวข้อ หรือแตะที่กระดาษ A4 ได้โดยตรง):</span>
           </div>
           <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-            (หรือคลิกปุ่มลัดด้านล่างเพื่อเปิดหน้าต่างขยายใหญ่ตามหัวข้อ)
+            7 หมวดหมู่ข้อมูล
           </span>
         </div>
 
         <div className="chip-group">
           {SECTIONS_META.map((sec, idx) => {
             const Icon = sec.icon;
+            const isActive = activeEditSection === sec.key;
             return (
               <button
                 key={idx}
-                className="chip-btn"
+                type="button"
+                className={`chip-btn ${isActive ? 'active' : ''}`}
                 onClick={() => setActiveEditSection(sec.key)}
-                style={{
-                  background: activeEditSection === sec.key ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.08)',
-                  borderColor: activeEditSection === sec.key ? '#3b82f6' : 'rgba(255, 255, 255, 0.15)',
-                  color: activeEditSection === sec.key ? '#60a5fa' : '#f1f5f9',
-                  fontWeight: 600,
-                  padding: '0.4rem 0.85rem'
-                }}
               >
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  background: isActive ? 'rgba(255, 255, 255, 0.28)' : 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '4px',
+                  padding: '1px 5px',
+                  color: isActive ? '#ffffff' : '#93c5fd'
+                }}>
+                  {idx + 1}
+                </span>
                 <Icon size={14} />
                 <span>{sec.shortName}</span>
               </button>
@@ -647,7 +721,7 @@ export default function ConcreteTransferPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร.) - 2238/2569"
+                      placeholder="เช่น ก.3 กรย.(กร)"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -658,7 +732,7 @@ export default function ConcreteTransferPage() {
                         className="a4-live-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 5 ต.ค. 2569"
+                        placeholder=""
                       />
                       <button
                         type="button"
@@ -685,15 +759,42 @@ export default function ConcreteTransferPage() {
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ fontWeight: 'bold', verticalAlign: 'top' }}>เรื่อง</td>
+                  <td style={{ fontWeight: 'bold', verticalAlign: 'top', paddingTop: '6pt' }}>เรื่อง</td>
                   <td colSpan={3}>
+                    {/* Quick ผรค. Chips Selector */}
+                    <div className="no-print" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>เลือก ผรค.:</span>
+                      {CONCRETE_PLANTS.map((plant) => {
+                        const isSelected = formData.subject.includes(plant.name) || formData.sourceUnits === plant.name;
+                        return (
+                          <button
+                            key={plant.id}
+                            type="button"
+                            onClick={() => handleSelectSourceUnit(plant.name)}
+                            style={{
+                              fontSize: '11px',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                              border: isSelected ? '1px solid #dc2626' : '1px solid #cbd5e1',
+                              background: isSelected ? '#fee2e2' : '#f8fafc',
+                              color: isSelected ? '#b91c1c' : '#475569',
+                              fontWeight: isSelected ? 'bold' : 'normal',
+                              cursor: 'pointer'
+                            }}
+                            title={`คลิกเพื่อตั้งชื่อเรื่องเป็น: ขอโอนผลิตภัณฑ์คอนกรีต จาก ${plant.name} มาใช้งานพื้นที่ กฟก.3`}
+                          >
+                            {plant.name}
+                          </button>
+                        );
+                      })}
+                    </div>
                     <textarea
                       rows={2}
                       className="a4-live-textarea"
                       style={{ fontWeight: 'bold' }}
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      placeholder="เรื่อง..."
+                      placeholder="ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค. มาใช้งานพื้นที่ กฟก.3"
                     />
                   </td>
                 </tr>
@@ -733,8 +834,15 @@ export default function ConcreteTransferPage() {
                 className="a4-inline-input"
                 style={{ width: '130px', fontWeight: 'bold' }}
                 value={formData.sourceUnits}
-                onChange={(e) => setFormData({ ...formData, sourceUnits: e.target.value })}
-                placeholder="ผรค.รบ.,กจ."
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData({
+                    ...formData,
+                    sourceUnits: val,
+                    subject: `ขอโอนผลิตภัณฑ์คอนกรีต จาก ${val || 'ผรค.'} มาใช้งานพื้นที่ กฟก.3`
+                  });
+                }}
+                placeholder="ผรค.กจ."
               />
               <span> เนื่องจาก </span>
               <input
@@ -956,7 +1064,7 @@ export default function ConcreteTransferPage() {
                     style={{ textAlign: 'center', width: '160pt' }}
                     value={formData.signerDate}
                     onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                    placeholder="5 ต.ค. 69"
+                    placeholder=""
                   />
                 </div>
               </div>
@@ -993,7 +1101,7 @@ export default function ConcreteTransferPage() {
                     style={{ width: '120px' }}
                     value={formData.informDate}
                     onChange={(e) => setFormData({ ...formData, informDate: e.target.value })}
-                    placeholder="5 ต.ค. 69"
+                    placeholder=""
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '2pt' }}>
@@ -1182,14 +1290,14 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>เลขที่หนังสือ</span>
-                        <span className="big-label-hint">เช่น ก.3 กรย.(กร.) - 2238/2569</span>
+                        <span className="big-label-hint">เช่น ก.3 กรย.(กร)</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร.) - 2238/2569"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
 
@@ -1217,7 +1325,7 @@ export default function ConcreteTransferPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="5 ต.ค. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1225,13 +1333,39 @@ export default function ConcreteTransferPage() {
                   <div className="big-field-group">
                     <label className="big-label">
                       <span>เรื่อง (ชื่อเรื่องการขอโอนผลิตภัณฑ์คอนกรีต)</span>
+                      <span className="big-label-hint">คลิกเลือก ผรค. ด้านล่าง หรือพิมพ์แก้ไขเอง</span>
                     </label>
+                    <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                      {CONCRETE_PLANTS.map((plant) => {
+                        const isSelected = formData.subject.includes(plant.name) || formData.sourceUnits === plant.name;
+                        return (
+                          <button
+                            key={plant.id}
+                            type="button"
+                            onClick={() => handleSelectSourceUnit(plant.name)}
+                            style={{
+                              fontSize: '12px',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              border: isSelected ? '1px solid #ef4444' : '1px solid #334155',
+                              background: isSelected ? 'rgba(239, 68, 68, 0.2)' : 'rgba(30, 41, 59, 0.6)',
+                              color: isSelected ? '#fca5a5' : '#cbd5e1',
+                              fontWeight: isSelected ? 700 : 500,
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {plant.fullName}
+                          </button>
+                        );
+                      })}
+                    </div>
                     <textarea
                       rows={2}
                       className="big-textarea"
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      placeholder="ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค.กจ., รบ. มาใช้งานพื้นที่ กฟก.3"
+                      placeholder="ขอโอนผลิตภัณฑ์คอนกรีต จาก ผรค. มาใช้งานพื้นที่ กฟก.3"
                     />
                   </div>
 
@@ -1257,15 +1391,43 @@ export default function ConcreteTransferPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1rem' }}>
                     <div className="big-field-group">
                       <label className="big-label">
-                        <span>แหล่งผลิตคอนกรีตที่ขอโอน</span>
-                        <span className="big-label-hint">เช่น ผรค.รบ.,กจ. หรือ ผรค.กจ.</span>
+                        <span>แหล่งผลิตคอนกรีตที่ขอโอน (ผรค.)</span>
+                        <span className="big-label-hint">เช่น ผรค.กจ., ผรค.รบ., ผรค.อย.</span>
                       </label>
+                      <div style={{ display: 'flex', gap: '4px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                        {CONCRETE_PLANTS.map((plant) => (
+                          <button
+                            key={plant.id}
+                            type="button"
+                            onClick={() => handleSelectSourceUnit(plant.name)}
+                            style={{
+                              fontSize: '11px',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              border: formData.sourceUnits === plant.name ? '1px solid #38bdf8' : '1px solid #334155',
+                              background: formData.sourceUnits === plant.name ? 'rgba(56, 189, 248, 0.2)' : 'rgba(30, 41, 59, 0.6)',
+                              color: formData.sourceUnits === plant.name ? '#7dd3fc' : '#94a3b8',
+                              fontWeight: formData.sourceUnits === plant.name ? 700 : 400,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {plant.name}
+                          </button>
+                        ))}
+                      </div>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.sourceUnits}
-                        onChange={(e) => setFormData({ ...formData, sourceUnits: e.target.value })}
-                        placeholder="ผรค.รบ.,กจ."
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFormData({
+                            ...formData,
+                            sourceUnits: val,
+                            subject: `ขอโอนผลิตภัณฑ์คอนกรีต จาก ${val || 'ผรค.'} มาใช้งานพื้นที่ กฟก.3`
+                          });
+                        }}
+                        placeholder="ผรค.กจ."
                       />
                     </div>
 
@@ -1507,14 +1669,13 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ลงนาม</span>
-                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.signerDate}
                         onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                        placeholder="5 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1542,14 +1703,13 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ส่งต่อ</span>
-                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.informDate}
                         onChange={(e) => setFormData({ ...formData, informDate: e.target.value })}
-                        placeholder="5 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1590,28 +1750,26 @@ export default function ConcreteTransferPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน หผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampHpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                        placeholder="5 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
 
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน ชผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 5 ต.ค. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="5 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>

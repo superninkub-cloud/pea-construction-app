@@ -126,8 +126,8 @@ export const POPULAR_DESTINATIONS = [
 export const SAMPLE_JOB_CLOSE_DATA: JobCloseFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กบฟ.(ก3)',
-  docNo: 'ก.3 กรย.(กร) 2383/2568',
-  docDate: '12 ก.ค. 2568',
+  docNo: 'ก.3 กรย.(กร)',
+  docDate: '',
   subject: 'ขอนำส่งรายงานปิด กส.3 จำนวน 1 งาน',
   salutation: 'อก.บฟ.(ก3)',
 
@@ -146,7 +146,7 @@ export const SAMPLE_JOB_CLOSE_DATA: JobCloseFormData = {
 
   signerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   signerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  signerDate: '12 ก.ค. 2568',
+  signerDate: '',
   showDigitalSign: true
 };
 

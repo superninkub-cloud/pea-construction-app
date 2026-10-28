@@ -72,7 +72,7 @@ export interface AccountAdjustFormData {
 export const SAMPLE_ACCOUNT_ADJUST_DATA: AccountAdjustFormData = {
   docFrom: "กรย.(ก3)",
   docTo: "กบฟ.(ก3)",
-  docNo: "",
+  docNo: "ก.3 กรย.(กร)",
   docDate: "",
   subject: "ขอให้ปรับปรุงรายการทางบัญชี",
   salutation: "อก.บฟ.(ก3)",

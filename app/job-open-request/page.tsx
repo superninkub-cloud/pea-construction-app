@@ -77,6 +77,24 @@ export default function JobOpenRequestPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.wbsNumber) {
+          if (!parsed.docNo || parsed.docNo.includes('2249') || parsed.docNo.includes('2246') || parsed.docNo.includes('2195') || parsed.docNo.includes('2569') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('28 ก.ย.') || parsed.docDate.includes('05 ต.ค.') || parsed.docDate.includes('ก.ย.') || parsed.docDate.includes('ต.ค.') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙'))) {
+            parsed.docDate = '';
+          }
+          if (parsed.signerDate && (parsed.signerDate.includes('ก.ย.') || parsed.signerDate.includes('ต.ค.') || parsed.signerDate.includes('2569') || parsed.signerDate.includes('69'))) {
+            parsed.signerDate = '';
+          }
+          if (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ก.ย.') || parsed.stampHpKrDate.includes('ต.ค.') || parsed.stampHpKrDate.includes('2569') || parsed.stampHpKrDate.includes('69'))) {
+            parsed.stampHpKrDate = '';
+          }
+          if (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ก.ย.') || parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('69'))) {
+            parsed.stampCpKrDate = '';
+          }
+          if (parsed.supervisorPosition) {
+            parsed.supervisorPosition = parsed.supervisorPosition.replace(/ผพง/g, 'พชง');
+          }
           setFormData(parsed);
         }
       }
@@ -592,7 +610,7 @@ export default function JobOpenRequestPage() {
                       className="a4-live-input"
                       value={formData.docNo}
                       onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                      placeholder="เช่น ก.3 กรย.(กร) 2249/2569"
+                      placeholder="เช่น ก.3 กรย.(กร)"
                     />
                   </td>
                   <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -603,7 +621,7 @@ export default function JobOpenRequestPage() {
                         className="a4-live-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 28 ก.ย. 2569"
+                        placeholder=""
                       />
                       <button
                         type="button"
@@ -766,7 +784,7 @@ export default function JobOpenRequestPage() {
                 style={{ width: '200px' }}
                 value={formData.supervisorPosition}
                 onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                placeholder="พชง.6 ผกร.กรย.(ก3)"
               />
               <span> เป็นผู้ควบคุมงานก่อสร้าง </span>
               <input
@@ -993,7 +1011,7 @@ export default function JobOpenRequestPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="ก.3 กรย.(กร) 2249/2569"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
 
@@ -1021,7 +1039,7 @@ export default function JobOpenRequestPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="28 ก.ย. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1158,14 +1176,14 @@ export default function JobOpenRequestPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>ตำแหน่งผู้ควบคุมงาน</span>
-                        <span className="big-label-hint">เช่น ผพง.6 ผกร.กรย.(ก3)</span>
+                        <span className="big-label-hint">เช่น พชง.6 ผกร.กรย.(ก3)</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.supervisorPosition}
                         onChange={(e) => setFormData({ ...formData, supervisorPosition: e.target.value })}
-                        placeholder="ผพง.6 ผกร.กรย.(ก3)"
+                        placeholder="พชง.6 ผกร.กรย.(ก3)"
                       />
                     </div>
                   </div>
@@ -1220,14 +1238,13 @@ export default function JobOpenRequestPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่ลงนาม</span>
-                        <span className="big-label-hint">เช่น 28 ก.ย. 2569</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.signerDate}
                         onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                        placeholder="28 ก.ย. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1241,28 +1258,26 @@ export default function JobOpenRequestPage() {
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน หผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 28 ก.ย. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampHpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                        placeholder="28 ก.ย. 69"
+                        placeholder=""
                       />
                     </div>
 
                     <div className="big-field-group">
                       <label className="big-label">
                         <span>วันที่เกษียน ชผ.กร.(ก3)</span>
-                        <span className="big-label-hint">เช่น 25 ก.ย. 69</span>
                       </label>
                       <input
                         type="text"
                         className="big-input"
                         value={formData.stampCpKrDate}
                         onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                        placeholder="25 ก.ย. 69"
+                        placeholder=""
                       />
                     </div>
                   </div>

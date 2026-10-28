@@ -73,9 +73,27 @@ export default function OvernightStayPage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.subject) {
+          const fixedDocNo = (!parsed.docNo || parsed.docNo.includes('2360') || parsed.docNo.includes('2358') || parsed.docNo.includes('2359') || parsed.docNo.includes('2361') || parsed.docNo.includes('5309') || parsed.docNo.includes('คชย'))
+            ? 'ก.3 กรย.(กร)'
+            : parsed.docNo;
+          const fixedDocDate = (parsed.docDate && (parsed.docDate.includes('ตุลาคม') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙')))
+            ? ''
+            : (parsed.docDate || '');
+          const fixedProposerDate = (parsed.proposerDate && (parsed.proposerDate.includes('ต.ค.') || parsed.proposerDate.includes('69') || parsed.proposerDate.includes('2569'))) ? '' : (parsed.proposerDate || '');
+          const fixedApproverDate = (parsed.approverDate && (parsed.approverDate.includes('ต.ค.') || parsed.approverDate.includes('69') || parsed.approverDate.includes('2569'))) ? '' : (parsed.approverDate || '');
+          const fixedStampRwWb = (parsed.stampRwWbDate && (parsed.stampRwWbDate.includes('ต.ค.') || parsed.stampRwWbDate.includes('69') || parsed.stampRwWbDate.includes('2569'))) ? '' : (parsed.stampRwWbDate || '');
+          const fixedStampHpKr = (parsed.stampHpKrDate && (parsed.stampHpKrDate.includes('ต.ค.') || parsed.stampHpKrDate.includes('69') || parsed.stampHpKrDate.includes('2569'))) ? '' : (parsed.stampHpKrDate || '');
+          const fixedStampCpKr = (parsed.stampCpKrDate && (parsed.stampCpKrDate.includes('ต.ค.') || parsed.stampCpKrDate.includes('69') || parsed.stampCpKrDate.includes('2569') || parsed.stampCpKrDate.includes('/'))) ? '' : (parsed.stampCpKrDate || '');
           setFormData({
             ...SAMPLE_SUPAWIT_DATA,
             ...parsed,
+            docNo: fixedDocNo,
+            docDate: fixedDocDate,
+            proposerDate: fixedProposerDate,
+            approverDate: fixedApproverDate,
+            stampRwWbDate: fixedStampRwWb,
+            stampHpKrDate: fixedStampHpKr,
+            stampCpKrDate: fixedStampCpKr,
             docTo: parsed.docTo || 'กฟก.3'
           });
           setActivePreset('custom');
@@ -432,7 +450,7 @@ export default function OvernightStayPage() {
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เลขที่หนังสือ เช่น มท 5309.16/..."
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </td>
                     <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -719,7 +737,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น มท 5309.16/2360"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
                     <div className="big-field-group">
@@ -1040,7 +1058,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.proposerDate}
                         onChange={(e) => setFormData({ ...formData, proposerDate: e.target.value })}
-                        placeholder="เช่น 9 ต.ค. 69"
+                        placeholder=""
                       />
                     </div>
                     <div className="big-field-group">
@@ -1089,7 +1107,7 @@ export default function OvernightStayPage() {
                         className="big-input"
                         value={formData.approverDate}
                         onChange={(e) => setFormData({ ...formData, approverDate: e.target.value })}
-                        placeholder="เช่น 12 ต.ค. 2569"
+                        placeholder=""
                       />
                     </div>
                   </div>
@@ -1129,7 +1147,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampRwWbDate}
                             onChange={(e) => setFormData({ ...formData, stampRwWbDate: e.target.value })}
-                            placeholder="เช่น 12 ต.ค. 69"
+                            placeholder=""
                           />
                         </div>
                         <div className="big-field-group">
@@ -1139,7 +1157,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampHpKrDate}
                             onChange={(e) => setFormData({ ...formData, stampHpKrDate: e.target.value })}
-                            placeholder="เช่น 9 ต.ค. 69"
+                            placeholder=""
                           />
                         </div>
                         <div className="big-field-group">
@@ -1149,7 +1167,7 @@ export default function OvernightStayPage() {
                             className="big-input"
                             value={formData.stampCpKrDate}
                             onChange={(e) => setFormData({ ...formData, stampCpKrDate: e.target.value })}
-                            placeholder="เช่น 9/10/2569"
+                            placeholder=""
                           />
                         </div>
                       </div>

@@ -46,11 +46,12 @@ export async function POST(request: Request) {
          }
        ];
     } else if (type === 'photo_upload') {
-       const { wbs, project_name, image_url } = payload;
+       const { wbs, project_name, image_url, image_count } = payload;
+       const countLabel = image_count && Number(image_count) > 1 ? ` (${image_count} รูป)` : '';
        messages = [
          {
            type: 'text',
-           text: `📸 [อัพโหลดรูปถ่าย]\n📌 งาน: ${wbs}\n📑 ชื่อ: ${project_name || '-'}`
+           text: `📸 [อัพโหลดรูปถ่าย${countLabel}]\n📌 งาน: ${wbs}\n📑 ชื่อ: ${project_name || '-'}`
          },
          {
            type: 'image',

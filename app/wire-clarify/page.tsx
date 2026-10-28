@@ -97,10 +97,18 @@ export default function WireClarifyPage() {
           const fixedApproverName = (parsed.approverName === 'นายเมธี สุกก่ำ' || parsed.approverName === 'นายเมธี สุภาก่า' || !parsed.approverName)
             ? 'นายเมธี สุภาก่ำ'
             : parsed.approverName;
+          const fixedDocNo = (!parsed.docNo || parsed.docNo.includes('5309') || parsed.docNo.includes('คชย'))
+            ? 'ก.3 กรย.(กร)'
+            : parsed.docNo;
+          const fixedDocDate = (parsed.docDate && (parsed.docDate.includes('ตุลาคม') || parsed.docDate.includes('2569') || parsed.docDate.includes('๒๕๖๙')))
+            ? ''
+            : (parsed.docDate || '');
 
           setFormData({
             ...SAMPLE_WIRE_CLARIFY_DATA,
             ...parsed,
+            docNo: fixedDocNo,
+            docDate: fixedDocDate,
             docTo: fixedDocTo,
             salutation: fixedSalutation,
             signerTitle: fixedSignerTitle,
@@ -628,7 +636,7 @@ export default function WireClarifyPage() {
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                         onClick={(e) => e.stopPropagation()}
-                        placeholder="เลขที่หนังสือ เช่น มท 5309.16/..."
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </td>
                     <td style={{ fontWeight: 'bold' }}>วันที่</td>
@@ -935,7 +943,7 @@ export default function WireClarifyPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น มท 5309.16/..."
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                     </div>
                     <div className="big-field-group">

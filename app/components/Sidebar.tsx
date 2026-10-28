@@ -7,7 +7,7 @@ import {
   LogOut, Recycle, ArrowRightLeft, Camera, ClipboardList, ChevronDown, ChevronRight, 
   Package, MapPin, Calculator, FileWarning, FileCheck, Wrench, CreditCard, 
   CheckCircle2, Building, PlayCircle, Receipt, PackagePlus, Trash2, Moon, Archive, 
-  X, Clock, Sparkles, Briefcase, Percent
+  X, Clock, Sparkles, Briefcase, Percent, Presentation
 } from "lucide-react";
 import { useSidebar } from "./SidebarContext";
 import { useEffect, useState } from "react";
@@ -135,6 +135,30 @@ export default function Sidebar() {
             <Link href="/" className={`nav-item ${pathname === "/" ? "active" : ""}`}>
               <LayoutDashboard size={20} />
               <span>Dashboard งานก่อสร้าง</span>
+            </Link>
+
+            <Link 
+              href="/performance-presentation" 
+              className={`nav-item ${pathname === "/performance-presentation" ? "active" : ""}`}
+              style={{
+                backgroundColor: pathname === "/performance-presentation" ? undefined : 'rgba(245, 158, 11, 0.15)',
+                border: pathname === "/performance-presentation" ? undefined : '1px solid rgba(245, 158, 11, 0.35)',
+              }}
+            >
+              <Presentation size={20} className="text-amber-400" />
+              <span className="font-semibold text-white">โปรแกรมนำเสนอผลการปฏิบัติงาน ผกร.</span>
+              <span style={{
+                marginLeft: 'auto',
+                fontSize: '0.62rem',
+                padding: '2px 6px',
+                borderRadius: '9999px',
+                backgroundColor: 'rgba(245, 158, 11, 0.25)',
+                color: '#fbbf24',
+                border: '1px solid rgba(245, 158, 11, 0.5)',
+                fontWeight: 700
+              }}>
+                ปี 2569
+              </span>
             </Link>
 
             {/* เมนูภาคสนาม แสดงเฉพาะเมื่อไม่ใช่ Office */}

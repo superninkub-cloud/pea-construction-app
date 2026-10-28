@@ -78,6 +78,15 @@ export default function JobCloseMemoPage() {
           if (!parsed.salutation) {
             parsed.salutation = 'อก.บฟ.(ก3)';
           }
+          if (!parsed.docNo || parsed.docNo.includes('2383') || parsed.docNo.includes('2568') || parsed.docNo.includes('คชย')) {
+            parsed.docNo = 'ก.3 กรย.(กร)';
+          }
+          if (parsed.docDate && (parsed.docDate.includes('12 ก.ค.') || parsed.docDate.includes('ก.ค.') || parsed.docDate.includes('2568') || parsed.docDate.includes('๒๕๖๘'))) {
+            parsed.docDate = '';
+          }
+          if (parsed.signerDate && (parsed.signerDate.includes('ก.ค.') || parsed.signerDate.includes('2568') || parsed.signerDate.includes('2569'))) {
+            parsed.signerDate = '';
+          }
           setFormData(parsed);
         }
       }
@@ -405,7 +414,7 @@ export default function JobCloseMemoPage() {
                           value={formData.docNo}
                           onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น ก.3 กรย.(กร) 2383/2568"
+                          placeholder="เช่น ก.3 กรย.(กร)"
                           title="เลขที่หนังสือ (จุดที่ต้องแก้ไขแต่ละครั้ง)"
                         />
                       </div>
@@ -420,7 +429,7 @@ export default function JobCloseMemoPage() {
                           value={formData.docDate}
                           onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
                           onClick={(e) => e.stopPropagation()}
-                          placeholder="เช่น 12 ก.ค. 2568"
+                          placeholder=""
                           title="วันที่ในหนังสือ (จุดที่ต้องแก้ไขแต่ละครั้ง)"
                         />
                         <button
@@ -704,7 +713,7 @@ export default function JobCloseMemoPage() {
                         className="big-input"
                         value={formData.docNo}
                         onChange={(e) => setFormData({ ...formData, docNo: e.target.value })}
-                        placeholder="เช่น ก.3 กรย.(กร) 2383/2568"
+                        placeholder="เช่น ก.3 กรย.(กร)"
                       />
                       <div className="var-quick-options">
                         <button
@@ -731,7 +740,7 @@ export default function JobCloseMemoPage() {
                         className="big-input"
                         value={formData.docDate}
                         onChange={(e) => setFormData({ ...formData, docDate: e.target.value })}
-                        placeholder="เช่น 12 ก.ค. 2568"
+                        placeholder=""
                       />
                       <div className="var-quick-options">
                         <button
@@ -1033,7 +1042,7 @@ export default function JobCloseMemoPage() {
                       className="big-input"
                       value={formData.signerDate}
                       onChange={(e) => setFormData({ ...formData, signerDate: e.target.value })}
-                      placeholder="เช่น 12 ก.ค. 2568"
+                      placeholder=""
                     />
                     <div className="var-quick-options">
                       <button

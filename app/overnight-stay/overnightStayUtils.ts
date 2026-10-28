@@ -115,7 +115,7 @@ export function getTodayThaiDate(format: 'short' | 'full' | 'thai_num' = 'short'
 export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟก.3',
-  docNo: 'ก.3 กรย.(กร) 2360/2569',
+  docNo: 'ก.3 กรย.(กร)',
   docDate: '',
   subject: 'ขออนุมัติพักแรมหน้างาน',
   salutation: 'ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)',
@@ -123,8 +123,8 @@ export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
   travelOrderNo: 'TI26234411 กรย.(ก3)',
   workArea: 'กฟจ.สมุทรสาคร และการไฟฟ้าในสังกัด กฟก.3',
   constructionDescription: 'รื้อถอนสถานีไฟฟ้าสมุทรสาคร 10 (ชั่วคราว), รื้อถอนสถานีไฟฟ้าสมุทรสาคร 16 (ชั่วคราว) และก่อสร้างสถานีไฟฟ้าสมุทรสาคร 18 (ชั่วคราว)',
-  workStartDate: '4 ตุลาคม 2569',
-  workEndDate: '31 ตุลาคม 2569',
+  workStartDate: '',
+  workEndDate: '',
   roundTripDistanceKm: '60',
 
   persons: [
@@ -143,24 +143,24 @@ export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
     '90-7312 นฐ.'
   ],
   caretakerName: 'นายศุภวิชญ์ เกาะลอย',
-  stayStartDate: '4 ตุลาคม 2569',
-  stayEndDate: '31 ตุลาคม 2569',
+  stayStartDate: '',
+  stayEndDate: '',
   totalDays: '27',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '9 ต.ค. 69',
+  proposerDate: '',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '12 ต.ค. 2569',
+  approverDate: '',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '12 ต.ค. 69',
+  stampRwWbDate: '',
   stampRkRyDate: '',
-  stampHpKrDate: '9 ต.ค. 69',
-  stampCpKrDate: '9/10/2569',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
   contactPhone: '10171'
@@ -172,7 +172,7 @@ export const SAMPLE_SUPAWIT_DATA: OvernightStayFormData = {
 export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟก.3',
-  docNo: 'ก.3 กรย.(กร) 2358/2569',
+  docNo: 'ก.3 กรย.(กร)',
   docDate: '',
   subject: 'ขออนุมัติพักแรมหน้างาน',
   salutation: 'ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)',
@@ -180,8 +180,8 @@ export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
   travelOrderNo: 'TI26234410 กรย.(ก3)',
   workArea: 'กฟส.พุทธมณฑล และ กฟส.สมุทรสาคร 2 (บ้านแพ้ว) และการไฟฟ้าในสังกัด กฟก.3',
   constructionDescription: 'งานปรับปรุงระบบจำหน่าย 22 เควี (ใต้ไลน์สายส่งระบบ 115 เควี) ตามแนวทางหลวงหมายเลข 35 ช่วงจุดแบ่งแดน กฟส.สมุทรสาคร ถึง คลองท่าแร้ง (ฝั่งสถานี) ต.ชัยมงคล อ.เมือง จ.สมุทรสาคร และงานปรับปรุงระบบจำหน่าย 22 เควี หลังสนามกอล์ฟ ถึง ซอยดาวทอง (จุดที่ 1-2) หมู่ 1 ต.ศาลายา อ.พุทธมณฑล จ.นครปฐม',
-  workStartDate: '4 ตุลาคม 2569',
-  workEndDate: '31 ตุลาคม 2569',
+  workStartDate: '',
+  workEndDate: '',
   roundTripDistanceKm: '60',
 
   persons: [
@@ -199,24 +199,24 @@ export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
     '90-7311 นฐ.'
   ],
   caretakerName: 'นายวีรพัฒน์ นาคลมัย',
-  stayStartDate: '4 ตุลาคม 2569',
-  stayEndDate: '31 ตุลาคม 2569',
+  stayStartDate: '',
+  stayEndDate: '',
   totalDays: '27',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '9 ต.ค. 69',
+  proposerDate: '',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '12 ต.ค. 2569',
+  approverDate: '',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '12 ต.ค. 69',
+  stampRwWbDate: '',
   stampRkRyDate: '',
-  stampHpKrDate: '9 ต.ค. 69',
-  stampCpKrDate: '9/10/2569',
+  stampHpKrDate: '',
+  stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
   contactPhone: '10171'
@@ -228,7 +228,7 @@ export const SAMPLE_WEERAPAT_DATA: OvernightStayFormData = {
 export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟก.3',
-  docNo: 'ก.3 กรย.(กร) 2359/2569',
+  docNo: 'ก.3 กรย.(กร)',
   docDate: '',
   subject: 'ขออนุมัติพักแรมหน้างาน',
   salutation: 'ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)',
@@ -236,8 +236,8 @@ export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
   travelOrderNo: 'TI26237986 กรย.(ก3)',
   workArea: 'กฟส.บางเลน และการไฟฟ้าในสังกัด กฟก.3',
   constructionDescription: 'ปรับปรุงระบบจำหน่าย 22 เควี ช่วงบริเวณยงคอนกรีต ถึง คลองโต๊ะนุ้ย อ.บางเลน จ.นครปฐม',
-  workStartDate: '1 ตุลาคม 2569',
-  workEndDate: '31 ตุลาคม 2569',
+  workStartDate: '',
+  workEndDate: '',
   roundTripDistanceKm: '70',
 
   persons: [
@@ -255,23 +255,23 @@ export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
     '90-8896 นฐ.'
   ],
   caretakerName: 'นายศราวุฒิ เกิดสีเล็ก',
-  stayStartDate: '4 ตุลาคม 2569',
-  stayEndDate: '31 ตุลาคม 2569',
+  stayStartDate: '',
+  stayEndDate: '',
   totalDays: '28',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '12 ต.ค. 69',
+  proposerDate: '',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '12 ต.ค. 2569',
+  approverDate: '',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '12 ต.ค. 69',
+  stampRwWbDate: '',
   stampRkRyDate: '',
-  stampHpKrDate: '9 ต.ค. 69',
+  stampHpKrDate: '',
   stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',
@@ -284,7 +284,7 @@ export const SAMPLE_SARAWUT_DATA: OvernightStayFormData = {
 export const SAMPLE_KWANNAKORN_DATA: OvernightStayFormData = {
   docFrom: 'กรย.(ก3)',
   docTo: 'กฟก.3',
-  docNo: 'ก.3 กรย.(กร) 2361/2569',
+  docNo: 'ก.3 กรย.(กร)',
   docDate: '',
   subject: 'ขออนุมัติพักแรมหน้างาน',
   salutation: 'ผชก.(ก3) ผ่าน อฝ.วบ.(ก3)',
@@ -292,8 +292,8 @@ export const SAMPLE_KWANNAKORN_DATA: OvernightStayFormData = {
   travelOrderNo: 'TI26238042 กรย.(ก3)',
   workArea: 'กฟส.สมุทรสาคร 2 (บ้านแพ้ว) และการไฟฟ้าในสังกัด กฟก.3',
   constructionDescription: 'ปรับปรุงระบบจำหน่ายคลอง D4 ช่วงแยกดอนราว',
-  workStartDate: '1 ตุลาคม 2569',
-  workEndDate: '31 ตุลาคม 2569',
+  workStartDate: '',
+  workEndDate: '',
   roundTripDistanceKm: '87',
 
   persons: [
@@ -313,23 +313,23 @@ export const SAMPLE_KWANNAKORN_DATA: OvernightStayFormData = {
     '90-7310 นฐ.'
   ],
   caretakerName: 'นายขวัญนคร ศรีจันทร์อินทร์',
-  stayStartDate: '4 ตุลาคม 2569',
-  stayEndDate: '31 ตุลาคม 2569',
+  stayStartDate: '',
+  stayEndDate: '',
   totalDays: '28',
 
   proposerName: 'นายอนันต์ กาญจนอุปถัมภ์',
   proposerPosition: 'รก.รย.(ก3) ปฏิบัติงานแทน อก.รย.(ก3)',
-  proposerDate: '9 ต.ค. 69',
+  proposerDate: '',
 
   approvalCommand: 'อนุมัติ',
   approverName: 'นายเมธี สุกก่ำ',
   approverPosition: 'อฝ.วบ.(ก3) ปฏิบัติงานแทน ผชก.(ก3)',
-  approverDate: '12 ต.ค. 2569',
+  approverDate: '',
 
   hasRoutingStamps: true,
-  stampRwWbDate: '12 ต.ค. 69',
+  stampRwWbDate: '',
   stampRkRyDate: '',
-  stampHpKrDate: '9 ต.ค. 69',
+  stampHpKrDate: '',
   stampCpKrDate: '',
 
   contactDepartment: 'แผนกก่อสร้างระบบไฟฟ้า',

@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
-import { Home, CheckCircle2, CircleDashed, Layers, Users, AlertTriangle } from "lucide-react";
+import { Home, CheckCircle2, CircleDashed, Layers, Users, AlertTriangle, X, ChevronLeft, ChevronRight, Download, Camera } from "lucide-react";
 import { wireDataList } from "../../lib/wireData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { parseProjectImages } from "../utils/imageCompressor";
 
 export default function Overview() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -22,6 +23,8 @@ export default function Overview() {
   const [closingPlanFilter, setClosingPlanFilter] = useState("ALL");
   const [statuses, setStatuses] = useState<string[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
+  const [galleryModal, setGalleryModal] = useState<{ title: string; images: string[] } | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   useEffect(() => {
     fetchProjects();
@@ -562,7 +565,49 @@ export default function Overview() {
                         </div>
                       </td>
                       <td data-label="รูปภาพ" style={{ textAlign: "center", paddingRight: "24px" }}>
-                        {p.image_url ? <a href={p.image_url} target="_blank" className="btn btn-primary" style={{ padding: "6px 12px", fontSize: "0.8rem", borderRadius: "8px" }}>รูปภาพ</a> : <span style={{ color: "var(--text-light)", fontSize: "0.8rem" }}>-</span>}
+                        {(() => {
+                          const imgs = parseProjectImages(p.image_url);
+                          if (imgs.length === 0) {
+                            return <span style={{ color: "var(--text-light)", fontSize: "0.8rem" }}>-</span>;
+                          }
+                          if (imgs.length === 1) {
+                            return (
+                              <a
+                                href={imgs[0]}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-primary"
+                                style={{ padding: "6px 12px", fontSize: "0.8rem", borderRadius: "8px", textDecoration: "none" }}
+                              >
+                                รูปภาพ
+                              </a>
+                            );
+                          }
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setGalleryModal({
+                                  title: `${p.wbs} - ${p.name || ""}`,
+                                  images: imgs,
+                                });
+                                setGalleryIndex(0);
+                              }}
+                              className="btn btn-primary"
+                              style={{
+                                padding: "6px 12px",
+                                fontSize: "0.8rem",
+                                borderRadius: "8px",
+                                background: "linear-gradient(135deg, #7e22ce 0%, #a855f7 100%)",
+                                border: "none",
+                                cursor: "pointer",
+                                boxShadow: "0 2px 6px rgba(126, 34, 206, 0.25)",
+                              }}
+                            >
+                              รูปภาพ ({imgs.length})
+                            </button>
+                          );
+                        })()}
                       </td>
                     </tr>
                   );
@@ -572,6 +617,210 @@ export default function Overview() {
           </table>
         </div>
       </div>
+      {/* Lightbox / Gallery Modal for Project Images */}
+      {galleryModal && (
+        <div
+          onClick={() => setGalleryModal(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.92)",
+            backdropFilter: "blur(4px)",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "20px",
+            boxSizing: "border-box",
+            userSelect: "none",
+          }}
+        >
+          {/* Header */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: "1000px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              color: "white",
+              paddingBottom: "10px",
+            }}
+          >
+            <div>
+              <div style={{ fontSize: "16px", fontWeight: 700 }}>
+                {galleryModal.title}
+              </div>
+              <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                รูปภาพที่ {galleryIndex + 1} จาก {galleryModal.images.length} รูป
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <a
+                href={galleryModal.images[galleryIndex]}
+                target="_blank"
+                rel="noreferrer"
+                download={`photo_${galleryIndex + 1}.jpg`}
+                className="btn"
+                style={{
+                  background: "rgba(255,255,255,0.15)",
+                  color: "white",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  padding: "6px 14px",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  textDecoration: "none",
+                }}
+              >
+                <Download size={14} />
+                <span>เปิดรูปเต็ม</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => setGalleryModal(null)}
+                style={{
+                  background: "rgba(255,255,255,0.2)",
+                  border: "none",
+                  color: "white",
+                  fontSize: "24px",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Main preview with prev/next buttons */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              flex: 1,
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {galleryIndex > 0 && (
+              <button
+                type="button"
+                onClick={() => setGalleryIndex((prev) => prev - 1)}
+                style={{
+                  position: "absolute",
+                  left: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "rgba(0,0,0,0.6)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  color: "white",
+                  borderRadius: "50%",
+                  width: "50px",
+                  height: "50px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  zIndex: 10,
+                }}
+                title="รูปก่อนหน้า"
+              >
+                <ChevronLeft size={28} />
+              </button>
+            )}
+
+            <img
+              src={galleryModal.images[galleryIndex]}
+              alt="Project Photo"
+              style={{
+                maxWidth: "92%",
+                maxHeight: "80vh",
+                objectFit: "contain",
+                borderRadius: "12px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+              }}
+            />
+
+            {galleryIndex < galleryModal.images.length - 1 && (
+              <button
+                type="button"
+                onClick={() => setGalleryIndex((prev) => prev + 1)}
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "rgba(0,0,0,0.6)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  color: "white",
+                  borderRadius: "50%",
+                  width: "50px",
+                  height: "50px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  zIndex: 10,
+                }}
+                title="รูปถัดไป"
+              >
+                <ChevronRight size={28} />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: "800px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              overflowX: "auto",
+              paddingTop: "10px",
+            }}
+          >
+            {galleryModal.images.map((imgUrl, i) => (
+              <img
+                key={i}
+                src={imgUrl}
+                alt="thumb"
+                onClick={() => setGalleryIndex(i)}
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  border: galleryIndex === i ? "2px solid #a855f7" : "1px solid rgba(255,255,255,0.3)",
+                  opacity: galleryIndex === i ? 1 : 0.6,
+                  transition: "all 0.15s ease",
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </>
   );
 }
