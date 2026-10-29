@@ -5,7 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { Project } from "../../lib/types";
 import TopBar from "./TopBar";
-import { Plus, X, Users, Camera, Upload, Trash2, ZoomIn, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, RotateCw, Image as ImageIcon, Download, AlertCircle } from "lucide-react";
+import { Plus, X, Users, Camera, Upload, Trash2, ZoomIn, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, RotateCw, Image as ImageIcon, Download, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { wireDataList } from "../../lib/wireData";
 import {
@@ -14,6 +14,7 @@ import {
   formatBytes,
   CompressedImageResult
 } from "../utils/imageCompressor";
+import TechnicianOverviewExportModal from "./TechnicianOverviewExportModal";
 
 const getLatestRemarkDetail = (remarks?: string) => {
   if (!remarks) return null;
@@ -112,6 +113,7 @@ export default function UpdateStatus() {
 
   // Add New Project State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [newProject, setNewProject] = useState({
     wbs: "",
     name: "",
@@ -785,9 +787,31 @@ export default function UpdateStatus() {
                         background: stat.percentage === 100 ? '#10b981' : (stat.percentage > 50 ? '#f59e0b' : '#ef4444')
                       }}></div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '8px' }}>
-                      <span>จำนวนงานทั้งหมด: <strong style={{ color: '#1e293b' }}>{stat.total}</strong> โครงการ</span>
-                      <span>ปิดงาน F4 แล้ว: <strong style={{ color: '#10b981' }}>{stat.f4}</strong> โครงการ</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#475569', borderTop: '1px dashed #cbd5e1', paddingTop: '8px', alignItems: 'center' }}>
+                      <span>จำนวนงาน: <strong style={{ color: '#1e293b' }}>{stat.total}</strong> โครงการ (F4: <strong style={{ color: '#10b981' }}>{stat.f4}</strong>)</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSupervisor(stat.name);
+                          setIsExportModalOpen(true);
+                        }}
+                        style={{
+                          background: '#f3e8ff',
+                          color: '#7e22ce',
+                          border: '1px solid #d8b4fe',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                        title={`ส่งออกภาพรวมงานของ ${stat.name}`}
+                      >
+                        <FileSpreadsheet size={12} /> ส่งออก
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -1006,6 +1030,27 @@ export default function UpdateStatus() {
                   </option>
                 ))}
               </select>
+              <button
+                className="btn"
+                style={{
+                  padding: "0 18px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  whiteSpace: "nowrap",
+                  background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                  color: "#ffffff",
+                  fontWeight: "700",
+                  borderRadius: "8px",
+                  border: "none",
+                  boxShadow: "0 2px 8px rgba(124, 58, 237, 0.25)",
+                  cursor: "pointer",
+                }}
+                onClick={() => setIsExportModalOpen(true)}
+                title="เปิดหน้าต่างส่งออกตารางสรุปภาพรวมงานช่าง (รูปภาพ PNG, Excel, PDF)"
+              >
+                <FileSpreadsheet size={18} /> 📊 ส่งออกภาพรวมงานช่าง
+              </button>
               {userRole !== "guest" && (
                 <button
                   className="btn btn-primary"
@@ -2417,77 +2462,349 @@ export default function UpdateStatus() {
           <div
             style={{ display: "flex", flexDirection: "column", gap: "16px" }}
           >
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <div
-                style={{
-                  display: "flex",
-                  background: "#f1f5f9",
-                  borderRadius: "8px",
-                  padding: "4px",
-                }}
-              >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontWeight: "700", color: "#1e293b", fontSize: "1.05rem" }}>
+                  📋 รายการโครงการ {selectedSupervisor !== "ALL" ? `ของ ${selectedSupervisor}` : "ทั้งหมด"} ({filteredProjects.length} โครงการ)
+                </span>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                {/* Export Button */}
                 <button
-                  onClick={() => setViewMode("grid")}
+                  onClick={() => setIsExportModalOpen(true)}
                   style={{
-                    padding: "6px 16px",
-                    borderRadius: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "7px 16px",
+                    borderRadius: "8px",
                     border: "none",
-                    background: viewMode === "grid" ? "#fff" : "transparent",
-                    color:
-                      viewMode === "grid" ? "var(--pea-purple)" : "#64748b",
-                    fontWeight: viewMode === "grid" ? "600" : "500",
+                    background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                    color: "#ffffff",
+                    fontWeight: "700",
+                    fontSize: "0.88rem",
                     cursor: "pointer",
-                    boxShadow:
-                      viewMode === "grid"
-                        ? "0 1px 3px rgba(0,0,0,0.1)"
-                        : "none",
+                    boxShadow: "0 2px 8px rgba(124, 58, 237, 0.3)",
                     transition: "all 0.2s",
                   }}
+                  title="ส่งออกตารางสรุปภาพรวมงานช่าง (รูปภาพ PNG, Excel, PDF, สไลด์)"
                 >
-                  🔲 แบบตาราง
+                  <FileSpreadsheet size={16} />
+                  <span>📊 ส่งออกภาพรวมงานช่าง (Export Overview)</span>
                 </button>
-                <button
-                  onClick={() => setViewMode("list")}
+
+                <div
                   style={{
-                    padding: "6px 16px",
-                    borderRadius: "6px",
-                    border: "none",
-                    background: viewMode === "list" ? "#fff" : "transparent",
-                    color:
-                      viewMode === "list" ? "var(--pea-purple)" : "#64748b",
-                    fontWeight: viewMode === "list" ? "600" : "500",
-                    cursor: "pointer",
-                    boxShadow:
-                      viewMode === "list"
-                        ? "0 1px 3px rgba(0,0,0,0.1)"
-                        : "none",
-                    transition: "all 0.2s",
+                    display: "flex",
+                    background: "#f1f5f9",
+                    borderRadius: "8px",
+                    padding: "4px",
                   }}
                 >
-                  📄 แบบรายการ
-                </button>
-                <button
-                  onClick={() => setShowAllProgress(!showAllProgress)}
-                  style={{
-                    padding: "6px 16px",
-                    borderRadius: "6px",
-                    border: "none",
-                    background: showAllProgress ? "#fff" : "transparent",
-                    color: showAllProgress ? "var(--pea-purple)" : "#64748b",
-                    fontWeight: showAllProgress ? "600" : "500",
-                    cursor: "pointer",
-                    boxShadow: showAllProgress
-                      ? "0 1px 3px rgba(0,0,0,0.1)"
-                      : "none",
-                    transition: "all 0.2s",
-                    marginLeft: "4px"
-                  }}
-                >
-                  {showAllProgress ? "ซ่อนความคืบหน้า" : "แสดงความคืบหน้า"}
-                </button>
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: viewMode === "grid" ? "#fff" : "transparent",
+                      color:
+                        viewMode === "grid" ? "var(--pea-purple)" : "#64748b",
+                      fontWeight: viewMode === "grid" ? "600" : "500",
+                      cursor: "pointer",
+                      boxShadow:
+                        viewMode === "grid"
+                          ? "0 1px 3px rgba(0,0,0,0.1)"
+                          : "none",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    🔲 แบบการ์ด
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: viewMode === "list" ? "#fff" : "transparent",
+                      color:
+                        viewMode === "list" ? "var(--pea-purple)" : "#64748b",
+                      fontWeight: viewMode === "list" ? "600" : "500",
+                      cursor: "pointer",
+                      boxShadow:
+                        viewMode === "list"
+                          ? "0 1px 3px rgba(0,0,0,0.1)"
+                          : "none",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    📄 แบบรายการ
+                  </button>
+                  <button
+                    onClick={() => setViewMode("table")}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: viewMode === "table" ? "#fff" : "transparent",
+                      color:
+                        viewMode === "table" ? "var(--pea-purple)" : "#64748b",
+                      fontWeight: viewMode === "table" ? "600" : "500",
+                      cursor: "pointer",
+                      boxShadow:
+                        viewMode === "table"
+                          ? "0 1px 3px rgba(0,0,0,0.1)"
+                          : "none",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    📋 ตารางภาพรวม
+                  </button>
+                  {viewMode !== "table" && (
+                    <button
+                      onClick={() => setShowAllProgress(!showAllProgress)}
+                      style={{
+                        padding: "6px 14px",
+                        borderRadius: "6px",
+                        border: "none",
+                        background: showAllProgress ? "#fff" : "transparent",
+                        color: showAllProgress ? "var(--pea-purple)" : "#64748b",
+                        fontWeight: showAllProgress ? "600" : "500",
+                        cursor: "pointer",
+                        boxShadow: showAllProgress
+                          ? "0 1px 3px rgba(0,0,0,0.1)"
+                          : "none",
+                        transition: "all 0.2s",
+                        marginLeft: "4px"
+                      }}
+                    >
+                      {showAllProgress ? "ซ่อนความคืบหน้า" : "แสดงความคืบหน้า"}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
+            {viewMode === "table" ? (
+              <div
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderRadius: "16px",
+                  border: "1px solid #cbd5e1",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "16px 20px",
+                    background: "linear-gradient(135deg, #581c87 0%, #7e22ce 100%)",
+                    color: "#ffffff",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: "12px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <FileSpreadsheet size={22} className="text-amber-300" />
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: "700" }}>
+                        ตารางสรุปภาพรวมงาน {selectedSupervisor !== "ALL" ? `ของ ${selectedSupervisor}` : "ทั้งหมด"} ({filteredProjects.length} โครงการ)
+                      </h4>
+                      <p style={{ margin: "2px 0 0", fontSize: "0.8rem", color: "#e9d5ff" }}>
+                        คลิกที่แถวโครงการเพื่อเลือกงานและอัปเดตสถานะ หรือกดปุ่มส่งออกเพื่อบันทึกเป็นรูปภาพ/Excel
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setIsExportModalOpen(true)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      background: "rgba(255, 255, 255, 0.2)",
+                      color: "#ffffff",
+                      fontWeight: "700",
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                      backdropFilter: "blur(4px)",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <Download size={15} />
+                    <span>เปิดโหมดส่งออก (Export PNG / Excel)</span>
+                  </button>
+                </div>
+
+                <div style={{ overflowX: "auto" }}>
+                  <table
+                    style={{
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      fontSize: "0.9rem",
+                      backgroundColor: "#cfd8dc",
+                    }}
+                  >
+                    <thead>
+                      <tr
+                        style={{
+                          backgroundColor: "#6A1B9A",
+                          color: "#ffffff",
+                          borderBottom: "2px solid #581c87",
+                        }}
+                      >
+                        <th style={{ width: "60px", padding: "12px 6px", textAlign: "center", fontWeight: "700", borderRight: "1px solid rgba(255, 255, 255, 0.35)" }}>
+                          ลำดับที่
+                        </th>
+                        <th style={{ width: "190px", padding: "12px 10px", textAlign: "center", fontWeight: "700", borderRight: "1px solid rgba(255, 255, 255, 0.35)" }}>
+                          WBS
+                        </th>
+                        <th style={{ minWidth: "280px", padding: "12px 14px", textAlign: "center", fontWeight: "700", borderRight: "1px solid rgba(255, 255, 255, 0.35)" }}>
+                          ชื่องาน
+                        </th>
+                        <th style={{ width: "110px", padding: "12px 6px", textAlign: "center", fontWeight: "700", borderRight: "1px solid rgba(255, 255, 255, 0.35)" }}>
+                          สถานะงาน<br />(ในระบบ)
+                        </th>
+                        <th style={{ width: "120px", padding: "12px 8px", textAlign: "center", fontWeight: "700", borderRight: "1px solid rgba(255, 255, 255, 0.35)" }}>
+                          วันที่<br />เปิดงาน
+                        </th>
+                        <th style={{ width: "200px", padding: "12px 10px", textAlign: "center", fontWeight: "700", borderRight: "1px solid rgba(255, 255, 255, 0.35)" }}>
+                          ความก้าวหน้างาน
+                        </th>
+                        <th style={{ width: "140px", padding: "12px 10px", textAlign: "center", fontWeight: "700", borderRight: "1px solid rgba(255, 255, 255, 0.35)" }}>
+                          แผนแล้วเสร็จ
+                        </th>
+                        <th style={{ width: "90px", padding: "12px 6px", textAlign: "center", fontWeight: "700" }}>
+                          จัดการ
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProjects.map((p, idx) => {
+                        const isEven = idx % 2 === 0;
+                        const rowBg = isEven ? "#d6dbdf" : "#e5e8e8";
+                        
+                        const remarkNote = getLatestRemarkDetail(p.remarks);
+                        const progressText = (p.status === "F4" || p.manual_progress === 100) ? "100%" : (remarkNote || (p.manual_progress ? `${p.manual_progress}%` : "อยู่ระหว่างดำเนินการ"));
+                        const planText = p.status === "F4" ? "" : (p.closing_plan || p.action_plan || "");
+
+                        const isProgRed = progressText !== "100%" && progressText !== "-";
+                        const isPlanRed = !!planText && planText !== "-";
+
+                        return (
+                          <tr
+                            key={p.id || p.wbs}
+                            onClick={() => setSelectedWbs(p.wbs)}
+                            style={{
+                              backgroundColor: rowBg,
+                              borderBottom: "1px solid #b0bec5",
+                              cursor: "pointer",
+                              transition: "background-color 0.15s ease",
+                            }}
+                          >
+                            <td style={{ padding: "10px 6px", textAlign: "center", fontWeight: "600", borderRight: "1px solid #b0bec5" }}>
+                              {idx + 1}
+                            </td>
+                            <td style={{ padding: "10px 10px", textAlign: "left", fontFamily: "monospace", fontWeight: "700", color: "#1e293b", borderRight: "1px solid #b0bec5", whiteSpace: "nowrap" }}>
+                              {p.wbs}
+                            </td>
+                            <td style={{ padding: "10px 12px", textAlign: "left", borderRight: "1px solid #b0bec5", color: "#0f172a" }}>
+                              {p.name}
+                            </td>
+                            <td style={{ padding: "10px 6px", textAlign: "center", borderRight: "1px solid #b0bec5" }}>
+                              <span
+                                style={{
+                                  display: "inline-block",
+                                  padding: "2px 8px",
+                                  borderRadius: "6px",
+                                  fontSize: "0.82rem",
+                                  fontWeight: "700",
+                                  backgroundColor: p.status === "F4" ? "rgba(16, 185, 129, 0.15)" : "rgba(245, 158, 11, 0.15)",
+                                  color: p.status === "F4" ? "#065f46" : "#92400e",
+                                }}
+                              >
+                                {p.status || "-"}
+                              </span>
+                            </td>
+                            <td style={{ padding: "10px 8px", textAlign: "center", borderRight: "1px solid #b0bec5", fontSize: "0.85rem", color: "#334155" }}>
+                              {p.open_year ? `ปี ${p.open_year}` : "-"}
+                            </td>
+                            <td style={{ padding: "10px 10px", textAlign: "center", borderRight: "1px solid #b0bec5", fontWeight: isProgRed ? "700" : "600", color: isProgRed ? "#dc2626" : "#1e293b" }}>
+                              {progressText}
+                            </td>
+                            <td style={{ padding: "10px 10px", textAlign: "center", borderRight: "1px solid #b0bec5", fontWeight: isPlanRed ? "700" : "500", color: isPlanRed ? "#dc2626" : "#475569" }}>
+                              {planText || "-"}
+                            </td>
+                            <td style={{ padding: "10px 6px", textAlign: "center" }}>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedWbs(p.wbs);
+                                }}
+                                style={{
+                                  backgroundColor: "var(--pea-purple)",
+                                  color: "#ffffff",
+                                  border: "none",
+                                  borderRadius: "6px",
+                                  padding: "4px 8px",
+                                  fontSize: "0.75rem",
+                                  fontWeight: "600",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                เลือกงาน
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div
+                  style={{
+                    padding: "12px 20px",
+                    backgroundColor: "#b0bec5",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    fontSize: "0.85rem",
+                    color: "#374151",
+                  }}
+                >
+                  <span>
+                    แสดงผลทั้งหมด <strong>{filteredProjects.length}</strong> โครงการ (ปิดงานแล้ว: <strong>{filteredProjects.filter(p => p.status === "F4").length}</strong>)
+                  </span>
+                  <button
+                    onClick={() => setIsExportModalOpen(true)}
+                    style={{
+                      background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "6px 14px",
+                      fontWeight: "700",
+                      fontSize: "0.82rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <Download size={14} /> ส่งออกภาพรวมงาน
+                  </button>
+                </div>
+              </div>
+            ) : (
             <div
               style={{
                 display: viewMode === "grid" ? "grid" : "flex",
@@ -2954,6 +3271,7 @@ export default function UpdateStatus() {
                 </div>
               )}
             </div>
+            )}
           </div>
         )}
       </div>
@@ -3494,6 +3812,16 @@ export default function UpdateStatus() {
           </div>
         );
       })()}
+
+      {/* Technician Job Status Overview Export Modal */}
+      <TechnicianOverviewExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        projects={projects}
+        initialSupervisor={selectedSupervisor}
+        supervisors={supervisors}
+        onSelectSupervisor={(sup) => setSelectedSupervisor(sup)}
+      />
     </>
   );
 }
