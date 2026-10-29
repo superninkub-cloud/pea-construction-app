@@ -35,6 +35,7 @@ export interface Project {
   check7: boolean;
   check8: boolean;
   image_url: string;
+  created_at?: string;
   updated_at?: string;
   scrap_wire_type?: string;
   scrap_wire_length?: number;
