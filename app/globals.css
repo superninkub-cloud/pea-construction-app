@@ -734,8 +734,96 @@ body {
 }
 
 @media print {
+  @page {
+    size: A4 landscape !important;
+    margin: 6mm 8mm !important;
+  }
+
   .print-only { display: block !important; }
   .no-print { display: none !important; }
+  .technician-overview-no-print,
+  .technician-overview-modal-header,
+  .technician-overview-modal-toolbar,
+  .technician-overview-modal-kpi,
+  .technician-overview-modal-hint {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .technician-overview-modal-backdrop {
+    position: static !important;
+    inset: auto !important;
+    z-index: auto !important;
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .technician-overview-modal-dialog {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .technician-overview-modal-body {
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  #technician-overview-print-area {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #technician-overview-print-area table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+  }
+
+  #technician-overview-print-area th,
+  #technician-overview-print-area td {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #technician-overview-print-area input,
+  #technician-overview-print-area textarea {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    resize: none !important;
+  }
   .sidebar, .topbar, .btn, .mobile-bottom-nav, .mobile-menu-btn { display: none !important; }
   
   /* Fix print truncation by forcing block layout and auto height on all wrappers */

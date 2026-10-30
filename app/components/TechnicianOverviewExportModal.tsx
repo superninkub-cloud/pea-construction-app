@@ -127,6 +127,7 @@ export default function TechnicianOverviewExportModal({
   const [isEditMode, setIsEditMode] = useState(false);
   const [customEdits, setCustomEdits] = useState<Record<string, Partial<TableRowData>>>({});
   const [exportTheme, setExportTheme] = useState<"pea_purple" | "pea_gradient" | "clean_white">("pea_purple");
+  const [includeSlideHeader, setIncludeSlideHeader] = useState<boolean>(true);
   const [isExportingImage, setIsExportingImage] = useState(false);
   const [copiedStatus, setCopiedStatus] = useState<"none" | "table" | "image">("none");
   const [zoomLevel, setZoomLevel] = useState<number>(100);
@@ -358,10 +359,14 @@ export default function TechnicianOverviewExportModal({
     };
   }, [selectedSup]);
 
-  // Export to PNG Image
+  // Export to PNG Image (Strictly captures document without edit outlines or system UI)
   const handleExportPNG = async () => {
     if (!printAreaRef.current) return;
     setIsExportingImage(true);
+
+    const wasEditing = isEditMode;
+    if (wasEditing) setIsEditMode(false);
+    await new Promise((r) => setTimeout(r, 60));
 
     try {
       // Apply clean styles for capturing
@@ -374,7 +379,7 @@ export default function TechnicianOverviewExportModal({
           pixelRatio: 2.5,
           backgroundColor: "#ffffff",
           filter: (node) => {
-            if (node instanceof HTMLElement && node.classList.contains("no-export")) {
+            if (node instanceof HTMLElement && (node.classList.contains("no-export") || node.classList.contains("no-print") || node.classList.contains("technician-overview-no-print"))) {
               return false;
             }
             return true;
@@ -400,6 +405,7 @@ export default function TechnicianOverviewExportModal({
       console.error("Export PNG error:", error);
       alert("เกิดข้อผิดพลาดในการส่งออกรูปภาพ กรุณาลองใหม่อีกครั้ง");
     } finally {
+      if (wasEditing) setIsEditMode(true);
       setIsExportingImage(false);
     }
   };
@@ -515,10 +521,20 @@ export default function TechnicianOverviewExportModal({
   // Copy Image to Clipboard
   const handleCopyImage = async () => {
     if (!printAreaRef.current) return;
+    const wasEditing = isEditMode;
+    if (wasEditing) setIsEditMode(false);
+    await new Promise((r) => setTimeout(r, 60));
+
     try {
       const blob = await toBlob(printAreaRef.current, {
         pixelRatio: 2,
         backgroundColor: "#ffffff",
+        filter: (node) => {
+          if (node instanceof HTMLElement && (node.classList.contains("no-export") || node.classList.contains("no-print") || node.classList.contains("technician-overview-no-print"))) {
+            return false;
+          }
+          return true;
+        },
       });
       if (blob && navigator.clipboard && window.ClipboardItem) {
         await navigator.clipboard.write([
@@ -532,65 +548,76 @@ export default function TechnicianOverviewExportModal({
     } catch (err) {
       console.error("Copy image error:", err);
       alert("ไม่สามารถคัดลอกรูปภาพได้ กรุณาใช้ปุ่มดาวน์โหลดแทน");
+    } finally {
+      if (wasEditing) setIsEditMode(true);
     }
   };
 
-  // Print PDF (Landscape A4)
-  const handlePrint = () => {
+  // Print PDF (Landscape A4 - Excludes system controls and modal header via print CSS)
+  const handlePrint = async () => {
+    const wasEditing = isEditMode;
+    if (wasEditing) setIsEditMode(false);
+    await new Promise((r) => setTimeout(r, 60));
     window.print();
+    if (wasEditing) {
+      setTimeout(() => setIsEditMode(true), 200);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        backgroundColor: "rgba(15, 23, 42, 0.75)",
-        backdropFilter: "blur(6px)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "16px",
-        overflowY: "auto",
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      {/* Modal Dialog Card */}
-      <div
+      className="technician-overview-modal-backdrop"
         style={{
-          width: "100%",
-          maxWidth: "1400px",
-          maxHeight: "94vh",
-          backgroundColor: "#ffffff",
-          borderRadius: "20px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          position: "fixed",
+          inset: 0,
+          zIndex: 9999,
+          backgroundColor: "rgba(15, 23, 42, 0.75)",
+          backdropFilter: "blur(6px)",
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
-          border: "1px solid #e2e8f0",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "16px",
+          overflowY: "auto",
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
       >
-        {/* Modal Top Header Bar */}
+        {/* Modal Dialog Card */}
         <div
+          className="technician-overview-modal-dialog"
           style={{
-            padding: "16px 24px",
-            background: "linear-gradient(135deg, #581c87 0%, #7e22ce 50%, #6b21a8 100%)",
-            color: "#ffffff",
+            width: "100%",
+            maxWidth: "1400px",
+            maxHeight: "94vh",
+            backgroundColor: "#ffffff",
+            borderRadius: "20px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
             display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "16px",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.15)",
+            flexDirection: "column",
+            overflow: "hidden",
+            border: "1px solid #e2e8f0",
           }}
+          onClick={(e) => e.stopPropagation()}
         >
+          {/* Modal Top Header Bar - Marked with technician-overview-no-print so it never shows in exported output */}
+          <div
+            className="technician-overview-modal-header technician-overview-no-print no-print"
+            style={{
+              padding: "16px 24px",
+              background: "linear-gradient(135deg, #581c87 0%, #7e22ce 50%, #6b21a8 100%)",
+              color: "#ffffff",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "16px",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.15)",
+            }}
+          >
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <div
               style={{
@@ -688,8 +715,9 @@ export default function TechnicianOverviewExportModal({
           </div>
         </div>
 
-        {/* Modal Action Controls Bar */}
+        {/* Modal Action Controls Bar - Marked with technician-overview-no-print so it never shows in exported output */}
         <div
+          className="technician-overview-modal-toolbar technician-overview-no-print no-print"
           style={{
             padding: "12px 24px",
             backgroundColor: "#f8fafc",
@@ -792,6 +820,29 @@ export default function TechnicianOverviewExportModal({
                 <option value="clean_white">⚪ ขาว-เทาคลาสสิก (Minimal Clean)</option>
               </select>
             </div>
+
+            {/* Slide Header Toggle: Allows switching between presentation banner and pure table matching sample */}
+            <button
+              onClick={() => setIncludeSlideHeader(!includeSlideHeader)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "6px 11px",
+                borderRadius: "8px",
+                border: includeSlideHeader ? "1px solid #c084fc" : "1px solid #cbd5e1",
+                backgroundColor: includeSlideHeader ? "#f5f3ff" : "#ffffff",
+                color: includeSlideHeader ? "#7e22ce" : "#64748b",
+                fontSize: "0.82rem",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+              title="คลิกเพื่อสลับ: แสดงหัวสไลด์ กฟภ. หรือซ่อนให้เหลือเฉพาะตารางล้วนตามแบบตัวอย่าง"
+            >
+              <FileText size={14} />
+              {includeSlideHeader ? "หัวเอกสาร กฟภ.: แสดง" : "หัวเอกสาร กฟภ.: ซ่อน (เฉพาะตาราง)"}
+            </button>
           </div>
 
           {/* Right: Export Buttons */}
@@ -922,6 +973,7 @@ export default function TechnicianOverviewExportModal({
 
         {/* Modal Scrollable Body */}
         <div
+          className="technician-overview-modal-body"
           style={{
             flex: 1,
             overflowY: "auto",
@@ -932,8 +984,9 @@ export default function TechnicianOverviewExportModal({
             alignItems: "center",
           }}
         >
-          {/* KPI Summary Cards */}
+          {/* KPI Summary Cards - Marked with technician-overview-no-print so it never shows in exported output */}
           <div
+            className="technician-overview-modal-kpi technician-overview-no-print no-print"
             style={{
               width: "100%",
               maxWidth: "1280px",
@@ -1080,9 +1133,10 @@ export default function TechnicianOverviewExportModal({
             </div>
           </div>
 
-          {/* Instruction hint banner if in edit mode */}
+          {/* Instruction hint banner if in edit mode - Hidden on print/export */}
           {isEditMode && (
             <div
+              className="technician-overview-modal-hint technician-overview-no-print no-print"
               style={{
                 width: "100%",
                 maxWidth: "1280px",
@@ -1127,27 +1181,28 @@ export default function TechnicianOverviewExportModal({
               fontFamily: "'Sarabun', 'Inter', -apple-system, sans-serif",
             }}
           >
-            {/* Slide / Report Top Header Banner */}
-            <div
-              style={{
-                padding: "20px 24px",
-                background:
-                  exportTheme === "pea_purple"
-                    ? "linear-gradient(135deg, #581c87 0%, #6b21a8 50%, #7e22ce 100%)"
-                    : exportTheme === "pea_gradient"
-                    ? "linear-gradient(135deg, #3b0764 0%, #6b21a8 60%, #b45309 100%)"
-                    : "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-                gap: "16px",
-                borderBottom: "3px solid #fbbf24",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <img
+            {/* Slide / Report Top Header Banner (Toggleable) */}
+            {includeSlideHeader && (
+              <div
+                style={{
+                  padding: "20px 24px",
+                  background:
+                    exportTheme === "pea_purple"
+                      ? "linear-gradient(135deg, #581c87 0%, #6b21a8 50%, #7e22ce 100%)"
+                      : exportTheme === "pea_gradient"
+                      ? "linear-gradient(135deg, #3b0764 0%, #6b21a8 60%, #b45309 100%)"
+                      : "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+                  color: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "16px",
+                  borderBottom: "3px solid #fbbf24",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                  <img
                   src="https://lh3.googleusercontent.com/d/1pQWRFXNG6IL3cQUTWmuQVE7wMHVFrsjD"
                   alt="PEA Logo"
                   style={{ height: "46px", width: "auto", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }}
@@ -1210,6 +1265,7 @@ export default function TechnicianOverviewExportModal({
                 </div>
               </div>
             </div>
+          )}
 
             {/* The Main Table - Exactly matching and improving the sample image */}
             <div style={{ width: "100%", overflowX: "auto" }}>
@@ -1658,3 +1714,6 @@ export default function TechnicianOverviewExportModal({
     </div>
   );
 }
+
+
+
