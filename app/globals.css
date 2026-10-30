@@ -2225,5 +2225,39 @@ body {
     size: A4 landscape;
     margin: 10mm;
   }
+  .technician-overview-modal-backdrop {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+    overflow: visible !important;
+    z-index: 99999 !important;
+    display: block !important;
+  }
+  .technician-overview-modal-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  .technician-overview-modal-body {
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+  .technician-overview-modal-toolbar,
+  .technician-overview-no-print {
+    display: none !important;
+  }
+  #technician-overview-print-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: 1px solid #b0bec5 !important;
+    margin: 0 auto !important;
+  }
 }
 
