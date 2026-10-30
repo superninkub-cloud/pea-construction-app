@@ -127,7 +127,7 @@ export default function TechnicianOverviewExportModal({
   const [isEditMode, setIsEditMode] = useState(false);
   const [customEdits, setCustomEdits] = useState<Record<string, Partial<TableRowData>>>({});
   const [exportTheme, setExportTheme] = useState<"pea_purple" | "pea_gradient" | "clean_white">("pea_purple");
-  const [includeSlideHeader, setIncludeSlideHeader] = useState<boolean>(true);
+  const [includeSlideHeader, setIncludeSlideHeader] = useState<boolean>(false);
   const [isExportingImage, setIsExportingImage] = useState(false);
   const [copiedStatus, setCopiedStatus] = useState<"none" | "table" | "image">("none");
   const [zoomLevel, setZoomLevel] = useState<number>(100);
@@ -590,599 +590,330 @@ export default function TechnicianOverviewExportModal({
         <div
           className="technician-overview-modal-dialog"
           style={{
-            width: "100%",
-            maxWidth: "1400px",
-            maxHeight: "94vh",
+            width: "98%",
+            maxWidth: "1440px",
+            maxHeight: "96vh",
             backgroundColor: "#ffffff",
-            borderRadius: "20px",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            borderRadius: "16px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.35)",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            border: "1px solid #e2e8f0",
+            border: "1px solid #cbd5e1",
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Modal Top Header Bar - Marked with technician-overview-no-print so it never shows in exported output */}
+          {/* Sleek Single Action Toolbar (Replaces old top header & old toolbar) */}
           <div
-            className="technician-overview-modal-header technician-overview-no-print no-print"
+            className="technician-overview-modal-toolbar technician-overview-no-print no-print"
             style={{
-              padding: "16px 24px",
-              background: "linear-gradient(135deg, #581c87 0%, #7e22ce 50%, #6b21a8 100%)",
+              padding: "10px 18px",
+              backgroundColor: "#581c87",
+              backgroundImage: "linear-gradient(135deg, #581c87 0%, #6b21a8 100%)",
               color: "#ffffff",
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "16px",
+              gap: "10px",
               borderBottom: "1px solid rgba(255, 255, 255, 0.15)",
             }}
           >
-          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "12px",
-                background: "rgba(255, 255, 255, 0.15)",
-                backdropFilter: "blur(4px)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.3)",
-              }}
-            >
-              <FileSpreadsheet size={24} className="text-amber-300" />
-            </div>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <h3 style={{ fontSize: "1.25rem", fontWeight: "700", margin: 0, letterSpacing: "-0.01em" }}>
-                  ส่งออกตารางสรุปภาพรวมงานช่าง (Export Overview)
-                </h3>
-                <span
+            {/* Left: Supervisor selector, Filter, Edit */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <User size={16} className="text-purple-200" />
+                <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "#f3e8ff" }}>ช่าง:</span>
+                <select
+                  value={selectedSup}
+                  onChange={(e) => {
+                    setSelectedSup(e.target.value);
+                    if (onSelectSupervisor) onSelectSupervisor(e.target.value);
+                  }}
                   style={{
-                    backgroundColor: "rgba(251, 191, 36, 0.25)",
-                    border: "1px solid rgba(251, 191, 36, 0.5)",
-                    color: "#fef08a",
-                    fontSize: "0.7rem",
-                    padding: "2px 8px",
-                    borderRadius: "9999px",
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                    color: "#ffffff",
+                    border: "1px solid rgba(255, 255, 255, 0.35)",
+                    borderRadius: "6px",
+                    padding: "4px 10px",
+                    fontSize: "0.85rem",
                     fontWeight: "600",
+                    outline: "none",
+                    cursor: "pointer",
                   }}
                 >
-                  ผกร.กรย.(ก3)
-                </span>
-              </div>
-              <p style={{ margin: "2px 0 0 0", fontSize: "0.85rem", color: "#e9d5ff" }}>
-                จัดรูปแบบตามมาตรฐาน กฟภ. พร้อมส่งออกสไลด์นำเสนอ รูปภาพ PNG, Excel และพิมพ์รายงาน A4
-              </p>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {/* Quick Supervisor Switcher inside Modal */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ fontSize: "0.85rem", color: "#e9d5ff", fontWeight: "500" }}>ช่าง:</span>
-              <select
-                value={selectedSup}
-                onChange={(e) => {
-                  setSelectedSup(e.target.value);
-                  if (onSelectSupervisor) onSelectSupervisor(e.target.value);
-                }}
-                style={{
-                  backgroundColor: "rgba(255, 255, 255, 0.15)",
-                  color: "#ffffff",
-                  border: "1px solid rgba(255, 255, 255, 0.3)",
-                  borderRadius: "8px",
-                  padding: "6px 12px",
-                  fontSize: "0.85rem",
-                  fontWeight: "600",
-                  outline: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <option value="ALL" style={{ color: "#1e293b", background: "#fff" }}>
-                  -- ทุกช่าง (ภาพรวมทั้งหมด) --
-                </option>
-                {supervisors.map((s) => (
-                  <option key={s} value={s} style={{ color: "#1e293b", background: "#fff" }}>
-                    {s}
+                  <option value="ALL" style={{ color: "#1e293b", background: "#fff" }}>
+                    -- ทุกช่าง (ภาพรวมทั้งหมด) --
                   </option>
-                ))}
-              </select>
-            </div>
+                  {supervisors.map((s) => (
+                    <option key={s} value={s} style={{ color: "#1e293b", background: "#fff" }}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "10px",
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "none",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "background 0.2s",
-              }}
-              title="ปิดหน้าต่าง"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <Filter size={15} className="text-purple-200" />
+                <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#f3e8ff" }}>สถานะ:</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  style={{
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
+                    color: "#ffffff",
+                    border: "1px solid rgba(255, 255, 255, 0.35)",
+                    borderRadius: "6px",
+                    padding: "4px 8px",
+                    fontSize: "0.85rem",
+                    outline: "none",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="ALL" style={{ color: "#1e293b", background: "#fff" }}>ทั้งหมด ({tableRows.length})</option>
+                  <option value="C1" style={{ color: "#1e293b", background: "#fff" }}>C1 อยู่ระหว่างดำเนินการ</option>
+                  <option value="D1" style={{ color: "#1e293b", background: "#fff" }}>D1 ดำเนินการแล้วเสร็จ</option>
+                  <option value="D2" style={{ color: "#1e293b", background: "#fff" }}>D2 รอเอกสารปิดงาน</option>
+                  <option value="F4" style={{ color: "#1e293b", background: "#fff" }}>F4 ปิดงานแล้ว</option>
+                </select>
+              </div>
 
-        {/* Modal Action Controls Bar - Marked with technician-overview-no-print so it never shows in exported output */}
-        <div
-          className="technician-overview-modal-toolbar technician-overview-no-print no-print"
-          style={{
-            padding: "12px 24px",
-            backgroundColor: "#f8fafc",
-            borderBottom: "1px solid #e2e8f0",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "12px",
-          }}
-        >
-          {/* Left: Filter & Edit Toggle */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem" }}>
-              <Filter size={15} color="#64748b" />
-              <span style={{ color: "#475569", fontWeight: "500" }}>สถานะ:</span>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                style={{
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "6px",
-                  padding: "4px 8px",
-                  fontSize: "0.85rem",
-                  backgroundColor: "#ffffff",
-                  color: "#1e293b",
-                }}
-              >
-                <option value="ALL">ทั้งหมด ({tableRows.length})</option>
-                <option value="C1">C1 อยู่ระหว่างดำเนินการ</option>
-                <option value="D1">D1 ดำเนินการแล้วเสร็จ</option>
-                <option value="D2">D2 รอเอกสารปิดงาน</option>
-                <option value="F4">F4 ปิดงานแล้ว</option>
-              </select>
-            </div>
-
-            {/* Toggle Inline Edit */}
-            <button
-              onClick={() => setIsEditMode(!isEditMode)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "6px 12px",
-                borderRadius: "8px",
-                border: isEditMode ? "1px solid #7c3aed" : "1px solid #cbd5e1",
-                backgroundColor: isEditMode ? "#ede9fe" : "#ffffff",
-                color: isEditMode ? "#6d28d9" : "#475569",
-                fontSize: "0.85rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
-              title="คลิกเพื่อพิมพ์แก้ไขข้อความในตารางได้โดยตรงก่อนส่งออก"
-            >
-              <Edit3 size={15} />
-              {isEditMode ? "กำลังอยู่ในโหมดแก้ไข (คลิกที่ช่องเพื่อแก้)" : "✏️ เปิดโหมดแก้ไขข้อความ"}
-            </button>
-
-            {/* Reset Edits button if any */}
-            {Object.keys(customEdits).length > 0 && (
+              {/* Toggle Inline Edit */}
               <button
-                onClick={handleResetEdits}
+                onClick={() => setIsEditMode(!isEditMode)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "5px 10px",
+                  borderRadius: "6px",
+                  border: isEditMode ? "1px solid #facc15" : "1px solid rgba(255, 255, 255, 0.3)",
+                  backgroundColor: isEditMode ? "#fef08a" : "rgba(255, 255, 255, 0.15)",
+                  color: isEditMode ? "#854d0e" : "#ffffff",
+                  fontSize: "0.82rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+                title="คลิกเพื่อเปิดโหมดพิมพ์แก้ไขข้อความในตารางได้โดยตรง"
+              >
+                <Edit3 size={14} />
+                {isEditMode ? "กำลังแก้ไข (คลิกช่องเพื่อแก้)" : "✏️ แก้ไขข้อความ"}
+              </button>
+
+              {/* Reset Edits button if any */}
+              {Object.keys(customEdits).length > 0 && (
+                <button
+                  onClick={handleResetEdits}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    padding: "5px 8px",
+                    borderRadius: "6px",
+                    border: "1px solid #fca5a5",
+                    backgroundColor: "#fee2e2",
+                    color: "#b91c1c",
+                    fontSize: "0.8rem",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                  title="ล้างค่าที่พิมพ์แก้ไขทั้งหมดและดึงข้อมูลเดิมจากระบบ"
+                >
+                  <RotateCcw size={12} />
+                  คืนค่าเดิม ({Object.keys(customEdits).length})
+                </button>
+              )}
+
+              {/* Slide Header Toggle (Default OFF so it matches sample directly) */}
+              <button
+                onClick={() => setIncludeSlideHeader(!includeSlideHeader)}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "4px",
-                  padding: "6px 10px",
+                  padding: "5px 8px",
                   borderRadius: "6px",
-                  border: "1px solid #fecaca",
-                  backgroundColor: "#fef2f2",
-                  color: "#dc2626",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  backgroundColor: includeSlideHeader ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.1)",
+                  color: "#ffffff",
                   fontSize: "0.8rem",
                   cursor: "pointer",
                 }}
-                title="ล้างค่าที่พิมพ์แก้ไขทั้งหมดและดึงข้อมูลเดิมจากระบบ"
+                title="คลิกเพื่อสลับ: แสดงหรือซ่อนหัวสไลด์ กฟภ."
               >
-                <RotateCcw size={13} />
-                คืนค่าเดิม ({Object.keys(customEdits).length})
+                <FileText size={13} />
+                {includeSlideHeader ? "หัวสไลด์: แสดง" : "หัวสไลด์: ซ่อน"}
               </button>
-            )}
-
-            {/* Theme selector */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem" }}>
-              <span style={{ color: "#475569", fontWeight: "500" }}>ธีม:</span>
-              <select
-                value={exportTheme}
-                onChange={(e) => setExportTheme(e.target.value as any)}
-                style={{
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "6px",
-                  padding: "4px 8px",
-                  fontSize: "0.85rem",
-                  backgroundColor: "#ffffff",
-                  color: "#1e293b",
-                }}
-              >
-                <option value="pea_purple">🟣 PEA ม่วงทางการ (แบบตามตัวอย่าง)</option>
-                <option value="pea_gradient">💜 PEA โมเดิร์นพรีเมียม (Modern Gradient)</option>
-                <option value="clean_white">⚪ ขาว-เทาคลาสสิก (Minimal Clean)</option>
-              </select>
             </div>
 
-            {/* Slide Header Toggle: Allows switching between presentation banner and pure table matching sample */}
-            <button
-              onClick={() => setIncludeSlideHeader(!includeSlideHeader)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                padding: "6px 11px",
-                borderRadius: "8px",
-                border: includeSlideHeader ? "1px solid #c084fc" : "1px solid #cbd5e1",
-                backgroundColor: includeSlideHeader ? "#f5f3ff" : "#ffffff",
-                color: includeSlideHeader ? "#7e22ce" : "#64748b",
-                fontSize: "0.82rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-              title="คลิกเพื่อสลับ: แสดงหัวสไลด์ กฟภ. หรือซ่อนให้เหลือเฉพาะตารางล้วนตามแบบตัวอย่าง"
-            >
-              <FileText size={14} />
-              {includeSlideHeader ? "หัวเอกสาร กฟภ.: แสดง" : "หัวเอกสาร กฟภ.: ซ่อน (เฉพาะตาราง)"}
-            </button>
+            {/* Right: Export Buttons + Close [X] */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <button
+                onClick={handleCopyTable}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  backgroundColor: copiedStatus === "table" ? "#22c55e" : "rgba(255, 255, 255, 0.15)",
+                  color: "#ffffff",
+                  fontSize: "0.82rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+                title="คัดลอกตารางไปวางใน Word, PowerPoint หรือ Excel"
+              >
+                {copiedStatus === "table" ? <Check size={14} /> : <Copy size={14} />}
+                {copiedStatus === "table" ? "คัดลอกแล้ว!" : "คัดลอกตาราง"}
+              </button>
+
+              <button
+                onClick={handleCopyImage}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  backgroundColor: copiedStatus === "image" ? "#22c55e" : "rgba(255, 255, 255, 0.15)",
+                  color: "#ffffff",
+                  fontSize: "0.82rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+                title="คัดลอกรูปภาพตารางไปวางใน LINE หรือแชท"
+              >
+                {copiedStatus === "image" ? <Check size={14} /> : <ImageIcon size={14} />}
+                {copiedStatus === "image" ? "คัดลอกภาพแล้ว!" : "คัดลอกรูปภาพ"}
+              </button>
+
+              <button
+                onClick={handleExportExcel}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid #86efac",
+                  backgroundColor: "#22c55e",
+                  color: "#ffffff",
+                  fontSize: "0.82rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                }}
+                title="ดาวน์โหลดไฟล์ CSV / Excel"
+              >
+                <FileSpreadsheet size={14} />
+                Excel / CSV
+              </button>
+
+              <button
+                onClick={handlePrint}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid #fdba74",
+                  backgroundColor: "#ea580c",
+                  color: "#ffffff",
+                  fontSize: "0.82rem",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                }}
+                title="พิมพ์ตารางหรือบันทึกเป็น PDF ขนาด A4 แนวนอน"
+              >
+                <Printer size={14} />
+                พิมพ์ / PDF
+              </button>
+
+              <button
+                onClick={handleExportPNG}
+                disabled={isExportingImage}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "6px 14px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: "linear-gradient(135deg, #a855f7 0%, #9333ea 100%)",
+                  color: "#ffffff",
+                  fontSize: "0.82rem",
+                  fontWeight: "800",
+                  cursor: isExportingImage ? "not-allowed" : "pointer",
+                  boxShadow: "0 2px 6px rgba(168, 85, 247, 0.4)",
+                }}
+                title="ดาวน์โหลดตารางเป็นรูปภาพ PNG คมชัดสูง"
+              >
+                {isExportingImage ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
+                {isExportingImage ? "กำลังเรนเดอร์..." : "🖼️ บันทึกรูปภาพ (PNG)"}
+              </button>
+
+              {/* Close Button */}
+              <button
+                onClick={onClose}
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "8px",
+                  background: "rgba(255, 255, 255, 0.15)",
+                  border: "none",
+                  color: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  marginLeft: "4px",
+                }}
+                title="ปิดหน้าต่าง"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
-          {/* Right: Export Buttons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-            {/* Copy Table Button */}
-            <button
-              onClick={handleCopyTable}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #cbd5e1",
-                backgroundColor: copiedStatus === "table" ? "#ecfdf5" : "#ffffff",
-                color: copiedStatus === "table" ? "#059669" : "#334155",
-                fontSize: "0.85rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                transition: "all 0.2s",
-              }}
-              title="คัดลอกตารางไปวางใน Word, PowerPoint หรือ Excel ได้ทันที"
-            >
-              {copiedStatus === "table" ? <Check size={16} /> : <Copy size={16} />}
-              {copiedStatus === "table" ? "คัดลอกตารางแล้ว!" : "คัดลอกตาราง"}
-            </button>
-
-            {/* Copy Image Button */}
-            <button
-              onClick={handleCopyImage}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #cbd5e1",
-                backgroundColor: copiedStatus === "image" ? "#ecfdf5" : "#ffffff",
-                color: copiedStatus === "image" ? "#059669" : "#334155",
-                fontSize: "0.85rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                transition: "all 0.2s",
-              }}
-              title="คัดลอกภาพสไลด์ไปวางใน LINE หรือ PowerPoint ได้ทันที"
-            >
-              {copiedStatus === "image" ? <Check size={16} /> : <ImageIcon size={16} />}
-              {copiedStatus === "image" ? "คัดลอกภาพแล้ว!" : "คัดลอกรูปภาพ"}
-            </button>
-
-            {/* Export Excel / CSV */}
-            <button
-              onClick={handleExportExcel}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #bbf7d0",
-                backgroundColor: "#f0fdf4",
-                color: "#166534",
-                fontSize: "0.85rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                transition: "all 0.2s",
-              }}
-              title="ดาวน์โหลดไฟล์ Excel (.csv) รองรับภาษาไทยสมบูรณ์แบบ"
-            >
-              <FileSpreadsheet size={16} />
-              Excel / CSV
-            </button>
-
-            {/* Print / PDF */}
-            <button
-              onClick={handlePrint}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 14px",
-                borderRadius: "8px",
-                border: "1px solid #fed7aa",
-                backgroundColor: "#fff7ed",
-                color: "#9a3412",
-                fontSize: "0.85rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                transition: "all 0.2s",
-              }}
-              title="พิมพ์เอกสารออกเครื่องพิมพ์ หรือบันทึกเป็น PDF ขนาด A4 แนวนอน"
-            >
-              <Printer size={16} />
-              พิมพ์ / PDF
-            </button>
-
-            {/* Export PNG High-Res (Main Action) */}
-            <button
-              onClick={handleExportPNG}
-              disabled={isExportingImage}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 18px",
-                borderRadius: "8px",
-                border: "none",
-                background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
-                color: "#ffffff",
-                fontSize: "0.85rem",
-                fontWeight: "700",
-                cursor: isExportingImage ? "not-allowed" : "pointer",
-                boxShadow: "0 4px 12px rgba(124, 58, 237, 0.35)",
-                transition: "all 0.2s",
-                opacity: isExportingImage ? 0.7 : 1,
-              }}
-              title="ดาวน์โหลดเป็นรูปภาพ PNG คมชัดสูง สไตล์สไลด์นำเสนอ"
-            >
-              {isExportingImage ? <RefreshCw size={16} className="animate-spin" /> : <Download size={16} />}
-              {isExportingImage ? "กำลังเรนเดอร์ภาพ..." : "🖼️ บันทึกเป็นรูปภาพ (PNG)"}
-            </button>
-          </div>
-        </div>
-
-        {/* Modal Scrollable Body */}
-        <div
-          className="technician-overview-modal-body"
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "24px",
-            backgroundColor: "#f1f5f9",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          {/* KPI Summary Cards - Marked with technician-overview-no-print so it never shows in exported output */}
+          {/* Modal Scrollable Body */}
           <div
-            className="technician-overview-modal-kpi technician-overview-no-print no-print"
+            className="technician-overview-modal-body"
             style={{
-              width: "100%",
-              maxWidth: "1280px",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "14px",
-              marginBottom: "20px",
+              flex: 1,
+              overflowY: "auto",
+              padding: "14px",
+              backgroundColor: "#f8fafc",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
+            {/* THE EXPORT TARGET CONTAINER (The Presentation Slide Table) */}
             <div
-              style={{
-                backgroundColor: "#ffffff",
-                padding: "14px 18px",
-                borderRadius: "14px",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "10px",
-                  backgroundColor: "#f3e8ff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#7e22ce",
-                }}
-              >
-                <FileSpreadsheet size={20} />
-              </div>
-              <div>
-                <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "600" }}>งานทั้งหมดในตาราง</div>
-                <div style={{ fontSize: "1.4rem", fontWeight: "800", color: "#1e293b" }}>
-                  {stats.total} <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#64748b" }}>โครงการ</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                backgroundColor: "#ffffff",
-                padding: "14px 18px",
-                borderRadius: "14px",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "10px",
-                  backgroundColor: "#dbeafe",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#2563eb",
-                }}
-              >
-                <Clock size={20} />
-              </div>
-              <div>
-                <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "600" }}>สถานะ C1 (กำลังก่อสร้าง)</div>
-                <div style={{ fontSize: "1.4rem", fontWeight: "800", color: "#2563eb" }}>
-                  {stats.c1Count} <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#64748b" }}>โครงการ</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                backgroundColor: "#ffffff",
-                padding: "14px 18px",
-                borderRadius: "14px",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "10px",
-                  backgroundColor: "#fef3c7",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#d97706",
-                }}
-              >
-                <AlertTriangle size={20} />
-              </div>
-              <div>
-                <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "600" }}>สถานะ D1 / D2 (รอปิด)</div>
-                <div style={{ fontSize: "1.4rem", fontWeight: "800", color: "#d97706" }}>
-                  {stats.d1Count} <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#64748b" }}>โครงการ</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                backgroundColor: "#ffffff",
-                padding: "14px 18px",
-                borderRadius: "14px",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "10px",
-                  backgroundColor: "#dcfce7",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#16a34a",
-                }}
-              >
-                <CheckCircle2 size={20} />
-              </div>
-              <div>
-                <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: "600" }}>ปิดงานแล้ว (F4 / 100%)</div>
-                <div style={{ fontSize: "1.4rem", fontWeight: "800", color: "#16a34a" }}>
-                  {stats.f4Count} <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#64748b" }}>โครงการ ({stats.percent.toFixed(0)}%)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Instruction hint banner if in edit mode - Hidden on print/export */}
-          {isEditMode && (
-            <div
-              className="technician-overview-modal-hint technician-overview-no-print no-print"
+              ref={printAreaRef}
+              id="technician-overview-print-area"
               style={{
                 width: "100%",
-                maxWidth: "1280px",
-                backgroundColor: "#faf5ff",
-                border: "1px dashed #c084fc",
+                maxWidth: "1380px",
+                backgroundColor: "#ffffff",
                 borderRadius: "12px",
-                padding: "12px 18px",
-                marginBottom: "16px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                color: "#6b21a8",
-                fontSize: "0.9rem",
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+                border: "1px solid #cbd5e1",
+                overflow: "visible",
+                position: "relative",
+                fontFamily: "'Sarabun', 'Inter', -apple-system, sans-serif",
               }}
             >
-              <Sparkles size={18} className="text-purple-600 flex-shrink-0" />
-              <div>
-                <strong>โหมดแก้ไขข้อความเปิดอยู่:</strong> คุณสามารถคลิกพิมพ์แก้ไขในช่อง{" "}
-                <span style={{ textDecoration: "underline" }}>&ldquo;ความก้าวหน้างาน&rdquo;</span>,{" "}
-                <span style={{ textDecoration: "underline" }}>&ldquo;แผนแล้วเสร็จ&rdquo;</span> หรือ{" "}
-                <span style={{ textDecoration: "underline" }}>&ldquo;วันที่เปิดงาน&rdquo;</span> ในตารางด้านล่างได้ทันที
-                ระบบจะบันทึกข้อความไว้ให้คุณส่งออกรูปภาพหรือสไลด์ได้ตามต้องการ!
-              </div>
-            </div>
-          )}
-
-          {/* ======================================================== */}
-          {/* THE EXPORT TARGET CONTAINER (The Presentation Slide Table) */}
-          {/* ======================================================== */}
-          <div
-            ref={printAreaRef}
-            id="technician-overview-print-area"
-            style={{
-              width: "100%",
-              maxWidth: "1280px",
-              backgroundColor: "#ffffff",
-              borderRadius: "16px",
-              boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.1)",
-              border: "1px solid #cbd5e1",
-              overflow: "hidden",
-              position: "relative",
-              fontFamily: "'Sarabun', 'Inter', -apple-system, sans-serif",
-            }}
-          >
-            {/* Slide / Report Top Header Banner (Toggleable) */}
-            {includeSlideHeader && (
+              {/* Slide / Report Top Header Banner (Toggleable) */}
+              {includeSlideHeader && (
               <div
                 style={{
                   padding: "20px 24px",
@@ -1294,12 +1025,12 @@ export default function TechnicianOverviewExportModal({
                     {/* 1. ลำดับที่ */}
                     <th
                       style={{
-                        width: "60px",
-                        padding: "12px 6px",
+                        width: "50px",
+                        padding: "7px 4px",
                         textAlign: "center",
                         fontWeight: "700",
                         borderRight: "1px solid rgba(255, 255, 255, 0.35)",
-                        fontSize: "0.95rem",
+                        fontSize: "0.85rem",
                       }}
                     >
                       ลำดับ<br />ที่
@@ -1308,12 +1039,12 @@ export default function TechnicianOverviewExportModal({
                     {/* 2. WBS */}
                     <th
                       style={{
-                        width: "190px",
-                        padding: "12px 10px",
+                        width: "175px",
+                        padding: "7px 6px",
                         textAlign: "center",
                         fontWeight: "700",
                         borderRight: "1px solid rgba(255, 255, 255, 0.35)",
-                        fontSize: "0.95rem",
+                        fontSize: "0.85rem",
                       }}
                     >
                       WBS
@@ -1323,12 +1054,12 @@ export default function TechnicianOverviewExportModal({
                     <th
                       style={{
                         width: "auto",
-                        minWidth: "300px",
-                        padding: "12px 14px",
+                        minWidth: "260px",
+                        padding: "7px 10px",
                         textAlign: "center",
                         fontWeight: "700",
                         borderRight: "1px solid rgba(255, 255, 255, 0.35)",
-                        fontSize: "0.95rem",
+                        fontSize: "0.85rem",
                       }}
                     >
                       ชื่องาน
@@ -1337,12 +1068,12 @@ export default function TechnicianOverviewExportModal({
                     {/* 4. สถานะงาน (ในระบบ) */}
                     <th
                       style={{
-                        width: "105px",
-                        padding: "12px 6px",
+                        width: "92px",
+                        padding: "7px 4px",
                         textAlign: "center",
                         fontWeight: "700",
                         borderRight: "1px solid rgba(255, 255, 255, 0.35)",
-                        fontSize: "0.95rem",
+                        fontSize: "0.85rem",
                       }}
                     >
                       สถานะงาน<br />(ในระบบ)
@@ -1351,12 +1082,12 @@ export default function TechnicianOverviewExportModal({
                     {/* 5. วันที่เปิดงาน */}
                     <th
                       style={{
-                        width: "120px",
-                        padding: "12px 8px",
+                        width: "105px",
+                        padding: "7px 4px",
                         textAlign: "center",
                         fontWeight: "700",
                         borderRight: "1px solid rgba(255, 255, 255, 0.35)",
-                        fontSize: "0.95rem",
+                        fontSize: "0.85rem",
                       }}
                     >
                       วันที่<br />เปิดงาน
@@ -1365,12 +1096,12 @@ export default function TechnicianOverviewExportModal({
                     {/* 6. ความก้าวหน้างาน */}
                     <th
                       style={{
-                        width: "190px",
-                        padding: "12px 10px",
+                        width: "170px",
+                        padding: "7px 6px",
                         textAlign: "center",
                         fontWeight: "700",
                         borderRight: "1px solid rgba(255, 255, 255, 0.35)",
-                        fontSize: "0.95rem",
+                        fontSize: "0.85rem",
                       }}
                     >
                       ความก้าวหน้างาน
@@ -1379,11 +1110,11 @@ export default function TechnicianOverviewExportModal({
                     {/* 7. แผนแล้วเสร็จ */}
                     <th
                       style={{
-                        width: "135px",
-                        padding: "12px 10px",
+                        width: "115px",
+                        padding: "7px 6px",
                         textAlign: "center",
                         fontWeight: "700",
-                        fontSize: "0.95rem",
+                        fontSize: "0.85rem",
                       }}
                     >
                       แผนแล้วเสร็จ
@@ -1398,10 +1129,10 @@ export default function TechnicianOverviewExportModal({
                         colSpan={7}
                         style={{
                           textAlign: "center",
-                          padding: "48px 16px",
+                          padding: "36px 16px",
                           color: "#64748b",
                           backgroundColor: "#ffffff",
-                          fontSize: "1rem",
+                          fontSize: "0.95rem",
                         }}
                       >
                         ไม่พบข้อมูลโครงการตามตัวกรองที่เลือก
@@ -1418,7 +1149,7 @@ export default function TechnicianOverviewExportModal({
                         exportTheme === "pea_purple"
                           ? isEven
                             ? "#d6dbdf"
-                            : "#e5e8e8"
+                            : "#e8ecef"
                           : isEven
                           ? "#ffffff"
                           : "#f8fafc";
@@ -1436,11 +1167,12 @@ export default function TechnicianOverviewExportModal({
                           {/* 1. ลำดับที่ */}
                           <td
                             style={{
-                              padding: "10px 6px",
+                              padding: "5px 4px",
                               textAlign: "center",
                               fontWeight: "600",
                               borderRight: "1px solid #b0bec5",
                               color: "#334155",
+                              fontSize: "0.82rem",
                             }}
                           >
                             {index + 1}
@@ -1449,11 +1181,11 @@ export default function TechnicianOverviewExportModal({
                           {/* 2. WBS */}
                           <td
                             style={{
-                              padding: "10px 10px",
+                              padding: "5px 6px",
                               textAlign: "left",
                               fontFamily: "monospace",
                               fontWeight: "700",
-                              fontSize: "0.88rem",
+                              fontSize: "0.80rem",
                               color: "#1e293b",
                               borderRight: "1px solid #b0bec5",
                               whiteSpace: "nowrap",
@@ -1466,10 +1198,10 @@ export default function TechnicianOverviewExportModal({
                                 onChange={(e) => handleCellEdit(row.wbs, "wbs", e.target.value)}
                                 style={{
                                   width: "100%",
-                                  padding: "2px 6px",
+                                  padding: "2px 4px",
                                   border: "1px solid #7c3aed",
                                   borderRadius: "4px",
-                                  fontSize: "0.85rem",
+                                  fontSize: "0.80rem",
                                   fontFamily: "monospace",
                                 }}
                               />
@@ -1481,11 +1213,12 @@ export default function TechnicianOverviewExportModal({
                           {/* 3. ชื่องาน */}
                           <td
                             style={{
-                              padding: "10px 12px",
+                              padding: "5px 8px",
                               textAlign: "left",
                               borderRight: "1px solid #b0bec5",
-                              lineHeight: "1.4",
+                              lineHeight: "1.3",
                               color: "#0f172a",
+                              fontSize: "0.82rem",
                             }}
                           >
                             {isEditMode ? (
@@ -1495,10 +1228,10 @@ export default function TechnicianOverviewExportModal({
                                 rows={2}
                                 style={{
                                   width: "100%",
-                                  padding: "4px 6px",
+                                  padding: "2px 4px",
                                   border: "1px solid #7c3aed",
                                   borderRadius: "4px",
-                                  fontSize: "0.88rem",
+                                  fontSize: "0.82rem",
                                   fontFamily: "inherit",
                                 }}
                               />
@@ -1510,10 +1243,11 @@ export default function TechnicianOverviewExportModal({
                           {/* 4. สถานะงาน (ในระบบ) */}
                           <td
                             style={{
-                              padding: "10px 6px",
+                              padding: "5px 4px",
                               textAlign: "center",
                               borderRight: "1px solid #b0bec5",
                               fontWeight: "700",
+                              fontSize: "0.82rem",
                             }}
                           >
                             {isEditMode ? (
@@ -1527,7 +1261,7 @@ export default function TechnicianOverviewExportModal({
                                   textAlign: "center",
                                   border: "1px solid #7c3aed",
                                   borderRadius: "4px",
-                                  fontSize: "0.85rem",
+                                  fontSize: "0.82rem",
                                   fontWeight: "bold",
                                 }}
                               />
@@ -1535,9 +1269,9 @@ export default function TechnicianOverviewExportModal({
                               <span
                                 style={{
                                   display: "inline-block",
-                                  padding: "3px 8px",
-                                  borderRadius: "6px",
-                                  fontSize: "0.85rem",
+                                  padding: "1px 6px",
+                                  borderRadius: "4px",
+                                  fontSize: "0.80rem",
                                   fontWeight: "700",
                                   backgroundColor:
                                     row.status === "F4"
@@ -1561,12 +1295,12 @@ export default function TechnicianOverviewExportModal({
                           {/* 5. วันที่เปิดงาน */}
                           <td
                             style={{
-                              padding: "10px 8px",
+                              padding: "5px 4px",
                               textAlign: "center",
                               borderRight: "1px solid #b0bec5",
                               whiteSpace: "nowrap",
                               color: "#334155",
-                              fontSize: "0.88rem",
+                              fontSize: "0.82rem",
                             }}
                           >
                             {isEditMode ? (
@@ -1580,7 +1314,7 @@ export default function TechnicianOverviewExportModal({
                                   textAlign: "center",
                                   border: "1px solid #7c3aed",
                                   borderRadius: "4px",
-                                  fontSize: "0.85rem",
+                                  fontSize: "0.82rem",
                                 }}
                               />
                             ) : (
@@ -1591,12 +1325,13 @@ export default function TechnicianOverviewExportModal({
                           {/* 6. ความก้าวหน้างาน (Smart Red Highlight) */}
                           <td
                             style={{
-                              padding: "10px 10px",
+                              padding: "5px 6px",
                               textAlign: "center",
                               borderRight: "1px solid #b0bec5",
                               fontWeight: isProgRed ? "700" : "600",
                               color: isProgRed ? "#dc2626" : "#1e293b",
-                              lineHeight: "1.35",
+                              lineHeight: "1.25",
+                              fontSize: "0.82rem",
                             }}
                           >
                             {isEditMode ? (
@@ -1606,11 +1341,11 @@ export default function TechnicianOverviewExportModal({
                                 onChange={(e) => handleCellEdit(row.wbs, "progressNote", e.target.value)}
                                 style={{
                                   width: "100%",
-                                  padding: "2px 6px",
+                                  padding: "2px 4px",
                                   textAlign: "center",
                                   border: "1px solid #7c3aed",
                                   borderRadius: "4px",
-                                  fontSize: "0.85rem",
+                                  fontSize: "0.82rem",
                                   color: isProgRed ? "#dc2626" : "#1e293b",
                                   fontWeight: "bold",
                                 }}
@@ -1623,11 +1358,12 @@ export default function TechnicianOverviewExportModal({
                           {/* 7. แผนแล้วเสร็จ (Smart Red Highlight) */}
                           <td
                             style={{
-                              padding: "10px 10px",
+                              padding: "5px 6px",
                               textAlign: "center",
                               fontWeight: isPlanRed ? "700" : "500",
                               color: isPlanRed ? "#dc2626" : "#475569",
                               whiteSpace: "nowrap",
+                              fontSize: "0.82rem",
                             }}
                           >
                             {isEditMode ? (
@@ -1637,11 +1373,11 @@ export default function TechnicianOverviewExportModal({
                                 onChange={(e) => handleCellEdit(row.wbs, "targetPlan", e.target.value)}
                                 style={{
                                   width: "100%",
-                                  padding: "2px 6px",
+                                  padding: "2px 4px",
                                   textAlign: "center",
                                   border: "1px solid #7c3aed",
                                   borderRadius: "4px",
-                                  fontSize: "0.85rem",
+                                  fontSize: "0.82rem",
                                   color: isPlanRed ? "#dc2626" : "#1e293b",
                                   fontWeight: "bold",
                                 }}
@@ -1661,18 +1397,18 @@ export default function TechnicianOverviewExportModal({
             {/* Slide / Report Bottom Footer Bar */}
             <div
               style={{
-                padding: "12px 24px",
+                padding: "8px 18px",
                 backgroundColor: exportTheme === "pea_purple" ? "#b0bec5" : "#f8fafc",
                 borderTop: "1px solid #90a4ae",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                fontSize: "0.82rem",
+                fontSize: "0.78rem",
                 color: "#374151",
                 position: "relative",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <span>
                   <strong>สรุปสถานะ:</strong> ทั้งหมด {stats.total} โครงการ | ดำเนินการเสร็จ {stats.f4Count} โครงการ | อยู่ระหว่างทำ {stats.c1Count + stats.d1Count} โครงการ
                 </span>
@@ -1685,7 +1421,7 @@ export default function TechnicianOverviewExportModal({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "8px",
+                  gap: "6px",
                   backgroundColor: "#6A1B9A",
                   color: "#ffffff",
                   padding: "4px 14px",
