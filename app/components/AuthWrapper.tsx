@@ -28,16 +28,19 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
       if (cleanPass === "Cha16072534" || cleanPass === "Cha16072534--") {
         sessionStorage.setItem("pea_auth", "true");
         sessionStorage.setItem("pea_role", "admin");
+        sessionStorage.setItem("pea_admin_user", "Cha16072534");
         setIsAuthenticated(true);
         setError(false);
       } else if (cleanPass === "pscc3") {
         sessionStorage.setItem("pea_auth", "true");
         sessionStorage.setItem("pea_role", "user");
+        sessionStorage.removeItem("pea_admin_user");
         setIsAuthenticated(true);
         setError(false);
       } else if (cleanPass === "Office" || cleanPass === "office") {
         sessionStorage.setItem("pea_auth", "true");
         sessionStorage.setItem("pea_role", "office");
+        sessionStorage.removeItem("pea_admin_user");
         setIsAuthenticated(true);
         setError(false);
       } else {
@@ -52,6 +55,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     try {
       sessionStorage.setItem("pea_auth", "true");
       sessionStorage.setItem("pea_role", "guest");
+      sessionStorage.removeItem("pea_admin_user");
       setIsAuthenticated(true);
       setError(false);
     } catch (error) {
