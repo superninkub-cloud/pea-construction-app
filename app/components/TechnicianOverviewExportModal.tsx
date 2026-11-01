@@ -20,22 +20,8 @@ export interface TechnicianOverviewExportModalProps {
   onSelectSupervisor?: (sup: string) => void;
 }
 
-// Known sample date mappings for SPINA projects for authentic initial view
-const KNOWN_SPINA_DEFAULTS: Record<string, { openDate?: string; progressNote?: string; targetPlan?: string }> = {
-  "P-TDD02.3-I-SPINA.0001": { openDate: "19 ม.ค.2565", progressNote: "คงเหลือพาดสายเพิ่มเติม", targetPlan: "ไตรมาส1/69" },
-  "P-TDD02.3-I-SPINA.0002": { openDate: "19 ม.ค.2565", progressNote: "คงเหลือพาดสายอีก 1 วงจร", targetPlan: "ไตรมาส1/69" },
-  "P-TDD02.3-I-SPINA.0003": { openDate: "29 ก.ค.2564", progressNote: "แล้วเสร็จ ธ.ค.68", targetPlan: "" },
-  "P-TDD02.3-I-SPINA.0004": { openDate: "5 พ.ค.2564", progressNote: "แล้วเสร็จ พ.ย.68", targetPlan: "" },
-  "P-TDD02.3-I-SPIIA.0005": { openDate: "1 ก.พ.2564", progressNote: "100%", targetPlan: "" },
-  "P-TDD02.3-I-SPINA.0006": { openDate: "19 ก.พ.2565", progressNote: "100%", targetPlan: "" },
-  "P-TDD02.3-I-SPINA.0007": { openDate: "19 ม.ค.2565", progressNote: "คงเหลือพาดสายอีก 1 วงจร", targetPlan: "ไตรมาส1/69" },
-  "P-TDD02.3-I-SPINA.0008": { openDate: "21 ก.พ.2565", progressNote: "100%", targetPlan: "" },
-  "P-TDD02.3-I-SPINA.0009": { openDate: "21 ก.พ.2565", progressNote: "", targetPlan: "" },
-  "P-TDD02.3-I-SPINA.0010": { openDate: "21 ก.พ.2565", progressNote: "", targetPlan: "" },
-  "P-TDD02.3-I-SPINA.0011": { openDate: "28 เม.ย.2565", progressNote: "100%", targetPlan: "" },
-  "P-TDD02.3-I-SPINA.0012": { openDate: "12 ก.ค.2565", progressNote: "คงเหลือพาดสาย/ติดอุปกรณ์", targetPlan: "ไตรมาส1/69" },
-  "P-TDD02.3-I-SPINA.0013": { openDate: "12 ก.ค.2565", progressNote: "คงเหลือพาดสาย/ติดอุปกรณ์", targetPlan: "ไตรมาส1/69" },
-};
+// Sample fallback defaults (empty to prioritize live database values)
+const KNOWN_SPINA_DEFAULTS: Record<string, { openDate?: string; progressNote?: string; targetPlan?: string }> = {};
 
 // Supervisor title and position mapping for executive presentation
 const SUPERVISOR_METADATA: Record<string, { fullName: string; position: string; team: string }> = {
@@ -57,10 +43,17 @@ export const getLatestRemarkDetail = (remarks?: string): string | null => {
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
-    if (trimmed.includes(' | ')) {
-      return trimmed.split(' | ').slice(1).join(' | ').trim();
+    if (trimmed.startsWith('📍') && trimmed.includes(' | ')) {
+      const parts = trimmed.split(' | ');
+      if (parts.length > 1 && parts[1].trim()) {
+        return parts.slice(1).join(' | ').trim();
+      }
     }
-    if (!trimmed.includes('📍')) {
+  }
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (!trimmed.startsWith('📍')) {
       return trimmed;
     }
   }
@@ -108,10 +101,13 @@ export interface TableRowData {
   id: string;
   wbs: string;
   name: string;
+  jobValue: string;
   status: string;
-  openDate: string;
+  openYear: string;
   progressNote: string;
-  targetPlan: string;
+  closingPlan: string;
+  openDate?: string;
+  targetPlan?: string;
 }
 
 export default function TechnicianOverviewExportModal({
@@ -185,39 +181,48 @@ export default function TechnicianOverviewExportModal({
   const tableRows: TableRowData[] = useMemo(() => {
     return supervisorProjects.map((p) => {
       const id = p.id || p.wbs;
-      const known = KNOWN_SPINA_DEFAULTS[p.wbs] || {};
       const custom = customEdits[p.wbs] || {};
 
-      // Open Date Resolution
-      let defaultOpenDate = known.openDate || "";
-      if (!defaultOpenDate) {
-        if (p.open_year) {
-          defaultOpenDate = p.open_year.startsWith("ปี") ? p.open_year : `ปี ${p.open_year}`;
-        } else if (p.created_at) {
-          try {
-            const d = new Date(p.created_at);
-            if (!isNaN(d.getTime())) {
-              const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-              defaultOpenDate = `${d.getDate()} ${months[d.getMonth()]}${d.getFullYear() + 543}`;
-            }
-          } catch {
-            defaultOpenDate = "-";
-          }
-        } else {
-          defaultOpenDate = "-";
-        }
+      // Job Value Resolution (มูลค่างาน)
+      let defaultJobValue = "-";
+      if (p.value !== undefined && p.value !== null && Number(p.value) > 0) {
+        defaultJobValue = Number(p.value).toLocaleString("th-TH", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      } else if (p.value === 0) {
+        defaultJobValue = "0.00";
       }
 
-      // Progress Note Resolution
-      let defaultProgressNote = known.progressNote !== undefined ? known.progressNote : "";
-      if (defaultProgressNote === "") {
-        const physical = computePhysicalProgress(p);
-        const remarkNote = getLatestRemarkDetail(p.remarks);
+      // Open Year Resolution (ปีที่เปิดงาน)
+      let defaultOpenYear = "";
+      if (p.open_year) {
+        const cleanYear = p.open_year.trim();
+        defaultOpenYear = cleanYear.startsWith("ปี") ? cleanYear : `ปี ${cleanYear}`;
+      } else if (p.created_at) {
+        try {
+          const d = new Date(p.created_at);
+          if (!isNaN(d.getTime())) {
+            defaultOpenYear = `ปี ${d.getFullYear() + 543}`;
+          }
+        } catch {
+          defaultOpenYear = "-";
+        }
+      } else {
+        defaultOpenYear = "-";
+      }
 
-        if (p.status === "F4" || physical === 100 || p.manual_progress === 100) {
+      // Progress Note Resolution (รายละเอียดความก้าวหน้างานตามสถานะที่อัพเดท)
+      const remarkNote = getLatestRemarkDetail(p.remarks);
+      let defaultProgressNote = "";
+      if (p.status === "F4") {
+        defaultProgressNote = remarkNote ? (remarkNote === "ปิดแล้ว" ? "100%" : remarkNote) : "100%";
+      } else if (remarkNote) {
+        defaultProgressNote = remarkNote;
+      } else {
+        const physical = computePhysicalProgress(p);
+        if (physical === 100 || p.manual_progress === 100) {
           defaultProgressNote = "100%";
-        } else if (remarkNote) {
-          defaultProgressNote = remarkNote;
         } else if (physical > 0) {
           defaultProgressNote = `${Math.round(physical)}%`;
         } else {
@@ -225,28 +230,25 @@ export default function TechnicianOverviewExportModal({
         }
       }
 
-      // Target Plan Resolution
-      let defaultTargetPlan = known.targetPlan !== undefined ? known.targetPlan : "";
-      if (defaultTargetPlan === "") {
-        if (p.status === "F4") {
-          defaultTargetPlan = "";
-        } else if (p.closing_plan && p.closing_plan.trim()) {
-          defaultTargetPlan = p.closing_plan.trim();
-        } else if (p.action_plan && p.action_plan.trim()) {
-          defaultTargetPlan = p.action_plan.trim();
-        } else {
-          defaultTargetPlan = "";
-        }
+      // Closing Plan Resolution (แผนปิดงาน)
+      let defaultClosingPlan = "";
+      if (p.closing_plan && p.closing_plan.trim()) {
+        defaultClosingPlan = p.closing_plan.trim();
+      } else if (p.action_plan && p.action_plan.trim()) {
+        defaultClosingPlan = p.action_plan.trim();
+      } else {
+        defaultClosingPlan = "";
       }
 
       return {
         id,
         wbs: custom.wbs ?? p.wbs,
         name: custom.name ?? p.name,
+        jobValue: custom.jobValue ?? defaultJobValue,
         status: custom.status ?? (p.status || "-"),
-        openDate: custom.openDate ?? defaultOpenDate,
+        openYear: custom.openYear ?? custom.openDate ?? defaultOpenYear,
         progressNote: custom.progressNote ?? defaultProgressNote,
-        targetPlan: custom.targetPlan ?? defaultTargetPlan,
+        closingPlan: custom.closingPlan ?? custom.targetPlan ?? defaultClosingPlan,
       };
     });
   }, [supervisorProjects, customEdits]);
@@ -254,12 +256,14 @@ export default function TechnicianOverviewExportModal({
   // Statistics
   const stats = useMemo(() => {
     const total = tableRows.length;
-    const f4Count = tableRows.filter((r) => r.status === "F4" || r.progressNote === "100%").length;
+    const f4Count = tableRows.filter((r) => r.status === "F4" || r.progressNote === "100%" || r.progressNote === "ปิดแล้ว").length;
     const c1Count = tableRows.filter((r) => r.status === "C1").length;
     const d1Count = tableRows.filter((r) => r.status === "D1" || r.status === "D2").length;
     const percent = total > 0 ? (f4Count / total) * 100 : 0;
-    return { total, f4Count, c1Count, d1Count, percent };
-  }, [tableRows]);
+    const totalValueNum = supervisorProjects.reduce((sum, p) => sum + (Number(p.value) || 0), 0);
+    const totalValueStr = totalValueNum.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return { total, f4Count, c1Count, d1Count, percent, totalValueStr };
+  }, [tableRows, supervisorProjects]);
 
   // Save edit to cell
   const handleCellEdit = (wbs: string, field: keyof TableRowData, value: string) => {
@@ -416,20 +420,22 @@ export default function TechnicianOverviewExportModal({
       "ลำดับที่",
       "WBS",
       "ชื่องาน",
+      "มูลค่างาน",
       "สถานะงาน (ในระบบ)",
-      "วันที่เปิดงาน",
-      "ความก้าวหน้างาน",
-      "แผนแล้วเสร็จ",
+      "ปีที่เปิดงาน",
+      "รายละเอียดความก้าวหน้างาน",
+      "แผนปิดงาน",
     ];
 
     const rows = tableRows.map((r, idx) => [
       idx + 1,
       `"${r.wbs}"`,
       `"${r.name.replace(/"/g, '""')}"`,
+      `"${r.jobValue.replace(/"/g, '""')}"`,
       `"${r.status}"`,
-      `"${r.openDate}"`,
+      `"${r.openYear}"`,
       `"${r.progressNote.replace(/"/g, '""')}"`,
-      `"${r.targetPlan.replace(/"/g, '""')}"`,
+      `"${r.closingPlan.replace(/"/g, '""')}"`,
     ]);
 
     const csvContent =
@@ -438,7 +444,7 @@ export default function TechnicianOverviewExportModal({
         `"ตารางสรุปภาพรวมและสถานะงานก่อสร้าง - ${supervisorInfo.fullName}"`,
         `"ตำแหน่ง: ${supervisorInfo.position} | สังกัด: ${supervisorInfo.team}"`,
         `"วันที่ส่งออกข้อมูล: ${new Date().toLocaleDateString("th-TH")} เวลา ${new Date().toLocaleTimeString("th-TH")} น."`,
-        `"จำนวนงานทั้งหมด: ${stats.total} โครงการ | ปิดงานแล้ว (F4): ${stats.f4Count} โครงการ (${stats.percent.toFixed(1)}%)"`,
+        `"จำนวนงานทั้งหมด: ${stats.total} โครงการ | ปิดงานแล้ว (F4): ${stats.f4Count} โครงการ (${stats.percent.toFixed(1)}%) | มูลค่ารวม: ${stats.totalValueStr} บาท"`,
         "",
         headers.join(","),
         ...rows.map((r) => r.join(",")),
@@ -460,21 +466,31 @@ export default function TechnicianOverviewExportModal({
   // Copy HTML Table to Clipboard
   const handleCopyTable = async () => {
     try {
-      const headers = ["ลำดับที่", "WBS", "ชื่องาน", "สถานะงาน (ในระบบ)", "วันที่เปิดงาน", "ความก้าวหน้างาน", "แผนแล้วเสร็จ"];
+      const headers = [
+        "ลำดับที่",
+        "WBS",
+        "ชื่องาน",
+        "มูลค่างาน",
+        "สถานะงาน (ในระบบ)",
+        "ปีที่เปิดงาน",
+        "รายละเอียดความก้าวหน้างาน",
+        "แผนปิดงาน"
+      ];
       const headerHtml = headers.map(h => `<th style="background-color: #6A1B9A; color: #ffffff; padding: 10px; border: 1px solid #ffffff; text-align: center;">${h}</th>`).join("");
       
       const rowsHtml = tableRows.map((r, idx) => {
         const isProgRed = isRedHighlight(r.progressNote, "progress");
-        const isPlanRed = isRedHighlight(r.targetPlan, "plan");
+        const isPlanRed = isRedHighlight(r.closingPlan, "plan");
         return `
           <tr style="background-color: ${idx % 2 === 0 ? '#f8fafc' : '#ffffff'};">
             <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: bold;">${idx + 1}</td>
             <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: 600;">${r.wbs}</td>
             <td style="border: 1px solid #cbd5e1; padding: 8px;">${r.name}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right; font-variant-numeric: tabular-nums;">${r.jobValue}</td>
             <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: 600;">${r.status}</td>
-            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${r.openDate}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${r.openYear}</td>
             <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; ${isProgRed ? 'color: #dc2626; font-weight: bold;' : ''}">${r.progressNote}</td>
-            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; ${isPlanRed ? 'color: #dc2626; font-weight: bold;' : ''}">${r.targetPlan}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; ${isPlanRed ? 'color: #dc2626; font-weight: bold;' : ''}">${r.closingPlan}</td>
           </tr>
         `;
       }).join("");
@@ -494,7 +510,7 @@ export default function TechnicianOverviewExportModal({
         `ตารางสรุปภาพรวมงานก่อสร้าง - ${supervisorInfo.fullName}`,
         `ตำแหน่ง: ${supervisorInfo.position} | วันที่: ${new Date().toLocaleDateString("th-TH")}`,
         headers.join("\t"),
-        ...tableRows.map((r, i) => [i + 1, r.wbs, r.name, r.status, r.openDate, r.progressNote, r.targetPlan].join("\t")),
+        ...tableRows.map((r, i) => [i + 1, r.wbs, r.name, r.jobValue, r.status, r.openYear, r.progressNote, r.closingPlan].join("\t")),
       ].join("\n");
 
       if (navigator.clipboard && window.ClipboardItem) {
@@ -1025,7 +1041,7 @@ export default function TechnicianOverviewExportModal({
                     {/* 1. ลำดับที่ */}
                     <th
                       style={{
-                        width: "50px",
+                        width: "48px",
                         padding: "7px 4px",
                         textAlign: "center",
                         fontWeight: "700",
@@ -1039,7 +1055,7 @@ export default function TechnicianOverviewExportModal({
                     {/* 2. WBS */}
                     <th
                       style={{
-                        width: "175px",
+                        width: "165px",
                         padding: "7px 6px",
                         textAlign: "center",
                         fontWeight: "700",
@@ -1054,7 +1070,7 @@ export default function TechnicianOverviewExportModal({
                     <th
                       style={{
                         width: "auto",
-                        minWidth: "260px",
+                        minWidth: "220px",
                         padding: "7px 10px",
                         textAlign: "center",
                         fontWeight: "700",
@@ -1065,10 +1081,24 @@ export default function TechnicianOverviewExportModal({
                       ชื่องาน
                     </th>
 
-                    {/* 4. สถานะงาน (ในระบบ) */}
+                    {/* 4. มูลค่างาน */}
                     <th
                       style={{
-                        width: "92px",
+                        width: "115px",
+                        padding: "7px 6px",
+                        textAlign: "center",
+                        fontWeight: "700",
+                        borderRight: "1px solid rgba(255, 255, 255, 0.35)",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      มูลค่างาน
+                    </th>
+
+                    {/* 5. สถานะงาน (ในระบบ) */}
+                    <th
+                      style={{
+                        width: "85px",
                         padding: "7px 4px",
                         textAlign: "center",
                         fontWeight: "700",
@@ -1079,10 +1109,10 @@ export default function TechnicianOverviewExportModal({
                       สถานะงาน<br />(ในระบบ)
                     </th>
 
-                    {/* 5. วันที่เปิดงาน */}
+                    {/* 6. ปีที่เปิดงาน */}
                     <th
                       style={{
-                        width: "105px",
+                        width: "88px",
                         padding: "7px 4px",
                         textAlign: "center",
                         fontWeight: "700",
@@ -1090,13 +1120,13 @@ export default function TechnicianOverviewExportModal({
                         fontSize: "0.85rem",
                       }}
                     >
-                      วันที่<br />เปิดงาน
+                      ปีที่เปิดงาน
                     </th>
 
-                    {/* 6. ความก้าวหน้างาน */}
+                    {/* 7. รายละเอียดความก้าวหน้างาน */}
                     <th
                       style={{
-                        width: "170px",
+                        width: "185px",
                         padding: "7px 6px",
                         textAlign: "center",
                         fontWeight: "700",
@@ -1104,20 +1134,20 @@ export default function TechnicianOverviewExportModal({
                         fontSize: "0.85rem",
                       }}
                     >
-                      ความก้าวหน้างาน
+                      รายละเอียดความก้าวหน้างาน
                     </th>
 
-                    {/* 7. แผนแล้วเสร็จ */}
+                    {/* 8. แผนปิดงาน */}
                     <th
                       style={{
-                        width: "115px",
+                        width: "105px",
                         padding: "7px 6px",
                         textAlign: "center",
                         fontWeight: "700",
                         fontSize: "0.85rem",
                       }}
                     >
-                      แผนแล้วเสร็จ
+                      แผนปิดงาน
                     </th>
                   </tr>
                 </thead>
@@ -1126,7 +1156,7 @@ export default function TechnicianOverviewExportModal({
                   {tableRows.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={8}
                         style={{
                           textAlign: "center",
                           padding: "36px 16px",
@@ -1141,7 +1171,7 @@ export default function TechnicianOverviewExportModal({
                   ) : (
                     tableRows.map((row, index) => {
                       const isProgRed = isRedHighlight(row.progressNote, "progress");
-                      const isPlanRed = isRedHighlight(row.targetPlan, "plan");
+                      const isPlanRed = isRedHighlight(row.closingPlan, "plan");
                       const isEven = index % 2 === 0;
 
                       // Row background tone matching sample image
@@ -1240,7 +1270,41 @@ export default function TechnicianOverviewExportModal({
                             )}
                           </td>
 
-                          {/* 4. สถานะงาน (ในระบบ) */}
+                          {/* 4. มูลค่างาน */}
+                          <td
+                            style={{
+                              padding: "5px 8px",
+                              textAlign: "right",
+                              fontFamily: "monospace",
+                              fontWeight: "600",
+                              fontSize: "0.82rem",
+                              color: "#0f172a",
+                              borderRight: "1px solid #b0bec5",
+                              whiteSpace: "nowrap",
+                              fontVariantNumeric: "tabular-nums",
+                            }}
+                          >
+                            {isEditMode ? (
+                              <input
+                                type="text"
+                                value={row.jobValue}
+                                onChange={(e) => handleCellEdit(row.wbs, "jobValue", e.target.value)}
+                                style={{
+                                  width: "100%",
+                                  padding: "2px 4px",
+                                  textAlign: "right",
+                                  border: "1px solid #7c3aed",
+                                  borderRadius: "4px",
+                                  fontSize: "0.80rem",
+                                  fontFamily: "monospace",
+                                }}
+                              />
+                            ) : (
+                              row.jobValue
+                            )}
+                          </td>
+
+                          {/* 5. สถานะงาน (ในระบบ) */}
                           <td
                             style={{
                               padding: "5px 4px",
@@ -1292,7 +1356,7 @@ export default function TechnicianOverviewExportModal({
                             )}
                           </td>
 
-                          {/* 5. วันที่เปิดงาน */}
+                          {/* 6. ปีที่เปิดงาน */}
                           <td
                             style={{
                               padding: "5px 4px",
@@ -1306,8 +1370,8 @@ export default function TechnicianOverviewExportModal({
                             {isEditMode ? (
                               <input
                                 type="text"
-                                value={row.openDate}
-                                onChange={(e) => handleCellEdit(row.wbs, "openDate", e.target.value)}
+                                value={row.openYear}
+                                onChange={(e) => handleCellEdit(row.wbs, "openYear", e.target.value)}
                                 style={{
                                   width: "100%",
                                   padding: "2px 4px",
@@ -1318,11 +1382,11 @@ export default function TechnicianOverviewExportModal({
                                 }}
                               />
                             ) : (
-                              row.openDate
+                              row.openYear
                             )}
                           </td>
 
-                          {/* 6. ความก้าวหน้างาน (Smart Red Highlight) */}
+                          {/* 7. รายละเอียดความก้าวหน้างาน (Smart Red Highlight) */}
                           <td
                             style={{
                               padding: "5px 6px",
@@ -1355,7 +1419,7 @@ export default function TechnicianOverviewExportModal({
                             )}
                           </td>
 
-                          {/* 7. แผนแล้วเสร็จ (Smart Red Highlight) */}
+                          {/* 8. แผนปิดงาน (Smart Red Highlight) */}
                           <td
                             style={{
                               padding: "5px 6px",
@@ -1369,8 +1433,8 @@ export default function TechnicianOverviewExportModal({
                             {isEditMode ? (
                               <input
                                 type="text"
-                                value={row.targetPlan}
-                                onChange={(e) => handleCellEdit(row.wbs, "targetPlan", e.target.value)}
+                                value={row.closingPlan}
+                                onChange={(e) => handleCellEdit(row.wbs, "closingPlan", e.target.value)}
                                 style={{
                                   width: "100%",
                                   padding: "2px 4px",
@@ -1383,7 +1447,7 @@ export default function TechnicianOverviewExportModal({
                                 }}
                               />
                             ) : (
-                              row.targetPlan || ""
+                              row.closingPlan || ""
                             )}
                           </td>
                         </tr>
@@ -1408,12 +1472,14 @@ export default function TechnicianOverviewExportModal({
                 position: "relative",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                 <span>
                   <strong>สรุปสถานะ:</strong> ทั้งหมด {stats.total} โครงการ | ดำเนินการเสร็จ {stats.f4Count} โครงการ | อยู่ระหว่างทำ {stats.c1Count + stats.d1Count} โครงการ
                 </span>
                 <span>•</span>
                 <span>อัตราความสำเร็จ: <strong>{stats.percent.toFixed(1)}%</strong></span>
+                <span>•</span>
+                <span>มูลค่างานรวม: <strong>{stats.totalValueStr} บาท</strong></span>
               </div>
 
               {/* Signature PEA Purple Brand Corner with Icon (Matching sample slide corner!) */}
