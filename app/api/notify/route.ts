@@ -1,8 +1,20 @@
 import { NextResponse } from 'next/server';
 import { sendLinePushMessage } from '../../../lib/line';
+import { getLineNotificationSetting } from '../../../lib/notifySettings';
 
 export async function POST(request: Request) {
   try {
+    // ตรวจสอบสถานะการเปิด/ปิดแจ้งเตือน LINE โดย Admin Cha16072534
+    const notifySetting = await getLineNotificationSetting();
+    if (!notifySetting.enabled) {
+      console.log('LINE notification is disabled by admin Cha16072534. Message skipped.');
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        message: 'การแจ้งเตือนผ่าน LINE ถูกปิดไว้โดย Admin Cha16072534'
+      });
+    }
+
     const body = await request.json();
     const { type, payload } = body;
     const targetId = process.env.LINE_TARGET_ID;
