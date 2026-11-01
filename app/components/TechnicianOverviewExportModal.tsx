@@ -212,11 +212,15 @@ export default function TechnicianOverviewExportModal({
         defaultOpenYear = "-";
       }
 
+      const statusValue = (custom.status ?? p.status ?? "").trim().toUpperCase();
+      const isF4 = statusValue === "F4";
+
       // Progress Note Resolution (รายละเอียดความก้าวหน้างานตามสถานะที่อัพเดท)
+      // งานไหนที่ F4 แล้ว ให้ใส่รายละเอียดความก้าวหน้างานเป็น 100%
       const remarkNote = getLatestRemarkDetail(p.remarks);
       let defaultProgressNote = "";
-      if (p.status === "F4") {
-        defaultProgressNote = remarkNote ? (remarkNote === "ปิดแล้ว" ? "100%" : remarkNote) : "100%";
+      if (isF4) {
+        defaultProgressNote = "100%";
       } else if (remarkNote) {
         defaultProgressNote = remarkNote;
       } else {
@@ -230,15 +234,22 @@ export default function TechnicianOverviewExportModal({
         }
       }
 
-      // Closing Plan Resolution (แผนปิดงาน)
+      // Closing Plan Resolution (แผนปิดงาน) - งานที่ F4 เสร็จแล้วไม่ต้องมีแผนปิดงาน
       let defaultClosingPlan = "";
-      if (p.closing_plan && p.closing_plan.trim()) {
+      if (isF4) {
+        defaultClosingPlan = "";
+      } else if (p.closing_plan && p.closing_plan.trim()) {
         defaultClosingPlan = p.closing_plan.trim();
       } else if (p.action_plan && p.action_plan.trim()) {
         defaultClosingPlan = p.action_plan.trim();
       } else {
         defaultClosingPlan = "";
       }
+
+      // ถ้าเป็นงาน F4 ให้ความก้าวหน้างานเป็น 100% เสมอ (ยกเว้นผู้ใช้แก้ไขเองแบบเจาะจงในโหมดแก้ไข)
+      const resolvedProgressNote = isF4
+        ? (custom.progressNote && custom.progressNote !== remarkNote ? custom.progressNote : "100%")
+        : (custom.progressNote ?? defaultProgressNote);
 
       return {
         id,
@@ -247,7 +258,7 @@ export default function TechnicianOverviewExportModal({
         jobValue: custom.jobValue ?? defaultJobValue,
         status: custom.status ?? (p.status || "-"),
         openYear: custom.openYear ?? custom.openDate ?? defaultOpenYear,
-        progressNote: custom.progressNote ?? defaultProgressNote,
+        progressNote: resolvedProgressNote,
         closingPlan: custom.closingPlan ?? custom.targetPlan ?? defaultClosingPlan,
       };
     });
