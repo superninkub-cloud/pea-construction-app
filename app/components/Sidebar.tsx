@@ -137,30 +137,6 @@ export default function Sidebar() {
               <span>Dashboard งานก่อสร้าง</span>
             </Link>
 
-            <Link 
-              href="/performance-presentation" 
-              className={`nav-item ${pathname === "/performance-presentation" ? "active" : ""}`}
-              style={{
-                backgroundColor: pathname === "/performance-presentation" ? undefined : 'rgba(245, 158, 11, 0.15)',
-                border: pathname === "/performance-presentation" ? undefined : '1px solid rgba(245, 158, 11, 0.35)',
-              }}
-            >
-              <Presentation size={20} className="text-amber-400" />
-              <span className="font-semibold text-white">โปรแกรมนำเสนอผลการปฏิบัติงาน ผกร.</span>
-              <span style={{
-                marginLeft: 'auto',
-                fontSize: '0.62rem',
-                padding: '2px 6px',
-                borderRadius: '9999px',
-                backgroundColor: 'rgba(245, 158, 11, 0.25)',
-                color: '#fbbf24',
-                border: '1px solid rgba(245, 158, 11, 0.5)',
-                fontWeight: 700
-              }}>
-                ปี 2569
-              </span>
-            </Link>
-
             {/* เมนูภาคสนาม แสดงเฉพาะเมื่อไม่ใช่ Office */}
             {!isOffice && (
               <>
@@ -192,6 +168,133 @@ export default function Sidebar() {
             )}
           </div>
         )}
+
+        {/* หมวดภาคสนาม (ซ่อนจากผู้ใช้งาน Office เพื่อความกระชับ) */}
+        {!isOffice && (
+          <>
+            <SectionHeader id="planning" title="บริหาร/วางแผนงานก่อสร้าง" />
+            {expanded.planning && (
+              <div onClick={closeSidebar}>
+                {canAccessRestricted && (
+                  <Link href="/planning" className={`nav-item ${pathname === "/planning" ? "active" : ""}`}>
+                    <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    <span>วางแผนงานก่อสร้าง</span>
+                  </Link>
+                )}
+                {canAccessRestricted && (
+                  <Link href="/important" className={`nav-item ${pathname === "/important" ? "active" : ""}`}>
+                    <AlertCircle size={20} />
+                    <span>ติดตามงานสำคัญ</span>
+                  </Link>
+                )}
+                <Link href="/emergency-plan" className={`nav-item ${pathname === "/emergency-plan" ? "active" : ""}`}>
+                  <MapPin size={20} />
+                  <span>งานฉุกเฉิน/รถชนเสา</span>
+                </Link>
+              </div>
+            )}
+
+            <SectionHeader id="docs" title="ตรวจสอบและเอกสาร" />
+            {expanded.docs && (
+              <div onClick={closeSidebar}>
+                <Link href="/estimation" className={`nav-item ${pathname === "/estimation" ? "active" : ""}`}>
+                  <ClipboardList size={20} />
+                  <span>โปรแกรมประมาณการ</span>
+                </Link>
+                <Link href="/budget-transfer" className={`nav-item ${pathname === "/budget-transfer" ? "active" : ""}`}>
+                  <ArrowRightLeft size={20} />
+                  <span>เอกสารใบขอเบิกค่าใช้จ่าย</span>
+                </Link>
+                <Link href="/teco-checker" className={`nav-item ${pathname === "/teco-checker" ? "active" : ""}`}>
+                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  <span>ตรวจสอบปิดงาน (TECO)</span>
+                </Link>
+                <Link href="/guide" className={`nav-item ${pathname === "/guide" ? "active" : ""}`}>
+                  <BookOpen size={20} />
+                  <span>คู่มือภาคสนามก่อสร้างระบบ 115 kV</span>
+                </Link>
+              </div>
+            )}
+
+            <SectionHeader id="safety" title="ความปลอดภัย" />
+            {expanded.safety && (
+              <div onClick={closeSidebar}>
+                <Link href="/safety" className={`nav-item ${pathname === "/safety" ? "active" : ""}`}>
+                  <ShieldCheck size={20} />
+                  <span>งานความปลอดภัย</span>
+                </Link>
+                <Link href="/safety-ppe" className={`nav-item ${pathname === "/safety-ppe" ? "active" : ""}`}>
+                  <ShieldCheck size={20} />
+                  <span>ตรวจสอบอุปกรณ์ความปลอดภัยและ PPE</span>
+                </Link>
+                {isAdmin && (
+                  <Link href="/safety-hub" className={`nav-item ${pathname === "/safety-hub" ? "active" : ""}`}>
+                    <Camera size={20} />
+                    <span>รายงาน Safety Hub</span>
+                  </Link>
+                )}
+              </div>
+            )}
+
+            <SectionHeader id="personnel" title="บุคลากร" />
+            {expanded.personnel && (
+              <div onClick={closeSidebar}>
+                <Link href="/personnel" className={`nav-item ${pathname === "/personnel" ? "active" : ""}`}>
+                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  <span>ข้อมูลบุคลากร</span>
+                </Link>
+                <Link href="/driver-ot" className={`nav-item ${pathname === "/driver-ot" ? "active" : ""}`}>
+                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                  <span>คำนวณ OT พขร.</span>
+                </Link>
+                <Link href="/team-ot" className={`nav-item ${pathname === "/team-ot" ? "active" : ""}`}>
+                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  <span>คำนวณ OT พนักงาน บ.</span>
+                </Link>
+              </div>
+            )}
+
+            <SectionHeader id="vehicle" title="ยานพาหนะและเชื้อเพลิง" />
+            {expanded.vehicle && (
+              <div onClick={closeSidebar}>
+                <Link href="/vehicle" className={`nav-item ${pathname === "/vehicle" ? "active" : ""}`}>
+                  <Car size={20} />
+                  <span>ระบบยานพาหนะ</span>
+                </Link>
+                <Link href="/gas-report" className={`nav-item ${pathname === "/gas-report" ? "active" : ""}`}>
+                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22h20" /><path d="M4 22V11c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4v11" /><path d="M14 22v-6c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v6" /><path d="M18 5V3c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2" /></svg>
+                  <span>รายงานน้ำมัน (ยพ.6)</span>
+                </Link>
+              </div>
+            )}
+          </>
+        )}
+        {/* 2 โปรแกรมลำดับท้ายใน Sidebar */}
+        <div className="mt-4 mb-2" onClick={closeSidebar}>
+          <Link 
+              href="/performance-presentation" 
+              className={`nav-item ${pathname === "/performance-presentation" ? "active" : ""}`}
+              style={{
+                backgroundColor: pathname === "/performance-presentation" ? undefined : 'rgba(245, 158, 11, 0.15)',
+                border: pathname === "/performance-presentation" ? undefined : '1px solid rgba(245, 158, 11, 0.35)',
+              }}
+            >
+              <Presentation size={20} className="text-amber-400" />
+              <span className="font-semibold text-white">โปรแกรมนำเสนอผลการปฏิบัติงาน ผกร.</span>
+              <span style={{
+                marginLeft: 'auto',
+                fontSize: '0.62rem',
+                padding: '2px 6px',
+                borderRadius: '9999px',
+                backgroundColor: 'rgba(245, 158, 11, 0.25)',
+                color: '#fbbf24',
+                border: '1px solid rgba(245, 158, 11, 0.5)',
+                fontWeight: 700
+              }}>
+                ปี 2569
+              </span>
+            </Link>
+        </div>
 
         {/* หมวดงานสำนักงานและธุรการ (Office) - พนักงาน Office */}
         {canAccessOfficeSection && (
@@ -620,107 +723,6 @@ export default function Sidebar() {
               </div>
             )}
           </div>
-        )}
-
-        {/* หมวดภาคสนาม (ซ่อนจากผู้ใช้งาน Office เพื่อความกระชับ) */}
-        {!isOffice && (
-          <>
-            <SectionHeader id="planning" title="บริหาร/วางแผนงานก่อสร้าง" />
-            {expanded.planning && (
-              <div onClick={closeSidebar}>
-                {canAccessRestricted && (
-                  <Link href="/planning" className={`nav-item ${pathname === "/planning" ? "active" : ""}`}>
-                    <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                    <span>วางแผนงานก่อสร้าง</span>
-                  </Link>
-                )}
-                {canAccessRestricted && (
-                  <Link href="/important" className={`nav-item ${pathname === "/important" ? "active" : ""}`}>
-                    <AlertCircle size={20} />
-                    <span>ติดตามงานสำคัญ</span>
-                  </Link>
-                )}
-                <Link href="/emergency-plan" className={`nav-item ${pathname === "/emergency-plan" ? "active" : ""}`}>
-                  <MapPin size={20} />
-                  <span>งานฉุกเฉิน/รถชนเสา</span>
-                </Link>
-              </div>
-            )}
-
-            <SectionHeader id="docs" title="ตรวจสอบและเอกสาร" />
-            {expanded.docs && (
-              <div onClick={closeSidebar}>
-                <Link href="/estimation" className={`nav-item ${pathname === "/estimation" ? "active" : ""}`}>
-                  <ClipboardList size={20} />
-                  <span>โปรแกรมประมาณการ</span>
-                </Link>
-                <Link href="/budget-transfer" className={`nav-item ${pathname === "/budget-transfer" ? "active" : ""}`}>
-                  <ArrowRightLeft size={20} />
-                  <span>เอกสารใบขอเบิกค่าใช้จ่าย</span>
-                </Link>
-                <Link href="/teco-checker" className={`nav-item ${pathname === "/teco-checker" ? "active" : ""}`}>
-                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  <span>ตรวจสอบปิดงาน (TECO)</span>
-                </Link>
-                <Link href="/guide" className={`nav-item ${pathname === "/guide" ? "active" : ""}`}>
-                  <BookOpen size={20} />
-                  <span>คู่มือภาคสนามก่อสร้างระบบ 115 kV</span>
-                </Link>
-              </div>
-            )}
-
-            <SectionHeader id="safety" title="ความปลอดภัย" />
-            {expanded.safety && (
-              <div onClick={closeSidebar}>
-                <Link href="/safety" className={`nav-item ${pathname === "/safety" ? "active" : ""}`}>
-                  <ShieldCheck size={20} />
-                  <span>งานความปลอดภัย</span>
-                </Link>
-                <Link href="/safety-ppe" className={`nav-item ${pathname === "/safety-ppe" ? "active" : ""}`}>
-                  <ShieldCheck size={20} />
-                  <span>ตรวจสอบอุปกรณ์ความปลอดภัยและ PPE</span>
-                </Link>
-                {isAdmin && (
-                  <Link href="/safety-hub" className={`nav-item ${pathname === "/safety-hub" ? "active" : ""}`}>
-                    <Camera size={20} />
-                    <span>รายงาน Safety Hub</span>
-                  </Link>
-                )}
-              </div>
-            )}
-
-            <SectionHeader id="personnel" title="บุคลากร" />
-            {expanded.personnel && (
-              <div onClick={closeSidebar}>
-                <Link href="/personnel" className={`nav-item ${pathname === "/personnel" ? "active" : ""}`}>
-                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                  <span>ข้อมูลบุคลากร</span>
-                </Link>
-                <Link href="/driver-ot" className={`nav-item ${pathname === "/driver-ot" ? "active" : ""}`}>
-                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                  <span>คำนวณ OT พขร.</span>
-                </Link>
-                <Link href="/team-ot" className={`nav-item ${pathname === "/team-ot" ? "active" : ""}`}>
-                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                  <span>คำนวณ OT พนักงาน บ.</span>
-                </Link>
-              </div>
-            )}
-
-            <SectionHeader id="vehicle" title="ยานพาหนะและเชื้อเพลิง" />
-            {expanded.vehicle && (
-              <div onClick={closeSidebar}>
-                <Link href="/vehicle" className={`nav-item ${pathname === "/vehicle" ? "active" : ""}`}>
-                  <Car size={20} />
-                  <span>ระบบยานพาหนะ</span>
-                </Link>
-                <Link href="/gas-report" className={`nav-item ${pathname === "/gas-report" ? "active" : ""}`}>
-                  <svg viewBox="0 0 24 24" style={{ width: "100%", height: "auto", maxWidth: "20px" }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22h20" /><path d="M4 22V11c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4v11" /><path d="M14 22v-6c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v6" /><path d="M18 5V3c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2" /></svg>
-                  <span>รายงานน้ำมัน (ยพ.6)</span>
-                </Link>
-              </div>
-            )}
-          </>
         )}
 
         {/* ส่วนท้าย Sidebar: คู่มือการใช้งานเว็บแอพ (ซ่อนสำหรับ Guest) */}
