@@ -213,13 +213,31 @@ export default function TechnicianOverviewExportModal({
       }
 
       const statusValue = (custom.status ?? p.status ?? "").trim().toUpperCase();
-      const isF4 = statusValue === "F4";
+      const isF4 = statusValue === "F4" || statusValue.startsWith("F4") || (p.status || "").trim().toUpperCase() === "F4";
+
+      // Helper to check if text indicates completed / closed
+      const isClosedText = (txt?: string | null): boolean => {
+        if (!txt) return false;
+        const t = txt.trim();
+        return (
+          t === "100%" ||
+          t === "100" ||
+          t === "ปิดงานแล้ว" ||
+          t === "ส่งปิดแล้ว" ||
+          t === "ปิดแล้ว" ||
+          t === "ปิดงาน" ||
+          t === "ส่งปิด" ||
+          t.includes("ปิดงานแล้ว") ||
+          t.includes("ส่งปิดแล้ว") ||
+          t.includes("ปิดงานเรียบร้อย")
+        );
+      };
 
       // Progress Note Resolution (รายละเอียดความก้าวหน้างานตามสถานะที่อัพเดท)
-      // งานไหนที่ F4 แล้ว ให้ใส่รายละเอียดความก้าวหน้างานเป็น 100%
+      // งานไหนที่ F4 แล้ว ให้ใส่รายละเอียดความก้าวหน้างานเป็น 100% (ไม่ใช่ ปิดงานแล้ว หรือ ส่งปิดแล้ว)
       const remarkNote = getLatestRemarkDetail(p.remarks);
       let defaultProgressNote = "";
-      if (isF4) {
+      if (isF4 || isClosedText(remarkNote)) {
         defaultProgressNote = "100%";
       } else if (remarkNote) {
         defaultProgressNote = remarkNote;
@@ -246,10 +264,14 @@ export default function TechnicianOverviewExportModal({
         defaultClosingPlan = "";
       }
 
-      // ถ้าเป็นงาน F4 ให้ความก้าวหน้างานเป็น 100% เสมอ (ยกเว้นผู้ใช้แก้ไขเองแบบเจาะจงในโหมดแก้ไข)
-      const resolvedProgressNote = isF4
-        ? (custom.progressNote && custom.progressNote !== remarkNote ? custom.progressNote : "100%")
-        : (custom.progressNote ?? defaultProgressNote);
+      // ถ้าเป็นงาน F4 หรือข้อความระบุว่าปิดงานแล้ว/ส่งปิดแล้ว ต้องเป็น 100% เสมอ ไม่ใช่ "ปิดงานแล้ว" หรือ "ส่งปิดแล้ว"
+      let resolvedProgressNote = "100%";
+      if (isF4) {
+        resolvedProgressNote = "100%";
+      } else {
+        const candidate = custom.progressNote ?? defaultProgressNote;
+        resolvedProgressNote = isClosedText(candidate) || isClosedText(remarkNote) ? "100%" : candidate;
+      }
 
       return {
         id,
@@ -311,7 +333,17 @@ export default function TechnicianOverviewExportModal({
   const isRedHighlight = (text: string, type: "progress" | "plan"): boolean => {
     if (!text || text === "-" || text.trim() === "") return false;
     const trimmed = text.trim();
-    if (trimmed === "100%" || trimmed === "100") return false;
+    if (
+      trimmed === "100%" ||
+      trimmed === "100" ||
+      trimmed === "ปิดงานแล้ว" ||
+      trimmed === "ส่งปิดแล้ว" ||
+      trimmed === "ปิดแล้ว" ||
+      trimmed.includes("ปิดงานแล้ว") ||
+      trimmed.includes("ส่งปิดแล้ว")
+    ) {
+      return false;
+    }
 
     if (type === "progress") {
       // Pending, remaining, or active work notes are bright red in the sample
