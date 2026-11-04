@@ -11,10 +11,14 @@ import { wireDataList } from "../../lib/wireData";
 import {
   compressMultipleImages,
   parseProjectImages,
+  parseProjectImagesWithCaptions,
+  serializeProjectImagesWithCaptions,
   formatBytes,
-  CompressedImageResult
+  CompressedImageResult,
+  ProjectImageItem,
 } from "../utils/imageCompressor";
 import TechnicianOverviewExportModal from "./TechnicianOverviewExportModal";
+import SingleProjectExportModal from "./SingleProjectExportModal";
 
 const getLatestRemarkDetail = (remarks?: string) => {
   if (!remarks) return null;
@@ -87,8 +91,8 @@ export default function UpdateStatus() {
     "",
   );
 
-  // Multi-image management (up to 30 photos with auto-compression)
-  const [existingImages, setExistingImages] = useState<string[]>([]);
+  // Multi-image management (up to 30 photos with auto-compression & captions)
+  const [existingImages, setExistingImages] = useState<ProjectImageItem[]>([]);
   const [newImages, setNewImages] = useState<CompressedImageResult[]>([]);
   const [compressing, setCompressing] = useState(false);
   const [compressionProgress, setCompressionProgress] = useState({ current: 0, total: 0, fileName: "" });
@@ -114,6 +118,7 @@ export default function UpdateStatus() {
   // Add New Project State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isSingleExportModalOpen, setIsSingleExportModalOpen] = useState(false);
   const [newProject, setNewProject] = useState({
     wbs: "",
     name: "",
@@ -301,8 +306,8 @@ export default function UpdateStatus() {
             : "",
         );
 
-        // Load existing images from database column
-        const imgs = parseProjectImages(p.image_url);
+        // Load existing images + captions from database column
+        const imgs = parseProjectImagesWithCaptions(p.image_url);
         setExistingImages(imgs);
         // Clear staged new images
         newImages.forEach((item) => {
@@ -429,6 +434,12 @@ export default function UpdateStatus() {
     setExistingImages((prev) => prev.filter((_, i) => i !== indexToRemove));
   };
 
+  const handleUpdateExistingImageCaption = (index: number, caption: string) => {
+    setExistingImages((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, caption } : item))
+    );
+  };
+
   const handleRemoveNewImage = (indexToRemove: number) => {
     setNewImages((prev) => {
       const item = prev[indexToRemove];
@@ -439,6 +450,12 @@ export default function UpdateStatus() {
     });
   };
 
+  const handleUpdateNewImageCaption = (index: number, caption: string) => {
+    setNewImages((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, caption } : item))
+    );
+  };
+
   const handleSubmit = async () => {
     if (!project) return;
     setLoading(true);
@@ -446,10 +463,10 @@ export default function UpdateStatus() {
 
     try {
       // 1. Handle Multiple Image Uploads to Supabase Storage
-      let finalImages = [...existingImages];
+      let finalImages: ProjectImageItem[] = [...existingImages];
 
       if (newImages.length > 0) {
-        const uploadedUrls: string[] = [];
+        const uploadedItems: ProjectImageItem[] = [];
         for (let i = 0; i < newImages.length; i++) {
           setUploadProgress({ current: i + 1, total: newImages.length });
           const item = newImages[i];
@@ -468,18 +485,16 @@ export default function UpdateStatus() {
             .from("project_images")
             .getPublicUrl(fileName);
 
-          uploadedUrls.push(publicUrlData.publicUrl);
+          uploadedItems.push({
+            url: publicUrlData.publicUrl,
+            caption: (item.caption || "").trim(),
+          });
         }
-        finalImages = [...finalImages, ...uploadedUrls];
+        finalImages = [...finalImages, ...uploadedItems];
       }
 
-      // Format final image_url string for database
-      let finalImageUrlValue = "";
-      if (finalImages.length === 1) {
-        finalImageUrlValue = finalImages[0];
-      } else if (finalImages.length > 1) {
-        finalImageUrlValue = JSON.stringify(finalImages);
-      }
+      // Format final image_url string for database (preserves captions!)
+      const finalImageUrlValue = serializeProjectImagesWithCaptions(finalImages);
 
       let combinedRemarks = oldRemarks;
       if (newRemarks.trim() !== "" || status.trim() !== "") {
@@ -577,7 +592,7 @@ export default function UpdateStatus() {
         }
         
         if (newImages.length > 0 && finalImages.length > 0) {
-          const latestImageUrl = finalImages[finalImages.length - 1];
+          const latestImageItem = finalImages[finalImages.length - 1];
           fetch('/api/notify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -586,7 +601,7 @@ export default function UpdateStatus() {
               payload: {
                 wbs: editWbs,
                 project_name: editName,
-                image_url: latestImageUrl,
+                image_url: latestImageItem.url,
                 image_count: finalImages.length
               }
             })
@@ -1072,20 +1087,54 @@ export default function UpdateStatus() {
 
         {project ? (
           <div className="card">
-            <button
-              onClick={() => setSelectedWbs("")}
-              className="btn"
+            <div
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "12px",
                 marginBottom: "20px",
-                background: "#f8fafc",
-                color: "var(--text-dark)",
-                border: "1px solid var(--border-color)",
-                fontSize: "0.9rem",
-                padding: "8px 16px",
               }}
             >
-              ⬅️ ย้อนกลับไปหน้ารายการ
-            </button>
+              <button
+                onClick={() => setSelectedWbs("")}
+                className="btn"
+                style={{
+                  background: "#f8fafc",
+                  color: "var(--text-dark)",
+                  border: "1px solid var(--border-color)",
+                  fontSize: "0.9rem",
+                  padding: "8px 16px",
+                }}
+              >
+                ⬅️ ย้อนกลับไปหน้ารายการ
+              </button>
+
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={() => setIsSingleExportModalOpen(true)}
+                  className="btn"
+                  style={{
+                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    border: "none",
+                    padding: "8px 18px",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.25)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Download size={17} />
+                  <span>📊 ส่งออกความก้าวหน้างานนี้ (Export รายงาน)</span>
+                </button>
+              </div>
+            </div>
             <div
               style={{
                 borderBottom: "1px solid #f1f5f9",
@@ -2029,28 +2078,30 @@ export default function UpdateStatus() {
             </div>
 
             {/* =========================================================================
-                MULTI-PHOTO UPLOAD & GALLERY (UP TO 30 PHOTOS WITH COMPRESSION)
+                MULTI-PHOTO UPLOAD & GALLERY (UP TO 30 PHOTOS WITH COMPRESSION & CAPTIONS)
                 ========================================================================= */}
             {(() => {
               const allImagesList = [
-                ...existingImages.map((url, idx) => ({
+                ...existingImages.map((item, idx) => ({
                   id: `existing-${idx}`,
                   type: "existing" as const,
-                  url,
+                  url: item.url,
+                  caption: item.caption || "",
                   originalIndex: idx,
                   title: `ภาพที่บันทึกแล้ว #${idx + 1}`,
                   subTitle: "จัดเก็บบนระบบคลาวด์เรียบร้อย",
-                  sizeBadge: null
+                  sizeBadge: null,
                 })),
                 ...newImages.map((img, idx) => ({
                   id: `new-${idx}`,
                   type: "new" as const,
                   url: img.previewUrl,
+                  caption: img.caption || "",
                   originalIndex: idx,
                   title: `ภาพใหม่ #${existingImages.length + idx + 1}`,
                   subTitle: img.file.name,
-                  sizeBadge: `${formatBytes(img.compressedSize)} (-${img.compressionRatio}%)`
-                }))
+                  sizeBadge: `${formatBytes(img.compressedSize)} (-${img.compressionRatio}%)`,
+                })),
               ];
 
               const totalImagesCount = existingImages.length + newImages.length;
@@ -2098,10 +2149,10 @@ export default function UpdateStatus() {
                         }}
                       >
                         <Camera size={20} color="#7c3aed" />
-                        <span>ภาพถ่ายหน้างาน (ระบบบีบอัดอัตโนมัติ)</span>
+                        <span>ภาพถ่ายหน้างานและคำบรรยายภาพ (ระบบบีบอัดอัตโนมัติ)</span>
                       </div>
                       <div style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "2px" }}>
-                        อัพโหลดได้สูงสุด 30 รูปต่อโครงการ • บีบอัดอัตโนมัติเพื่อประหยัดพื้นที่และโหลดไว
+                        อัพโหลดได้สูงสุด 30 รูปต่อโครงการ • สามารถพิมพ์คำบรรยายใต้แต่ละภาพเพื่อใช้ในรายงานนำเสนอความก้าวหน้าได้
                       </div>
                     </div>
 
@@ -2282,13 +2333,13 @@ export default function UpdateStatus() {
                     </div>
                   )}
 
-                  {/* Thumbnails Grid */}
+                  {/* Thumbnails Grid with Caption Inputs */}
                   {allImagesList.length > 0 && (
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
-                        gap: "12px",
+                        gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))",
+                        gap: "14px",
                         width: "100%",
                         marginTop: "8px",
                       }}
@@ -2297,102 +2348,144 @@ export default function UpdateStatus() {
                         <div
                           key={item.id}
                           style={{
-                            position: "relative",
+                            display: "flex",
+                            flexDirection: "column",
                             borderRadius: "12px",
                             overflow: "hidden",
                             border: item.type === "new" ? "2px solid #8b5cf6" : "1px solid #cbd5e1",
                             background: "#ffffff",
                             boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                            aspectRatio: "1/1",
-                            cursor: "pointer",
                             transition: "transform 0.15s ease",
                           }}
                         >
-                          <img
-                            src={item.url}
-                            alt={item.title}
-                            onClick={() => setLightboxIndex(idx)}
+                          <div
                             style={{
+                              position: "relative",
                               width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              display: "block",
-                            }}
-                          />
-
-                          {/* Order Number Badge */}
-                          <span
-                            style={{
-                              position: "absolute",
-                              top: "6px",
-                              left: "6px",
-                              background: "rgba(0,0,0,0.65)",
-                              color: "white",
-                              fontSize: "10px",
-                              fontWeight: 700,
-                              padding: "2px 6px",
-                              borderRadius: "6px",
-                              backdropFilter: "blur(2px)",
-                            }}
-                          >
-                            #{idx + 1}
-                          </span>
-
-                          {/* Status Tag */}
-                          <span
-                            style={{
-                              position: "absolute",
-                              bottom: "6px",
-                              left: "6px",
-                              background: item.type === "new" ? "rgba(124, 58, 237, 0.9)" : "rgba(16, 185, 129, 0.9)",
-                              color: "white",
-                              fontSize: "9px",
-                              fontWeight: 700,
-                              padding: "2px 6px",
-                              borderRadius: "6px",
-                              backdropFilter: "blur(2px)",
-                              maxWidth: "calc(100% - 12px)",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {item.type === "new" ? (item.sizeBadge || "ใหม่") : "บันทึกแล้ว"}
-                          </span>
-
-                          {/* Delete button */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (item.type === "existing") {
-                                if (confirm(`ต้องการลบรูปภาพ #${idx + 1} ออกจากโครงการนี้ใช่หรือไม่?`)) {
-                                  handleRemoveExistingImage(item.originalIndex);
-                                }
-                              } else {
-                                handleRemoveNewImage(item.originalIndex);
-                              }
-                            }}
-                            style={{
-                              position: "absolute",
-                              top: "6px",
-                              right: "6px",
-                              background: "rgba(239, 68, 68, 0.9)",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "50%",
-                              width: "24px",
-                              height: "24px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
+                              aspectRatio: "4/3",
                               cursor: "pointer",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                              backgroundColor: "#f1f5f9",
                             }}
-                            title="ลบรูปนี้"
                           >
-                            <Trash2 size={13} />
-                          </button>
+                            <img
+                              src={item.url}
+                              alt={item.caption || item.title}
+                              onClick={() => setLightboxIndex(idx)}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                display: "block",
+                              }}
+                            />
+
+                            {/* Order Number Badge */}
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: "6px",
+                                left: "6px",
+                                background: "rgba(0,0,0,0.65)",
+                                color: "white",
+                                fontSize: "10px",
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: "6px",
+                                backdropFilter: "blur(2px)",
+                              }}
+                            >
+                              #{idx + 1}
+                            </span>
+
+                            {/* Status Tag */}
+                            <span
+                              style={{
+                                position: "absolute",
+                                bottom: "6px",
+                                left: "6px",
+                                background: item.type === "new" ? "rgba(124, 58, 237, 0.9)" : "rgba(16, 185, 129, 0.9)",
+                                color: "white",
+                                fontSize: "9px",
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: "6px",
+                                backdropFilter: "blur(2px)",
+                                maxWidth: "calc(100% - 12px)",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {item.type === "new" ? (item.sizeBadge || "ใหม่") : "บันทึกแล้ว"}
+                            </span>
+
+                            {/* Delete button */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (item.type === "existing") {
+                                  if (confirm(`ต้องการลบรูปภาพ #${idx + 1} ออกจากโครงการนี้ใช่หรือไม่?`)) {
+                                    handleRemoveExistingImage(item.originalIndex);
+                                  }
+                                } else {
+                                  handleRemoveNewImage(item.originalIndex);
+                                }
+                              }}
+                              style={{
+                                position: "absolute",
+                                top: "6px",
+                                right: "6px",
+                                background: "rgba(239, 68, 68, 0.9)",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "50%",
+                                width: "24px",
+                                height: "24px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                              }}
+                              title="ลบรูปนี้"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+
+                          {/* Caption Input Field under Photo */}
+                          <div
+                            style={{
+                              padding: "8px 10px",
+                              background: "#f8fafc",
+                              borderTop: "1px solid #e2e8f0",
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={item.caption}
+                              onChange={(e) => {
+                                if (item.type === "existing") {
+                                  handleUpdateExistingImageCaption(item.originalIndex, e.target.value);
+                                } else {
+                                  handleUpdateNewImageCaption(item.originalIndex, e.target.value);
+                                }
+                              }}
+                              placeholder={`✏️ คำบรรยายภาพที่ ${idx + 1}...`}
+                              disabled={userRole === "guest"}
+                              style={{
+                                width: "100%",
+                                padding: "6px 8px",
+                                fontSize: "0.8rem",
+                                borderRadius: "6px",
+                                border: "1px solid #cbd5e1",
+                                background: "#ffffff",
+                                color: "#1e293b",
+                                outline: "none",
+                              }}
+                            />
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -2406,6 +2499,8 @@ export default function UpdateStatus() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "12px",
               }}
             >
               {message.text ? (
@@ -2428,7 +2523,27 @@ export default function UpdateStatus() {
                 <div></div>
               )}
 
-              <div style={{ display: "flex", gap: "12px" }}>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setIsSingleExportModalOpen(true)}
+                  style={{
+                    minWidth: "180px",
+                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    border: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.25)",
+                  }}
+                >
+                  <Download size={16} />
+                  <span>📊 ส่งออกความก้าวหน้างานนี้</span>
+                </button>
                 {userRole !== "guest" && (
                   <>
                     {userRole === "admin" && (
@@ -2744,24 +2859,49 @@ export default function UpdateStatus() {
                               {planText || "-"}
                             </td>
                             <td style={{ padding: "10px 6px", textAlign: "center" }}>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedWbs(p.wbs);
-                                }}
-                                style={{
-                                  backgroundColor: "var(--pea-purple)",
-                                  color: "#ffffff",
-                                  border: "none",
-                                  borderRadius: "6px",
-                                  padding: "4px 8px",
-                                  fontSize: "0.75rem",
-                                  fontWeight: "600",
-                                  cursor: "pointer",
-                                }}
-                              >
-                                เลือกงาน
-                              </button>
+                              <div style={{ display: "flex", gap: "4px", justifyContent: "center" }}>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedWbs(p.wbs);
+                                  }}
+                                  style={{
+                                    backgroundColor: "var(--pea-purple)",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    padding: "4px 8px",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  เลือกงาน
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedWbs(p.wbs);
+                                    setTimeout(() => setIsSingleExportModalOpen(true), 50);
+                                  }}
+                                  style={{
+                                    backgroundColor: "#059669",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    padding: "4px 7px",
+                                    fontSize: "0.75rem",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "3px",
+                                  }}
+                                  title="ส่งออกรายงานความก้าวหน้างานนี้"
+                                >
+                                  <Download size={12} /> Export
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -3128,22 +3268,47 @@ export default function UpdateStatus() {
                           }}
                         >
                           <span>ผู้ควบคุมงาน: {p.supervisor}</span>
-                          <button
-                            onClick={toggleExpand}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              padding: "4px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "#64748b",
-                            }}
-                            title={isExpanded || showAllProgress ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
-                          >
-                            {isExpanded || showAllProgress ? "▲" : "▼"}
-                          </button>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedWbs(p.wbs);
+                                setTimeout(() => setIsSingleExportModalOpen(true), 50);
+                              }}
+                              style={{
+                                background: "#ecfdf5",
+                                color: "#059669",
+                                border: "1px solid #a7f3d0",
+                                borderRadius: "6px",
+                                padding: "2px 8px",
+                                fontSize: "0.72rem",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                              title="ส่งออกรายงานความก้าวหน้างานนี้"
+                            >
+                              <Download size={11} /> Export
+                            </button>
+                            <button
+                              onClick={toggleExpand}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                padding: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#64748b",
+                              }}
+                              title={isExpanded || showAllProgress ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
+                            >
+                              {isExpanded || showAllProgress ? "▲" : "▼"}
+                            </button>
+                          </div>
                         </div>
                         {getLatestRemarkDetail(p.remarks) && (
                           <div style={{
@@ -3214,22 +3379,47 @@ export default function UpdateStatus() {
                               {p.status || "-"}
                             </span>
                           </div>
-                          <button
-                            onClick={toggleExpand}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              padding: "4px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "#64748b",
-                            }}
-                            title={isExpanded || showAllProgress ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
-                          >
-                            {isExpanded || showAllProgress ? "▲" : "▼"}
-                          </button>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedWbs(p.wbs);
+                                setTimeout(() => setIsSingleExportModalOpen(true), 50);
+                              }}
+                              style={{
+                                background: "#ecfdf5",
+                                color: "#059669",
+                                border: "1px solid #a7f3d0",
+                                borderRadius: "6px",
+                                padding: "3px 8px",
+                                fontSize: "0.75rem",
+                                fontWeight: 700,
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                              title="ส่งออกรายงานความก้าวหน้างานนี้"
+                            >
+                              <Download size={12} /> Export
+                            </button>
+                            <button
+                              onClick={toggleExpand}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                padding: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#64748b",
+                              }}
+                              title={isExpanded || showAllProgress ? "ซ่อนรายละเอียด" : "แสดงรายละเอียด"}
+                            >
+                              {isExpanded || showAllProgress ? "▲" : "▼"}
+                            </button>
+                          </div>
                         </div>
                         {getLatestRemarkDetail(p.remarks) && (
                           <div style={{
@@ -3582,24 +3772,26 @@ export default function UpdateStatus() {
           ========================================================================= */}
       {(() => {
         const allImagesList = [
-          ...existingImages.map((url, idx) => ({
+          ...existingImages.map((item, idx) => ({
             id: `existing-${idx}`,
             type: "existing" as const,
-            url,
+            url: item.url,
+            caption: item.caption || "",
             originalIndex: idx,
             title: `ภาพที่บันทึกแล้ว #${idx + 1}`,
             subTitle: "จัดเก็บบนระบบคลาวด์เรียบร้อย",
-            sizeBadge: null
+            sizeBadge: null,
           })),
           ...newImages.map((img, idx) => ({
             id: `new-${idx}`,
             type: "new" as const,
             url: img.previewUrl,
+            caption: img.caption || "",
             originalIndex: idx,
             title: `ภาพใหม่ #${existingImages.length + idx + 1}`,
             subTitle: img.file.name,
-            sizeBadge: `${formatBytes(img.compressedSize)} (-${img.compressionRatio}%)`
-          }))
+            sizeBadge: `${formatBytes(img.compressedSize)} (-${img.compressionRatio}%)`,
+          })),
         ];
 
         if (lightboxIndex === null || !allImagesList[lightboxIndex]) return null;
@@ -3700,10 +3892,12 @@ export default function UpdateStatus() {
                 flex: 1,
                 width: "100%",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 position: "relative",
                 overflow: "hidden",
+                gap: "12px",
               }}
             >
               {/* Prev Button */}
@@ -3739,12 +3933,30 @@ export default function UpdateStatus() {
                 alt="Fullscreen Preview"
                 style={{
                   maxWidth: "92%",
-                  maxHeight: "80vh",
+                  maxHeight: "72vh",
                   objectFit: "contain",
                   borderRadius: "12px",
                   boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
                 }}
               />
+
+              {currentItem.caption && (
+                <div
+                  style={{
+                    background: "rgba(15, 23, 42, 0.85)",
+                    color: "#f8fafc",
+                    padding: "8px 18px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    fontSize: "0.95rem",
+                    fontWeight: 600,
+                    maxWidth: "80%",
+                    textAlign: "center",
+                  }}
+                >
+                  💬 {currentItem.caption}
+                </div>
+              )}
 
               {/* Next Button */}
               {lightboxIndex < allImagesList.length - 1 && (
@@ -3822,6 +4034,50 @@ export default function UpdateStatus() {
         supervisors={supervisors}
         onSelectSupervisor={(sup) => setSelectedSupervisor(sup)}
       />
+
+      {/* Single Project Presentation & Export Modal */}
+      {project && (
+        <SingleProjectExportModal
+          isOpen={isSingleExportModalOpen}
+          onClose={() => setIsSingleExportModalOpen(false)}
+          project={project}
+          wbs={editWbs || project.wbs}
+          name={editName || project.name}
+          status={status}
+          projectValue={projectValue}
+          supervisor={project.supervisor || ""}
+          openYear={project.open_year || ""}
+          yearCriteria={project.year_criteria || ""}
+          pTracking={pTracking}
+          actionPlan={actionPlan}
+          closingPlan={closingPlan}
+          constructionType={constructionType}
+          progTargets={progTargets}
+          progDone={progDone}
+          manualProgress={manualProgress}
+          checks={checks}
+          estSiteExpense={estSiteExpense}
+          allocatedSiteBudget={allocatedSiteBudget}
+          disbursedSiteExpense={disbursedSiteExpense}
+          scrapWireName={wireDataList.find((w) => w.id === scrapWireType)?.name}
+          scrapWireLength={scrapWireLength}
+          scrapReturnedWeight={scrapReturnedWeight}
+          oldRemarks={oldRemarks}
+          newRemarks={newRemarks}
+          selectedMonth={selectedMonth}
+          images={[
+            ...existingImages.map((it) => ({ url: it.url, caption: it.caption || "" })),
+            ...newImages.map((it) => ({ url: it.previewUrl, caption: it.caption || "" })),
+          ]}
+          onUpdateImageCaption={(idx, cap) => {
+            if (idx < existingImages.length) {
+              handleUpdateExistingImageCaption(idx, cap);
+            } else {
+              handleUpdateNewImageCaption(idx - existingImages.length, cap);
+            }
+          }}
+        />
+      )}
     </>
   );
 }

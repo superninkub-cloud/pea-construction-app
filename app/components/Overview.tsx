@@ -7,7 +7,7 @@ import TopBar from "./TopBar";
 import { Home, CheckCircle2, CircleDashed, Layers, Users, AlertTriangle, X, ChevronLeft, ChevronRight, Download, Camera } from "lucide-react";
 import { wireDataList } from "../../lib/wireData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { parseProjectImages } from "../utils/imageCompressor";
+import { parseProjectImages, parseProjectImagesWithCaptions, ProjectImageItem } from "../utils/imageCompressor";
 
 export default function Overview() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -23,7 +23,7 @@ export default function Overview() {
   const [closingPlanFilter, setClosingPlanFilter] = useState("ALL");
   const [statuses, setStatuses] = useState<string[]>([]);
   const [supervisors, setSupervisors] = useState<string[]>([]);
-  const [galleryModal, setGalleryModal] = useState<{ title: string; images: string[] } | null>(null);
+  const [galleryModal, setGalleryModal] = useState<{ title: string; images: ProjectImageItem[] } | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
 
   useEffect(() => {
@@ -566,22 +566,9 @@ export default function Overview() {
                       </td>
                       <td data-label="รูปภาพ" style={{ textAlign: "center", paddingRight: "24px" }}>
                         {(() => {
-                          const imgs = parseProjectImages(p.image_url);
+                          const imgs = parseProjectImagesWithCaptions(p.image_url);
                           if (imgs.length === 0) {
                             return <span style={{ color: "var(--text-light)", fontSize: "0.8rem" }}>-</span>;
-                          }
-                          if (imgs.length === 1) {
-                            return (
-                              <a
-                                href={imgs[0]}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-primary"
-                                style={{ padding: "6px 12px", fontSize: "0.8rem", borderRadius: "8px", textDecoration: "none" }}
-                              >
-                                รูปภาพ
-                              </a>
-                            );
                           }
                           return (
                             <button
@@ -662,7 +649,7 @@ export default function Overview() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <a
-                href={galleryModal.images[galleryIndex]}
+                href={galleryModal.images[galleryIndex]?.url}
                 target="_blank"
                 rel="noreferrer"
                 download={`photo_${galleryIndex + 1}.jpg`}
@@ -712,10 +699,12 @@ export default function Overview() {
               flex: 1,
               width: "100%",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               position: "relative",
               overflow: "hidden",
+              gap: "12px",
             }}
           >
             {galleryIndex > 0 && (
@@ -746,16 +735,34 @@ export default function Overview() {
             )}
 
             <img
-              src={galleryModal.images[galleryIndex]}
+              src={galleryModal.images[galleryIndex]?.url}
               alt="Project Photo"
               style={{
                 maxWidth: "92%",
-                maxHeight: "80vh",
+                maxHeight: "72vh",
                 objectFit: "contain",
                 borderRadius: "12px",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
               }}
             />
+
+            {galleryModal.images[galleryIndex]?.caption && (
+              <div
+                style={{
+                  background: "rgba(15, 23, 42, 0.85)",
+                  color: "#f8fafc",
+                  padding: "8px 18px",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                  maxWidth: "80%",
+                  textAlign: "center",
+                }}
+              >
+                💬 {galleryModal.images[galleryIndex].caption}
+              </div>
+            )}
 
             {galleryIndex < galleryModal.images.length - 1 && (
               <button
@@ -799,10 +806,10 @@ export default function Overview() {
               paddingTop: "10px",
             }}
           >
-            {galleryModal.images.map((imgUrl, i) => (
+            {galleryModal.images.map((imgItem, i) => (
               <img
                 key={i}
-                src={imgUrl}
+                src={imgItem.url}
                 alt="thumb"
                 onClick={() => setGalleryIndex(i)}
                 style={{

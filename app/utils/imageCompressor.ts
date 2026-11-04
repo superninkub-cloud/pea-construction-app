@@ -13,6 +13,12 @@ export interface CompressedImageResult {
   compressionRatio: number; // e.g. 85 (% saved)
   width: number;
   height: number;
+  caption?: string;
+}
+
+export interface ProjectImageItem {
+  url: string;
+  caption: string;
 }
 
 /**
@@ -28,31 +34,79 @@ export function formatBytes(bytes: number, decimals: number = 1): string {
 }
 
 /**
- * Parse project image_url column value into an array of image URLs
- * Handles both JSON arrays ("[\"url1\", \"url2\"]"), single URLs, and comma-separated strings
+ * Parse project image_url column value into an array of ProjectImageItem ({ url, caption })
+ * Handles JSON arrays of objects ([{ url, caption }]), JSON arrays of strings (["url1", "url2"]),
+ * single URLs, and comma-separated strings.
  */
-export function parseProjectImages(imageUrlStr?: string | null): string[] {
+export function parseProjectImagesWithCaptions(imageUrlStr?: string | null): ProjectImageItem[] {
   if (!imageUrlStr || !imageUrlStr.trim()) return [];
   const trimmed = imageUrlStr.trim();
   if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
     try {
       const parsed = JSON.parse(trimmed);
       if (Array.isArray(parsed)) {
-        return parsed.filter(
-          (item): item is string => typeof item === "string" && item.trim().length > 0
-        );
+        const result: ProjectImageItem[] = [];
+        for (const item of parsed) {
+          if (typeof item === "string" && item.trim().length > 0) {
+            result.push({ url: item.trim(), caption: "" });
+          } else if (item && typeof item === "object" && typeof item.url === "string" && item.url.trim().length > 0) {
+            result.push({
+              url: item.url.trim(),
+              caption: typeof item.caption === "string" ? item.caption : "",
+            });
+          }
+        }
+        return result;
       }
     } catch (e) {
       console.warn("Could not parse image_url JSON array", e);
     }
   }
-  if (trimmed.includes(",")) {
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed && typeof parsed === "object" && typeof parsed.url === "string" && parsed.url.trim().length > 0) {
+        return [{ url: parsed.url.trim(), caption: typeof parsed.caption === "string" ? parsed.caption : "" }];
+      }
+    } catch (e) {
+      console.warn("Could not parse image_url JSON object", e);
+    }
+  }
+  if (trimmed.includes(",") && !trimmed.startsWith("data:")) {
     return trimmed
       .split(",")
       .map((s) => s.trim())
-      .filter((s) => s.length > 0);
+      .filter((s) => s.length > 0)
+      .map((url) => ({ url, caption: "" }));
   }
-  return [trimmed];
+  return [{ url: trimmed, caption: "" }];
+}
+
+/**
+ * Serialize ProjectImageItem[] back into database string value
+ */
+export function serializeProjectImagesWithCaptions(items: ProjectImageItem[]): string {
+  const valid = items.filter((it) => it && typeof it.url === "string" && it.url.trim().length > 0);
+  if (valid.length === 0) return "";
+  const hasAnyCaption = valid.some((it) => it.caption && it.caption.trim().length > 0);
+  if (!hasAnyCaption) {
+    if (valid.length === 1) return valid[0].url.trim();
+    return JSON.stringify(valid.map((it) => it.url.trim()));
+  }
+  return JSON.stringify(
+    valid.map((it) => ({
+      url: it.url.trim(),
+      caption: (it.caption || "").trim(),
+    }))
+  );
+}
+
+/**
+ * Parse project image_url column value into an array of image URLs
+ * Handles JSON arrays of objects, JSON arrays of strings, single URLs, and comma-separated strings
+ */
+export function parseProjectImages(imageUrlStr?: string | null): string[] {
+  return parseProjectImagesWithCaptions(imageUrlStr).map((item) => item.url);
 }
 
 /**
@@ -167,7 +221,8 @@ export async function compressImage(
             compressedSize,
             compressionRatio: ratio,
             width,
-            height
+            height,
+            caption: ""
           });
         },
         mimeType,
