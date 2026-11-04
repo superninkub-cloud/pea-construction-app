@@ -33,6 +33,19 @@ export function formatBytes(bytes: number, decimals: number = 1): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
+function isValidImageUrl(str?: string | null): boolean {
+  if (!str) return false;
+  const s = str.trim();
+  if (!s || s === "-" || s === "null" || s === "undefined" || s === "[]" || s === "{}") return false;
+  return (
+    s.startsWith("http://") ||
+    s.startsWith("https://") ||
+    s.startsWith("blob:") ||
+    s.startsWith("data:image/") ||
+    s.startsWith("/")
+  );
+}
+
 /**
  * Parse project image_url column value into an array of ProjectImageItem ({ url, caption })
  * Handles JSON arrays of objects ([{ url, caption }]), JSON arrays of strings (["url1", "url2"]),
@@ -41,15 +54,17 @@ export function formatBytes(bytes: number, decimals: number = 1): string {
 export function parseProjectImagesWithCaptions(imageUrlStr?: string | null): ProjectImageItem[] {
   if (!imageUrlStr || !imageUrlStr.trim()) return [];
   const trimmed = imageUrlStr.trim();
+  if (trimmed === "-" || trimmed === "null" || trimmed === "undefined" || trimmed === "[]") return [];
+
   if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
     try {
       const parsed = JSON.parse(trimmed);
       if (Array.isArray(parsed)) {
         const result: ProjectImageItem[] = [];
         for (const item of parsed) {
-          if (typeof item === "string" && item.trim().length > 0) {
+          if (typeof item === "string" && isValidImageUrl(item)) {
             result.push({ url: item.trim(), caption: "" });
-          } else if (item && typeof item === "object" && typeof item.url === "string" && item.url.trim().length > 0) {
+          } else if (item && typeof item === "object" && typeof item.url === "string" && isValidImageUrl(item.url)) {
             result.push({
               url: item.url.trim(),
               caption: typeof item.caption === "string" ? item.caption : "",
@@ -65,7 +80,7 @@ export function parseProjectImagesWithCaptions(imageUrlStr?: string | null): Pro
   if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
     try {
       const parsed = JSON.parse(trimmed);
-      if (parsed && typeof parsed === "object" && typeof parsed.url === "string" && parsed.url.trim().length > 0) {
+      if (parsed && typeof parsed === "object" && typeof parsed.url === "string" && isValidImageUrl(parsed.url)) {
         return [{ url: parsed.url.trim(), caption: typeof parsed.caption === "string" ? parsed.caption : "" }];
       }
     } catch (e) {
@@ -76,9 +91,10 @@ export function parseProjectImagesWithCaptions(imageUrlStr?: string | null): Pro
     return trimmed
       .split(",")
       .map((s) => s.trim())
-      .filter((s) => s.length > 0)
+      .filter((s) => isValidImageUrl(s))
       .map((url) => ({ url, caption: "" }));
   }
+  if (!isValidImageUrl(trimmed)) return [];
   return [{ url: trimmed, caption: "" }];
 }
 

@@ -4076,6 +4076,14 @@ export default function UpdateStatus() {
               handleUpdateNewImageCaption(idx - existingImages.length, cap);
             }
           }}
+          onAddFiles={handleFileChange}
+          onRemoveImage={(idx) => {
+            if (idx < existingImages.length) {
+              handleRemoveExistingImage(idx);
+            } else {
+              handleRemoveNewImage(idx - existingImages.length);
+            }
+          }}
         />
       )}
     </>

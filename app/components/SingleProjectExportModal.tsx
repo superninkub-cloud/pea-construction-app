@@ -10,7 +10,6 @@ import {
   Copy,
   Check,
   Image as ImageIcon,
-  FileText,
   CheckCircle2,
   Circle,
   RefreshCw,
@@ -23,6 +22,8 @@ import {
   Layers,
   Award,
   Clock,
+  Upload,
+  Trash2,
 } from "lucide-react";
 import { toPng, toBlob } from "html-to-image";
 import html2canvas from "html2canvas";
@@ -66,6 +67,8 @@ export interface SingleProjectExportModalProps {
   selectedMonth: string;
   images: ProjectImageItem[];
   onUpdateImageCaption?: (index: number, caption: string) => void;
+  onAddFiles?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemoveImage?: (index: number) => void;
 }
 
 const STEP_DEFINITIONS = [
@@ -118,6 +121,8 @@ export default function SingleProjectExportModal({
   selectedMonth,
   images,
   onUpdateImageCaption,
+  onAddFiles,
+  onRemoveImage,
 }: SingleProjectExportModalProps) {
   const [showBudget, setShowBudget] = useState(true);
   const [showChecklist, setShowChecklist] = useState(true);
@@ -130,6 +135,19 @@ export default function SingleProjectExportModal({
   const [copiedType, setCopiedType] = useState<"none" | "image" | "text">("none");
 
   const slideRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Filter out any empty or invalid URLs
+  const validImages = useMemo(() => {
+    return (images || []).filter(
+      (img) =>
+        img &&
+        typeof img.url === "string" &&
+        img.url.trim() !== "" &&
+        img.url.trim() !== "-" &&
+        img.url.trim() !== "null"
+    );
+  }, [images]);
 
   // Calculate physical progress
   const physicalProgress = useMemo(() => {
@@ -242,7 +260,7 @@ export default function SingleProjectExportModal({
       link.click();
     } catch (error) {
       console.error("Failed to export PNG:", error);
-      alert("เกิดข้อผิดพลาดในการบันทึกรูปภาพ กรุณาใช้ปุ่ม พิมพ์ / PDF แทนครับ");
+      alert("เกิดข้อผิดพลาดในการบันทึกรูปภาพ กรุณาใช้ปุ่ม ส่งออก PDF แทนครับ");
     } finally {
       if (wasEditing) setIsEditMode(true);
       setIsExporting(false);
@@ -295,7 +313,7 @@ export default function SingleProjectExportModal({
         (c) => `${checks[c.id as keyof typeof checks] ? "✅" : "⬜"} ${c.label}`
       ).join("\n");
 
-      const photoCaptionLines = images
+      const photoCaptionLines = validImages
         .map((img, i) => `  📸 รูปที่ ${i + 1}: ${img.caption ? img.caption : "(ไม่มีคำบรรยาย)"}`)
         .join("\n");
 
@@ -310,7 +328,7 @@ export default function SingleProjectExportModal({
         `📝 ความคืบหน้าล่าสุด:\n${latestRemarkText}`,
         `\n📋 เช็คลิสท์การดำเนินงาน (${checklistDoneCount}/8):`,
         checkLines,
-        images.length > 0 ? `\n🖼️ รูปถ่ายหน้างาน (${images.length} รูป):\n${photoCaptionLines}` : "",
+        validImages.length > 0 ? `\n🖼️ รูปถ่ายหน้างาน (${validImages.length} รูป):\n${photoCaptionLines}` : "",
         `\n📅 ข้อมูล ณ วันที่: ${new Date().toLocaleDateString("th-TH")}`,
       ]
         .filter(Boolean)
@@ -324,7 +342,7 @@ export default function SingleProjectExportModal({
     }
   };
 
-  // Print / Save as PDF via dedicated print window or html2pdf
+  // Print / Save as PDF via html2pdf
   const handlePrintPDF = async () => {
     if (!slideRef.current) return;
     const wasEditing = isEditMode;
@@ -380,6 +398,18 @@ export default function SingleProjectExportModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
+      {/* Hidden File Input for adding photos directly from the report modal */}
+      {onAddFiles && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*,.heic,.heif"
+          onChange={onAddFiles}
+          style={{ display: "none" }}
+        />
+      )}
+
       <div
         style={{
           width: "98%",
@@ -418,6 +448,31 @@ export default function SingleProjectExportModal({
                 ส่งออกสไลด์นำเสนอรายโครงการ (Single Job Export)
               </span>
             </div>
+
+            {onAddFiles && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "5px 11px",
+                  borderRadius: "6px",
+                  border: "1px solid #fde047",
+                  background: "#facc15",
+                  color: "#4a044e",
+                  fontSize: "0.8rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                }}
+                title="คลิกเพื่อเลือกรูปภาพแนบเข้าในรายงานนี้ทันที"
+              >
+                <Camera size={14} />
+                + เพิ่มรูปภาพแนบ
+              </button>
+            )}
 
             <button
               type="button"
@@ -500,10 +555,10 @@ export default function SingleProjectExportModal({
                 onChange={(e) => setShowPhotos(e.target.checked)}
                 style={{ accentColor: "#facc15" }}
               />
-              แสดงรูปถ่าย ({images.length})
+              แสดงรูปถ่ายแนบ ({validImages.length})
             </label>
 
-            {showPhotos && images.length > 0 && (
+            {showPhotos && validImages.length > 0 && (
               <select
                 value={photoColumns}
                 onChange={(e) => setPhotoColumns(Number(e.target.value) as 2 | 3 | 4)}
@@ -1447,8 +1502,8 @@ export default function SingleProjectExportModal({
               )}
             </div>
 
-            {/* 4. SITE PHOTOS WITH CAPTIONS SECTION */}
-            {showPhotos && images.length > 0 && (
+            {/* 4. SITE PHOTOS WITH CAPTIONS SECTION (Always shown when showPhotos is true) */}
+            {showPhotos && (
               <div
                 style={{
                   padding: "0 24px 22px 24px",
@@ -1456,7 +1511,7 @@ export default function SingleProjectExportModal({
               >
                 <div
                   style={{
-                    borderTop: "1px solid #e2e8f0",
+                    borderTop: "2px solid #f1f5f9",
                     paddingTop: "18px",
                   }}
                 >
@@ -1466,6 +1521,8 @@ export default function SingleProjectExportModal({
                       justifyContent: "space-between",
                       alignItems: "center",
                       marginBottom: "14px",
+                      flexWrap: "wrap",
+                      gap: "10px",
                     }}
                   >
                     <div
@@ -1479,104 +1536,245 @@ export default function SingleProjectExportModal({
                       }}
                     >
                       <Camera size={19} color="#7e22ce" />
-                      <span>ภาพถ่ายผลการดำเนินงานหน้างาน ({images.length} รูป)</span>
+                      <span>
+                        ภาพถ่ายประกอบรายงานความก้าวหน้า ({validImages.length} รูป)
+                      </span>
                     </div>
-                  </div>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: `repeat(${photoColumns}, 1fr)`,
-                      gap: "14px",
-                    }}
-                  >
-                    {images.map((img, idx) => (
-                      <div
-                        key={idx}
+                    {onAddFiles && (
+                      <button
+                        type="button"
+                        className="no-export no-print"
+                        onClick={() => fileInputRef.current?.click()}
                         style={{
-                          borderRadius: "12px",
-                          overflow: "hidden",
-                          border: "1px solid #cbd5e1",
-                          background: "#ffffff",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                           display: "flex",
-                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "6px",
+                          padding: "5px 12px",
+                          borderRadius: "8px",
+                          border: "1px solid #c4b5fd",
+                          background: "#f3e8ff",
+                          color: "#6d28d9",
+                          fontSize: "0.8rem",
+                          fontWeight: 700,
+                          cursor: "pointer",
                         }}
                       >
+                        <Upload size={14} />
+                        + เลือกรูปภาพแนบเพิ่มในรายงาน
+                      </button>
+                    )}
+                  </div>
+
+                  {validImages.length === 0 ? (
+                    <div
+                      className="no-export no-print"
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        border: "2px dashed #c4b5fd",
+                        borderRadius: "14px",
+                        padding: "28px 20px",
+                        background: "#faf5ff",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        cursor: onAddFiles ? "pointer" : "default",
+                        textAlign: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "44px",
+                          height: "44px",
+                          borderRadius: "12px",
+                          background: "#ede9fe",
+                          color: "#7e22ce",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Camera size={22} />
+                      </div>
+                      <div style={{ fontWeight: 700, color: "#581c87", fontSize: "0.95rem" }}>
+                        ยังไม่มีรูปภาพแนบในโครงการนี้ — คลิกที่นี่เพื่อเลือกรูปภาพแนบในรายงาน
+                      </div>
+                      <div style={{ fontSize: "0.8rem", color: "#64748b" }}>
+                        สามารถเลือกรูปถ่ายหน้างานและพิมพ์คำบรรยายใต้ภาพได้ทันที (กล่องนี้จะไม่ติดไปตอนบันทึกรูปหากไม่มีภาพ)
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                          validImages.length === 1
+                            ? "minmax(280px, 540px)"
+                            : `repeat(${Math.min(photoColumns, validImages.length)}, 1fr)`,
+                        gap: "14px",
+                      }}
+                    >
+                      {validImages.map((img, idx) => (
                         <div
+                          key={idx}
                           style={{
-                            position: "relative",
-                            width: "100%",
-                            height: photoColumns === 2 ? "240px" : photoColumns === 3 ? "185px" : "145px",
-                            backgroundColor: "#f1f5f9",
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            border: "1px solid #cbd5e1",
+                            background: "#ffffff",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                            display: "flex",
+                            flexDirection: "column",
                           }}
                         >
-                          <img
-                            src={img.url}
-                            alt={img.caption || `ภาพที่ ${idx + 1}`}
-                            crossOrigin="anonymous"
+                          <div
                             style={{
+                              position: "relative",
                               width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              display: "block",
-                            }}
-                          />
-                          <span
-                            style={{
-                              position: "absolute",
-                              top: "8px",
-                              left: "8px",
-                              background: "rgba(15, 23, 42, 0.75)",
-                              color: "#ffffff",
-                              fontSize: "0.72rem",
-                              fontWeight: 700,
-                              padding: "2px 8px",
-                              borderRadius: "6px",
+                              height:
+                                validImages.length === 1
+                                  ? "280px"
+                                  : photoColumns === 2
+                                  ? "240px"
+                                  : photoColumns === 3
+                                  ? "190px"
+                                  : "150px",
+                              backgroundColor: "#f1f5f9",
                             }}
                           >
-                            ภาพที่ {idx + 1}
-                          </span>
-                        </div>
+                            <img
+                              src={img.url}
+                              alt={img.caption || `ภาพที่ ${idx + 1}`}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                display: "block",
+                              }}
+                            />
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: "8px",
+                                left: "8px",
+                                background: "rgba(15, 23, 42, 0.78)",
+                                color: "#ffffff",
+                                fontSize: "0.74rem",
+                                fontWeight: 700,
+                                padding: "2px 9px",
+                                borderRadius: "6px",
+                              }}
+                            >
+                              ภาพที่ {idx + 1}
+                            </span>
 
-                        {/* Caption Area under Photo */}
-                        {(img.caption || isEditMode) && (
+                            {onRemoveImage && (
+                              <button
+                                type="button"
+                                className="no-export no-print"
+                                onClick={() => onRemoveImage(idx)}
+                                style={{
+                                  position: "absolute",
+                                  top: "8px",
+                                  right: "8px",
+                                  background: "rgba(239, 68, 68, 0.9)",
+                                  color: "#ffffff",
+                                  border: "none",
+                                  borderRadius: "50%",
+                                  width: "26px",
+                                  height: "26px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  cursor: "pointer",
+                                }}
+                                title="ลบรูปนี้ออกจากรายงาน"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Caption Area under Photo - Always editable inline! */}
                           <div
                             style={{
                               padding: "8px 12px",
                               background: "#f8fafc",
                               borderTop: "1px solid #e2e8f0",
-                              fontSize: "0.82rem",
+                              fontSize: "0.84rem",
                               color: "#1e293b",
                               fontWeight: 600,
-                              flex: 1,
                               display: "flex",
                               alignItems: "center",
+                              minHeight: "38px",
                             }}
                           >
-                            {isEditMode && onUpdateImageCaption ? (
-                              <input
-                                type="text"
-                                value={img.caption || ""}
-                                onChange={(e) => onUpdateImageCaption(idx, e.target.value)}
-                                placeholder={`พิมพ์คำบรรยายภาพที่ ${idx + 1}...`}
-                                style={{
-                                  width: "100%",
-                                  padding: "4px 8px",
-                                  borderRadius: "6px",
-                                  border: "1px solid #a855f7",
-                                  fontSize: "0.8rem",
-                                  background: "#ffffff",
-                                }}
-                              />
+                            {onUpdateImageCaption ? (
+                              <>
+                                {/* Interactive input shown in preview */}
+                                <input
+                                  type="text"
+                                  className="no-export no-print"
+                                  value={img.caption || ""}
+                                  onChange={(e) => onUpdateImageCaption(idx, e.target.value)}
+                                  placeholder={`✏️ พิมพ์คำบรรยายภาพที่ ${idx + 1}...`}
+                                  style={{
+                                    width: "100%",
+                                    padding: "5px 8px",
+                                    borderRadius: "6px",
+                                    border: "1px dashed #cbd5e1",
+                                    fontSize: "0.82rem",
+                                    background: "#ffffff",
+                                    color: "#1e293b",
+                                    fontWeight: 600,
+                                    outline: "none",
+                                  }}
+                                />
+                                {/* Clean text rendered when exporting to PNG / PDF */}
+                                <span
+                                  style={{
+                                    display: "none",
+                                  }}
+                                  className="export-only-caption"
+                                >
+                                  {img.caption || `ภาพถ่ายผลการดำเนินงาน #${idx + 1}`}
+                                </span>
+                                {img.caption ? (
+                                  <div
+                                    style={{
+                                      display: "none",
+                                    }}
+                                  >
+                                    {img.caption}
+                                  </div>
+                                ) : null}
+                              </>
                             ) : (
-                              <span>{img.caption}</span>
+                              <span>{img.caption || `ภาพถ่ายผลการดำเนินงาน #${idx + 1}`}</span>
                             )}
                           </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+
+                          {/* Visible static caption block for exported image/PDF */}
+                          {img.caption && (
+                            <div
+                              style={{
+                                padding: "6px 12px 8px 12px",
+                                background: "#f3e8ff",
+                                borderTop: "1px solid #e9d5ff",
+                                fontSize: "0.84rem",
+                                color: "#4a044e",
+                                fontWeight: 700,
+                              }}
+                            >
+                              💬 {img.caption}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1621,4 +1819,3 @@ export default function SingleProjectExportModal({
     </div>
   );
 }
-
