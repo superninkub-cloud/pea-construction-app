@@ -110,6 +110,7 @@ export default function SafetyPPEDashboard() {
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [updateItem, setUpdateItem] = useState<AggregatedEquipment | null>(null);
+  const [editStandard, setEditStandard] = useState<number>(0);
   const [editReady, setEditReady] = useState<number>(0);
   const [editPending, setEditPending] = useState<number>(0);
   const [editDamaged, setEditDamaged] = useState<number>(0);
@@ -121,6 +122,7 @@ export default function SafetyPPEDashboard() {
   const [newCategory, setNewCategory] = useState('1.1 ป้องกันศีรษะ');
   const [newName, setNewName] = useState('');
   const [newUnit, setNewUnit] = useState('ใบ');
+  const [newStandard, setNewStandard] = useState(1);
   const [newReady, setNewReady] = useState(1);
   const [newPending, setNewPending] = useState(0);
   const [newDamaged, setNewDamaged] = useState(0);
@@ -167,6 +169,7 @@ export default function SafetyPPEDashboard() {
 
   const openEditModal = (item: AggregatedEquipment) => {
     setUpdateItem(item);
+    setEditStandard(item.standard || 0);
     setEditReady(item.ready);
     setEditPending(item.pending);
     setEditDamaged(item.damaged);
@@ -182,6 +185,7 @@ export default function SafetyPPEDashboard() {
       if (item.rowKey === updateItem.rowKey) {
         return {
           ...item,
+          standard: Math.max(0, Number(editStandard) || 0),
           ready: Math.max(0, Number(editReady) || 0),
           pending: Math.max(0, Number(editPending) || 0),
           damaged: Math.max(0, Number(editDamaged) || 0),
@@ -211,6 +215,7 @@ export default function SafetyPPEDashboard() {
       const target = updated[existingIndex];
       updated[existingIndex] = {
         ...target,
+        standard: Math.max(0, Number(newStandard) || target.standard),
         ready: target.ready + Math.max(0, Number(newReady) || 0),
         pending: target.pending + Math.max(0, Number(newPending) || 0),
         damaged: target.damaged + Math.max(0, Number(newDamaged) || 0),
@@ -228,7 +233,7 @@ export default function SafetyPPEDashboard() {
         category: newCategory,
         name: newName.trim(),
         unit: newUnit.trim() || 'ชิ้น',
-        standard: Math.max(1, totalAdded),
+        standard: Math.max(0, Number(newStandard) || totalAdded || 1),
         ready: Math.max(0, Number(newReady) || 0),
         pending: Math.max(0, Number(newPending) || 0),
         damaged: Math.max(0, Number(newDamaged) || 0),
@@ -239,6 +244,7 @@ export default function SafetyPPEDashboard() {
     }
 
     setNewName('');
+    setNewStandard(1);
     setNewReady(1);
     setNewPending(0);
     setNewDamaged(0);
@@ -422,10 +428,10 @@ export default function SafetyPPEDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
-          <div className="w-8 h-8 rounded-full bg-[#1E88E5] text-white flex items-center justify-center font-bold">ธ</div>
+          <div className="w-8 h-8 rounded-full bg-[#1E88E5] text-white flex items-center justify-center font-bold text-xs">AD</div>
           <div className="text-sm">
-            <p className="font-bold text-slate-800 leading-tight">นายธีรภัทร</p>
-            <p className="text-xs text-slate-500 leading-tight">หัวหน้าแผนก</p>
+            <p className="font-bold text-slate-800 leading-tight">Admin</p>
+            <p className="text-xs text-slate-500 leading-tight">ผู้ดูแลระบบ</p>
           </div>
         </div>
       </header>
@@ -637,6 +643,7 @@ export default function SafetyPPEDashboard() {
                       <th className="px-5 py-3.5 font-bold text-slate-800">ชื่ออุปกรณ์</th>
                       <th className="px-5 py-3.5 font-bold">หมวดหมู่</th>
                       <th className="px-5 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
+                      <th className="px-5 py-3.5 font-bold text-center">จำนวนขั้นต่ำต่อชุด</th>
                       <th className="px-5 py-3.5 font-bold">ภาพรวมสถานะแต่ละอุปกรณ์</th>
                       <th className="px-5 py-3.5 font-bold text-center">พร้อมใช้</th>
                       <th className="px-5 py-3.5 font-bold text-center">ชำรุด</th>
@@ -648,7 +655,7 @@ export default function SafetyPPEDashboard() {
                   <tbody className="divide-y divide-slate-100">
                     {currentData.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="px-6 py-12 text-center text-slate-500">
+                        <td colSpan={11} className="px-6 py-12 text-center text-slate-500">
                           ไม่มีข้อมูลที่ตรงกับตัวกรอง
                         </td>
                       </tr>
@@ -677,6 +684,11 @@ export default function SafetyPPEDashboard() {
                                 </div>
                                 <span className="text-slate-800 font-semibold">{item.userName}</span>
                               </div>
+                            </td>
+                            <td className="px-5 py-3.5 text-center">
+                              <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-purple-50 text-purple-800 border border-purple-200">
+                                {item.standard} {item.unit}
+                              </span>
                             </td>
                             <td className="px-5 py-3.5">
                               {renderOverviewSummary(item)}
@@ -806,6 +818,8 @@ export default function SafetyPPEDashboard() {
                                   {item.name}
                                 </p>
                                 <p className="text-xs text-slate-500 mt-0.5">
+                                  ขั้นต่ำ <span className="font-bold text-purple-700">{item.standard} {item.unit}</span>
+                                  {' • '}
                                   รวม <span className="font-bold text-slate-800">{totalCount} {item.unit}</span>
                                   {' • '}
                                   <span className="text-emerald-600 font-bold">พร้อมใช้ {item.ready} {item.unit}</span>
@@ -869,6 +883,19 @@ export default function SafetyPPEDashboard() {
               </div>
 
               <form id="update-form" onSubmit={handleUpdateQuantities} className="space-y-4">
+                <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 flex items-center justify-between gap-4">
+                  <label className="text-xs font-bold text-purple-900">
+                    จำนวนอุปกรณ์ขั้นต่ำต่อชุด ({updateItem.unit})
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={editStandard}
+                    onChange={(e) => setEditStandard(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-32 px-3 py-1.5 bg-white border border-purple-300 rounded-lg font-bold text-slate-800 text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200">
                     <label className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 mb-1.5">
@@ -1004,6 +1031,17 @@ export default function SafetyPPEDashboard() {
                 >
                   {allCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
+              </div>
+
+              <div className="p-3 rounded-xl bg-purple-50/70 border border-purple-200 flex items-center justify-between gap-3">
+                <label className="text-xs font-bold text-purple-900">จำนวนอุปกรณ์ขั้นต่ำต่อชุด ({newUnit || 'ชิ้น'})</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={newStandard}
+                  onChange={(e) => setNewStandard(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-28 px-3 py-1.5 bg-white border border-purple-300 rounded-xl text-sm font-bold text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-1">
