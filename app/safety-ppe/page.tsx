@@ -26,9 +26,28 @@ type AggregatedEquipment = {
   remarks?: string;
 };
 
-// Emoji mapping for images based on name or category
+// Custom SVG Safety Helmet & Emoji mapping so icons render crisply on all OS versions
+const SafetyHelmetIcon = ({ size = 28 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Dome */}
+    <path d="M10 38C10 23.6406 19.8497 12 32 12C44.1503 12 54 23.6406 54 38H10Z" fill="#FBBF24" stroke="#B45309" strokeWidth="3" strokeLinejoin="round"/>
+    {/* Top Ridge */}
+    <path d="M27 12.5C27 10.567 29.2386 9 32 9C34.7614 9 37 10.567 37 12.5V34H27V12.5Z" fill="#F59E0B" stroke="#B45309" strokeWidth="2.5" strokeLinejoin="round"/>
+    {/* Highlight */}
+    <path d="M17 29C18.5 22 22.5 17.5 26 16" stroke="#FEF3C7" strokeWidth="3" strokeLinecap="round"/>
+    {/*PEA Purple/White Front Badge */}
+    <rect x="28" y="21" width="8" height="8" rx="2" fill="#7C3AED" stroke="#FEF3C7" strokeWidth="1.5"/>
+    {/* Brim */}
+    <path d="M5 38C5 36.3431 6.34315 35 8 35H56C57.6569 35 59 36.3431 59 38V40C59 41.6569 57.6569 43 56 43H8C6.34315 43 5 41.6569 5 40V38Z" fill="#F59E0B" stroke="#B45309" strokeWidth="3" strokeLinejoin="round"/>
+    {/* Chin strap hint */}
+    <path d="M16 43L20 51H44L48 43" stroke="#64748B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 const getEmojiIcon = (category: string, name: string) => {
-  if (name.includes('หมวก')) return '🪖';
+  if (name.includes('หมวก') || category.includes('ป้องกันศีรษะ')) {
+    return <SafetyHelmetIcon size={28} />;
+  }
   if (name.includes('แว่น')) return '🥽';
   if (name.includes('ปลั๊กอุดหู')) return '🎧';
   if (name.includes('ถุงมือ')) return '🧤';
@@ -392,8 +411,8 @@ export default function SafetyPPEDashboard() {
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-10 sticky top-0 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 flex items-center justify-center shrink-0">
-            <span className="text-4xl drop-shadow-sm">🪖</span>
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 shadow-sm">
+            <SafetyHelmetIcon size={36} />
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-tight">ระบบติดตามสถานะอุปกรณ์ (PPE)</h1>
