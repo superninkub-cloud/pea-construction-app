@@ -64,6 +64,8 @@ const getEmojiIcon = (category: string, name: string) => {
 };
 
 const STORAGE_KEY = 'pea_safety_data_v5_summary';
+const ITEM_EXEC_REMARKS_KEY = 'pea_safety_item_exec_remarks_v1';
+const OVERALL_EXEC_NOTE_KEY = 'pea_safety_overall_exec_note_v1';
 
 const buildDefaultAggregatedData = (): AggregatedEquipment[] => {
   const today = new Date().toISOString().split('T')[0];
@@ -114,6 +116,8 @@ export default function SafetyPPEDashboard() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportViewMode, setExportViewMode] = useState<'summary_by_item' | 'summary_by_tech' | 'detailed_list'>('summary_by_item');
   const [isExportingImage, setIsExportingImage] = useState(false);
+  const [itemExecRemarks, setItemExecRemarks] = useState<Record<string, string>>({});
+  const [overallExecNote, setOverallExecNote] = useState<string>('');
   const exportRef = useRef<HTMLDivElement>(null);
   const [updateItem, setUpdateItem] = useState<AggregatedEquipment | null>(null);
   const [editStandard, setEditStandard] = useState<number>(0);
@@ -163,6 +167,18 @@ export default function SafetyPPEDashboard() {
       setLocalData(initial);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
     }
+    const savedItemRemarks = localStorage.getItem(ITEM_EXEC_REMARKS_KEY);
+    if (savedItemRemarks) {
+      try {
+        setItemExecRemarks(JSON.parse(savedItemRemarks));
+      } catch {}
+    }
+
+    const savedOverallNote = localStorage.getItem(OVERALL_EXEC_NOTE_KEY);
+    if (savedOverallNote) {
+      setOverallExecNote(savedOverallNote);
+    }
+
     setIsLoaded(true);
     
     return () => clearInterval(timer);
@@ -171,6 +187,24 @@ export default function SafetyPPEDashboard() {
   const saveLocalData = (newData: AggregatedEquipment[]) => {
     setLocalData(newData);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+  };
+
+  const updateItemExecRemark = (equipmentName: string, value: string) => {
+    const updated = { ...itemExecRemarks, [equipmentName]: value };
+    setItemExecRemarks(updated);
+    localStorage.setItem(ITEM_EXEC_REMARKS_KEY, JSON.stringify(updated));
+  };
+
+  const updateRowRemarkInline = (rowKey: string, value: string) => {
+    const newData = localData.map(item =>
+      item.rowKey === rowKey ? { ...item, remarks: value } : item
+    );
+    saveLocalData(newData);
+  };
+
+  const updateOverallNote = (value: string) => {
+    setOverallExecNote(value);
+    localStorage.setItem(OVERALL_EXEC_NOTE_KEY, value);
   };
 
   const openEditModal = (item: AggregatedEquipment) => {
@@ -338,6 +372,7 @@ export default function SafetyPPEDashboard() {
       pendingTotal: number;
       damagedTotal: number;
       disposedTotal: number;
+      defaultRemarks: string[];
       teamBreakdowns: { userName: string; standard: number; ready: number; damaged: number; pending: number; disposed: number }[];
     }>();
 
@@ -350,6 +385,9 @@ export default function SafetyPPEDashboard() {
         existing.pendingTotal += item.pending;
         existing.damagedTotal += item.damaged;
         existing.disposedTotal += item.disposed;
+        if (item.remarks && !existing.defaultRemarks.includes(item.remarks)) {
+          existing.defaultRemarks.push(item.remarks);
+        }
         existing.teamBreakdowns.push({
           userName: item.userName,
           standard: item.standard,
@@ -369,6 +407,7 @@ export default function SafetyPPEDashboard() {
           pendingTotal: item.pending,
           damagedTotal: item.damaged,
           disposedTotal: item.disposed,
+          defaultRemarks: item.remarks ? [item.remarks] : [],
           teamBreakdowns: [{
             userName: item.userName,
             standard: item.standard,
@@ -406,7 +445,26 @@ export default function SafetyPPEDashboard() {
 
   const handlePrintDocument = () => {
     if (!exportRef.current) return;
-    const printContents = exportRef.current.innerHTML;
+    // Clone node and bake current input/textarea values into attributes/textContent so they appear in print
+    const clone = exportRef.current.cloneNode(true) as HTMLElement;
+    const origInputs = exportRef.current.querySelectorAll('input');
+    const cloneInputs = clone.querySelectorAll('input');
+    origInputs.forEach((inp, i) => {
+      if (cloneInputs[i]) {
+        cloneInputs[i].setAttribute('value', inp.value);
+        if (!inp.value) cloneInputs[i].setAttribute('placeholder', '-');
+      }
+    });
+    const origTextareas = exportRef.current.querySelectorAll('textarea');
+    const cloneTextareas = clone.querySelectorAll('textarea');
+    origTextareas.forEach((ta, i) => {
+      if (cloneTextareas[i]) {
+        cloneTextareas[i].textContent = ta.value;
+        if (!ta.value) cloneTextareas[i].setAttribute('placeholder', '-');
+      }
+    });
+
+    const printContents = clone.innerHTML;
     const win = window.open('', '_blank', 'width=1200,height=900');
     if (!win) return;
     win.document.write(`
@@ -1394,12 +1452,12 @@ export default function SafetyPPEDashboard() {
                 {/* Section 1: Summary By Equipment Type */}
                 {exportViewMode === 'summary_by_item' && (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-2 gap-1">
                       <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                         <ShieldCheck size={17} className="text-[#6B2169]" />
                         ตารางสรุปภาพรวมความพร้อมแยกตามประเภทอุปกรณ์ ({groupedByEquipmentType.length} รายการ)
                       </h4>
-                      <span className="text-xs text-slate-500">เปรียบเทียบเกณฑ์ขั้นต่ำต่อชุด กับจำนวนพร้อมใช้งานจริง</span>
+                      <span className="text-xs text-purple-700 font-semibold">💡 คลิกที่ช่อง "หมายเหตุ / คำชี้แจง" เพื่อพิมพ์รายละเอียดชี้แจงผู้บริหารได้ทันที</span>
                     </div>
                     <div className="overflow-x-auto border border-slate-200 rounded-xl">
                       <table className="w-full text-left text-xs">
@@ -1414,11 +1472,15 @@ export default function SafetyPPEDashboard() {
                             <th className="py-2.5 px-3 font-bold text-center text-amber-700">รอซ่อม</th>
                             <th className="py-2.5 px-3 font-bold text-center text-slate-600">จำหน่าย/ขาด</th>
                             <th className="py-2.5 px-3 font-bold text-center">ความพร้อม (%)</th>
+                            <th className="py-2.5 px-3 font-bold min-w-[200px]">หมายเหตุ / คำชี้แจงผู้บริหาร</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                           {groupedByEquipmentType.map((eq, idx) => {
                             const readinessPct = eq.standardTotal > 0 ? Math.min(100, Math.round((eq.readyTotal / eq.standardTotal) * 100)) : 100;
+                            const currentRemark = itemExecRemarks[eq.name] !== undefined
+                              ? itemExecRemarks[eq.name]
+                              : eq.defaultRemarks.join(', ');
                             return (
                               <tr key={eq.name} className="hover:bg-slate-50/70">
                                 <td className="py-2 px-3 text-slate-500 font-semibold">{idx + 1}</td>
@@ -1444,6 +1506,15 @@ export default function SafetyPPEDashboard() {
                                   }`}>
                                     {readinessPct}%
                                   </span>
+                                </td>
+                                <td className="py-1.5 px-2.5">
+                                  <input
+                                    type="text"
+                                    value={currentRemark}
+                                    onChange={(e) => updateItemExecRemark(eq.name, e.target.value)}
+                                    placeholder="คลิกเพื่อระบุคำชี้แจง..."
+                                    className="w-full px-2.5 py-1 rounded-lg text-xs text-slate-800 font-medium bg-transparent hover:bg-amber-50/60 focus:bg-amber-50 border border-transparent hover:border-amber-200 focus:border-amber-400 focus:outline-none placeholder:text-slate-300 transition-colors"
+                                  />
                                 </td>
                               </tr>
                             );
@@ -1489,15 +1560,24 @@ export default function SafetyPPEDashboard() {
                             </div>
                             <div className="p-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                               {tech.items.map(item => (
-                                <div key={item.rowKey} className="px-3 py-2 rounded-lg border border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs">
-                                  <span className="font-semibold text-slate-800 truncate pr-2">{item.name}</span>
-                                  <span className="shrink-0 font-bold text-[11px]">
-                                    <span className="text-purple-700">ขั้นต่ำ {item.standard}</span>
-                                    {' | '}
-                                    <span className="text-emerald-600">ดี {item.ready}</span>
-                                    {item.damaged > 0 && <span className="text-rose-600"> • ชำรุด {item.damaged}</span>}
-                                    {item.disposed > 0 && <span className="text-slate-500"> • ขาด {item.disposed}</span>}
-                                  </span>
+                                <div key={item.rowKey} className="px-3 py-2 rounded-lg border border-slate-100 bg-slate-50/50 flex flex-col gap-1 text-xs">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-semibold text-slate-800 truncate pr-2">{item.name}</span>
+                                    <span className="shrink-0 font-bold text-[11px]">
+                                      <span className="text-purple-700">ขั้นต่ำ {item.standard}</span>
+                                      {' | '}
+                                      <span className="text-emerald-600">ดี {item.ready}</span>
+                                      {item.damaged > 0 && <span className="text-rose-600"> • ชำรุด {item.damaged}</span>}
+                                      {item.disposed > 0 && <span className="text-slate-500"> • ขาด {item.disposed}</span>}
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="text"
+                                    value={item.remarks || ''}
+                                    onChange={(e) => updateRowRemarkInline(item.rowKey, e.target.value)}
+                                    placeholder="หมายเหตุ/คำชี้แจง..."
+                                    className="w-full px-2 py-0.5 rounded text-[11px] text-amber-800 bg-white/80 hover:bg-amber-50/60 focus:bg-amber-50 border border-slate-200/70 focus:border-amber-400 focus:outline-none placeholder:text-slate-300"
+                                  />
                                 </div>
                               ))}
                             </div>
@@ -1511,10 +1591,11 @@ export default function SafetyPPEDashboard() {
                 {/* Section 3: Detailed List */}
                 {exportViewMode === 'detailed_list' && (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-2 gap-1">
                       <h4 className="font-bold text-slate-800 text-sm">
                         ตารางรายการอุปกรณ์รายชุดงาน ({filteredData.length} รายการ)
                       </h4>
+                      <span className="text-xs text-purple-700 font-semibold">💡 คลิกที่ช่อง "หมายเหตุ / คำชี้แจง" เพื่อพิมพ์แก้ไขได้ทันที</span>
                     </div>
                     <div className="overflow-x-auto border border-slate-200 rounded-xl">
                       <table className="w-full text-left text-xs">
@@ -1528,6 +1609,7 @@ export default function SafetyPPEDashboard() {
                             <th className="py-2 px-3 font-bold text-center text-rose-700">ชำรุด</th>
                             <th className="py-2 px-3 font-bold text-center text-amber-700">รอซ่อม</th>
                             <th className="py-2 px-3 font-bold text-center text-slate-600">จำหน่าย/ขาด</th>
+                            <th className="py-2 px-3 font-bold min-w-[200px]">หมายเหตุ / คำชี้แจงผู้บริหาร</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -1541,6 +1623,15 @@ export default function SafetyPPEDashboard() {
                               <td className="py-2 px-3 text-center font-bold text-rose-600">{item.damaged > 0 ? `${item.damaged} ${item.unit}` : '-'}</td>
                               <td className="py-2 px-3 text-center font-bold text-amber-600">{item.pending > 0 ? `${item.pending} ${item.unit}` : '-'}</td>
                               <td className="py-2 px-3 text-center text-slate-500">{item.disposed > 0 ? `${item.disposed} ${item.unit}` : '-'}</td>
+                              <td className="py-1.5 px-2.5">
+                                <input
+                                  type="text"
+                                  value={item.remarks || ''}
+                                  onChange={(e) => updateRowRemarkInline(item.rowKey, e.target.value)}
+                                  placeholder="คลิกเพื่อระบุคำชี้แจง..."
+                                  className="w-full px-2.5 py-1 rounded-lg text-xs text-slate-800 font-medium bg-transparent hover:bg-amber-50/60 focus:bg-amber-50 border border-transparent hover:border-amber-200 focus:border-amber-400 focus:outline-none placeholder:text-slate-300 transition-colors"
+                                />
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -1548,6 +1639,24 @@ export default function SafetyPPEDashboard() {
                     </div>
                   </div>
                 )}
+
+                {/* Overall Executive Note / Clarification Box */}
+                <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200/90 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
+                      <Edit3 size={14} className="text-amber-700" />
+                      หมายเหตุสรุปภาพรวม / คำชี้แจงเพิ่มเติมเพื่อเรียนผู้บริหาร
+                    </label>
+                    <span className="text-[11px] text-amber-700">สามารถพิมพ์รายละเอียดแผนการจัดซื้อ/เบิกทดแทน หรือเหตุผลชี้แจงเพิ่มเติมได้โดยตรง</span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={overallExecNote}
+                    onChange={(e) => updateOverallNote(e.target.value)}
+                    placeholder="พิมพ์รายละเอียดชี้แจงผู้บริหาร เช่น รายการที่ขาดอัตราอยู่ระหว่างดำเนินการขออนุมัติจัดซื้อทดแทนประจำปีงบประมาณ / อุปกรณ์ที่ชำรุดได้ส่งตรวจสอบมาตรฐานแล้ว..."
+                    className="w-full p-3 rounded-xl bg-white border border-amber-200 text-xs text-slate-800 font-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-400 resize-y placeholder:text-slate-400"
+                  />
+                </div>
 
                 {/* Report Footer Signature / Timestamp */}
                 <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-[11px] text-slate-400">
