@@ -4,20 +4,26 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, Plus, X, HardHat, ChevronDown, 
   List, CheckCircle, AlertTriangle, Box, RefreshCw,
-  Filter, ChevronLeft, ChevronRight, Wrench, MoreVertical, Calendar, Trash2, Edit3
+  Filter, ChevronLeft, ChevronRight, Wrench, Calendar, Trash2, Edit3, Users, ShieldCheck
 } from 'lucide-react';
 import { safetyData } from './data';
 
 // --- Type Definitions ---
-type ExplodedEquipment = {
-  id: string; // e.g., PPE-00128
+type AggregatedEquipment = {
+  rowKey: string; // e.g., team1_1
   teamId: string;
   userName: string;
+  membersCount: number;
   category: string;
   name: string;
-  status: 'ready' | 'pending' | 'damaged' | 'disposed';
+  unit: string;
+  standard: number;
+  ready: number;
+  pending: number;
+  damaged: number;
+  disposed: number; // ขาด / จำหน่าย / เบิกเพิ่ม
   lastInspected: string;
-  originalItemId: string;
+  remarks?: string;
 };
 
 // Emoji mapping for images based on name or category
@@ -36,22 +42,70 @@ const getEmojiIcon = (category: string, name: string) => {
   return '🛠️';
 };
 
+const STORAGE_KEY = 'pea_safety_data_v5_summary';
+
+const buildDefaultAggregatedData = (): AggregatedEquipment[] => {
+  const today = new Date().toISOString().split('T')[0];
+  const rows: AggregatedEquipment[] = [];
+  safetyData.forEach(team => {
+    const cleanUser = team.name.replace('ชุดงาน นาย', 'นาย');
+    team.equipment.forEach(eq => {
+      const readyCount = Math.max(0, eq.actual - (eq.damaged || 0) - (eq.pending || 0));
+      const pendingCount = eq.pending || 0;
+      const damagedCount = eq.damaged || 0;
+      const disposedCount = eq.missing || 0;
+      rows.push({
+        rowKey: `${team.id}_${eq.id}`,
+        teamId: team.id,
+        userName: cleanUser,
+        membersCount: team.membersCount,
+        category: eq.category,
+        name: eq.name,
+        unit: eq.unit || 'ชิ้น',
+        standard: eq.standard,
+        ready: readyCount,
+        pending: pendingCount,
+        damaged: damagedCount,
+        disposed: disposedCount,
+        lastInspected: today,
+        remarks: eq.remarks || '',
+      });
+    });
+  });
+  return rows;
+};
+
 export default function SafetyPPEDashboard() {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [localData, setLocalData] = useState<ExplodedEquipment[]>([]);
+  const [localData, setLocalData] = useState<AggregatedEquipment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedUser, setSelectedUser] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [activeTab, setActiveTab] = useState<'equipment' | 'technician'>('equipment');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const [itemsPerPage, setItemsPerPage] = useState(15);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [updateItem, setUpdateItem] = useState<ExplodedEquipment | null>(null);
-  const [updateTargetStatus, setUpdateTargetStatus] = useState<'ready' | 'pending' | 'damaged' | 'disposed'>('ready');
+  const [updateItem, setUpdateItem] = useState<AggregatedEquipment | null>(null);
+  const [editReady, setEditReady] = useState<number>(0);
+  const [editPending, setEditPending] = useState<number>(0);
+  const [editDamaged, setEditDamaged] = useState<number>(0);
+  const [editDisposed, setEditDisposed] = useState<number>(0);
+  const [editRemarks, setEditRemarks] = useState<string>('');
+
+  // Create form state
+  const [newUserName, setNewUserName] = useState('');
+  const [newCategory, setNewCategory] = useState('1.1 ป้องกันศีรษะ');
+  const [newName, setNewName] = useState('');
+  const [newUnit, setNewUnit] = useState('ใบ');
+  const [newReady, setNewReady] = useState(1);
+  const [newPending, setNewPending] = useState(0);
+  const [newDamaged, setNewDamaged] = useState(0);
+  const [newDisposed, setNewDisposed] = useState(0);
 
   useEffect(() => {
     setUserRole(sessionStorage.getItem("pea_role"));
@@ -61,67 +115,61 @@ export default function SafetyPPEDashboard() {
       setCurrentTime(new Date());
     }, 1000);
 
-    const saved = localStorage.getItem('pea_safety_data_v4_exploded');
+    const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      setLocalData(JSON.parse(saved));
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0 && 'ready' in parsed[0]) {
+          setLocalData(parsed);
+        } else {
+          const initial = buildDefaultAggregatedData();
+          setLocalData(initial);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+        }
+      } catch {
+        const initial = buildDefaultAggregatedData();
+        setLocalData(initial);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      }
     } else {
-      // Generate exploded data from safetyData
-      const exploded: ExplodedEquipment[] = [];
-      safetyData.forEach(team => {
-        team.equipment.forEach(eq => {
-          const totalToCreate = Math.max(eq.standard, eq.actual + (eq.missing || 0));
-          let readyToCreate = Math.max(0, eq.actual - (eq.damaged || 0) - (eq.pending || 0));
-          let pendingToCreate = eq.pending || 0;
-          let damagedToCreate = eq.damaged || 0;
-          let disposedToCreate = eq.missing || 0;
-
-          for (let i = 0; i < totalToCreate; i++) {
-            let status = 'disposed';
-            if (readyToCreate > 0) { status = 'ready'; readyToCreate--; }
-            else if (pendingToCreate > 0) { status = 'pending'; pendingToCreate--; }
-            else if (damagedToCreate > 0) { status = 'damaged'; damagedToCreate--; }
-            else if (disposedToCreate > 0) { status = 'disposed'; disposedToCreate--; }
-
-            // Deterministic random ID based on team and item for stability, or just random
-            const randomId = Math.floor(10000 + Math.random() * 90000);
-            
-            // Random date within last 3 months
-            const randomDate = new Date();
-            randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 90));
-
-            exploded.push({
-              id: `PPE-${randomId}`,
-              teamId: team.id,
-              userName: team.name.replace('ชุดงาน นาย', 'นาย'),
-              category: eq.category,
-              name: eq.name,
-              status: status as any,
-              lastInspected: randomDate.toISOString().split('T')[0],
-              originalItemId: eq.id
-            });
-          }
-        });
-      });
-      setLocalData(exploded);
-      localStorage.setItem('pea_safety_data_v4_exploded', JSON.stringify(exploded));
+      const initial = buildDefaultAggregatedData();
+      setLocalData(initial);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
     }
     setIsLoaded(true);
     
     return () => clearInterval(timer);
   }, []);
 
-  const saveLocalData = (newData: ExplodedEquipment[]) => {
+  const saveLocalData = (newData: AggregatedEquipment[]) => {
     setLocalData(newData);
-    localStorage.setItem('pea_safety_data_v4_exploded', JSON.stringify(newData));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
   };
 
-  const handleUpdateStatus = (e: React.FormEvent) => {
+  const openEditModal = (item: AggregatedEquipment) => {
+    setUpdateItem(item);
+    setEditReady(item.ready);
+    setEditPending(item.pending);
+    setEditDamaged(item.damaged);
+    setEditDisposed(item.disposed);
+    setEditRemarks(item.remarks || '');
+  };
+
+  const handleUpdateQuantities = (e: React.FormEvent) => {
     e.preventDefault();
     if (!updateItem) return;
     
     const newData = localData.map(item => {
-      if (item.id === updateItem.id) {
-        return { ...item, status: updateTargetStatus, lastInspected: new Date().toISOString().split('T')[0] };
+      if (item.rowKey === updateItem.rowKey) {
+        return {
+          ...item,
+          ready: Math.max(0, Number(editReady) || 0),
+          pending: Math.max(0, Number(editPending) || 0),
+          damaged: Math.max(0, Number(editDamaged) || 0),
+          disposed: Math.max(0, Number(editDisposed) || 0),
+          remarks: editRemarks.trim(),
+          lastInspected: new Date().toISOString().split('T')[0]
+        };
       }
       return item;
     });
@@ -130,40 +178,145 @@ export default function SafetyPPEDashboard() {
     setUpdateItem(null);
   };
 
+  const handleCreateEquipment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim() || !newUserName.trim()) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const existingIndex = localData.findIndex(
+      i => i.userName === newUserName && i.name.trim().toLowerCase() === newName.trim().toLowerCase()
+    );
+
+    if (existingIndex >= 0) {
+      const updated = [...localData];
+      const target = updated[existingIndex];
+      updated[existingIndex] = {
+        ...target,
+        ready: target.ready + Math.max(0, Number(newReady) || 0),
+        pending: target.pending + Math.max(0, Number(newPending) || 0),
+        damaged: target.damaged + Math.max(0, Number(newDamaged) || 0),
+        disposed: target.disposed + Math.max(0, Number(newDisposed) || 0),
+        lastInspected: today,
+      };
+      saveLocalData(updated);
+    } else {
+      const totalAdded = Math.max(0, Number(newReady) || 0) + Math.max(0, Number(newPending) || 0) + Math.max(0, Number(newDamaged) || 0);
+      const newRow: AggregatedEquipment = {
+        rowKey: `custom_${Date.now()}`,
+        teamId: `custom`,
+        userName: newUserName,
+        membersCount: 10,
+        category: newCategory,
+        name: newName.trim(),
+        unit: newUnit.trim() || 'ชิ้น',
+        standard: Math.max(1, totalAdded),
+        ready: Math.max(0, Number(newReady) || 0),
+        pending: Math.max(0, Number(newPending) || 0),
+        damaged: Math.max(0, Number(newDamaged) || 0),
+        disposed: Math.max(0, Number(newDisposed) || 0),
+        lastInspected: today,
+      };
+      saveLocalData([newRow, ...localData]);
+    }
+
+    setNewName('');
+    setNewReady(1);
+    setNewPending(0);
+    setNewDamaged(0);
+    setNewDisposed(0);
+    setShowCreateModal(false);
+  };
+
   // Derived filter options
   const allCategories = useMemo(() => Array.from(new Set(localData.map(i => i.category))).sort(), [localData]);
   const allUsers = useMemo(() => Array.from(new Set(localData.map(i => i.userName))).sort(), [localData]);
+
+  useEffect(() => {
+    if (!newUserName && allUsers.length > 0) {
+      setNewUserName(allUsers[0]);
+    }
+  }, [allUsers, newUserName]);
 
   // Apply filters
   const filteredData = useMemo(() => {
     return localData.filter(item => {
       const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.userName.toLowerCase().includes(searchQuery.toLowerCase());
+                          item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          item.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.remarks && item.remarks.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
       const matchUser = selectedUser === 'all' || item.userName === selectedUser;
-      const matchStatus = selectedStatus === 'all' || item.status === selectedStatus;
+      
+      let matchStatus = true;
+      if (selectedStatus === 'ready') matchStatus = item.ready > 0;
+      else if (selectedStatus === 'pending') matchStatus = item.pending > 0;
+      else if (selectedStatus === 'damaged') matchStatus = item.damaged > 0;
+      else if (selectedStatus === 'disposed') matchStatus = item.disposed > 0;
       
       return matchSearch && matchCat && matchUser && matchStatus;
     });
   }, [localData, searchQuery, selectedCategory, selectedUser, selectedStatus]);
 
+  // Group by Technician for "ดูตามช่างผู้เบิก" tab
+  const groupedByTechnician = useMemo(() => {
+    const map = new Map<string, {
+      userName: string;
+      items: AggregatedEquipment[];
+      totalItems: number;
+      ready: number;
+      pending: number;
+      damaged: number;
+      disposed: number;
+    }>();
+
+    filteredData.forEach(item => {
+      const itemTotal = item.ready + item.pending + item.damaged + item.disposed;
+      const existing = map.get(item.userName);
+      if (existing) {
+        existing.items.push(item);
+        existing.totalItems += itemTotal;
+        existing.ready += item.ready;
+        existing.pending += item.pending;
+        existing.damaged += item.damaged;
+        existing.disposed += item.disposed;
+      } else {
+        map.set(item.userName, {
+          userName: item.userName,
+          items: [item],
+          totalItems: itemTotal,
+          ready: item.ready,
+          pending: item.pending,
+          damaged: item.damaged,
+          disposed: item.disposed,
+        });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [filteredData]);
+
   // Pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const currentData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  // Stats calculation
+  // Stats calculation (respects selectedUser & selectedCategory so filtering by technician shows their totals!)
   const stats = useMemo(() => {
     let ready = 0, pending = 0, damaged = 0, disposed = 0;
     
-    localData.forEach(i => {
-      if (i.status === 'ready') ready++;
-      else if (i.status === 'pending') pending++;
-      else if (i.status === 'damaged') damaged++;
-      else if (i.status === 'disposed') disposed++;
+    const baseForStats = localData.filter(item => {
+      const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
+      const matchUser = selectedUser === 'all' || item.userName === selectedUser;
+      return matchCat && matchUser;
+    });
+
+    baseForStats.forEach(i => {
+      ready += i.ready;
+      pending += i.pending;
+      damaged += i.damaged;
+      disposed += i.disposed;
     });
     
-    const total = localData.length;
+    const total = ready + pending + damaged + disposed;
     
     return {
       total,
@@ -176,22 +329,7 @@ export default function SafetyPPEDashboard() {
       disposed,
       disposedPct: total ? Math.round((disposed / total) * 100) : 0,
     };
-  }, [localData]);
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'ready':
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"><CheckCircle size={12} /> พร้อมใช้งาน</span>;
-      case 'pending':
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]"><Wrench size={12} /> รอตรวจ/ซ่อม</span>;
-      case 'damaged':
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]"><AlertTriangle size={12} /> ชำรุด</span>;
-      case 'disposed':
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200"><Trash2 size={12} /> จำหน่ายแล้ว</span>;
-      default:
-        return null;
-    }
-  };
+  }, [localData, selectedCategory, selectedUser]);
 
   const formatDate = (dateString: string) => {
     const d = new Date(dateString);
@@ -208,6 +346,44 @@ export default function SafetyPPEDashboard() {
     return `${d}/${m}/${y} ${h}:${min}`;
   };
 
+  // Build natural summary sentence e.g. "มีหมวก 5 ใบ: พร้อมใช้งาน 4 ใบ • ชำรุด 1 ใบ"
+  const renderOverviewSummary = (item: AggregatedEquipment) => {
+    const activeTotal = item.ready + item.pending + item.damaged;
+    const totalAll = activeTotal + item.disposed;
+    const unit = item.unit || 'ชิ้น';
+
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-extrabold bg-indigo-50 text-indigo-800 border border-indigo-200">
+          ทั้งหมด {totalAll} {unit}
+        </span>
+        {item.ready > 0 && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+            <CheckCircle size={12} /> พร้อมใช้งาน {item.ready} {unit}
+          </span>
+        )}
+        {item.damaged > 0 && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]">
+            <AlertTriangle size={12} /> ชำรุด {item.damaged} {unit}
+          </span>
+        )}
+        {item.pending > 0 && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]">
+            <Wrench size={12} /> รอซ่อม {item.pending} {unit}
+          </span>
+        )}
+        {item.disposed > 0 && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+            <Trash2 size={12} /> จำหน่าย/ขาด {item.disposed} {unit}
+          </span>
+        )}
+        {totalAll === 0 && (
+          <span className="text-xs text-slate-400 italic">ยังไม่มีอุปกรณ์ในรายการนี้</span>
+        )}
+      </div>
+    );
+  };
+
   if (!isLoaded) return null;
 
   return (
@@ -222,7 +398,7 @@ export default function SafetyPPEDashboard() {
           <div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-tight">ระบบติดตามสถานะอุปกรณ์ (PPE)</h1>
             <p className="text-sm text-slate-500 flex items-center gap-2">
-              <Calendar size={14} /> {formatDateTime(currentTime)}
+              <Calendar size={14} /> {formatDateTime(currentTime)} • ภาพรวมจำนวนอุปกรณ์ประจำชุดงานช่าง (ไม่ใช้รหัสรายชิ้น)
             </p>
           </div>
         </div>
@@ -313,14 +489,17 @@ export default function SafetyPPEDashboard() {
         <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
           <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
             <div className="relative col-span-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input 
-                type="text" 
-                placeholder="ค้นหารหัส PPE, ชื่ออุปกรณ์, ผู้ใช้งาน ..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2.5 w-full border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1E88E5] bg-white shadow-sm transition-shadow hover:border-slate-300"
-              />
+              <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">ค้นหาอุปกรณ์ / ช่าง</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="ค้นหาชื่ออุปกรณ์, ชื่อช่างผู้เบิก..." 
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  className="pl-10 pr-4 py-2.5 w-full border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1E88E5] bg-white shadow-sm transition-shadow hover:border-slate-300"
+                />
+              </div>
             </div>
             
             <div>
@@ -356,7 +535,7 @@ export default function SafetyPPEDashboard() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">สถานะ</label>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5 ml-1">กรองรายการที่มีสถานะ</label>
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-500" size={16} />
                 <select 
@@ -365,28 +544,26 @@ export default function SafetyPPEDashboard() {
                   onChange={(e) => { setSelectedStatus(e.target.value); setCurrentPage(1); }}
                 >
                   <option value="all">ทุกสถานะ</option>
-                  <option value="ready">พร้อมใช้งาน</option>
-                  <option value="pending">รอตรวจ / รอซ่อม</option>
-                  <option value="damaged">ชำรุด</option>
-                  <option value="disposed">จำหน่าย/เลิกใช้งาน</option>
+                  <option value="ready">มีพร้อมใช้งาน</option>
+                  <option value="pending">มีรายการรอตรวจ / รอซ่อม</option>
+                  <option value="damaged">มีรายการชำรุด</option>
+                  <option value="disposed">มีรายการจำหน่าย/ขาด</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
               </div>
             </div>
           </div>
 
-          <div className="flex flex-row lg:flex-col gap-2 shrink-0">
-            {userRole === 'admin' && (
-              <button 
-                onClick={() => setShowCreateModal(true)}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#7C5EE4] hover:bg-[#6D53C9] text-white py-2.5 px-6 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap"
-              >
-                <Plus size={18} /> เพิ่มอุปกรณ์ใหม่
-              </button>
-            )}
+          <div className="flex flex-row gap-2 shrink-0">
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="flex-1 flex items-center justify-center gap-2 bg-[#7C5EE4] hover:bg-[#6D53C9] text-white py-2.5 px-5 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap"
+            >
+              <Plus size={18} /> เพิ่มอุปกรณ์ใหม่
+            </button>
             <button 
               onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedUser('all'); setSelectedStatus('all'); setCurrentPage(1); }}
-              className="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-6 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap border border-slate-200"
+              className="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-5 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap border border-slate-200"
             >
               <RefreshCw size={16} /> ล้างตัวกรอง
             </button>
@@ -398,139 +575,260 @@ export default function SafetyPPEDashboard() {
           {/* Table Toolbar */}
           <div className="px-4 pt-4 pb-0 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
             <div className="flex gap-6 border-b border-transparent text-sm font-bold">
-              <button className="pb-3 border-b-2 border-[#1E88E5] text-[#1E88E5]">ดูตามอุปกรณ์ (รายชิ้น)</button>
-              <button className="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700">ดูตามช่างผู้เบิก</button>
+              <button 
+                onClick={() => setActiveTab('equipment')}
+                className={`pb-3 border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'equipment' ? 'border-[#1E88E5] text-[#1E88E5]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+              >
+                <ShieldCheck size={16} /> ภาพรวมแต่ละอุปกรณ์ ({filteredData.length} รายการ)
+              </button>
+              <button 
+                onClick={() => setActiveTab('technician')}
+                className={`pb-3 border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'technician' ? 'border-[#1E88E5] text-[#1E88E5]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+              >
+                <Users size={16} /> ดูแยกตามช่างผู้เบิก ({groupedByTechnician.length} ชุดงาน)
+              </button>
             </div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm cursor-pointer hover:bg-slate-100 transition-colors">
-                <List size={16} className="text-slate-500" />
-                <span className="font-medium text-slate-600">แสดง {itemsPerPage} รายการ</span>
-                <ChevronDown size={14} className="text-slate-400" />
+            {activeTab === 'equipment' && (
+              <div className="flex items-center gap-2 mb-3">
+                <div className="relative">
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                    className="bg-slate-50 border border-slate-200 rounded-lg pl-3 pr-8 py-1.5 text-sm font-medium text-slate-600 cursor-pointer hover:bg-slate-100 appearance-none focus:outline-none"
+                  >
+                    <option value={15}>แสดง 15 รายการ</option>
+                    <option value={30}>แสดง 30 รายการ</option>
+                    <option value={50}>แสดง 50 รายการ</option>
+                    <option value={200}>แสดงทั้งหมด</option>
+                  </select>
+                  <ChevronDown size={14} className="text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Data Table */}
-          <div className="overflow-x-auto min-h-[500px]">
-            <table className="w-full text-left text-[13px] whitespace-nowrap">
-              <thead>
-                <tr className="bg-[#F8FAFC] text-slate-600 border-b border-slate-200">
-                  <th className="px-5 py-3.5 font-bold">รหัส/หมายเลข</th>
-                  <th className="px-5 py-3.5 font-bold">รูปภาพ</th>
-                  <th className="px-5 py-3.5 font-bold text-slate-800">ชื่ออุปกรณ์</th>
-                  <th className="px-5 py-3.5 font-bold">หมวดหมู่</th>
-                  <th className="px-5 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
-                  <th className="px-5 py-3.5 font-bold">ตรวจล่าสุด</th>
-                  <th className="px-5 py-3.5 font-bold">สถานะ</th>
-                  <th className="px-5 py-3.5 font-bold text-center">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {currentData.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
-                      ไม่มีข้อมูลที่ตรงกับตัวกรอง
-                    </td>
-                  </tr>
-                ) : (
-                  currentData.map((item) => {
-                    return (
-                      <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="px-5 py-3 font-mono text-xs font-bold text-slate-600">{item.id}</td>
-                        <td className="px-5 py-3">
-                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-2xl shadow-sm border border-slate-200">
-                            {getEmojiIcon(item.category, item.name)}
-                          </div>
-                        </td>
-                        <td className="px-5 py-3 font-bold text-slate-800 max-w-[200px] truncate" title={item.name}>{item.name}</td>
-                        <td className="px-5 py-3 text-slate-500 max-w-[150px] truncate" title={item.category}>{item.category.split(' ')[1] || item.category}</td>
-                        <td className="px-5 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
-                              {item.userName.charAt(0)}
-                            </div>
-                            <span className="text-slate-700 font-medium">{item.userName}</span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3 text-slate-500 text-xs">{formatDate(item.lastInspected)}</td>
-                        <td className="px-5 py-3">
-                          {getStatusBadge(item.status)}
-                        </td>
-                        <td className="px-5 py-3 text-center">
-                          {userRole === 'admin' ? (
-                            <button 
-                              onClick={() => { setUpdateItem(item); setUpdateTargetStatus(item.status); }}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-[#1E88E5] hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
-                            >
-                              <Edit3 size={14} /> อัปเดต
-                            </button>
-                          ) : (
-                            <button className="text-slate-400 cursor-not-allowed">
-                              <MoreVertical size={16} />
-                            </button>
-                          )}
+          {activeTab === 'equipment' ? (
+            <>
+              {/* Aggregated Equipment Data Table (No PPE ID column) */}
+              <div className="overflow-x-auto min-h-[500px]">
+                <table className="w-full text-left text-[13px] whitespace-nowrap">
+                  <thead>
+                    <tr className="bg-[#F8FAFC] text-slate-600 border-b border-slate-200">
+                      <th className="px-5 py-3.5 font-bold">รูปภาพ</th>
+                      <th className="px-5 py-3.5 font-bold text-slate-800">ชื่ออุปกรณ์</th>
+                      <th className="px-5 py-3.5 font-bold">หมวดหมู่</th>
+                      <th className="px-5 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
+                      <th className="px-5 py-3.5 font-bold">ภาพรวมสถานะแต่ละอุปกรณ์</th>
+                      <th className="px-5 py-3.5 font-bold text-center">พร้อมใช้</th>
+                      <th className="px-5 py-3.5 font-bold text-center">ชำรุด</th>
+                      <th className="px-5 py-3.5 font-bold text-center">รอซ่อม</th>
+                      <th className="px-5 py-3.5 font-bold">ตรวจล่าสุด</th>
+                      <th className="px-5 py-3.5 font-bold text-center">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {currentData.length === 0 ? (
+                      <tr>
+                        <td colSpan={10} className="px-6 py-12 text-center text-slate-500">
+                          ไม่มีข้อมูลที่ตรงกับตัวกรอง
                         </td>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      currentData.map((item) => {
+                        return (
+                          <tr key={item.rowKey} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="px-5 py-3.5">
+                              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-2xl shadow-sm border border-slate-200">
+                                {getEmojiIcon(item.category, item.name)}
+                              </div>
+                            </td>
+                            <td className="px-5 py-3.5">
+                              <div className="font-bold text-slate-800">{item.name}</div>
+                              {item.remarks && (
+                                <div className="text-[11px] text-amber-600 font-medium mt-0.5">หมายเหตุ: {item.remarks}</div>
+                              )}
+                            </td>
+                            <td className="px-5 py-3.5 text-slate-500">
+                              {item.category.split(' ')[1] || item.category}
+                            </td>
+                            <td className="px-5 py-3.5">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+                                  {item.userName.replace('นาย', '').charAt(0)}
+                                </div>
+                                <span className="text-slate-800 font-semibold">{item.userName}</span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-3.5">
+                              {renderOverviewSummary(item)}
+                            </td>
+                            <td className="px-5 py-3.5 text-center">
+                              <span className={`font-extrabold text-sm ${item.ready > 0 ? 'text-emerald-600' : 'text-slate-300'}`}>
+                                {item.ready} {item.unit}
+                              </span>
+                            </td>
+                            <td className="px-5 py-3.5 text-center">
+                              <span className={`font-extrabold text-sm ${item.damaged > 0 ? 'text-rose-600' : 'text-slate-300'}`}>
+                                {item.damaged} {item.unit}
+                              </span>
+                            </td>
+                            <td className="px-5 py-3.5 text-center">
+                              <span className={`font-extrabold text-sm ${item.pending > 0 ? 'text-amber-600' : 'text-slate-300'}`}>
+                                {item.pending} {item.unit}
+                              </span>
+                            </td>
+                            <td className="px-5 py-3.5 text-slate-500 text-xs">{formatDate(item.lastInspected)}</td>
+                            <td className="px-5 py-3.5 text-center">
+                              <button 
+                                onClick={() => openEditModal(item)}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-[#1E88E5] bg-blue-50/60 hover:bg-blue-100/80 rounded-lg transition-colors border border-blue-200/60"
+                              >
+                                <Edit3 size={14} /> ปรับจำนวน
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Pagination */}
-          <div className="p-5 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#F8FAFC]">
-            <p className="text-sm font-medium text-slate-500">
-              แสดง {(currentPage - 1) * itemsPerPage + (filteredData.length > 0 ? 1 : 0)} - {Math.min(currentPage * itemsPerPage, filteredData.length)} จาก {filteredData.length} รายการ
-            </p>
-            <div className="flex items-center gap-1.5">
-              <button 
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              
-              {/* Simple pagination logic for demo */}
-              {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                let page = i + 1;
-                if (totalPages > 5 && currentPage > 3) {
-                  page = currentPage - 2 + i;
-                  if (page > totalPages) return null;
-                }
-                
-                return (
+              {/* Pagination */}
+              <div className="p-5 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#F8FAFC]">
+                <p className="text-sm font-medium text-slate-500">
+                  แสดง {(currentPage - 1) * itemsPerPage + (filteredData.length > 0 ? 1 : 0)} - {Math.min(currentPage * itemsPerPage, filteredData.length)} จาก {filteredData.length} รายการอุปกรณ์
+                </p>
+                <div className="flex items-center gap-1.5">
                   <button 
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-bold transition-all ${currentPage === page ? 'bg-[#1E88E5] text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'}`}
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
                   >
-                    {page}
+                    <ChevronLeft size={18} />
                   </button>
-                );
-              })}
-              
-              <button 
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages || totalPages === 0}
-                className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
-              >
-                <ChevronRight size={18} />
-              </button>
+                  
+                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                    let page = i + 1;
+                    if (totalPages > 5 && currentPage > 3) {
+                      page = currentPage - 2 + i;
+                      if (page > totalPages) return null;
+                    }
+                    
+                    return (
+                      <button 
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-bold transition-all ${currentPage === page ? 'bg-[#1E88E5] text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'}`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                  
+                  <button 
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Technician Grouped View */
+            <div className="p-6 space-y-6 bg-slate-50/50">
+              {groupedByTechnician.length === 0 ? (
+                <div className="py-12 text-center text-slate-500">ไม่มีข้อมูลที่ตรงกับตัวกรอง</div>
+              ) : (
+                groupedByTechnician.map(group => (
+                  <div key={group.userName} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-indigo-50/30 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#1E88E5] text-white flex items-center justify-center font-black text-base shadow-sm">
+                          {group.userName.replace('นาย', '').charAt(0)}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-base">{group.userName}</h3>
+                          <p className="text-xs text-slate-500">รายการอุปกรณ์ทั้งหมด {group.items.length} ประเภท ({group.totalItems} ชิ้น)</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                        <span className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          พร้อมใช้งาน {group.ready}
+                        </span>
+                        <span className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
+                          ชำรุด {group.damaged}
+                        </span>
+                        <span className="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+                          รอซ่อม {group.pending}
+                        </span>
+                        <span className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">
+                          จำหน่าย/ขาด {group.disposed}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                      {group.items.map(item => {
+                        const totalCount = item.ready + item.pending + item.damaged + item.disposed;
+                        return (
+                          <div
+                            key={item.rowKey}
+                            className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 bg-white flex items-start justify-between gap-3 transition-all shadow-sm"
+                          >
+                            <div className="flex items-start gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-2xl shrink-0">
+                                {getEmojiIcon(item.category, item.name)}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-bold text-slate-800 text-sm truncate" title={item.name}>
+                                  {item.name}
+                                </p>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                  รวม <span className="font-bold text-slate-800">{totalCount} {item.unit}</span>
+                                  {' • '}
+                                  <span className="text-emerald-600 font-bold">พร้อมใช้ {item.ready} {item.unit}</span>
+                                  {item.damaged > 0 && (
+                                    <> • <span className="text-rose-600 font-bold">ชำรุด {item.damaged} {item.unit}</span></>
+                                  )}
+                                  {item.pending > 0 && (
+                                    <> • <span className="text-amber-600 font-bold">รอซ่อม {item.pending} {item.unit}</span></>
+                                  )}
+                                  {item.disposed > 0 && (
+                                    <> • <span className="text-slate-500 font-semibold">ขาด/จำหน่าย {item.disposed} {item.unit}</span></>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => openEditModal(item)}
+                              className="p-1.5 text-slate-400 hover:text-[#1E88E5] hover:bg-blue-50 rounded-lg transition-colors shrink-0"
+                              title="แก้ไขจำนวน"
+                            >
+                              <Edit3 size={15} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-          </div>
+          )}
         </div>
 
       </main>
 
-      {/* Update Status Modal */}
+      {/* Update Aggregated Quantities Modal */}
       {updateItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-                <Edit3 size={20} className="text-indigo-600" /> อัปเดตสถานะรายชิ้น
+                <Edit3 size={20} className="text-indigo-600" /> อัปเดตภาพรวมจำนวนอุปกรณ์
               </h3>
               <button onClick={() => setUpdateItem(null)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
                 <X size={20} />
@@ -538,41 +836,83 @@ export default function SafetyPPEDashboard() {
             </div>
             
             <div className="p-6">
-              <div className="flex items-center gap-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex items-center gap-4 mb-5 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-3xl shadow-sm border border-slate-200 shrink-0">
                   {getEmojiIcon(updateItem.category, updateItem.name)}
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">{updateItem.id}</span>
-                    <span className="text-xs text-slate-500">ผู้ถือครอง: {updateItem.userName}</span>
-                  </div>
-                  <h4 className="font-bold text-slate-800 leading-tight">{updateItem.name}</h4>
+                  <p className="text-xs font-bold text-indigo-600 mb-0.5">ผู้ถือครอง / ช่าง: {updateItem.userName}</p>
+                  <h4 className="font-bold text-slate-900 text-base leading-tight">{updateItem.name}</h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    รวมทั้งหมด {(Number(editReady) || 0) + (Number(editPending) || 0) + (Number(editDamaged) || 0) + (Number(editDisposed) || 0)} {updateItem.unit}
+                  </p>
                 </div>
               </div>
 
-              <form id="update-form" onSubmit={handleUpdateStatus} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-3">สถานะปัจจุบัน: {getStatusBadge(updateItem.status)}</label>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">อัปเดตเป็น <span className="text-rose-500">*</span></label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-3 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'ready' ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-200'}`}>
-                      <input type="radio" className="hidden" checked={updateTargetStatus === 'ready'} onChange={() => setUpdateTargetStatus('ready')} />
-                      <CheckCircle size={18} /> พร้อมใช้งาน
+              <form id="update-form" onSubmit={handleUpdateQuantities} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 mb-1.5">
+                      <CheckCircle size={14} /> พร้อมใช้งาน ({updateItem.unit})
                     </label>
-                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-3 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'pending' ? 'bg-amber-50 border-amber-500 text-amber-700' : 'bg-white border-slate-200 text-slate-600 hover:border-amber-200'}`}>
-                      <input type="radio" className="hidden" checked={updateTargetStatus === 'pending'} onChange={() => setUpdateTargetStatus('pending')} />
-                      <Wrench size={18} /> รอซ่อม
-                    </label>
-                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-3 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'damaged' ? 'bg-rose-50 border-rose-500 text-rose-700' : 'bg-white border-slate-200 text-slate-600 hover:border-rose-200'}`}>
-                      <input type="radio" className="hidden" checked={updateTargetStatus === 'damaged'} onChange={() => setUpdateTargetStatus('damaged')} />
-                      <AlertTriangle size={18} /> ชำรุด
-                    </label>
-                    <label className={`flex items-center justify-center gap-2 cursor-pointer px-3 py-3 rounded-xl border-2 transition-colors ${updateTargetStatus === 'disposed' ? 'bg-slate-100 border-slate-500 text-slate-700' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}>
-                      <input type="radio" className="hidden" checked={updateTargetStatus === 'disposed'} onChange={() => setUpdateTargetStatus('disposed')} />
-                      <Trash2 size={18} /> จำหน่ายแล้ว
-                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={editReady}
+                      onChange={(e) => setEditReady(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
                   </div>
+
+                  <div className="p-3.5 rounded-xl bg-rose-50/60 border border-rose-200">
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-rose-800 mb-1.5">
+                      <AlertTriangle size={14} /> ชำรุด ({updateItem.unit})
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={editDamaged}
+                      onChange={(e) => setEditDamaged(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full px-3 py-2 bg-white border border-rose-300 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200">
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-amber-800 mb-1.5">
+                      <Wrench size={14} /> รอตรวจ / รอซ่อม ({updateItem.unit})
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={editPending}
+                      onChange={(e) => setEditPending(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full px-3 py-2 bg-white border border-amber-300 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-100 border border-slate-200">
+                    <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1.5">
+                      <Trash2 size={14} /> จำหน่าย / ขาด ({updateItem.unit})
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={editDisposed}
+                      onChange={(e) => setEditDisposed(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+                  <input
+                    type="text"
+                    placeholder="เช่น รอเบิกทดแทน 1 ใบ..."
+                    value={editRemarks}
+                    onChange={(e) => setEditRemarks(e.target.value)}
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1E88E5]"
+                  />
                 </div>
               </form>
             </div>
@@ -580,23 +920,125 @@ export default function SafetyPPEDashboard() {
             <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
               <button type="button" onClick={() => setUpdateItem(null)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">ยกเลิก</button>
               <button type="submit" form="update-form" className="px-6 py-2 text-sm font-bold text-white bg-[#1E88E5] hover:bg-blue-600 rounded-lg transition-colors shadow-sm">
-                บันทึกสถานะ
+                บันทึกข้อมูล
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Add new equipment mock modal */}
+      {/* Add new equipment modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center">
-            <div className="w-16 h-16 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Plus size={32} />
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Plus size={20} className="text-[#7C5EE4]" /> เพิ่ม/ปรับปรุงรายการอุปกรณ์
+              </h3>
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-200 p-1 rounded-full transition-colors">
+                <X size={20} />
+              </button>
             </div>
-            <h3 className="font-bold text-lg text-slate-800 mb-2">เพิ่มอุปกรณ์ใหม่</h3>
-            <p className="text-slate-500 text-sm mb-6">ฟังก์ชันการเพิ่มอุปกรณ์ชิ้นใหม่ยังอยู่ในระหว่างการพัฒนา</p>
-            <button onClick={() => setShowCreateModal(false)} className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">ปิดหน้าต่าง</button>
+
+            <form onSubmit={handleCreateEquipment} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">ผู้ใช้งาน / ช่าง</label>
+                <select
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1E88E5]"
+                >
+                  {allUsers.map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5">ชื่ออุปกรณ์</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="เช่น หมวกนิรภัย (Safety Helmet)"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1E88E5]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5">หน่วยนับ</label>
+                  <input
+                    type="text"
+                    placeholder="ใบ / คู่ / ชุด"
+                    value={newUnit}
+                    onChange={(e) => setNewUnit(e.target.value)}
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1E88E5]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">หมวดหมู่</label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1E88E5]"
+                >
+                  {allCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="block text-xs font-bold text-emerald-700 mb-1">พร้อมใช้งาน</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={newReady}
+                    onChange={(e) => setNewReady(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-rose-700 mb-1">ชำรุด</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={newDamaged}
+                    onChange={(e) => setNewDamaged(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-amber-700 mb-1">รอตรวจ/รอซ่อม</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={newPending}
+                    onChange={(e) => setNewPending(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1">จำหน่าย/ขาด</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={newDisposed}
+                    onChange={(e) => setNewDisposed(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                  ยกเลิก
+                </button>
+                <button type="submit" className="px-5 py-2 text-sm font-bold text-white bg-[#7C5EE4] hover:bg-[#6D53C9] rounded-lg transition-colors shadow-sm">
+                  บันทึกรายการ
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
