@@ -1457,7 +1457,7 @@ export default function SafetyPPEDashboard() {
                         <ShieldCheck size={17} className="text-[#6B2169]" />
                         ตารางสรุปภาพรวมความพร้อมแยกตามประเภทอุปกรณ์ ({groupedByEquipmentType.length} รายการ)
                       </h4>
-                      <span className="text-xs text-purple-700 font-semibold">💡 คลิกที่ช่อง "หมายเหตุ / คำชี้แจง" เพื่อพิมพ์รายละเอียดชี้แจงผู้บริหารได้ทันที</span>
+                      <span className="text-xs text-purple-700 font-semibold">💡 คลิกที่ช่อง หมายเหตุ / คำชี้แจง เพื่อพิมพ์รายละเอียดชี้แจงผู้บริหารได้ทันที</span>
                     </div>
                     <div className="overflow-x-auto border border-slate-200 rounded-xl">
                       <table className="w-full text-left text-xs">
@@ -1595,7 +1595,7 @@ export default function SafetyPPEDashboard() {
                       <h4 className="font-bold text-slate-800 text-sm">
                         ตารางรายการอุปกรณ์รายชุดงาน ({filteredData.length} รายการ)
                       </h4>
-                      <span className="text-xs text-purple-700 font-semibold">💡 คลิกที่ช่อง "หมายเหตุ / คำชี้แจง" เพื่อพิมพ์แก้ไขได้ทันที</span>
+                      <span className="text-xs text-purple-700 font-semibold">💡 คลิกที่ช่อง หมายเหตุ / คำชี้แจง เพื่อพิมพ์แก้ไขได้ทันที</span>
                     </div>
                     <div className="overflow-x-auto border border-slate-200 rounded-xl">
                       <table className="w-full text-left text-xs">
