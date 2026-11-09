@@ -1338,7 +1338,7 @@ export default function SafetyPPEDashboard() {
                     </div>
                     <div>
                       <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400 text-slate-900 mb-1.5">
-                        PEA ผกส.กบย.(ก3) • EXECUTIVE SAFETY REPORT
+                        PEA ผกร.กรย.(ก3) • EXECUTIVE SAFETY REPORT
                       </div>
                       <h2 className="text-xl md:text-2xl font-extrabold tracking-tight leading-snug">
                         รายงานสรุปสถานะและความพร้อมอุปกรณ์ความปลอดภัย (PPE)
@@ -1349,7 +1349,7 @@ export default function SafetyPPEDashboard() {
                     </div>
                   </div>
                   <div className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20 text-right shrink-0">
-                    <p className="text-[11px] text-purple-100">ความพร้อมใช้งานสุทธิ</p>
+                    <p className="text-[11px] text-purple-100">%ความพร้อมใช้งาน</p>
                     <p className="text-3xl font-black text-amber-300 leading-none mt-1">{stats.readyPct}%</p>
                     <p className="text-[11px] text-purple-100 mt-1">ข้อมูล ณ วันที่ {formatDateTime(currentTime)}</p>
                   </div>
@@ -1551,7 +1551,7 @@ export default function SafetyPPEDashboard() {
 
                 {/* Report Footer Signature / Timestamp */}
                 <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-[11px] text-slate-400">
-                  <span>ระบบติดตามสถานะและความพร้อมอุปกรณ์ความปลอดภัย (Safety & PPE Dashboard) • ผกส.กบย.(ก3)</span>
+                  <span>ระบบติดตามสถานะและความพร้อมอุปกรณ์ความปลอดภัย (Safety & PPE Dashboard) • PEA ผกร.กรย.(ก3)</span>
                   <span>ผู้จัดทำรายงาน: Admin • พิมพ์เมื่อ {formatDateTime(currentTime)}</span>
                 </div>
               </div>
