@@ -848,23 +848,24 @@ export default function SafetyPPEDashboard() {
                 <table className="w-full text-left text-[13px] whitespace-nowrap">
                   <thead>
                     <tr className="bg-[#F8FAFC] text-slate-600 border-b border-slate-200">
-                      <th className="px-5 py-3.5 font-bold">รูปภาพ</th>
-                      <th className="px-5 py-3.5 font-bold text-slate-800">ชื่ออุปกรณ์</th>
-                      <th className="px-5 py-3.5 font-bold">หมวดหมู่</th>
-                      <th className="px-5 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
-                      <th className="px-5 py-3.5 font-bold text-center">จำนวนขั้นต่ำต่อชุด</th>
-                      <th className="px-5 py-3.5 font-bold">ภาพรวมสถานะแต่ละอุปกรณ์</th>
-                      <th className="px-5 py-3.5 font-bold text-center">พร้อมใช้</th>
-                      <th className="px-5 py-3.5 font-bold text-center">ชำรุด</th>
-                      <th className="px-5 py-3.5 font-bold text-center">รอซ่อม</th>
-                      <th className="px-5 py-3.5 font-bold">ตรวจล่าสุด</th>
-                      <th className="px-5 py-3.5 font-bold text-center">จัดการ</th>
+                      <th className="px-4 py-3.5 font-bold">รูปภาพ</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">ชื่ออุปกรณ์</th>
+                      <th className="px-4 py-3.5 font-bold">หมวดหมู่</th>
+                      <th className="px-4 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
+                      <th className="px-4 py-3.5 font-bold text-center">จำนวนขั้นต่ำต่อชุด</th>
+                      <th className="px-4 py-3.5 font-bold">ภาพรวมสถานะแต่ละอุปกรณ์</th>
+                      <th className="px-3 py-3.5 font-bold text-center">พร้อมใช้</th>
+                      <th className="px-3 py-3.5 font-bold text-center">ชำรุด</th>
+                      <th className="px-3 py-3.5 font-bold text-center">รอซ่อม</th>
+                      <th className="px-4 py-3.5 font-bold min-w-[200px]">หมายเหตุ / คำชี้แจง</th>
+                      <th className="px-3 py-3.5 font-bold">ตรวจล่าสุด</th>
+                      <th className="px-4 py-3.5 font-bold text-center">จัดการ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {currentData.length === 0 ? (
                       <tr>
-                        <td colSpan={11} className="px-6 py-12 text-center text-slate-500">
+                        <td colSpan={12} className="px-6 py-12 text-center text-slate-500">
                           ไม่มีข้อมูลที่ตรงกับตัวกรอง
                         </td>
                       </tr>
@@ -872,21 +873,18 @@ export default function SafetyPPEDashboard() {
                       currentData.map((item) => {
                         return (
                           <tr key={item.rowKey} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="px-5 py-3.5">
+                            <td className="px-4 py-3.5">
                               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-2xl shadow-sm border border-slate-200">
                                 {getEmojiIcon(item.category, item.name)}
                               </div>
                             </td>
-                            <td className="px-5 py-3.5">
+                            <td className="px-4 py-3.5">
                               <div className="font-bold text-slate-800">{item.name}</div>
-                              {item.remarks && (
-                                <div className="text-[11px] text-amber-600 font-medium mt-0.5">หมายเหตุ: {item.remarks}</div>
-                              )}
                             </td>
-                            <td className="px-5 py-3.5 text-slate-500">
+                            <td className="px-4 py-3.5 text-slate-500">
                               {item.category.split(' ')[1] || item.category}
                             </td>
-                            <td className="px-5 py-3.5">
+                            <td className="px-4 py-3.5">
                               <div className="flex items-center gap-2">
                                 <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
                                   {item.userName.replace('นาย', '').charAt(0)}
@@ -894,34 +892,44 @@ export default function SafetyPPEDashboard() {
                                 <span className="text-slate-800 font-semibold">{item.userName}</span>
                               </div>
                             </td>
-                            <td className="px-5 py-3.5 text-center">
+                            <td className="px-4 py-3.5 text-center">
                               <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-purple-50 text-purple-800 border border-purple-200">
                                 {item.standard} {item.unit}
                               </span>
                             </td>
-                            <td className="px-5 py-3.5">
+                            <td className="px-4 py-3.5">
                               {renderOverviewSummary(item)}
                             </td>
-                            <td className="px-5 py-3.5 text-center">
+                            <td className="px-3 py-3.5 text-center">
                               <span className={`font-extrabold text-sm ${item.ready > 0 ? 'text-emerald-600' : 'text-slate-300'}`}>
                                 {item.ready} {item.unit}
                               </span>
                             </td>
-                            <td className="px-5 py-3.5 text-center">
+                            <td className="px-3 py-3.5 text-center">
                               <span className={`font-extrabold text-sm ${item.damaged > 0 ? 'text-rose-600' : 'text-slate-300'}`}>
                                 {item.damaged} {item.unit}
                               </span>
                             </td>
-                            <td className="px-5 py-3.5 text-center">
+                            <td className="px-3 py-3.5 text-center">
                               <span className={`font-extrabold text-sm ${item.pending > 0 ? 'text-amber-600' : 'text-slate-300'}`}>
                                 {item.pending} {item.unit}
                               </span>
                             </td>
-                            <td className="px-5 py-3.5 text-slate-500 text-xs">{formatDate(item.lastInspected)}</td>
-                            <td className="px-5 py-3.5 text-center">
+                            <td className="px-4 py-3">
+                              <input
+                                type="text"
+                                value={item.remarks || ''}
+                                onChange={(e) => updateRowRemarkInline(item.rowKey, e.target.value)}
+                                placeholder="ระบุหมายเหตุ/คำชี้แจง..."
+                                className="w-full min-w-[180px] px-3 py-1.5 rounded-lg text-xs text-slate-800 font-medium bg-slate-50 hover:bg-amber-50/50 focus:bg-white border border-slate-200 hover:border-amber-300 focus:border-[#1E88E5] focus:outline-none focus:ring-2 focus:ring-blue-500/20 placeholder:text-slate-400 transition-all"
+                              />
+                            </td>
+                            <td className="px-3 py-3.5 text-slate-500 text-xs">{formatDate(item.lastInspected)}</td>
+                            <td className="px-4 py-3.5 text-center">
                               <button 
+                                type="button"
                                 onClick={() => openEditModal(item)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-[#1E88E5] bg-blue-50/60 hover:bg-blue-100/80 rounded-lg transition-colors border border-blue-200/60"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-[#1E88E5] bg-blue-50/60 hover:bg-blue-100/80 rounded-lg transition-colors border border-blue-200/60 cursor-pointer"
                               >
                                 <Edit3 size={14} /> ปรับจำนวน
                               </button>
@@ -1016,41 +1024,51 @@ export default function SafetyPPEDashboard() {
                         return (
                           <div
                             key={item.rowKey}
-                            className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 bg-white flex items-start justify-between gap-3 transition-all shadow-sm"
+                            className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 bg-white flex flex-col gap-2.5 transition-all shadow-sm"
                           >
-                            <div className="flex items-start gap-3 min-w-0">
-                              <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-2xl shrink-0">
-                                {getEmojiIcon(item.category, item.name)}
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-start gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-2xl shrink-0">
+                                  {getEmojiIcon(item.category, item.name)}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-bold text-slate-800 text-sm truncate" title={item.name}>
+                                    {item.name}
+                                  </p>
+                                  <p className="text-xs text-slate-500 mt-0.5">
+                                    ขั้นต่ำ <span className="font-bold text-purple-700">{item.standard} {item.unit}</span>
+                                    {' • '}
+                                    รวม <span className="font-bold text-slate-800">{totalCount} {item.unit}</span>
+                                    {' • '}
+                                    <span className="text-emerald-600 font-bold">พร้อมใช้ {item.ready} {item.unit}</span>
+                                    {item.damaged > 0 && (
+                                      <> • <span className="text-rose-600 font-bold">ชำรุด {item.damaged} {item.unit}</span></>
+                                    )}
+                                    {item.pending > 0 && (
+                                      <> • <span className="text-amber-600 font-bold">รอซ่อม {item.pending} {item.unit}</span></>
+                                    )}
+                                    {item.disposed > 0 && (
+                                      <> • <span className="text-slate-500 font-semibold">ขาด/จำหน่าย {item.disposed} {item.unit}</span></>
+                                    )}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="min-w-0">
-                                <p className="font-bold text-slate-800 text-sm truncate" title={item.name}>
-                                  {item.name}
-                                </p>
-                                <p className="text-xs text-slate-500 mt-0.5">
-                                  ขั้นต่ำ <span className="font-bold text-purple-700">{item.standard} {item.unit}</span>
-                                  {' • '}
-                                  รวม <span className="font-bold text-slate-800">{totalCount} {item.unit}</span>
-                                  {' • '}
-                                  <span className="text-emerald-600 font-bold">พร้อมใช้ {item.ready} {item.unit}</span>
-                                  {item.damaged > 0 && (
-                                    <> • <span className="text-rose-600 font-bold">ชำรุด {item.damaged} {item.unit}</span></>
-                                  )}
-                                  {item.pending > 0 && (
-                                    <> • <span className="text-amber-600 font-bold">รอซ่อม {item.pending} {item.unit}</span></>
-                                  )}
-                                  {item.disposed > 0 && (
-                                    <> • <span className="text-slate-500 font-semibold">ขาด/จำหน่าย {item.disposed} {item.unit}</span></>
-                                  )}
-                                </p>
-                              </div>
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(item)}
+                                className="p-1.5 text-slate-400 hover:text-[#1E88E5] hover:bg-blue-50 rounded-lg transition-colors shrink-0 border-0 cursor-pointer"
+                                title="แก้ไขจำนวน"
+                              >
+                                <Edit3 size={15} />
+                              </button>
                             </div>
-                            <button
-                              onClick={() => openEditModal(item)}
-                              className="p-1.5 text-slate-400 hover:text-[#1E88E5] hover:bg-blue-50 rounded-lg transition-colors shrink-0"
-                              title="แก้ไขจำนวน"
-                            >
-                              <Edit3 size={15} />
-                            </button>
+                            <input
+                              type="text"
+                              value={item.remarks || ''}
+                              onChange={(e) => updateRowRemarkInline(item.rowKey, e.target.value)}
+                              placeholder="ระบุหมายเหตุ/คำชี้แจง..."
+                              className="w-full px-2.5 py-1.5 rounded-lg text-xs text-slate-700 bg-slate-50 hover:bg-amber-50/50 focus:bg-white border border-slate-200 focus:border-[#1E88E5] focus:outline-none placeholder:text-slate-400 transition-colors"
+                            />
                           </div>
                         );
                       })}
