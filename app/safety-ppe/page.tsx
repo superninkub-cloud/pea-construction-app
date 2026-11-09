@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Search, Plus, X, HardHat, ChevronDown, 
   List, CheckCircle, AlertTriangle, Box, RefreshCw,
-  Filter, ChevronLeft, ChevronRight, Wrench, Calendar, Trash2, Edit3, Users, ShieldCheck
+  Filter, ChevronLeft, ChevronRight, Wrench, Calendar, Trash2, Edit3, Users, ShieldCheck,
+  Download, Printer, FileText, Sparkles
 } from 'lucide-react';
+import { toPng } from 'html-to-image';
 import { safetyData } from './data';
 
 // --- Type Definitions ---
@@ -109,6 +111,10 @@ export default function SafetyPPEDashboard() {
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportViewMode, setExportViewMode] = useState<'summary_by_item' | 'summary_by_tech' | 'detailed_list'>('summary_by_item');
+  const [isExportingImage, setIsExportingImage] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
   const [updateItem, setUpdateItem] = useState<AggregatedEquipment | null>(null);
   const [editStandard, setEditStandard] = useState<number>(0);
   const [editReady, setEditReady] = useState<number>(0);
@@ -319,6 +325,115 @@ export default function SafetyPPEDashboard() {
 
     return Array.from(map.values());
   }, [filteredData]);
+
+  // Group by Equipment Name across all filtered rows (for executive summary by equipment type)
+  const groupedByEquipmentType = useMemo(() => {
+    const map = new Map<string, {
+      name: string;
+      category: string;
+      unit: string;
+      teamsCount: number;
+      standardTotal: number;
+      readyTotal: number;
+      pendingTotal: number;
+      damagedTotal: number;
+      disposedTotal: number;
+      teamBreakdowns: { userName: string; standard: number; ready: number; damaged: number; pending: number; disposed: number }[];
+    }>();
+
+    filteredData.forEach(item => {
+      const existing = map.get(item.name);
+      if (existing) {
+        existing.teamsCount += 1;
+        existing.standardTotal += item.standard;
+        existing.readyTotal += item.ready;
+        existing.pendingTotal += item.pending;
+        existing.damagedTotal += item.damaged;
+        existing.disposedTotal += item.disposed;
+        existing.teamBreakdowns.push({
+          userName: item.userName,
+          standard: item.standard,
+          ready: item.ready,
+          damaged: item.damaged,
+          pending: item.pending,
+          disposed: item.disposed,
+        });
+      } else {
+        map.set(item.name, {
+          name: item.name,
+          category: item.category,
+          unit: item.unit,
+          teamsCount: 1,
+          standardTotal: item.standard,
+          readyTotal: item.ready,
+          pendingTotal: item.pending,
+          damagedTotal: item.damaged,
+          disposedTotal: item.disposed,
+          teamBreakdowns: [{
+            userName: item.userName,
+            standard: item.standard,
+            ready: item.ready,
+            damaged: item.damaged,
+            pending: item.pending,
+            disposed: item.disposed,
+          }],
+        });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [filteredData]);
+
+  const handleDownloadPNG = async () => {
+    if (!exportRef.current) return;
+    try {
+      setIsExportingImage(true);
+      const dataUrl = await toPng(exportRef.current, {
+        quality: 0.98,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+      });
+      const link = document.createElement('a');
+      link.download = `รายงานสรุปอุปกรณ์_PPE_${new Date().toISOString().split('T')[0]}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Export PNG failed:', err);
+    } finally {
+      setIsExportingImage(false);
+    }
+  };
+
+  const handlePrintDocument = () => {
+    if (!exportRef.current) return;
+    const printContents = exportRef.current.innerHTML;
+    const win = window.open('', '_blank', 'width=1200,height=900');
+    if (!win) return;
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>เอกสารสรุปภาพรวมสถานะและความพร้อมของอุปกรณ์ความปลอดภัยและ PPE</title>
+          <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            body { font-family: 'Prompt', sans-serif; background: #fff; margin: 0; padding: 16px; color: #0f172a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @media print {
+              body { padding: 0; }
+              @page { size: A4 portrait; margin: 10mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div>${printContents}</div>
+          <script>
+            setTimeout(() => { window.print(); }, 600);
+          </script>
+        </body>
+      </html>
+    `);
+    win.document.close();
+  };
 
   // Pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -579,16 +694,25 @@ export default function SafetyPPEDashboard() {
             </div>
           </div>
 
-          <div className="flex flex-row gap-2 shrink-0">
+          <div className="flex flex-wrap sm:flex-row gap-2 shrink-0">
             <button 
+              type="button"
+              onClick={() => setShowExportModal(true)}
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#6B2169] to-[#8A3B87] hover:from-[#581a56] hover:to-[#732f70] text-white py-2.5 px-5 rounded-xl font-bold text-sm transition-all shadow-sm whitespace-nowrap border-0 cursor-pointer"
+            >
+              <FileText size={18} /> Export สรุปผู้บริหาร
+            </button>
+            <button 
+              type="button"
               onClick={() => setShowCreateModal(true)}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#7C5EE4] hover:bg-[#6D53C9] text-white py-2.5 px-5 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap"
+              className="flex-1 flex items-center justify-center gap-2 bg-[#7C5EE4] hover:bg-[#6D53C9] text-white py-2.5 px-5 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap border-0 cursor-pointer"
             >
               <Plus size={18} /> เพิ่มอุปกรณ์ใหม่
             </button>
             <button 
+              type="button"
               onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedUser('all'); setSelectedStatus('all'); setCurrentPage(1); }}
-              className="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-5 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap border border-slate-200"
+              className="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-5 rounded-xl font-medium text-sm transition-colors shadow-sm whitespace-nowrap border border-slate-200 cursor-pointer"
             >
               <RefreshCw size={16} /> ล้างตัวกรอง
             </button>
@@ -598,28 +722,55 @@ export default function SafetyPPEDashboard() {
         {/* Tabs & Table Container */}
         <div className="bg-white rounded-[20px] shadow-sm border border-slate-200 overflow-hidden flex flex-col">
           {/* Table Toolbar */}
-          <div className="px-4 pt-4 pb-0 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
-            <div className="flex gap-6 border-b border-transparent text-sm font-bold">
+          <div className="px-5 py-3.5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
+            <div className="inline-flex items-center p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80 gap-1.5">
               <button 
+                type="button"
                 onClick={() => setActiveTab('equipment')}
-                className={`pb-3 border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'equipment' ? 'border-[#1E88E5] text-[#1E88E5]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border-0 cursor-pointer ${
+                  activeTab === 'equipment'
+                    ? 'bg-gradient-to-r from-[#1E88E5] to-[#1565C0] text-white shadow-sm'
+                    : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
               >
-                <ShieldCheck size={16} /> ภาพรวมแต่ละอุปกรณ์ ({filteredData.length} รายการ)
+                <ShieldCheck size={16} /> ภาพรวมแต่ละอุปกรณ์
+                <span className={`px-2 py-0.5 rounded-full text-xs font-extrabold ${
+                  activeTab === 'equipment' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+                }`}>
+                  {filteredData.length} รายการ
+                </span>
               </button>
               <button 
+                type="button"
                 onClick={() => setActiveTab('technician')}
-                className={`pb-3 border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'technician' ? 'border-[#1E88E5] text-[#1E88E5]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border-0 cursor-pointer ${
+                  activeTab === 'technician'
+                    ? 'bg-gradient-to-r from-[#1E88E5] to-[#1565C0] text-white shadow-sm'
+                    : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                }`}
               >
-                <Users size={16} /> ดูแยกตามช่างผู้เบิก ({groupedByTechnician.length} ชุดงาน)
+                <Users size={16} /> ดูแยกตามช่างผู้เบิก
+                <span className={`px-2 py-0.5 rounded-full text-xs font-extrabold ${
+                  activeTab === 'technician' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-700'
+                }`}>
+                  {groupedByTechnician.length} ชุดงาน
+                </span>
               </button>
             </div>
-            {activeTab === 'equipment' && (
-              <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowExportModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-50 hover:bg-purple-100 text-[#6B2169] border border-purple-200 transition-colors cursor-pointer"
+              >
+                <Sparkles size={14} /> ออกรายงานสรุปความพร้อม PPE
+              </button>
+              {activeTab === 'equipment' && (
                 <div className="relative">
                   <select
                     value={itemsPerPage}
                     onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                    className="bg-slate-50 border border-slate-200 rounded-lg pl-3 pr-8 py-1.5 text-sm font-medium text-slate-600 cursor-pointer hover:bg-slate-100 appearance-none focus:outline-none"
+                    className="bg-slate-50 border border-slate-200 rounded-xl pl-3 pr-8 py-1.5 text-sm font-medium text-slate-600 cursor-pointer hover:bg-slate-100 appearance-none focus:outline-none"
                   >
                     <option value={15}>แสดง 15 รายการ</option>
                     <option value={30}>แสดง 30 รายการ</option>
@@ -628,8 +779,8 @@ export default function SafetyPPEDashboard() {
                   </select>
                   <ChevronDown size={14} className="text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {activeTab === 'equipment' ? (
@@ -1088,14 +1239,323 @@ export default function SafetyPPEDashboard() {
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors border-0 cursor-pointer">
                   ยกเลิก
                 </button>
-                <button type="submit" className="px-5 py-2 text-sm font-bold text-white bg-[#7C5EE4] hover:bg-[#6D53C9] rounded-lg transition-colors shadow-sm">
+                <button type="submit" className="px-5 py-2 text-sm font-bold text-white bg-[#7C5EE4] hover:bg-[#6D53C9] rounded-lg transition-colors shadow-sm border-0 cursor-pointer">
                   บันทึกรายการ
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Executive Summary Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-slate-100 rounded-3xl w-full max-w-6xl max-h-[94vh] shadow-2xl overflow-hidden flex flex-col border border-slate-200">
+            
+            {/* Modal Top Controls */}
+            <div className="px-6 py-4 bg-gradient-to-r from-[#4A154B] via-[#6B2169] to-[#8A3B87] text-white flex flex-wrap items-center justify-between gap-4 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                  <FileText size={20} className="text-amber-300" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base md:text-lg leading-tight">เอกสารสรุปภาพรวมรายการอุปกรณ์และความพร้อม PPE (สำหรับนำเสนอผู้บริหาร)</h3>
+                  <p className="text-xs text-purple-200">สามารถเลือกรูปแบบสรุป บันทึกเป็นรูปภาพ (PNG) หรือสั่งพิมพ์ / บันทึกเป็น PDF ได้ทันที</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex bg-black/25 p-1 rounded-xl gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setExportViewMode('summary_by_item')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer ${
+                      exportViewMode === 'summary_by_item' ? 'bg-white text-[#6B2169] shadow-sm' : 'bg-transparent text-white/85 hover:text-white'
+                    }`}
+                  >
+                    สรุปตามประเภทอุปกรณ์
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExportViewMode('summary_by_tech')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer ${
+                      exportViewMode === 'summary_by_tech' ? 'bg-white text-[#6B2169] shadow-sm' : 'bg-transparent text-white/85 hover:text-white'
+                    }`}
+                  >
+                    สรุปแยกตามชุดงานช่าง
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExportViewMode('detailed_list')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border-0 cursor-pointer ${
+                      exportViewMode === 'detailed_list' ? 'bg-white text-[#6B2169] shadow-sm' : 'bg-transparent text-white/85 hover:text-white'
+                    }`}
+                  >
+                    ตารางรายการละเอียด
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handlePrintDocument}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-sm transition-all border-0 cursor-pointer"
+                >
+                  <Printer size={15} /> พิมพ์ / บันทึก PDF
+                </button>
+                <button
+                  type="button"
+                  disabled={isExportingImage}
+                  onClick={handleDownloadPNG}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm transition-all border-0 cursor-pointer disabled:opacity-60"
+                >
+                  <Download size={15} /> {isExportingImage ? 'กำลังสร้างไฟล์...' : 'บันทึกรูปภาพ (PNG)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowExportModal(false)}
+                  className="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors border-0 cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Printable Report Body */}
+            <div className="p-4 md:p-8 overflow-y-auto flex-1">
+              <div
+                ref={exportRef}
+                className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 max-w-5xl mx-auto text-slate-800 space-y-6"
+              >
+                {/* Report Banner Header */}
+                <div className="rounded-2xl bg-gradient-to-r from-[#4A154B] via-[#6B2169] to-[#8A3B87] p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-md shrink-0">
+                      <SafetyHelmetIcon size={44} />
+                    </div>
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-400 text-slate-900 mb-1.5">
+                        PEA ผกส.กบย.(ก3) • EXECUTIVE SAFETY REPORT
+                      </div>
+                      <h2 className="text-xl md:text-2xl font-extrabold tracking-tight leading-snug">
+                        รายงานสรุปสถานะและความพร้อมอุปกรณ์ความปลอดภัย (PPE)
+                      </h2>
+                      <p className="text-xs text-purple-100 mt-1">
+                        ขอบเขตข้อมูล: {selectedCategory === 'all' ? 'ทุกหมวดหมู่อุปกรณ์' : selectedCategory} • ผู้เบิก/ชุดงาน: {selectedUser === 'all' ? `ทุกชุดงาน (${groupedByTechnician.length} ชุดงาน)` : selectedUser}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20 text-right shrink-0">
+                    <p className="text-[11px] text-purple-100">ความพร้อมใช้งานสุทธิ</p>
+                    <p className="text-3xl font-black text-amber-300 leading-none mt-1">{stats.readyPct}%</p>
+                    <p className="text-[11px] text-purple-100 mt-1">ข้อมูล ณ วันที่ {formatDateTime(currentTime)}</p>
+                  </div>
+                </div>
+
+                {/* Executive KPI Summary Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <p className="text-xs font-bold text-slate-500">จำนวนอุปกรณ์รวมทั้งหมด</p>
+                    <p className="text-2xl font-black text-slate-900 mt-1">{stats.total.toLocaleString()} <span className="text-xs font-bold text-slate-500">ชิ้น/หน่วย</span></p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-emerald-800">พร้อมใช้งาน</p>
+                      <span className="text-[11px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-200/70 text-emerald-900">{stats.readyPct}%</span>
+                    </div>
+                    <p className="text-2xl font-black text-emerald-700 mt-1">{stats.ready.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-rose-50/70 border border-rose-200">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-rose-800">ชำรุด</p>
+                      <span className="text-[11px] font-extrabold px-1.5 py-0.5 rounded bg-rose-200/70 text-rose-900">{stats.damagedPct}%</span>
+                    </div>
+                    <p className="text-2xl font-black text-rose-700 mt-1">{stats.damaged.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-amber-800">รอตรวจ / รอซ่อม</p>
+                      <span className="text-[11px] font-extrabold px-1.5 py-0.5 rounded bg-amber-200/70 text-amber-900">{stats.pendingPct}%</span>
+                    </div>
+                    <p className="text-2xl font-black text-amber-700 mt-1">{stats.pending.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-100 border border-slate-300">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-slate-700">จำหน่าย / ขาดอัตรา</p>
+                      <span className="text-[11px] font-extrabold px-1.5 py-0.5 rounded bg-slate-300 text-slate-800">{stats.disposedPct}%</span>
+                    </div>
+                    <p className="text-2xl font-black text-slate-700 mt-1">{stats.disposed.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* Section 1: Summary By Equipment Type */}
+                {exportViewMode === 'summary_by_item' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                      <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <ShieldCheck size={17} className="text-[#6B2169]" />
+                        ตารางสรุปภาพรวมความพร้อมแยกตามประเภทอุปกรณ์ ({groupedByEquipmentType.length} รายการ)
+                      </h4>
+                      <span className="text-xs text-slate-500">เปรียบเทียบเกณฑ์ขั้นต่ำต่อชุด กับจำนวนพร้อมใช้งานจริง</span>
+                    </div>
+                    <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700 border-b border-slate-200">
+                            <th className="py-2.5 px-3 font-bold">ลำดับ</th>
+                            <th className="py-2.5 px-3 font-bold">รายการอุปกรณ์</th>
+                            <th className="py-2.5 px-3 font-bold">หมวดหมู่</th>
+                            <th className="py-2.5 px-3 font-bold text-center">เกณฑ์ขั้นต่ำรวม</th>
+                            <th className="py-2.5 px-3 font-bold text-center text-emerald-700">พร้อมใช้งาน</th>
+                            <th className="py-2.5 px-3 font-bold text-center text-rose-700">ชำรุด</th>
+                            <th className="py-2.5 px-3 font-bold text-center text-amber-700">รอซ่อม</th>
+                            <th className="py-2.5 px-3 font-bold text-center text-slate-600">จำหน่าย/ขาด</th>
+                            <th className="py-2.5 px-3 font-bold text-center">ความพร้อม (%)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {groupedByEquipmentType.map((eq, idx) => {
+                            const readinessPct = eq.standardTotal > 0 ? Math.min(100, Math.round((eq.readyTotal / eq.standardTotal) * 100)) : 100;
+                            return (
+                              <tr key={eq.name} className="hover:bg-slate-50/70">
+                                <td className="py-2 px-3 text-slate-500 font-semibold">{idx + 1}</td>
+                                <td className="py-2 px-3 font-bold text-slate-900">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-base">{getEmojiIcon(eq.category, eq.name)}</span>
+                                    <span>{eq.name}</span>
+                                  </div>
+                                </td>
+                                <td className="py-2 px-3 text-slate-500">{eq.category.split(' ')[1] || eq.category}</td>
+                                <td className="py-2 px-3 text-center font-bold text-purple-800 bg-purple-50/40">{eq.standardTotal} {eq.unit}</td>
+                                <td className="py-2 px-3 text-center font-extrabold text-emerald-700 bg-emerald-50/40">{eq.readyTotal} {eq.unit}</td>
+                                <td className="py-2 px-3 text-center font-bold text-rose-600">{eq.damagedTotal > 0 ? `${eq.damagedTotal} ${eq.unit}` : '-'}</td>
+                                <td className="py-2 px-3 text-center font-bold text-amber-600">{eq.pendingTotal > 0 ? `${eq.pendingTotal} ${eq.unit}` : '-'}</td>
+                                <td className="py-2 px-3 text-center font-semibold text-slate-500">{eq.disposedTotal > 0 ? `${eq.disposedTotal} ${eq.unit}` : '-'}</td>
+                                <td className="py-2 px-3 text-center">
+                                  <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                                    readinessPct >= 80
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : readinessPct >= 50
+                                      ? 'bg-amber-100 text-amber-800'
+                                      : 'bg-rose-100 text-rose-800'
+                                  }`}>
+                                    {readinessPct}%
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Section 2: Summary By Technician */}
+                {exportViewMode === 'summary_by_tech' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                      <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <Users size={17} className="text-[#6B2169]" />
+                        สรุปความพร้อมอุปกรณ์แยกตามชุดงานช่าง ({groupedByTechnician.length} ชุดงาน)
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4">
+                      {groupedByTechnician.map((tech) => {
+                        const techMinTotal = tech.items.reduce((acc, i) => acc + (i.standard || 0), 0);
+                        const techReadyPct = techMinTotal > 0 ? Math.min(100, Math.round((tech.ready / techMinTotal) * 100)) : 0;
+                        return (
+                          <div key={tech.userName} className="border border-slate-200 rounded-xl overflow-hidden">
+                            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-[#6B2169] text-white flex items-center justify-center font-bold text-xs">
+                                  {tech.userName.replace('นาย', '').charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-slate-900 text-sm">{tech.userName}</p>
+                                  <p className="text-[11px] text-slate-500">จำนวนรายการอุปกรณ์ {tech.items.length} ประเภท • ความพร้อมเทียบเกณฑ์ขั้นต่ำ {techReadyPct}%</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-1.5 text-[11px] font-bold">
+                                <span className="px-2.5 py-1 rounded-md bg-purple-50 text-purple-800 border border-purple-200">ขั้นต่ำรวม {techMinTotal}</span>
+                                <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">พร้อมใช้งาน {tech.ready}</span>
+                                <span className="px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 border border-rose-200">ชำรุด {tech.damaged}</span>
+                                <span className="px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200">รอซ่อม {tech.pending}</span>
+                                <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">จำหน่าย/ขาด {tech.disposed}</span>
+                              </div>
+                            </div>
+                            <div className="p-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {tech.items.map(item => (
+                                <div key={item.rowKey} className="px-3 py-2 rounded-lg border border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-slate-800 truncate pr-2">{item.name}</span>
+                                  <span className="shrink-0 font-bold text-[11px]">
+                                    <span className="text-purple-700">ขั้นต่ำ {item.standard}</span>
+                                    {' | '}
+                                    <span className="text-emerald-600">ดี {item.ready}</span>
+                                    {item.damaged > 0 && <span className="text-rose-600"> • ชำรุด {item.damaged}</span>}
+                                    {item.disposed > 0 && <span className="text-slate-500"> • ขาด {item.disposed}</span>}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Section 3: Detailed List */}
+                {exportViewMode === 'detailed_list' && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                      <h4 className="font-bold text-slate-800 text-sm">
+                        ตารางรายการอุปกรณ์รายชุดงาน ({filteredData.length} รายการ)
+                      </h4>
+                    </div>
+                    <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700 border-b border-slate-200">
+                            <th className="py-2 px-3 font-bold">ชื่ออุปกรณ์</th>
+                            <th className="py-2 px-3 font-bold">หมวดหมู่</th>
+                            <th className="py-2 px-3 font-bold">ผู้ใช้งาน / ช่าง</th>
+                            <th className="py-2 px-3 font-bold text-center">ขั้นต่ำต่อชุด</th>
+                            <th className="py-2 px-3 font-bold text-center text-emerald-700">พร้อมใช้</th>
+                            <th className="py-2 px-3 font-bold text-center text-rose-700">ชำรุด</th>
+                            <th className="py-2 px-3 font-bold text-center text-amber-700">รอซ่อม</th>
+                            <th className="py-2 px-3 font-bold text-center text-slate-600">จำหน่าย/ขาด</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {filteredData.map((item) => (
+                            <tr key={item.rowKey}>
+                              <td className="py-2 px-3 font-bold text-slate-800">{item.name}</td>
+                              <td className="py-2 px-3 text-slate-500">{item.category.split(' ')[1] || item.category}</td>
+                              <td className="py-2 px-3 font-semibold text-slate-700">{item.userName}</td>
+                              <td className="py-2 px-3 text-center font-bold text-purple-800">{item.standard} {item.unit}</td>
+                              <td className="py-2 px-3 text-center font-bold text-emerald-600">{item.ready} {item.unit}</td>
+                              <td className="py-2 px-3 text-center font-bold text-rose-600">{item.damaged > 0 ? `${item.damaged} ${item.unit}` : '-'}</td>
+                              <td className="py-2 px-3 text-center font-bold text-amber-600">{item.pending > 0 ? `${item.pending} ${item.unit}` : '-'}</td>
+                              <td className="py-2 px-3 text-center text-slate-500">{item.disposed > 0 ? `${item.disposed} ${item.unit}` : '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Report Footer Signature / Timestamp */}
+                <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-[11px] text-slate-400">
+                  <span>ระบบติดตามสถานะและความพร้อมอุปกรณ์ความปลอดภัย (Safety & PPE Dashboard) • ผกส.กบย.(ก3)</span>
+                  <span>ผู้จัดทำรายงาน: Admin • พิมพ์เมื่อ {formatDateTime(currentTime)}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
