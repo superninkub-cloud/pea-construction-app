@@ -454,7 +454,7 @@ export default function WorkReportClaimPage() {
     }
   };
 
-  // Print / Save PDF
+  // Print / Save PDF (Optimized single-page A4 layout that fits up to 4 jobs / 12 photos on Page 1)
   const handlePrintPDF = () => {
     if (!reportRef.current) return;
     const clone = reportRef.current.cloneNode(true) as HTMLElement;
@@ -473,13 +473,13 @@ export default function WorkReportClaimPage() {
               background: #ffffff;
               color: #0f172a;
               margin: 0;
-              padding: 16px;
+              padding: 8px;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
             @media print {
-              body { padding: 0; }
-              @page { size: A4 portrait; margin: 10mm; }
+              body { padding: 0; margin: 0; }
+              @page { size: A4 portrait; margin: 6mm 8mm; }
             }
           </style>
         </head>
@@ -494,32 +494,59 @@ export default function WorkReportClaimPage() {
     win.document.close();
   };
 
-  // All attached photos across selected projects + other tasks
-  const allReportPhotos = useMemo(() => {
-    const list: { sourceLabel: string; url: string; caption: string }[] = [];
-    selectedProjects.forEach((p) => {
+  // Grouped photos per job (latest 3 photos per job only, separated clearly by job)
+  const groupedReportPhotos = useMemo(() => {
+    const groups: {
+      groupKey: string;
+      badge: string;
+      title: string;
+      subtitle: string;
+      totalOriginalCount: number;
+      photos: { url: string; caption: string }[];
+    }[] = [];
+
+    selectedProjects.forEach((p, idx) => {
       const ov = projectOverrides[p.wbs];
       if (ov && !ov.includeImages) return;
       const imgs = parseProjectImagesWithCaptions(p.image_url);
-      imgs.slice(0, 4).forEach((img) => {
-        list.push({
-          sourceLabel: `${p.wbs}`,
+      if (imgs.length === 0) return;
+      // Take the latest 3 photos (last 3 uploaded)
+      const latestThree = imgs.slice(-3);
+      groups.push({
+        groupKey: `proj_${p.wbs}`,
+        badge: `งานที่ ${idx + 1} • ${p.wbs}`,
+        title: p.name || p.wbs,
+        subtitle: `สถานะ ${p.status || "-"} (${calculateProjectProgress(p)}%)`,
+        totalOriginalCount: imgs.length,
+        photos: latestThree.map((img) => ({
           url: img.url,
-          caption: img.caption || p.name,
-        });
+          caption: img.caption || "",
+        })),
       });
     });
+
     otherTasks.forEach((t, idx) => {
-      t.images.forEach((img) => {
-        list.push({
-          sourceLabel: `งานอื่นๆ #${idx + 1}: ${t.title}`,
+      if (!t.images || t.images.length === 0) return;
+      const latestThree = t.images.slice(-3);
+      groups.push({
+        groupKey: `other_${t.id}`,
+        badge: `งานอื่นๆ #${idx + 1}`,
+        title: t.title,
+        subtitle: t.category,
+        totalOriginalCount: t.images.length,
+        photos: latestThree.map((img) => ({
           url: img.url,
           caption: img.caption || t.resultDetail,
-        });
+        })),
       });
     });
-    return list;
+
+    return groups;
   }, [selectedProjects, projectOverrides, otherTasks]);
+
+  const totalDisplayedPhotosCount = useMemo(() => {
+    return groupedReportPhotos.reduce((acc, g) => acc + g.photos.length, 0);
+  }, [groupedReportPhotos]);
 
   if (!isRoleChecked) return null;
 
@@ -1066,7 +1093,7 @@ export default function WorkReportClaimPage() {
                   onChange={(e) => setShowPhotosInReport(e.target.checked)}
                   className="rounded text-amber-600"
                 />
-                แนบรูปถ่ายหน้างาน ({allReportPhotos.length} รูป)
+                แนบรูปถ่ายหน้างาน (งานละไม่เกิน 3 รูป • รวม {totalDisplayedPhotosCount} รูป)
               </label>
             </div>
             <div className="p-5 space-y-3.5 bg-gradient-to-b from-amber-100/50 via-amber-50/40 to-orange-50/30">
@@ -1129,91 +1156,91 @@ export default function WorkReportClaimPage() {
               </div>
             </div>
 
-            {/* PRINTABLE SHEET */}
+            {/* PRINTABLE SHEET - Compact layout engineered so 4 jobs + 12 photos (3 per job) fit on 1 A4 page */}
             <div
               ref={reportRef}
-              className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8 text-slate-900 space-y-5 max-w-[920px] mx-auto"
+              className="bg-white rounded-2xl shadow-lg border border-slate-200 p-4 md:p-5 text-slate-900 space-y-3 max-w-[920px] mx-auto"
             >
               {/* Official Banner Header */}
-              <div className="border-b-2 border-[#6B2169] pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-[#6B2169] text-white flex flex-col items-center justify-center font-black shadow-sm shrink-0">
-                    <span className="text-base leading-none">PEA</span>
-                    <span className="text-[9px] font-bold text-amber-300 mt-0.5">ผกร.(ก3)</span>
+              <div className="border-b-2 border-[#6B2169] pb-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-[#6B2169] text-white flex flex-col items-center justify-center font-black shadow-sm shrink-0">
+                    <span className="text-sm leading-none">PEA</span>
+                    <span className="text-[8px] font-bold text-amber-300 mt-0.5">ผกร.(ก3)</span>
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-[#6B2169] mb-1">
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-purple-100 text-[#6B2169] mb-0.5">
                       การไฟฟ้าส่วนภูมิภาค เขต 3 (ภาคกลาง) จ.นครปฐม • PEA ผกร.กรย.(ก3)
                     </div>
-                    <h2 className="text-lg md:text-xl font-black text-slate-900 leading-snug">
+                    <h2 className="text-base md:text-lg font-black text-slate-900 leading-tight">
                       แบบรายงานผลการปฏิบัติงานและอัปเดตสถานะงาน (ประกอบการเบิกค่าตอบแทน)
                     </h2>
-                    <p className="text-xs font-semibold text-slate-600">
+                    <p className="text-[11px] font-semibold text-slate-600">
                       {claimType} • <span className="text-[#6B2169] font-extrabold">{claimPeriod}</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-purple-50 border border-purple-200 rounded-xl px-3.5 py-2 text-right shrink-0">
-                  <p className="text-[10px] font-bold text-purple-700">สรุปภารกิจที่ขอเบิก</p>
-                  <p className="text-xl font-black text-[#6B2169] leading-tight">
+                <div className="bg-purple-50 border border-purple-200 rounded-xl px-3 py-1.5 text-right shrink-0">
+                  <p className="text-[9.5px] font-bold text-purple-700">สรุปภารกิจที่ขอเบิก</p>
+                  <p className="text-base font-black text-[#6B2169] leading-tight">
                     {selectedProjects.length + otherTasks.length} รายการ
                   </p>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="text-[9.5px] text-slate-500">
                     งานในระบบ {selectedProjects.length} • งานอื่นๆ {otherTasks.length}
                   </p>
                 </div>
               </div>
 
               {/* Claimant Info Box */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 text-[11px]">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 block">ผู้ขอเบิก / ช่างผู้ควบคุมงาน</span>
+                  <span className="text-[9.5px] font-bold text-slate-400 block">ผู้ขอเบิก / ช่างผู้ควบคุมงาน</span>
                   <span className="font-extrabold text-slate-900">{claimantName || "-"}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 block">ตำแหน่ง / สังกัด</span>
+                  <span className="text-[9.5px] font-bold text-slate-400 block">ตำแหน่ง / สังกัด</span>
                   <span className="font-bold text-slate-800">{claimantPosition}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 block">เลขที่อนุมัติเดินทาง / คำสั่ง</span>
+                  <span className="text-[9.5px] font-bold text-slate-400 block">เลขที่อนุมัติเดินทาง / คำสั่ง</span>
                   <span className="font-bold text-slate-800">{travelOrderNo || "-"}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 block">รถยนต์ที่ใช้ปฏิบัติงาน</span>
+                  <span className="text-[9.5px] font-bold text-slate-400 block">รถยนต์ที่ใช้ปฏิบัติงาน</span>
                   <span className="font-bold text-slate-800">{vehiclePlate || "-"}</span>
                 </div>
               </div>
 
               {/* PART 1: งานจากการอัปเดตสถานะงานในระบบ */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
-                  <h3 className="text-xs md:text-sm font-extrabold text-[#1E3A8A] flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-md bg-blue-600 text-white inline-flex items-center justify-center text-[11px]">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                  <h3 className="text-xs font-extrabold text-[#1E3A8A] flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded bg-blue-600 text-white inline-flex items-center justify-center text-[10px]">
                       1
                     </span>
                     ส่วนที่ 1: รายละเอียดงานก่อสร้างที่อัปเดตสถานะในระบบติดตาม ผกร.กรย.(ก3) ({selectedProjects.length}{" "}
                     โครงการ)
                   </h3>
-                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                     ✓ อัปเดตสถานะในระบบแล้ว
                   </span>
                 </div>
 
                 {selectedProjects.length === 0 ? (
-                  <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-400">
+                  <div className="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-400">
                     ยังไม่ได้เลือกโครงการจากระบบอัปเดตสถานะงาน (กรุณาติ๊กเลือกโครงการจากแถบด้านซ้าย)
                   </div>
                 ) : (
                   <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                    <table className="w-full text-left text-[11.5px]">
+                    <table className="w-full text-left text-[11px]">
                       <thead>
                         <tr className="bg-slate-100 text-slate-700 border-b border-slate-200">
-                          <th className="py-2 px-2.5 font-bold w-10 text-center">ลำดับ</th>
-                          <th className="py-2 px-2.5 font-bold w-24">วันที่ปฏิบัติงาน</th>
-                          <th className="py-2 px-2.5 font-bold">หมายเลข WBS / ชื่องานก่อสร้าง</th>
-                          <th className="py-2 px-2.5 font-bold text-center w-24">สถานะ / % งาน</th>
-                          <th className="py-2 px-2.5 font-bold">ปริมาณงานและรายละเอียดที่อัปเดตในระบบ</th>
+                          <th className="py-1.5 px-2 font-bold w-8 text-center">ลำดับ</th>
+                          <th className="py-1.5 px-2 font-bold w-20">วันที่</th>
+                          <th className="py-1.5 px-2 font-bold">หมายเลข WBS / ชื่องานก่อสร้าง</th>
+                          <th className="py-1.5 px-2 font-bold text-center w-20">สถานะ / %</th>
+                          <th className="py-1.5 px-2 font-bold">ปริมาณงานและรายละเอียดที่อัปเดตในระบบ</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200">
@@ -1246,33 +1273,35 @@ export default function WorkReportClaimPage() {
 
                           return (
                             <tr key={proj.wbs} className="align-top">
-                              <td className="py-2.5 px-2.5 text-center font-bold text-slate-500">{idx + 1}</td>
-                              <td className="py-2.5 px-2.5 font-bold text-slate-800 whitespace-nowrap">
+                              <td className="py-1.5 px-2 text-center font-bold text-slate-500">{idx + 1}</td>
+                              <td className="py-1.5 px-2 font-bold text-slate-800 whitespace-nowrap">
                                 {formatThaiDateShort(ov?.workDate)}
                               </td>
-                              <td className="py-2.5 px-2.5">
-                                <div className="font-mono font-extrabold text-indigo-900 text-xs">{proj.wbs}</div>
-                                <div className="font-bold text-slate-900 mt-0.5">{proj.name}</div>
-                                <div className="text-[10.5px] text-slate-500 mt-0.5">
+                              <td className="py-1.5 px-2">
+                                <div className="font-mono font-extrabold text-indigo-900 text-[11px] leading-tight">
+                                  {proj.wbs}
+                                </div>
+                                <div className="font-bold text-slate-900 leading-snug">{proj.name}</div>
+                                <div className="text-[10px] text-slate-500">
                                   ผู้ควบคุมงาน: {proj.supervisor || claimantName}
                                 </div>
                               </td>
-                              <td className="py-2.5 px-2.5 text-center">
-                                <span className="inline-block px-2 py-0.5 rounded bg-purple-100 text-[#6B2169] font-extrabold text-[11px]">
+                              <td className="py-1.5 px-2 text-center">
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-purple-100 text-[#6B2169] font-extrabold text-[10px]">
                                   {proj.status || "-"}
                                 </span>
-                                <div className="font-black text-emerald-700 text-sm mt-1">{pct}%</div>
+                                <div className="font-black text-emerald-700 text-xs mt-0.5">{pct}%</div>
                               </td>
-                              <td className="py-2.5 px-2.5 space-y-1">
-                                <p className="font-bold text-slate-800">
+                              <td className="py-1.5 px-2 space-y-0.5">
+                                <p className="font-bold text-slate-800 leading-snug">
                                   {ov?.customActivity || getLatestRemarkLines(proj.remarks)}
                                 </p>
                                 {activeMetrics.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 pt-0.5">
+                                  <div className="flex flex-wrap gap-1">
                                     {activeMetrics.map((m) => (
                                       <span
                                         key={m.idx}
-                                        className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200"
+                                        className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 text-[9.5px] font-semibold border border-slate-200"
                                       >
                                         {m.label}: {m.done}/{m.target} {m.unit}
                                       </span>
@@ -1280,11 +1309,11 @@ export default function WorkReportClaimPage() {
                                   </div>
                                 )}
                                 {checkedItems.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 pt-0.5">
+                                  <div className="flex flex-wrap gap-1">
                                     {checkedItems.map((c) => (
                                       <span
                                         key={String(c.key)}
-                                        className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200"
+                                        className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 text-[9.5px] font-bold border border-emerald-200"
                                       >
                                         ✓ {c.label}
                                       </span>
@@ -1302,53 +1331,53 @@ export default function WorkReportClaimPage() {
               </div>
 
               {/* PART 2: งานอื่นๆ ที่ไม่อยู่ในการอัปเดตสถานะงาน */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
-                  <h3 className="text-xs md:text-sm font-extrabold text-emerald-900 flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-md bg-emerald-600 text-white inline-flex items-center justify-center text-[11px]">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                  <h3 className="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded bg-emerald-600 text-white inline-flex items-center justify-center text-[10px]">
                       2
                     </span>
                     ส่วนที่ 2: งานปฏิบัติการอื่นๆ นอกเหนือจากงานอัปเดตสถานะ ({otherTasks.length} รายการ)
                   </h3>
-                  <span className="text-[11px] font-semibold text-slate-500">
+                  <span className="text-[10px] font-semibold text-slate-500">
                     งานสำรวจ / ตรวจรับ / แก้ไฟขัดข้อง / งานมอบหมายพิเศษ
                   </span>
                 </div>
 
                 {otherTasks.length === 0 ? (
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-400">
-                    - ไม่มีรายการงานอื่นๆ เพิ่มเติม (หากมีงานนอกระบบ สามารถกรอกเพิ่มได้ที่กล่องส่วนที่ 2 ด้านซ้าย) -
+                  <div className="py-1.5 px-3 rounded-lg bg-slate-50 border border-slate-200 text-center text-[10.5px] text-slate-400">
+                    - ไม่มีรายการงานอื่นๆ เพิ่มเติม -
                   </div>
                 ) : (
                   <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                    <table className="w-full text-left text-[11.5px]">
+                    <table className="w-full text-left text-[11px]">
                       <thead>
                         <tr className="bg-emerald-50/70 text-emerald-950 border-b border-slate-200">
-                          <th className="py-2 px-2.5 font-bold w-10 text-center">ลำดับ</th>
-                          <th className="py-2 px-2.5 font-bold w-24">วันที่ปฏิบัติงาน</th>
-                          <th className="py-2 px-2.5 font-bold">ประเภทภารกิจ / ชื่องานอื่นๆ</th>
-                          <th className="py-2 px-2.5 font-bold">สถานที่ / พื้นที่ปฏิบัติงาน</th>
-                          <th className="py-2 px-2.5 font-bold">ผลการปฏิบัติงานเพื่อประกอบการเบิก</th>
+                          <th className="py-1.5 px-2 font-bold w-8 text-center">ลำดับ</th>
+                          <th className="py-1.5 px-2 font-bold w-20">วันที่</th>
+                          <th className="py-1.5 px-2 font-bold">ประเภทภารกิจ / ชื่องานอื่นๆ</th>
+                          <th className="py-1.5 px-2 font-bold">สถานที่ / พื้นที่ปฏิบัติงาน</th>
+                          <th className="py-1.5 px-2 font-bold">ผลการปฏิบัติงานเพื่อประกอบการเบิก</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200">
                         {otherTasks.map((task, idx) => (
                           <tr key={task.id} className="align-top">
-                            <td className="py-2 px-2.5 text-center font-bold text-slate-500">{idx + 1}</td>
-                            <td className="py-2 px-2.5 font-bold text-slate-800 whitespace-nowrap">
+                            <td className="py-1.5 px-2 text-center font-bold text-slate-500">{idx + 1}</td>
+                            <td className="py-1.5 px-2 font-bold text-slate-800 whitespace-nowrap">
                               {formatThaiDateShort(task.date)}
                             </td>
-                            <td className="py-2 px-2.5">
-                              <span className="inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-extrabold mb-0.5">
+                            <td className="py-1.5 px-2">
+                              <span className="inline-block px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 text-[9.5px] font-extrabold mr-1">
                                 {task.category}
                               </span>
-                              <div className="font-bold text-slate-900">{task.title}</div>
+                              <span className="font-bold text-slate-900">{task.title}</span>
                               {task.referenceNo && (
-                                <div className="text-[10.5px] text-slate-500">อ้างอิง: {task.referenceNo}</div>
+                                <span className="text-[10px] text-slate-500 ml-1">(อ้างอิง: {task.referenceNo})</span>
                               )}
                             </td>
-                            <td className="py-2 px-2.5 font-medium text-slate-700">{task.location || "-"}</td>
-                            <td className="py-2 px-2.5 font-bold text-slate-800">{task.resultDetail}</td>
+                            <td className="py-1.5 px-2 font-medium text-slate-700">{task.location || "-"}</td>
+                            <td className="py-1.5 px-2 font-bold text-slate-800">{task.resultDetail}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1357,24 +1386,67 @@ export default function WorkReportClaimPage() {
                 )}
               </div>
 
-              {/* PART 3: ประมวลภาพถ่ายการปฏิบัติงานหน้างาน (ถ้ามี) */}
-              {showPhotosInReport && allReportPhotos.length > 0 && (
-                <div className="space-y-2.5 pt-1">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
-                    <h3 className="text-xs md:text-sm font-extrabold text-purple-950 flex items-center gap-2">
-                      <ImageIcon size={16} className="text-[#6B2169]" />
-                      ภาพถ่ายหลักฐานการออกไปปฏิบัติงานหน้างาน ({allReportPhotos.length} รูป)
+              {/* PART 3: ประมวลภาพถ่ายการปฏิบัติงานหน้างาน (แยกแต่ละงาน งานละไม่เกิน 3 รูป ล่าสุด และจัดขนาดให้พอดี 12 รูปในหน้าแรก) */}
+              {showPhotosInReport && groupedReportPhotos.length > 0 && (
+                <div className="space-y-2 pt-0.5">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                    <h3 className="text-xs font-extrabold text-purple-950 flex items-center gap-1.5">
+                      <ImageIcon size={15} className="text-[#6B2169]" />
+                      ภาพถ่ายหลักฐานการออกไปปฏิบัติงานหน้างาน แยกตามรายโครงการ (แสดงภาพล่าสุดงานละไม่เกิน 3 รูป • รวม{" "}
+                      {totalDisplayedPhotosCount} รูป)
                     </h3>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {allReportPhotos.slice(0, 9).map((photo, idx) => (
-                      <div key={idx} className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col">
-                        <div className="h-32 w-full bg-slate-100 overflow-hidden">
-                          <img src={photo.url} alt="" className="w-full h-full object-cover" />
+
+                  {/* When there are multiple jobs (e.g. 3-4 jobs = 9-12 photos), arrange job cards in a 2-column grid so all 12 photos fit comfortably on Page 1 */}
+                  <div
+                    className={`grid gap-2.5 ${
+                      groupedReportPhotos.length >= 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
+                    }`}
+                  >
+                    {groupedReportPhotos.map((group) => (
+                      <div
+                        key={group.groupKey}
+                        className="rounded-xl border border-purple-200/90 bg-purple-50/30 p-2 space-y-1.5"
+                      >
+                        {/* Job Header inside Photo Section */}
+                        <div className="flex items-center justify-between gap-1.5 border-b border-purple-100 pb-1">
+                          <div className="min-w-0 flex items-center gap-1.5">
+                            <span className="px-2 py-0.5 rounded-md bg-[#6B2169] text-white font-mono text-[9.5px] font-extrabold shrink-0">
+                              {group.badge}
+                            </span>
+                            <span className="font-extrabold text-slate-900 text-[10.5px] truncate" title={group.title}>
+                              {group.title}
+                            </span>
+                          </div>
+                          <span className="text-[9.5px] font-bold text-purple-800 bg-purple-100 px-1.5 py-0.5 rounded shrink-0">
+                            ล่าสุด {group.photos.length} รูป
+                          </span>
                         </div>
-                        <div className="p-2 text-[10.5px]">
-                          <div className="font-extrabold text-[#6B2169] truncate">{photo.sourceLabel}</div>
-                          <div className="text-slate-600 line-clamp-2 leading-snug mt-0.5">{photo.caption}</div>
+
+                        {/* 3 Photos Row for this specific Job */}
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {group.photos.map((photo, pIdx) => (
+                            <div
+                              key={pIdx}
+                              className="rounded-lg border border-slate-200 overflow-hidden bg-white flex flex-col shadow-sm"
+                            >
+                              <div
+                                className={`${
+                                  groupedReportPhotos.length >= 3 ? "h-20" : "h-24"
+                                } w-full bg-slate-100 overflow-hidden relative`}
+                              >
+                                <img src={photo.url} alt="" className="w-full h-full object-cover" />
+                                <span className="absolute top-1 left-1 bg-black/60 text-white text-[8.5px] font-bold px-1.5 py-0.2 rounded">
+                                  รูปที่ {pIdx + 1}
+                                </span>
+                              </div>
+                              {photo.caption && (
+                                <div className="px-1.5 py-1 text-[9px] text-slate-600 truncate leading-tight">
+                                  {photo.caption}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     ))}
@@ -1384,32 +1456,32 @@ export default function WorkReportClaimPage() {
 
               {/* Clarification / Certification Box */}
               {executiveNote && (
-                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs">
+                <div className="px-3 py-2 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] leading-snug">
                   <span className="font-extrabold text-amber-900">คำรับรองและหมายเหตุประกอบการขอเบิกค่าตอบแทน: </span>
                   <span className="text-slate-800 font-medium">{executiveNote}</span>
                 </div>
               )}
 
-              {/* Official Signature Blocks */}
-              <div className="pt-6 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs text-center">
-                <div className="space-y-2">
+              {/* Official Signature Blocks (Compact for single-page A4) */}
+              <div className="pt-3 border-t border-slate-200 grid grid-cols-2 gap-4 text-[11px] text-center">
+                <div className="space-y-1">
                   <p className="font-bold text-slate-600">ขอรับรองว่าได้ออกไปปฏิบัติงานและอัปเดตสถานะงานจริง</p>
-                  <div className="pt-7 text-slate-400">ลงชื่อ ............................................................ ผู้ขอเบิก</div>
+                  <div className="pt-4 text-slate-400">ลงชื่อ ............................................................ ผู้ขอเบิก</div>
                   <p className="font-extrabold text-slate-900">({claimantName || "................................................"})</p>
-                  <p className="text-slate-600">{claimantPosition}</p>
-                  <p className="text-[11px] text-slate-400">วันที่ ......... / .................... / ............</p>
+                  <p className="text-slate-600 text-[10.5px]">{claimantPosition}</p>
+                  <p className="text-[10px] text-slate-400">วันที่ ......... / .................... / ............</p>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <p className="font-bold text-slate-600">ได้ตรวจสอบผลการปฏิบัติงานในระบบแล้ว เห็นควรอนุมัติเบิกจ่าย</p>
-                  <div className="pt-7 text-slate-400">ลงชื่อ ............................................................ ผู้รับรอง/ผู้บังคับบัญชา</div>
+                  <div className="pt-4 text-slate-400">ลงชื่อ ............................................................ ผู้รับรอง/ผู้บังคับบัญชา</div>
                   <p className="font-extrabold text-slate-900">(............................................................)</p>
-                  <p className="text-slate-600">{approverName}</p>
-                  <p className="text-[11px] text-slate-400">วันที่ ......... / .................... / ............</p>
+                  <p className="text-slate-600 text-[10.5px]">{approverName}</p>
+                  <p className="text-[10px] text-slate-400">วันที่ ......... / .................... / ............</p>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400">
+              <div className="pt-1.5 border-t border-slate-100 flex justify-between items-center text-[9.5px] text-slate-400">
                 <span>เอกสารอ้างอิงจากระบบติดตามงานก่อสร้าง PEA ผกร.กรย.(ก3)</span>
                 <span>พิมพ์เมื่อ: {new Date().toLocaleDateString("th-TH")}</span>
               </div>
