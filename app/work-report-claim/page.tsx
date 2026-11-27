@@ -523,8 +523,9 @@ export default function WorkReportClaimPage() {
 
   if (!isRoleChecked) return null;
 
-  // Restrict to Admin only
-  if (userRole !== "admin") {
+  // Restrict to Admin, pscc3 (user), and Office (exclude guest)
+  const canAccess = userRole === "admin" || userRole === "user" || userRole === "office";
+  if (!canAccess) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col">
         <TopBar title="รายงานผลการปฏิบัติงาน (เบิกค่าตอบแทน)" />
@@ -533,10 +534,10 @@ export default function WorkReportClaimPage() {
             <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
               <ShieldAlert size={36} />
             </div>
-            <h2 className="text-xl font-extrabold text-slate-900">จำกัดสิทธิ์เฉพาะผู้ดูแลระบบ (Admin)</h2>
+            <h2 className="text-xl font-extrabold text-slate-900">จำกัดสิทธิ์เฉพาะเจ้าหน้าที่</h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              โปรแกรมรายงานผลการปฏิบัติงานเพื่อประกอบการเบิกค่าตอบแทน ขณะนี้เปิดให้ทดสอบและใช้งานเฉพาะบัญชี{" "}
-              <span className="font-bold text-purple-700">Admin</span> เท่านั้น
+              โปรแกรมรายงานผลการปฏิบัติงานเพื่อประกอบการเบิกค่าตอบแทน เปิดให้ใช้งานสำหรับผู้ใช้งาน{" "}
+              <span className="font-bold text-purple-700">Admin, pscc3 และ Office</span> เท่านั้น
             </p>
           </div>
         </div>
@@ -555,12 +556,12 @@ export default function WorkReportClaimPage() {
             <FileCheck size={26} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-lg md:text-xl font-extrabold text-slate-900 tracking-tight">
                 โปรแกรมรายงานผลการปฏิบัติงาน เพื่อประกอบการเบิกค่าตอบแทน
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                เฉพาะ Admin
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-purple-100 text-[#6B2169] border border-purple-300">
+                PEA ผกร.กรย.(ก3)
               </span>
             </div>
             <p className="text-xs md:text-sm text-slate-500 mt-0.5">
@@ -591,124 +592,124 @@ export default function WorkReportClaimPage() {
       <main className="flex-1 p-4 md:p-6 max-w-[1700px] mx-auto w-full grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: Controls & Data Entry (5 cols on XL) */}
         <div className="xl:col-span-5 space-y-6">
-          {/* Card 1: ข้อมูลผู้ขอเบิกและรอบการเบิก */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="px-5 py-3.5 bg-gradient-to-r from-slate-50 to-purple-50/40 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="font-extrabold text-sm text-slate-800 flex items-center gap-2">
-                <User size={17} className="text-[#6B2169]" />
+          {/* Card 1: ข้อมูลผู้ขอเบิกและรอบการเบิก (Purple Theme) */}
+          <div className="bg-purple-50/70 rounded-2xl shadow-sm border-2 border-purple-200/90 overflow-hidden">
+            <div className="px-5 py-3.5 bg-gradient-to-r from-[#581C87] via-[#6B2169] to-[#8A3B87] text-white flex items-center justify-between">
+              <h2 className="font-extrabold text-sm flex items-center gap-2">
+                <User size={18} className="text-amber-300" />
                 1. ข้อมูลช่างผู้ควบคุมงาน / ผู้ขอเบิกค่าตอบแทน
               </h2>
-              <span className="text-[11px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
+              <span className="text-[11px] font-bold text-purple-950 bg-amber-300 px-2.5 py-0.5 rounded-full shadow-sm">
                 บันทึกอัตโนมัติ
               </span>
             </div>
-            <div className="p-5 space-y-3.5 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-5 space-y-4 text-xs bg-gradient-to-b from-purple-100/60 via-purple-50/50 to-fuchsia-50/40">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">ชื่อ-สกุล ผู้ขอเบิก</label>
+                  <label className="block font-extrabold text-purple-950 mb-1.5">ชื่อ-สกุล ผู้ขอเบิก</label>
                   <input
                     type="text"
                     value={claimantName}
                     onChange={(e) => setClaimantName(e.target.value)}
                     placeholder="เช่น นายอุดมศักดิ์ จันทร์กลิ่น"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-bold text-slate-900 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">ตำแหน่ง</label>
+                  <label className="block font-extrabold text-purple-950 mb-1.5">ตำแหน่ง</label>
                   <input
                     type="text"
                     value={claimantPosition}
                     onChange={(e) => setClaimantPosition(e.target.value)}
                     placeholder="ช่างผู้ควบคุมงาน"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">สังกัด / แผนก</label>
+                  <label className="block font-extrabold text-purple-950 mb-1.5">สังกัด / แผนก</label>
                   <input
                     type="text"
                     value={claimAffiliation}
                     onChange={(e) => setClaimAffiliation(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">งวด / ช่วงวันที่ขอเบิก</label>
+                  <label className="block font-extrabold text-purple-950 mb-1.5">งวด / ช่วงวันที่ขอเบิก</label>
                   <input
                     type="text"
                     value={claimPeriod}
                     onChange={(e) => setClaimPeriod(e.target.value)}
                     placeholder="เช่น ประจำเดือน พ.ย. 2569 หรือ 1-15 พ.ย. 69"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 font-bold text-purple-800 bg-purple-50/40 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-purple-300 shadow-sm font-extrabold text-[#6B2169] hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-600 mb-1">ประเภทการเบิกค่าตอบแทน</label>
+                <label className="block font-extrabold text-purple-950 mb-1.5">ประเภทการเบิกค่าตอบแทน</label>
                 <input
                   type="text"
                   value={claimType}
                   onChange={(e) => setClaimType(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">เลขที่อนุมัติเดินทาง / คำสั่ง (ถ้ามี)</label>
+                  <label className="block font-extrabold text-purple-950 mb-1.5">เลขที่อนุมัติเดินทาง / คำสั่ง (ถ้ามี)</label>
                   <input
                     type="text"
                     value={travelOrderNo}
                     onChange={(e) => setTravelOrderNo(e.target.value)}
                     placeholder="เช่น ก.3 ผกร.(ก3) / -"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">รถยนต์ที่ใช้ปฏิบัติงาน (ถ้ามี)</label>
+                  <label className="block font-extrabold text-purple-950 mb-1.5">รถยนต์ที่ใช้ปฏิบัติงาน (ถ้ามี)</label>
                   <input
                     type="text"
                     value={vehiclePlate}
                     onChange={(e) => setVehiclePlate(e.target.value)}
                     placeholder="เช่น ทะเบียน 4กฒ-xxxx"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Card 2: ส่วนที่ 1 ดึงงานจากการอัปเดตสถานะงานในระบบ */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="px-5 py-3.5 bg-gradient-to-r from-blue-50 to-indigo-50/50 border-b border-slate-200 flex items-center justify-between">
+          {/* Card 2: ส่วนที่ 1 ดึงงานจากการอัปเดตสถานะงานในระบบ (Soft Blue Theme) */}
+          <div className="bg-blue-50/60 rounded-2xl shadow-sm border-2 border-blue-200/90 overflow-hidden">
+            <div className="px-5 py-3.5 bg-gradient-to-r from-[#1E3A8A] via-[#1D4ED8] to-[#2563EB] text-white flex items-center justify-between">
               <div>
-                <h2 className="font-extrabold text-sm text-slate-800 flex items-center gap-2">
-                  <Layers size={17} className="text-blue-600" />
+                <h2 className="font-extrabold text-sm flex items-center gap-2">
+                  <Layers size={18} className="text-sky-200" />
                   2. ส่วนที่ 1: เลือกงานจากระบบอัปเดตสถานะงานก่อสร้าง
                 </h2>
-                <p className="text-[11px] text-slate-500 mt-0.5">
+                <p className="text-[11px] text-blue-100 mt-0.5">
                   ติ๊กเลือกงานที่ช่างได้อัปเดตสถานะในระบบแล้ว เพื่อนำรายละเอียดความก้าวหน้ามาแนบเบิก
                 </p>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-blue-600 text-white">
+              <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-300 text-slate-900 shadow-sm shrink-0">
                 เลือกแล้ว {selectedProjects.length} งาน
               </span>
             </div>
 
-            <div className="p-4 space-y-3">
+            <div className="p-5 space-y-3.5 bg-gradient-to-b from-blue-100/50 via-blue-50/40 to-sky-50/30">
               {/* Filter Bar */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-500 mb-1">กรองตามช่างผู้ควบคุมงาน</label>
+                  <label className="block font-extrabold text-blue-950 mb-1.5">กรองตามช่างผู้ควบคุมงาน</label>
                   <select
                     value={selectedSupervisor}
                     onChange={(e) => handleSupervisorChange(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-blue-200 bg-white shadow-sm font-bold text-slate-800 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   >
                     <option value="ALL">-- ช่างผู้ควบคุมงานทุกคน ({projects.length} งาน) --</option>
                     {supervisors.map((sup) => (
@@ -720,29 +721,29 @@ export default function WorkReportClaimPage() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-500 mb-1">ค้นหาหมายเลข WBS / ชื่องาน</label>
+                  <label className="block font-extrabold text-blue-950 mb-1.5">ค้นหาหมายเลข WBS / ชื่องาน</label>
                   <div className="relative">
-                    <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="พิมพ์ WBS หรือชื่องาน..."
-                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-blue-200 bg-white shadow-sm text-xs font-semibold hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center justify-between text-xs pt-1">
-                <span className="text-slate-500 font-medium">
+                <span className="text-blue-900 font-bold">
                   พบ {filteredProjects.length} โครงการในระบบ
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={selectAllFiltered}
-                    className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition-colors border border-blue-200 cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors border-0 shadow-sm cursor-pointer"
                   >
                     + เลือกทั้งหมดที่กรอง
                   </button>
@@ -750,7 +751,7 @@ export default function WorkReportClaimPage() {
                     <button
                       type="button"
                       onClick={() => setSelectedWbsList([])}
-                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition-colors border-0 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 font-bold transition-colors border border-rose-200 shadow-sm cursor-pointer"
                     >
                       ล้างที่เลือก
                     </button>
@@ -759,7 +760,7 @@ export default function WorkReportClaimPage() {
               </div>
 
               {/* Project Picker List */}
-              <div className="max-h-[290px] overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 bg-slate-50/40">
+              <div className="max-h-[290px] overflow-y-auto border border-blue-200 rounded-xl divide-y divide-blue-100 bg-white shadow-sm">
                 {loadingProjects ? (
                   <div className="p-8 text-center text-xs text-slate-400">กำลังดึงข้อมูลงานจากระบบอัปเดตสถานะงาน...</div>
                 ) : filteredProjects.length === 0 ? (
@@ -774,7 +775,7 @@ export default function WorkReportClaimPage() {
                         key={proj.wbs}
                         onClick={() => toggleSelectProject(proj)}
                         className={`p-3 flex items-start gap-3 cursor-pointer transition-colors ${
-                          isChecked ? "bg-blue-50/80 hover:bg-blue-100/70" : "bg-white hover:bg-slate-50"
+                          isChecked ? "bg-blue-100/70 hover:bg-blue-100" : "bg-white hover:bg-blue-50/40"
                         }`}
                       >
                         <div className="pt-0.5 text-blue-600 shrink-0">
@@ -813,11 +814,11 @@ export default function WorkReportClaimPage() {
               {/* Selected Projects Fine-Tuning */}
               {selectedProjects.length > 0 && (
                 <div className="pt-2 space-y-2.5">
-                  <p className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
-                    <Edit3 size={14} className="text-blue-600" />
+                  <p className="text-xs font-extrabold text-blue-950 flex items-center gap-1.5">
+                    <Edit3 size={14} className="text-blue-700" />
                     ปรับแต่งวันที่ออกไปปฏิบัติงาน / รายละเอียดการปฏิบัติงานรายโครงการ ({selectedProjects.length} งาน):
                   </p>
-                  <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                  <div className="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
                     {selectedProjects.map((proj, idx) => {
                       const ov = projectOverrides[proj.wbs] || {
                         workDate: new Date().toISOString().split("T")[0],
@@ -828,7 +829,7 @@ export default function WorkReportClaimPage() {
                       return (
                         <div
                           key={proj.wbs}
-                          className="p-3 rounded-xl bg-blue-50/50 border border-blue-200/80 space-y-2 text-xs"
+                          className="p-3.5 rounded-xl bg-white border border-blue-200 shadow-sm space-y-2.5 text-xs"
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-extrabold text-blue-950 truncate">
@@ -843,20 +844,20 @@ export default function WorkReportClaimPage() {
                               <Trash2 size={14} />
                             </button>
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                             <div>
-                              <label className="block text-[10px] font-bold text-slate-500 mb-0.5">
+                              <label className="block text-[10px] font-extrabold text-blue-900 mb-1">
                                 วันที่ออกไปปฏิบัติงาน
                               </label>
                               <input
                                 type="date"
                                 value={ov.workDate}
                                 onChange={(e) => updateOverride(proj.wbs, { workDate: e.target.value })}
-                                className="w-full px-2 py-1 rounded-lg border border-slate-200 bg-white text-xs font-semibold"
+                                className="w-full px-2.5 py-1.5 rounded-xl border border-blue-200 bg-blue-50/30 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
                             <div className="sm:col-span-2">
-                              <label className="block text-[10px] font-bold text-slate-500 mb-0.5">
+                              <label className="block text-[10px] font-extrabold text-blue-900 mb-1">
                                 รายละเอียดผลการปฏิบัติงาน / การอัปเดตสถานะในระบบ
                               </label>
                               <input
@@ -864,7 +865,7 @@ export default function WorkReportClaimPage() {
                                 value={ov.customActivity}
                                 onChange={(e) => updateOverride(proj.wbs, { customActivity: e.target.value })}
                                 placeholder="ระบุผลการออกไปควบคุมงาน..."
-                                className="w-full px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-xs"
+                                className="w-full px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/30 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
                           </div>
@@ -877,40 +878,43 @@ export default function WorkReportClaimPage() {
             </div>
           </div>
 
-          {/* Card 3: ส่วนที่ 2 งานอื่นๆ ที่ไม่อยู่ในการอัปเดตสถานะงาน */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="px-5 py-3.5 bg-gradient-to-r from-emerald-50 to-teal-50/50 border-b border-slate-200 flex items-center justify-between">
+          {/* Card 3: ส่วนที่ 2 งานอื่นๆ ที่ไม่อยู่ในการอัปเดตสถานะงาน (Soft Emerald Theme) */}
+          <div className="bg-emerald-50/60 rounded-2xl shadow-sm border-2 border-emerald-200/90 overflow-hidden">
+            <div className="px-5 py-3.5 bg-gradient-to-r from-[#065F46] via-[#047857] to-[#059669] text-white flex items-center justify-between">
               <div>
-                <h2 className="font-extrabold text-sm text-slate-800 flex items-center gap-2">
-                  <Briefcase size={17} className="text-emerald-600" />
+                <h2 className="font-extrabold text-sm flex items-center gap-2">
+                  <Briefcase size={18} className="text-emerald-200" />
                   3. ส่วนที่ 2: งานอื่นๆ (ที่ไม่อยู่ในระบบอัปเดตสถานะงาน)
                 </h2>
-                <p className="text-[11px] text-slate-500 mt-0.5">
+                <p className="text-[11px] text-emerald-100 mt-0.5">
                   เพิ่มงานสำรวจ, งานตรวจรับ, งานแก้ไขไฟขัดข้อง หรืองานมอบหมายพิเศษเพื่อประกอบการเบิก
                 </p>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-600 text-white">
+              <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-300 text-slate-900 shadow-sm shrink-0">
                 {otherTasks.length} รายการ
               </span>
             </div>
 
-            <form onSubmit={handleAddOtherTask} className="p-4 space-y-3 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <form
+              onSubmit={handleAddOtherTask}
+              className="p-5 space-y-3.5 text-xs bg-gradient-to-b from-emerald-100/50 via-emerald-50/40 to-teal-50/30"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">วันที่ปฏิบัติงาน</label>
+                  <label className="block font-extrabold text-emerald-950 mb-1.5">วันที่ปฏิบัติงาน</label>
                   <input
                     type="date"
                     value={newTaskDate}
                     onChange={(e) => setNewTaskDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-semibold"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-bold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">ประเภทงานอื่นๆ</label>
+                  <label className="block font-extrabold text-emerald-950 mb-1.5">ประเภทงานอื่นๆ</label>
                   <select
                     value={newTaskCategory}
                     onChange={(e) => setNewTaskCategory(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-semibold"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-bold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                   >
                     {OTHER_TASK_CATEGORIES.map((c) => (
                       <option key={c} value={c}>
@@ -921,9 +925,9 @@ export default function WorkReportClaimPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block font-bold text-slate-600 mb-1">
+                  <label className="block font-extrabold text-emerald-950 mb-1.5">
                     ชื่องาน / ภารกิจที่ออกไปปฏิบัติ <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -932,47 +936,47 @@ export default function WorkReportClaimPage() {
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
                     placeholder="เช่น สำรวจประมาณการขยายเขตระบบจำหน่าย / ตรวจรับเสาไฟฟ้า"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-semibold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">เลขบันทึก / อ้างอิง (ถ้ามี)</label>
+                  <label className="block font-extrabold text-emerald-950 mb-1.5">เลขบันทึก / อ้างอิง (ถ้ามี)</label>
                   <input
                     type="text"
                     value={newTaskRef}
                     onChange={(e) => setNewTaskRef(e.target.value)}
                     placeholder="เช่น ก.3 กรย. / ใบสั่งงาน"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-semibold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">สถานที่ปฏิบัติงาน / พื้นที่</label>
+                  <label className="block font-extrabold text-emerald-950 mb-1.5">สถานที่ปฏิบัติงาน / พื้นที่</label>
                   <input
                     type="text"
                     value={newTaskLocation}
                     onChange={(e) => setNewTaskLocation(e.target.value)}
                     placeholder="เช่น ต.บ้านโพธิ์ อ.เมือง จ.นครราชสีมา"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-semibold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">ผลการปฏิบัติงาน</label>
+                  <label className="block font-extrabold text-emerald-950 mb-1.5">ผลการปฏิบัติงาน</label>
                   <input
                     type="text"
                     value={newTaskDetail}
                     onChange={(e) => setNewTaskDetail(e.target.value)}
                     placeholder="เช่น สำรวจและจัดทำแผนผังแล้วเสร็จ 100%"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-semibold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                   />
                 </div>
               </div>
 
               {/* Optional Photo Upload for Other Task */}
               <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold cursor-pointer transition-colors">
+                <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-sm font-bold cursor-pointer transition-colors">
                   <Upload size={14} />
                   <span>{compressingTaskImg ? "กำลังบีบอัดรูป..." : "แนบรูปถ่ายงานอื่นๆ (ถ้ามี)"}</span>
                   <input
@@ -986,7 +990,7 @@ export default function WorkReportClaimPage() {
 
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm transition-colors border-0 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm transition-colors border-0 cursor-pointer"
                 >
                   <Plus size={16} /> เพิ่มรายการงานอื่นๆ
                 </button>
@@ -995,7 +999,7 @@ export default function WorkReportClaimPage() {
               {newTaskImages.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   {newTaskImages.map((img, i) => (
-                    <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden border border-slate-200">
+                    <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden border border-emerald-300 shadow-sm">
                       <img src={img.url} alt="" className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -1011,11 +1015,11 @@ export default function WorkReportClaimPage() {
 
               {/* List of Added Other Tasks */}
               {otherTasks.length > 0 && (
-                <div className="pt-3 border-t border-slate-100 space-y-2">
+                <div className="pt-3 border-t border-emerald-200/80 space-y-2">
                   {otherTasks.map((task, idx) => (
                     <div
                       key={task.id}
-                      className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-200 flex items-start justify-between gap-2"
+                      className="p-3 rounded-xl bg-white border border-emerald-200 shadow-sm flex items-start justify-between gap-2"
                     >
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -1025,7 +1029,7 @@ export default function WorkReportClaimPage() {
                           <span className="text-[11px] font-bold text-emerald-900">
                             วันที่ {formatThaiDateShort(task.date)}
                           </span>
-                          <span className="text-[10px] text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                          <span className="text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold">
                             {task.category}
                           </span>
                         </div>
@@ -1048,37 +1052,46 @@ export default function WorkReportClaimPage() {
             </form>
           </div>
 
-          {/* Card 4: หมายเหตุและการตั้งค่ารายงาน */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-3 text-xs">
-            <div className="flex items-center justify-between">
-              <label className="font-extrabold text-slate-800 flex items-center gap-1.5">
-                <FileText size={15} className="text-[#6B2169]" />
+          {/* Card 4: หมายเหตุและการตั้งค่ารายงาน (Soft Amber Theme) */}
+          <div className="bg-amber-50/70 rounded-2xl shadow-sm border-2 border-amber-200/90 overflow-hidden text-xs">
+            <div className="px-5 py-3 bg-gradient-to-r from-[#B45309] via-[#D97706] to-[#F59E0B] text-white flex flex-wrap items-center justify-between gap-2">
+              <label className="font-extrabold text-sm flex items-center gap-2">
+                <FileText size={17} className="text-amber-100" />
                 4. คำรับรอง / หมายเหตุประกอบการเบิกค่าตอบแทน
               </label>
-              <label className="inline-flex items-center gap-1.5 cursor-pointer font-bold text-purple-800">
+              <label className="inline-flex items-center gap-1.5 cursor-pointer font-extrabold text-amber-950 bg-white/90 px-3 py-1 rounded-full shadow-sm">
                 <input
                   type="checkbox"
                   checked={showPhotosInReport}
                   onChange={(e) => setShowPhotosInReport(e.target.checked)}
-                  className="rounded text-purple-600"
+                  className="rounded text-amber-600"
                 />
-                แนบรูปถ่ายหน้างานในรายงาน ({allReportPhotos.length} รูป)
+                แนบรูปถ่ายหน้างาน ({allReportPhotos.length} รูป)
               </label>
             </div>
-            <textarea
-              rows={2}
-              value={executiveNote}
-              onChange={(e) => setExecutiveNote(e.target.value)}
-              className="w-full p-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-            <div>
-              <label className="block font-bold text-slate-600 mb-1">ตำแหน่งผู้บังคับบัญชา / ผู้รับรองผลการปฏิบัติงาน</label>
-              <input
-                type="text"
-                value={approverName}
-                onChange={(e) => setApproverName(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium"
-              />
+            <div className="p-5 space-y-3.5 bg-gradient-to-b from-amber-100/50 via-amber-50/40 to-orange-50/30">
+              <div>
+                <label className="block font-extrabold text-amber-950 mb-1.5">
+                  ข้อความรับรองผลการปฏิบัติงาน / หมายเหตุเพิ่มเติม
+                </label>
+                <textarea
+                  rows={2}
+                  value={executiveNote}
+                  onChange={(e) => setExecutiveNote(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-white border border-amber-200 shadow-sm text-xs font-semibold text-slate-800 hover:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block font-extrabold text-amber-950 mb-1.5">
+                  ตำแหน่งผู้บังคับบัญชา / ผู้รับรองผลการปฏิบัติงาน
+                </label>
+                <input
+                  type="text"
+                  value={approverName}
+                  onChange={(e) => setApproverName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-amber-200 shadow-sm text-xs font-semibold text-slate-800 hover:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                />
+              </div>
             </div>
           </div>
         </div>

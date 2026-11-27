@@ -137,6 +137,20 @@ export default function Sidebar() {
               <span>Dashboard งานก่อสร้าง</span>
             </Link>
 
+            {(isAdmin || isUser || isOffice) && (
+              <Link
+                href="/work-report-claim"
+                className={`nav-item ${pathname === "/work-report-claim" ? "active" : ""}`}
+                style={{
+                  backgroundColor: pathname === "/work-report-claim" ? undefined : 'rgba(168, 85, 247, 0.20)',
+                  border: pathname === "/work-report-claim" ? undefined : '1px solid rgba(192, 132, 252, 0.35)',
+                }}
+              >
+                <FileCheck size={20} className="text-purple-300" />
+                <span className="font-semibold text-white">รายงานผลปฏิบัติงาน (เบิกค่าตอบแทน)</span>
+              </Link>
+            )}
+
             {/* เมนูภาคสนาม แสดงเฉพาะเมื่อไม่ใช่ Office */}
             {!isOffice && (
               <>
@@ -144,31 +158,6 @@ export default function Sidebar() {
                   <FileEdit size={20} />
                   <span>อัปเดตสถานะงาน</span>
                 </Link>
-                {isAdmin && (
-                  <Link
-                    href="/work-report-claim"
-                    className={`nav-item ${pathname === "/work-report-claim" ? "active" : ""}`}
-                    style={{
-                      backgroundColor: pathname === "/work-report-claim" ? undefined : 'rgba(16, 185, 129, 0.16)',
-                      border: pathname === "/work-report-claim" ? undefined : '1px solid rgba(16, 185, 129, 0.35)',
-                    }}
-                  >
-                    <FileCheck size={20} className="text-emerald-400" />
-                    <span className="font-semibold text-white">รายงานผลปฏิบัติงาน (เบิกค่าตอบแทน)</span>
-                    <span style={{
-                      marginLeft: 'auto',
-                      fontSize: '0.60rem',
-                      padding: '1px 6px',
-                      borderRadius: '9999px',
-                      backgroundColor: 'rgba(16, 185, 129, 0.25)',
-                      color: '#6ee7b7',
-                      border: '1px solid rgba(16, 185, 129, 0.45)',
-                      fontWeight: 700
-                    }}>
-                      Admin
-                    </span>
-                  </Link>
-                )}
                 <Link href="/wire-return" className={`nav-item ${pathname === "/wire-return" ? "active" : ""}`}>
                   <Recycle size={20} />
                   <span>สถานะการคืนเศษสาย</span>
