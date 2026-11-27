@@ -576,7 +576,7 @@ export default function WorkReportClaimPage() {
             onClick={handlePrintPDF}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-sm transition-all border-0 cursor-pointer"
           >
-            <Printer size={17} /> พิมพ์รายงาน / บันทึก PDF (A4)
+            <Printer size={17} /> พิมพ์ สำหรับแนบเบิกค่าตอบแทน
           </button>
           <button
             type="button"
@@ -1099,14 +1099,34 @@ export default function WorkReportClaimPage() {
         {/* RIGHT COLUMN: Live Official Document Preview (7 cols on XL) */}
         <div className="xl:col-span-7">
           <div className="bg-slate-200/70 rounded-3xl p-3 md:p-6 border border-slate-300/80 shadow-inner">
-            <div className="flex items-center justify-between mb-3 px-2">
-              <span className="text-xs font-extrabold text-slate-600 flex items-center gap-1.5">
-                <Eye size={15} className="text-[#6B2169]" />
-                ตัวอย่างเอกสารรายงานผลการปฏิบัติงาน (A4 Preview - พร้อมพิมพ์แนบเบิกค่าตอบแทน)
-              </span>
-              <span className="text-[11px] font-bold text-slate-500">
-                รวมงานในระบบ {selectedProjects.length} งาน + งานอื่นๆ {otherTasks.length} งาน
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-2">
+              <div>
+                <span className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+                  <Eye size={15} className="text-[#6B2169]" />
+                  ตัวอย่างเอกสารรายงานผลการปฏิบัติงาน (A4 Preview - พร้อมพิมพ์แนบเบิกค่าตอบแทน)
+                </span>
+                <span className="text-[11px] font-bold text-slate-500">
+                  รวมงานในระบบ {selectedProjects.length} งาน + งานอื่นๆ {otherTasks.length} งาน
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrintPDF}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-[#6B2169] to-[#8A3B87] hover:from-[#581a56] hover:to-[#732f70] text-white shadow-md transition-all border-0 cursor-pointer"
+                >
+                  <Printer size={15} className="text-amber-300" /> พิมพ์ สำหรับแนบเบิกค่าตอบแทน
+                </button>
+                <button
+                  type="button"
+                  disabled={isExportingPng}
+                  onClick={handleDownloadPNG}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all border-0 cursor-pointer disabled:opacity-60"
+                >
+                  <Download size={14} /> บันทึกรูป (PNG)
+                </button>
+              </div>
             </div>
 
             {/* PRINTABLE SHEET */}
@@ -1123,7 +1143,7 @@ export default function WorkReportClaimPage() {
                   </div>
                   <div>
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-[#6B2169] mb-1">
-                      การไฟฟ้าส่วนภูมิภาค เขต 3 (ภาคตะวันออกเฉียงเหนือ) จ.นครราชสีมา • PEA ผกร.กรย.(ก3)
+                      การไฟฟ้าส่วนภูมิภาค เขต 3 (ภาคกลาง) จ.นครปฐม • PEA ผกร.กรย.(ก3)
                     </div>
                     <h2 className="text-lg md:text-xl font-black text-slate-900 leading-snug">
                       แบบรายงานผลการปฏิบัติงานและอัปเดตสถานะงาน (ประกอบการเบิกค่าตอบแทน)
