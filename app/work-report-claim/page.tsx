@@ -35,10 +35,15 @@ import {
   Eye,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   Save,
   FolderOpen,
   FilePlus,
   Clock,
+  Info,
+  Megaphone,
+  ClipboardCheck,
+  PenTool,
 } from "lucide-react";
 import { toPng } from "html-to-image";
 
@@ -622,7 +627,7 @@ export default function WorkReportClaimPage() {
     }
   };
 
-  // Print / Save PDF (Optimized single-page A4 layout that fits up to 4 jobs / 12 photos on Page 1)
+  // Print / Save PDF (Matches screen preview layout while optimizing shadows & borders for crisp ink-saving A4 printing)
   const handlePrintPDF = () => {
     if (!reportRef.current) return;
     const clone = reportRef.current.cloneNode(true) as HTMLElement;
@@ -646,8 +651,9 @@ export default function WorkReportClaimPage() {
               print-color-adjust: exact;
             }
             @media print {
-              body { padding: 0; margin: 0; }
+              body { padding: 0; margin: 0; background: #ffffff !important; }
               @page { size: A4 portrait; margin: 6mm 8mm; }
+              * { box-shadow: none !important; text-shadow: none !important; }
             }
           </style>
         </head>
@@ -741,55 +747,55 @@ export default function WorkReportClaimPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-800">
+    <div className="min-h-screen bg-[#F5F7FA] flex flex-col font-sans text-[#0F172A]">
       <TopBar title="รายงานผลการปฏิบัติงาน (เบิกค่าตอบแทน)" />
 
-      {/* Page Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sticky top-0 z-20 shadow-sm">
+      {/* Page Header - Modern Clean Microsoft 365 Style */}
+      <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sticky top-0 z-20">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#6B2169] to-[#8A3B87] text-white flex items-center justify-center shadow-md shrink-0">
-            <FileCheck size={26} />
+          <div className="w-11 h-11 rounded-xl bg-[#7C3AED] text-white flex items-center justify-center shrink-0">
+            <FileCheck size={24} />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-lg md:text-xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-lg md:text-xl font-extrabold text-[#0F172A] tracking-tight">
                 โปรแกรมรายงานผลการปฏิบัติงาน เพื่อประกอบการเบิกค่าตอบแทน
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-purple-100 text-[#6B2169] border border-purple-300">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#F3E8FF] text-[#6D28D9] border border-[#DDD6FE]">
                 PEA ผกร.กรย.(ก3)
               </span>
             </div>
-            <p className="text-xs md:text-sm text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               ดึงรายละเอียดจากการอัปเดตสถานะงานก่อสร้างในระบบ + เพิ่มเติมงานอื่นๆ นอกระบบ เพื่อพิมพ์แนบเบิกค่าตอบแทน/เบี้ยเลี้ยง/OT
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={handlePrintPDF}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-sm transition-all border-0 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-[#EA580C] hover:bg-[#C2410C] text-white transition-colors border-0 cursor-pointer"
           >
-            <Printer size={17} /> พิมพ์ สำหรับแนบเบิกค่าตอบแทน
+            <Printer size={16} /> พิมพ์ สำหรับแนบเบิกค่าตอบแทน
           </button>
           <button
             type="button"
             disabled={isExportingPng}
             onClick={handleDownloadPNG}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all border-0 cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-[#16A34A] hover:bg-[#15803D] text-white transition-colors border-0 cursor-pointer disabled:opacity-60"
           >
-            <Download size={17} /> {isExportingPng ? "กำลังสร้างรูปภาพ..." : "บันทึกรูปภาพรายงาน (PNG)"}
+            <Download size={16} /> {isExportingPng ? "กำลังสร้างรูปภาพ..." : "บันทึกรูปภาพรายงาน (PNG)"}
           </button>
         </div>
       </header>
 
       <main className="flex-1 p-4 md:p-6 max-w-[1700px] mx-auto w-full grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: Controls & Data Entry (5 cols on XL) */}
-        <div className="xl:col-span-5 space-y-4">
+        <div className="xl:col-span-5 space-y-3.5">
           {/* Toast Notification */}
           {saveToastMsg && (
-            <div className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold shadow-md flex items-center justify-between animate-in fade-in duration-200">
+            <div className="px-4 py-2.5 rounded-xl bg-[#16A34A] text-white text-xs font-bold flex items-center justify-between">
               <span>{saveToastMsg}</span>
               <button
                 type="button"
@@ -801,43 +807,44 @@ export default function WorkReportClaimPage() {
             </div>
           )}
 
-          {/* Card 0: คลังบันทึกเก็บรายงานผลการปฏิบัติงาน (Save / Load / Edit / Delete) */}
-          <div className="bg-indigo-50/70 rounded-2xl shadow-sm border-2 border-indigo-200/90 overflow-hidden transition-all">
+          {/* Card 0: คลังบันทึกเก็บรายงานผลการปฏิบัติงาน (Microsoft 365 Clean Style) */}
+          <div className="rounded-2xl border border-[#CBD5E1] bg-white overflow-hidden transition-all">
             <div
               onClick={() => setIsArchiveOpen((prev) => !prev)}
-              className="px-5 py-3 bg-gradient-to-r from-[#312E81] via-[#4338CA] to-[#4F46E5] text-white flex items-center justify-between cursor-pointer select-none hover:brightness-105 transition-all"
+              className="flex items-stretch cursor-pointer select-none hover:bg-slate-50 transition-colors"
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <FolderOpen size={18} className="text-amber-300 shrink-0" />
+              <div className="w-16 bg-[#475569] text-white flex items-center justify-center shrink-0">
+                <FolderOpen size={24} strokeWidth={2.2} />
+              </div>
+              <div className="flex-1 px-4 py-3 flex items-center justify-between gap-2 min-w-0">
                 <div className="min-w-0">
-                  <h2 className="font-extrabold text-sm leading-tight truncate">
-                    แฟ้มบันทึกรายงานผลที่กรอกไว้ ({savedReports.length} ฉบับ)
+                  <h2 className="font-extrabold text-[15px] text-[#0F172A] leading-snug truncate">
+                    แฟ้มบันทึกรายงานผลที่กรอกไว้
                   </h2>
-                  <p className="text-[11px] text-indigo-100 truncate">
+                  <p className="text-xs text-slate-600 mt-0.5 truncate">
                     บันทึกเก็บไว้เรียกมาแก้ไข พิมพ์ซ้ำ หรือลบออกเมื่อไม่ใช้แล้ว
                   </p>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-300 text-slate-900">
-                  {savedReports.length} รายการ
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">
-                  {isArchiveOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#334155] text-white">
+                    {savedReports.length} ฉบับ
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
+                    {isArchiveOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
                 </div>
               </div>
             </div>
 
             {isArchiveOpen && (
-              <div className="p-4 space-y-3 text-xs bg-gradient-to-b from-indigo-100/50 via-indigo-50/40 to-white">
-                {/* Save Bar */}
+              <div className="p-4 space-y-3 text-xs bg-[#F8FAFC] border-t border-slate-200">
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={customReportTitle}
                     onChange={(e) => setCustomReportTitle(e.target.value)}
                     placeholder={`ตั้งชื่อแฟ้มรายงาน เช่น ${claimantName} - ${claimPeriod}`}
-                    className="flex-1 px-3 py-2 rounded-xl bg-white border border-indigo-200 shadow-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="flex-1 px-3 py-2 rounded-xl bg-white border border-slate-300 font-semibold text-[#0F172A] focus:outline-none focus:border-[#4F46E5]"
                   />
                   <div className="flex items-center gap-1.5 shrink-0">
                     {activeSavedReportId ? (
@@ -845,48 +852,47 @@ export default function WorkReportClaimPage() {
                         <button
                           type="button"
                           onClick={() => handleSaveCurrentReport(false)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold shadow-sm border-0 cursor-pointer transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold border-0 cursor-pointer transition-colors"
                           title="บันทึกทับฉบับที่กำลังเปิดแก้ไข"
                         >
-                          <Save size={15} /> บันทึกแก้ไข
+                          <Save size={14} /> บันทึกแก้ไข
                         </button>
                         <button
                           type="button"
                           onClick={() => handleSaveCurrentReport(true)}
-                          className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm border-0 cursor-pointer transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white font-bold border-0 cursor-pointer transition-colors"
                           title="บันทึกแยกเป็นฉบับใหม่"
                         >
-                          <FilePlus size={14} /> บันทึกเป็นฉบับใหม่
+                          <FilePlus size={14} /> บันทึกฉบับใหม่
                         </button>
                       </>
                     ) : (
                       <button
                         type="button"
                         onClick={() => handleSaveCurrentReport(true)}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold shadow-sm border-0 cursor-pointer transition-colors"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold border-0 cursor-pointer transition-colors"
                       >
-                        <Save size={15} /> บันทึกเก็บรายงานนี้
+                        <Save size={14} /> บันทึกเก็บรายงานนี้
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={handleCreateBlankReport}
-                      className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 shadow-sm cursor-pointer transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-300 cursor-pointer transition-colors"
                       title="ล้างฟอร์มเพื่อสร้างรายงานฉบับใหม่"
                     >
-                      <RefreshCw size={13} /> เริ่มฉบับใหม่
+                      <RefreshCw size={13} /> เริ่มใหม่
                     </button>
                   </div>
                 </div>
 
-                {/* Saved List */}
                 {savedReports.length === 0 ? (
-                  <div className="py-4 px-3 rounded-xl border border-dashed border-indigo-200 bg-white/70 text-center text-slate-400">
-                    ยังไม่มีรายงานที่บันทึกเก็บไว้ • เมื่อกรอกข้อมูลแล้วกดปุ่ม{" "}
-                    <span className="font-bold text-indigo-700">บันทึกเก็บรายงานนี้</span> เพื่อเก็บไว้เรียกใช้ภายหลัง
+                  <div className="py-3.5 px-3 rounded-xl border border-dashed border-slate-300 bg-white text-center text-slate-500">
+                    ยังไม่มีรายงานที่บันทึกเก็บไว้ • กดปุ่ม{" "}
+                    <span className="font-bold text-[#4F46E5]">บันทึกเก็บรายงานนี้</span> เพื่อเก็บไว้เรียกใช้ภายหลัง
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-[210px] overflow-y-auto pr-1">
+                  <div className="space-y-1.5 max-h-[190px] overflow-y-auto pr-1">
                     {savedReports.map((rec) => {
                       const isCurrent = rec.id === activeSavedReportId;
                       const savedDate = new Date(rec.savedAt);
@@ -899,10 +905,10 @@ export default function WorkReportClaimPage() {
                       return (
                         <div
                           key={rec.id}
-                          className={`p-3 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+                          className={`p-2.5 rounded-xl border transition-colors flex items-center justify-between gap-2 ${
                             isCurrent
-                              ? "bg-indigo-100/80 border-indigo-400 shadow-sm"
-                              : "bg-white border-indigo-100 hover:border-indigo-300"
+                              ? "bg-[#EEF2FF] border-[#818CF8]"
+                              : "bg-white border-slate-200 hover:border-slate-300"
                           }`}
                         >
                           <div
@@ -911,18 +917,17 @@ export default function WorkReportClaimPage() {
                           >
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {isCurrent && (
-                                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-indigo-600 text-white">
-                                  กำลังเปิดใช้งาน
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#4F46E5] text-white">
+                                  กำลังเปิดแก้ไข
                                 </span>
                               )}
-                              <span className="font-extrabold text-slate-900 truncate">{rec.reportTitle}</span>
+                              <span className="font-bold text-[#0F172A] truncate">{rec.reportTitle}</span>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 text-[10.5px] text-slate-500 mt-0.5">
+                            <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 mt-0.5">
                               <span>ผู้ขอเบิก: {rec.claimantName || "-"}</span>
                               <span>•</span>
                               <span>
-                                งานในระบบ {rec.selectedWbsList?.length || 0} งาน + งานอื่นๆ{" "}
-                                {rec.otherTasks?.length || 0} งาน
+                                งานในระบบ {rec.selectedWbsList?.length || 0} + งานอื่นๆ {rec.otherTasks?.length || 0}
                               </span>
                               <span>•</span>
                               <span className="inline-flex items-center gap-0.5 text-slate-400">
@@ -935,7 +940,7 @@ export default function WorkReportClaimPage() {
                             <button
                               type="button"
                               onClick={() => handleLoadSavedReport(rec)}
-                              className="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-bold border border-indigo-200 transition-colors cursor-pointer text-[11px]"
+                              className="px-2.5 py-1.5 rounded-lg bg-[#EEF2FF] hover:bg-[#4F46E5] text-[#4338CA] hover:text-white font-bold border border-[#C7D2FE] transition-colors cursor-pointer text-[11px]"
                             >
                               เรียกใช้/แก้ไข
                             </button>
@@ -957,133 +962,143 @@ export default function WorkReportClaimPage() {
             )}
           </div>
 
-          {/* Quick Expand/Collapse Toolbar */}
-          <div className="flex items-center justify-between px-3.5 py-2.5 bg-white rounded-2xl border border-slate-200 shadow-sm text-xs">
-            <span className="font-bold text-slate-600 flex items-center gap-1.5">
-              <Edit3 size={14} className="text-[#6B2169]" />
-              คลิกที่หัวข้อส่วนที่ 1 - 4 เพื่อเปิดกรอกหรือยุบซ่อนรายละเอียด
+          {/* Quick Expand/Collapse Toolbar (Matches uploaded reference image) */}
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-white rounded-2xl border border-slate-200/90 text-xs">
+            <span className="font-bold text-[#1E293B] flex items-center gap-2">
+              <Edit3 size={15} className="text-[#7C3AED]" />
+              คลิกที่หัวข้อส่วนที่ 1 - 4 เพื่อเปิดกรอกหรือดูข้อมูลรายละเอียด
             </span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setExpandedSections({ 1: true, 2: true, 3: true, 4: true })}
-                className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-[#6B2169] font-bold border border-purple-200 cursor-pointer transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-[#F3E8FF] text-[#6D28D9] font-bold border border-[#C4B5FD] cursor-pointer transition-colors"
               >
-                เปิดทั้งหมด
+                <RefreshCw size={12} /> เปิดทั้งหมด
               </button>
               <button
                 type="button"
                 onClick={() => setExpandedSections({ 1: false, 2: false, 3: false, 4: false })}
-                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold border-0 cursor-pointer transition-colors"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#334155] font-bold border-0 cursor-pointer transition-colors"
               >
-                ยุบทั้งหมด
+                <ChevronUp size={13} /> ยุบทั้งหมด
               </button>
             </div>
           </div>
 
-          {/* Card 1: ข้อมูลผู้ขอเบิกและรอบการเบิก (Purple Theme) */}
-          <div className="bg-purple-50/70 rounded-2xl shadow-sm border-2 border-purple-200/90 overflow-hidden transition-all">
+          {/* Card 1: ม่วง = ข้อมูลผู้ควบคุมงาน (Microsoft 365 Modern Clean Card) */}
+          <div className="rounded-2xl border border-[#DDD6FE] bg-[#F5F0FF] overflow-hidden transition-all">
             <div
               onClick={() => toggleSection(1)}
-              className="px-5 py-3.5 bg-gradient-to-r from-[#581C87] via-[#6B2169] to-[#8A3B87] text-white flex items-center justify-between cursor-pointer select-none hover:brightness-105 transition-all"
+              className="flex items-stretch cursor-pointer select-none hover:bg-[#EDE5FF] transition-colors min-h-[78px]"
             >
-              <div className="min-w-0 pr-2">
-                <h2 className="font-extrabold text-sm flex items-center gap-2">
-                  <User size={18} className="text-amber-300 shrink-0" />
-                  <span>1. ข้อมูลช่างผู้ควบคุมงาน / ผู้ขอเบิกค่าตอบแทน</span>
-                </h2>
-                {!expandedSections[1] && (
-                  <p className="text-[11px] text-purple-100 mt-1 truncate">
-                    ผู้ขอเบิก: <span className="font-bold text-amber-200">{claimantName || "-"}</span> • {claimPeriod} (แตะเพื่อแก้ไข)
-                  </p>
-                )}
+              {/* Left Solid Category Block */}
+              <div className="w-16 bg-[#7C3AED] text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full border-2 border-white/80 flex items-center justify-center">
+                  <User size={22} strokeWidth={2.3} />
+                </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[11px] font-bold text-purple-950 bg-amber-300 px-2.5 py-0.5 rounded-full shadow-sm">
-                  {expandedSections[1] ? "ยุบซ่อน" : "กดเพื่อกรอก"}
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">
-                  {expandedSections[1] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+
+              {/* Center Navy Text on Soft Lavender */}
+              <div className="flex-1 px-4 py-3 flex items-center justify-between gap-2 min-w-0">
+                <div className="min-w-0">
+                  <h2 className="font-extrabold text-[15px] text-[#0F172A] leading-snug truncate">
+                    1. ข้อมูลช่างผู้ควบคุมงาน / ผู้ขอเบิกค่าตอบแทน
+                  </h2>
+                  <p className="text-xs text-[#334155] mt-0.5 truncate">
+                    ผู้ขอเบิก: <span className="font-extrabold text-[#5B21B6]">{claimantName || "-"}</span> •{" "}
+                    {claimPeriod} (แตะเพื่อแก้ไข)
+                  </p>
+                </div>
+
+                {/* Right Action Pill + Circular Chevron */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#6D28D9] text-white">
+                    {expandedSections[1] ? "ยุบซ่อน" : "กดเพื่อกรอก"}
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-[#DDD6FE] text-[#4C1D95] flex items-center justify-center">
+                    {expandedSections[1] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
                 </div>
               </div>
             </div>
 
             {expandedSections[1] && (
-              <div className="p-5 space-y-4 text-xs bg-gradient-to-b from-purple-100/60 via-purple-50/50 to-fuchsia-50/40">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="p-5 space-y-3.5 text-xs bg-[#FAF7FF] border-t border-[#DDD6FE]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-extrabold text-purple-950 mb-1.5">ชื่อ-สกุล ผู้ขอเบิก</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">ชื่อ-สกุล ผู้ขอเบิก</label>
                     <input
                       type="text"
                       value={claimantName}
                       onChange={(e) => setClaimantName(e.target.value)}
                       placeholder="เช่น นายอุดมศักดิ์ จันทร์กลิ่น"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-bold text-slate-900 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#C4B5FD] font-bold text-[#0F172A] focus:outline-none focus:border-[#7C3AED]"
                     />
                   </div>
                   <div>
-                    <label className="block font-extrabold text-purple-950 mb-1.5">ตำแหน่ง</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">ตำแหน่ง</label>
                     <input
                       type="text"
                       value={claimantPosition}
                       onChange={(e) => setClaimantPosition(e.target.value)}
                       placeholder="ช่างผู้ควบคุมงาน"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#C4B5FD] font-semibold text-[#1E293B] focus:outline-none focus:border-[#7C3AED]"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-extrabold text-purple-950 mb-1.5">สังกัด / แผนก</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">สังกัด / แผนก</label>
                     <input
                       type="text"
                       value={claimAffiliation}
                       onChange={(e) => setClaimAffiliation(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#C4B5FD] font-semibold text-[#1E293B] focus:outline-none focus:border-[#7C3AED]"
                     />
                   </div>
                   <div>
-                    <label className="block font-extrabold text-purple-950 mb-1.5">งวด / ช่วงวันที่ขอเบิก</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">งวด / ช่วงวันที่ขอเบิก</label>
                     <input
                       type="text"
                       value={claimPeriod}
                       onChange={(e) => setClaimPeriod(e.target.value)}
                       placeholder="เช่น ประจำเดือน พ.ย. 2569 หรือ 1-15 พ.ย. 69"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-purple-300 shadow-sm font-extrabold text-[#6B2169] hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#A78BFA] font-extrabold text-[#5B21B6] focus:outline-none focus:border-[#7C3AED]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-extrabold text-purple-950 mb-1.5">ประเภทการเบิกค่าตอบแทน</label>
+                  <label className="block font-bold text-[#1E293B] mb-1">ประเภทการเบิกค่าตอบแทน</label>
                   <input
                     type="text"
                     value={claimType}
                     onChange={(e) => setClaimType(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#C4B5FD] font-semibold text-[#1E293B] focus:outline-none focus:border-[#7C3AED]"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-extrabold text-purple-950 mb-1.5">เลขที่อนุมัติเดินทาง / คำสั่ง (ถ้ามี)</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">เลขที่อนุมัติเดินทาง / คำสั่ง (ถ้ามี)</label>
                     <input
                       type="text"
                       value={travelOrderNo}
                       onChange={(e) => setTravelOrderNo(e.target.value)}
                       placeholder="เช่น ก.3 ผกร.(ก3) / -"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#C4B5FD] font-semibold text-[#1E293B] focus:outline-none focus:border-[#7C3AED]"
                     />
                   </div>
                   <div>
-                    <label className="block font-extrabold text-purple-950 mb-1.5">รถยนต์ที่ใช้ปฏิบัติงาน (ถ้ามี)</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">รถยนต์ที่ใช้ปฏิบัติงาน (ถ้ามี)</label>
                     <input
                       type="text"
                       value={vehiclePlate}
                       onChange={(e) => setVehiclePlate(e.target.value)}
                       placeholder="เช่น ทะเบียน 4กฒ-xxxx"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-purple-200 shadow-sm font-semibold text-slate-800 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#C4B5FD] font-semibold text-[#1E293B] focus:outline-none focus:border-[#7C3AED]"
                     />
                   </div>
                 </div>
@@ -1091,43 +1106,53 @@ export default function WorkReportClaimPage() {
             )}
           </div>
 
-          {/* Card 2: ส่วนที่ 1 ดึงงานจากการอัปเดตสถานะงานในระบบ (Soft Blue Theme) */}
-          <div className="bg-blue-50/60 rounded-2xl shadow-sm border-2 border-blue-200/90 overflow-hidden transition-all">
+          {/* Card 2: น้ำเงิน = งานก่อสร้าง (Microsoft 365 Modern Clean Card) */}
+          <div className="rounded-2xl border border-[#BFDBFE] bg-[#EAF3FF] overflow-hidden transition-all">
             <div
               onClick={() => toggleSection(2)}
-              className="px-5 py-3.5 bg-gradient-to-r from-[#1E3A8A] via-[#1D4ED8] to-[#2563EB] text-white flex items-center justify-between cursor-pointer select-none hover:brightness-105 transition-all"
+              className="flex items-stretch cursor-pointer select-none hover:bg-[#DCEBFE] transition-colors min-h-[78px]"
             >
-              <div className="min-w-0 pr-2">
-                <h2 className="font-extrabold text-sm flex items-center gap-2">
-                  <Layers size={18} className="text-sky-200 shrink-0" />
-                  <span>2. ส่วนที่ 1: เลือกงานจากระบบอัปเดตสถานะงานก่อสร้าง</span>
-                </h2>
-                <p className="text-[11px] text-blue-100 mt-0.5 truncate">
-                  {expandedSections[2]
-                    ? "ติ๊กเลือกงานที่ช่างได้อัปเดตสถานะในระบบแล้ว เพื่อนำรายละเอียดความก้าวหน้ามาแนบเบิก"
-                    : `เลือกไว้แล้ว ${selectedProjects.length} โครงการ (แตะเพื่อเปิดเลือกงานหรือแก้ไขรายละเอียด)`}
-                </p>
+              {/* Left Solid Category Block */}
+              <div className="w-16 bg-[#1D4ED8] text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full border-2 border-white/80 flex items-center justify-center">
+                  <Layers size={21} strokeWidth={2.3} />
+                </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-300 text-slate-900 shadow-sm">
-                  เลือกแล้ว {selectedProjects.length} งาน
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">
-                  {expandedSections[2] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+
+              {/* Center Navy Text on Soft Sky Blue */}
+              <div className="flex-1 px-4 py-3 flex items-center justify-between gap-2 min-w-0">
+                <div className="min-w-0">
+                  <h2 className="font-extrabold text-[15px] text-[#0F172A] leading-snug truncate">
+                    2. ส่วนที่ 1: เลือกงานจากระบบอัปเดตสถานะงานก่อสร้าง
+                  </h2>
+                  <p className="text-xs text-[#1E3A8A] mt-0.5 truncate">
+                    <span className="font-extrabold text-[#1D4ED8]">เลือกไว้แล้ว {selectedProjects.length} โครงการ</span>{" "}
+                    (แตะเพื่อเปิดเลือกงานหรือแก้ไขรายละเอียด)
+                  </p>
+                </div>
+
+                {/* Right Action Pill + Circular Chevron */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#1D4ED8] text-white">
+                    เลือกแล้ว {selectedProjects.length} งาน
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-[#BFDBFE] text-[#1E3A8A] flex items-center justify-center">
+                    {expandedSections[2] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
                 </div>
               </div>
             </div>
 
             {expandedSections[2] && (
-              <div className="p-5 space-y-3.5 bg-gradient-to-b from-blue-100/50 via-blue-50/40 to-sky-50/30">
+              <div className="p-5 space-y-3.5 bg-[#F4F9FF] border-t border-[#BFDBFE]">
                 {/* Filter Bar */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="block font-extrabold text-blue-950 mb-1.5">กรองตามช่างผู้ควบคุมงาน</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">กรองตามช่างผู้ควบคุมงาน</label>
                     <select
                       value={selectedSupervisor}
                       onChange={(e) => handleSupervisorChange(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-blue-200 bg-white shadow-sm font-bold text-slate-800 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#93C5FD] bg-white font-bold text-[#0F172A] focus:outline-none focus:border-[#1D4ED8]"
                     >
                       <option value="ALL">-- ช่างผู้ควบคุมงานทุกคน ({projects.length} งาน) --</option>
                       {supervisors.map((sup) => (
@@ -1139,29 +1164,29 @@ export default function WorkReportClaimPage() {
                   </div>
 
                   <div>
-                    <label className="block font-extrabold text-blue-950 mb-1.5">ค้นหาหมายเลข WBS / ชื่องาน</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">ค้นหาหมายเลข WBS / ชื่องาน</label>
                     <div className="relative">
-                      <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400" />
+                      <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3B82F6]" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="พิมพ์ WBS หรือชื่องาน..."
-                        className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-blue-200 bg-white shadow-sm text-xs font-semibold hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-[#93C5FD] bg-white text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#1D4ED8]"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs pt-1">
-                  <span className="text-blue-900 font-bold">
+                <div className="flex items-center justify-between text-xs pt-0.5">
+                  <span className="text-[#1E3A8A] font-bold">
                     พบ {filteredProjects.length} โครงการในระบบ
                   </span>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={selectAllFiltered}
-                      className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors border-0 shadow-sm cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-bold transition-colors border-0 cursor-pointer"
                     >
                       + เลือกทั้งหมดที่กรอง
                     </button>
@@ -1169,7 +1194,7 @@ export default function WorkReportClaimPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedWbsList([])}
-                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 font-bold transition-colors border border-rose-200 shadow-sm cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-600 font-bold transition-colors border border-rose-200 cursor-pointer"
                       >
                         ล้างที่เลือก
                       </button>
@@ -1178,7 +1203,7 @@ export default function WorkReportClaimPage() {
                 </div>
 
                 {/* Project Picker List */}
-                <div className="max-h-[290px] overflow-y-auto border border-blue-200 rounded-xl divide-y divide-blue-100 bg-white shadow-sm">
+                <div className="max-h-[280px] overflow-y-auto border border-[#BFDBFE] rounded-xl divide-y divide-slate-100 bg-white">
                   {loadingProjects ? (
                     <div className="p-8 text-center text-xs text-slate-400">กำลังดึงข้อมูลงานจากระบบอัปเดตสถานะงาน...</div>
                   ) : filteredProjects.length === 0 ? (
@@ -1193,30 +1218,30 @@ export default function WorkReportClaimPage() {
                           key={proj.wbs}
                           onClick={() => toggleSelectProject(proj)}
                           className={`p-3 flex items-start gap-3 cursor-pointer transition-colors ${
-                            isChecked ? "bg-blue-100/70 hover:bg-blue-100" : "bg-white hover:bg-blue-50/40"
+                            isChecked ? "bg-[#EFF6FF]" : "bg-white hover:bg-slate-50"
                           }`}
                         >
-                          <div className="pt-0.5 text-blue-600 shrink-0">
+                          <div className="pt-0.5 text-[#1D4ED8] shrink-0">
                             {isChecked ? <CheckSquare size={18} /> : <Square size={18} className="text-slate-300" />}
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <span className="font-mono text-xs font-extrabold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                              <span className="font-mono text-xs font-extrabold text-[#1E3A8A] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE]">
                                 {proj.wbs}
                               </span>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#DCFCE7] text-[#166534]">
                                 สถานะ: {proj.status || "-"} ({pct}%)
                               </span>
                               <span className="text-[11px] font-bold text-slate-600">
                                 ผู้คุมงาน: {proj.supervisor || "-"}
                               </span>
                               {imgs.length > 0 && (
-                                <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">
+                                <span className="text-[10px] font-bold text-[#6D28D9] bg-[#F3E8FF] px-1.5 py-0.5 rounded">
                                   📷 {imgs.length} รูป
                                 </span>
                               )}
                             </div>
-                            <p className="font-bold text-slate-800 text-xs mt-1 truncate" title={proj.name}>
+                            <p className="font-bold text-[#0F172A] text-xs mt-1 truncate" title={proj.name}>
                               {proj.name}
                             </p>
                             <p className="text-[11px] text-slate-500 truncate mt-0.5">
@@ -1231,12 +1256,12 @@ export default function WorkReportClaimPage() {
 
                 {/* Selected Projects Fine-Tuning */}
                 {selectedProjects.length > 0 && (
-                  <div className="pt-2 space-y-2.5">
-                    <p className="text-xs font-extrabold text-blue-950 flex items-center gap-1.5">
-                      <Edit3 size={14} className="text-blue-700" />
+                  <div className="pt-2 space-y-2">
+                    <p className="text-xs font-extrabold text-[#0F172A] flex items-center gap-1.5">
+                      <Edit3 size={14} className="text-[#1D4ED8]" />
                       ปรับแต่งวันที่ออกไปปฏิบัติงาน / รายละเอียดการปฏิบัติงานรายโครงการ ({selectedProjects.length} งาน):
                     </p>
-                    <div className="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
+                    <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
                       {selectedProjects.map((proj, idx) => {
                         const ov = projectOverrides[proj.wbs] || {
                           workDate: new Date().toISOString().split("T")[0],
@@ -1247,10 +1272,10 @@ export default function WorkReportClaimPage() {
                         return (
                           <div
                             key={proj.wbs}
-                            className="p-3.5 rounded-xl bg-white border border-blue-200 shadow-sm space-y-2.5 text-xs"
+                            className="p-3 rounded-xl bg-white border border-[#BFDBFE] space-y-2 text-xs"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-extrabold text-blue-950 truncate">
+                              <span className="font-extrabold text-[#0F172A] truncate">
                                 #{idx + 1} {proj.wbs} - {proj.name}
                               </span>
                               <button
@@ -1262,20 +1287,20 @@ export default function WorkReportClaimPage() {
                                 <Trash2 size={14} />
                               </button>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                               <div>
-                                <label className="block text-[10px] font-extrabold text-blue-900 mb-1">
+                                <label className="block text-[10px] font-bold text-[#1E3A8A] mb-1">
                                   วันที่ออกไปปฏิบัติงาน
                                 </label>
                                 <input
                                   type="date"
                                   value={ov.workDate}
                                   onChange={(e) => updateOverride(proj.wbs, { workDate: e.target.value })}
-                                  className="w-full px-2.5 py-1.5 rounded-xl border border-blue-200 bg-blue-50/30 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-2.5 py-1.5 rounded-lg border border-[#BFDBFE] bg-[#F8FAFC] text-xs font-bold text-[#0F172A] focus:outline-none focus:border-[#1D4ED8]"
                                 />
                               </div>
                               <div className="sm:col-span-2">
-                                <label className="block text-[10px] font-extrabold text-blue-900 mb-1">
+                                <label className="block text-[10px] font-bold text-[#1E3A8A] mb-1">
                                   รายละเอียดผลการปฏิบัติงาน / การอัปเดตสถานะในระบบ
                                 </label>
                                 <input
@@ -1283,7 +1308,7 @@ export default function WorkReportClaimPage() {
                                   value={ov.customActivity}
                                   onChange={(e) => updateOverride(proj.wbs, { customActivity: e.target.value })}
                                   placeholder="ระบุผลการออกไปควบคุมงาน..."
-                                  className="w-full px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/30 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full px-3 py-1.5 rounded-lg border border-[#BFDBFE] bg-[#F8FAFC] text-xs font-medium text-[#0F172A] focus:outline-none focus:border-[#1D4ED8]"
                                 />
                               </div>
                             </div>
@@ -1297,29 +1322,39 @@ export default function WorkReportClaimPage() {
             )}
           </div>
 
-          {/* Card 3: ส่วนที่ 2 งานอื่นๆ ที่ไม่อยู่ในการอัปเดตสถานะงาน (Soft Emerald Theme) */}
-          <div className="bg-emerald-50/60 rounded-2xl shadow-sm border-2 border-emerald-200/90 overflow-hidden transition-all">
+          {/* Card 3: เขียว = งานอื่น ๆ (Microsoft 365 Modern Clean Card) */}
+          <div className="rounded-2xl border border-[#BBF7D0] bg-[#EAFBF0] overflow-hidden transition-all">
             <div
               onClick={() => toggleSection(3)}
-              className="px-5 py-3.5 bg-gradient-to-r from-[#065F46] via-[#047857] to-[#059669] text-white flex items-center justify-between cursor-pointer select-none hover:brightness-105 transition-all"
+              className="flex items-stretch cursor-pointer select-none hover:bg-[#DCFCE7] transition-colors min-h-[78px]"
             >
-              <div className="min-w-0 pr-2">
-                <h2 className="font-extrabold text-sm flex items-center gap-2">
-                  <Briefcase size={18} className="text-emerald-200 shrink-0" />
-                  <span>3. ส่วนที่ 2: งานอื่นๆ (ที่ไม่อยู่ในระบบอัปเดตสถานะงาน)</span>
-                </h2>
-                <p className="text-[11px] text-emerald-100 mt-0.5 truncate">
-                  {expandedSections[3]
-                    ? "เพิ่มงานสำรวจ, งานตรวจรับ, งานแก้ไขไฟขัดข้อง หรืองานมอบหมายพิเศษเพื่อประกอบการเบิก"
-                    : `มีงานอื่นๆ ${otherTasks.length} รายการ (แตะเพื่อเพิ่มรายการงานอื่นๆ)`}
-                </p>
+              {/* Left Solid Category Block */}
+              <div className="w-16 bg-[#16A34A] text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full border-2 border-white/80 flex items-center justify-center">
+                  <Briefcase size={20} strokeWidth={2.3} />
+                </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-300 text-slate-900 shadow-sm">
-                  {otherTasks.length} รายการ
-                </span>
-                <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">
-                  {expandedSections[3] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+
+              {/* Center Navy Text on Soft Mint Green */}
+              <div className="flex-1 px-4 py-3 flex items-center justify-between gap-2 min-w-0">
+                <div className="min-w-0">
+                  <h2 className="font-extrabold text-[15px] text-[#0F172A] leading-snug truncate">
+                    3. ส่วนที่ 2: งานอื่นๆ (ที่ไม่อยู่ในระบบอัปเดตสถานะงาน)
+                  </h2>
+                  <p className="text-xs text-[#14532D] mt-0.5 truncate">
+                    <span className="font-extrabold text-[#15803D]">มีงานอื่นๆ {otherTasks.length} รายการ</span>{" "}
+                    (แตะเพื่อเพิ่มรายการงานอื่นๆ)
+                  </p>
+                </div>
+
+                {/* Right Action Pill + Circular Chevron */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#15803D] text-white">
+                    {otherTasks.length} รายการ
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-[#BBF7D0] text-[#14532D] flex items-center justify-center">
+                    {expandedSections[3] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1327,24 +1362,24 @@ export default function WorkReportClaimPage() {
             {expandedSections[3] && (
               <form
                 onSubmit={handleAddOtherTask}
-                className="p-5 space-y-3.5 text-xs bg-gradient-to-b from-emerald-100/50 via-emerald-50/40 to-teal-50/30"
+                className="p-5 space-y-3.5 text-xs bg-[#F4FDF7] border-t border-[#BBF7D0]"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-extrabold text-emerald-950 mb-1.5">วันที่ปฏิบัติงาน</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">วันที่ปฏิบัติงาน</label>
                     <input
                       type="date"
                       value={newTaskDate}
                       onChange={(e) => setNewTaskDate(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-bold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#86EFAC] bg-white font-bold text-[#0F172A] focus:outline-none focus:border-[#16A34A]"
                     />
                   </div>
                   <div>
-                    <label className="block font-extrabold text-emerald-950 mb-1.5">ประเภทงานอื่นๆ</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">ประเภทงานอื่นๆ</label>
                     <select
                       value={newTaskCategory}
                       onChange={(e) => setNewTaskCategory(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-bold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#86EFAC] bg-white font-bold text-[#0F172A] focus:outline-none focus:border-[#16A34A]"
                     >
                       {OTHER_TASK_CATEGORIES.map((c) => (
                         <option key={c} value={c}>
@@ -1357,7 +1392,7 @@ export default function WorkReportClaimPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="sm:col-span-2">
-                    <label className="block font-extrabold text-emerald-950 mb-1.5">
+                    <label className="block font-bold text-[#1E293B] mb-1">
                       ชื่องาน / ภารกิจที่ออกไปปฏิบัติ <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -1366,47 +1401,47 @@ export default function WorkReportClaimPage() {
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       placeholder="เช่น สำรวจประมาณการขยายเขตระบบจำหน่าย / ตรวจรับเสาไฟฟ้า"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-semibold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#86EFAC] bg-white font-semibold text-[#0F172A] focus:outline-none focus:border-[#16A34A]"
                     />
                   </div>
                   <div>
-                    <label className="block font-extrabold text-emerald-950 mb-1.5">เลขบันทึก / อ้างอิง (ถ้ามี)</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">เลขบันทึก / อ้างอิง (ถ้ามี)</label>
                     <input
                       type="text"
                       value={newTaskRef}
                       onChange={(e) => setNewTaskRef(e.target.value)}
                       placeholder="เช่น ก.3 กรย. / ใบสั่งงาน"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-semibold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#86EFAC] bg-white font-semibold text-[#0F172A] focus:outline-none focus:border-[#16A34A]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-extrabold text-emerald-950 mb-1.5">สถานที่ปฏิบัติงาน / พื้นที่</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">สถานที่ปฏิบัติงาน / พื้นที่</label>
                     <input
                       type="text"
                       value={newTaskLocation}
                       onChange={(e) => setNewTaskLocation(e.target.value)}
                       placeholder="เช่น ต.บ้านโพธิ์ อ.เมือง จ.นครปฐม"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-semibold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#86EFAC] bg-white font-semibold text-[#0F172A] focus:outline-none focus:border-[#16A34A]"
                     />
                   </div>
                   <div>
-                    <label className="block font-extrabold text-emerald-950 mb-1.5">ผลการปฏิบัติงาน</label>
+                    <label className="block font-bold text-[#1E293B] mb-1">ผลการปฏิบัติงาน</label>
                     <input
                       type="text"
                       value={newTaskDetail}
                       onChange={(e) => setNewTaskDetail(e.target.value)}
                       placeholder="เช่น สำรวจและจัดทำแผนผังแล้วเสร็จ 100%"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-white shadow-sm font-semibold text-slate-800 hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#86EFAC] bg-white font-semibold text-[#0F172A] focus:outline-none focus:border-[#16A34A]"
                     />
                   </div>
                 </div>
 
                 {/* Optional Photo Upload for Other Task */}
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                  <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-sm font-bold cursor-pointer transition-colors">
+                  <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#DCFCE7] text-[#15803D] border border-[#86EFAC] font-bold cursor-pointer transition-colors">
                     <Upload size={14} />
                     <span>{compressingTaskImg ? "กำลังบีบอัดรูป..." : "แนบรูปถ่ายงานอื่นๆ (ถ้ามี)"}</span>
                     <input
@@ -1420,7 +1455,7 @@ export default function WorkReportClaimPage() {
 
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-sm transition-colors border-0 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#15803D] hover:bg-[#166534] text-white font-bold transition-colors border-0 cursor-pointer"
                   >
                     <Plus size={16} /> เพิ่มรายการงานอื่นๆ
                   </button>
@@ -1429,7 +1464,7 @@ export default function WorkReportClaimPage() {
                 {newTaskImages.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-1">
                     {newTaskImages.map((img, i) => (
-                      <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden border border-emerald-300 shadow-sm">
+                      <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden border border-[#86EFAC]">
                         <img src={img.url} alt="" className="w-full h-full object-cover" />
                         <button
                           type="button"
@@ -1445,25 +1480,25 @@ export default function WorkReportClaimPage() {
 
                 {/* List of Added Other Tasks */}
                 {otherTasks.length > 0 && (
-                  <div className="pt-3 border-t border-emerald-200/80 space-y-2">
+                  <div className="pt-3 border-t border-[#BBF7D0] space-y-2">
                     {otherTasks.map((task, idx) => (
                       <div
                         key={task.id}
-                        className="p-3 rounded-xl bg-white border border-emerald-200 shadow-sm flex items-start justify-between gap-2"
+                        className="p-3 rounded-xl bg-white border border-[#BBF7D0] flex items-start justify-between gap-2"
                       >
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-600 text-white">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#15803D] text-white">
                               งานอื่นๆ #{idx + 1}
                             </span>
-                            <span className="text-[11px] font-bold text-emerald-900">
+                            <span className="text-[11px] font-bold text-[#14532D]">
                               วันที่ {formatThaiDateShort(task.date)}
                             </span>
-                            <span className="text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold">
+                            <span className="text-[10px] text-[#15803D] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0] font-semibold">
                               {task.category}
                             </span>
                           </div>
-                          <p className="font-bold text-slate-800 text-xs mt-1">{task.title}</p>
+                          <p className="font-bold text-[#0F172A] text-xs mt-1">{task.title}</p>
                           <p className="text-[11px] text-slate-600">
                             พื้นที่: {task.location || "-"} • ผลปฏิบัติงาน: {task.resultDetail}
                           </p>
@@ -1483,64 +1518,76 @@ export default function WorkReportClaimPage() {
             )}
           </div>
 
-          {/* Card 4: หมายเหตุและการตั้งค่ารายงาน (Soft Amber Theme) */}
-          <div className="bg-amber-50/70 rounded-2xl shadow-sm border-2 border-amber-200/90 overflow-hidden text-xs transition-all">
+          {/* Card 4: ส้ม = คำรับรองและเอกสาร (Microsoft 365 Modern Clean Card) */}
+          <div className="rounded-2xl border border-[#FED7AA] bg-[#FFF4E5] overflow-hidden text-xs transition-all">
             <div
               onClick={() => toggleSection(4)}
-              className="px-5 py-3.5 bg-gradient-to-r from-[#B45309] via-[#D97706] to-[#F59E0B] text-white flex items-center justify-between gap-2 cursor-pointer select-none hover:brightness-105 transition-all"
+              className="flex items-stretch cursor-pointer select-none hover:bg-[#FFEDD5] transition-colors min-h-[78px]"
             >
-              <div className="min-w-0 pr-2">
-                <h2 className="font-extrabold text-sm flex items-center gap-2">
-                  <FileText size={17} className="text-amber-100 shrink-0" />
-                  <span>4. คำรับรอง / หมายเหตุประกอบการเบิกค่าตอบแทน</span>
-                </h2>
-                {!expandedSections[4] && (
-                  <p className="text-[11px] text-amber-100 mt-0.5 truncate">
-                    {showPhotosInReport ? `แสดงรูปถ่าย (${totalDisplayedPhotosCount} รูป)` : "ไม่แสดงรูปถ่าย"} • แตะเพื่อแก้ไขคำรับรอง/ผู้บังคับบัญชา
-                  </p>
-                )}
+              {/* Left Solid Category Block */}
+              <div className="w-16 bg-[#EA580C] text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full border-2 border-white/80 flex items-center justify-center">
+                  <FileText size={20} strokeWidth={2.3} />
+                </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <label
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1.5 cursor-pointer font-extrabold text-amber-950 bg-white/95 px-2.5 py-1 rounded-full shadow-sm text-[11px]"
-                >
-                  <input
-                    type="checkbox"
-                    checked={showPhotosInReport}
-                    onChange={(e) => setShowPhotosInReport(e.target.checked)}
-                    className="rounded text-amber-600"
-                  />
-                  แนบรูป ({totalDisplayedPhotosCount})
-                </label>
-                <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">
-                  {expandedSections[4] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+
+              {/* Center Navy Text on Soft Apricot Orange */}
+              <div className="flex-1 px-4 py-3 flex items-center justify-between gap-2 min-w-0">
+                <div className="min-w-0">
+                  <h2 className="font-extrabold text-[15px] text-[#0F172A] leading-snug truncate">
+                    4. คำรับรอง / หมายเหตุประกอบการเบิกค่าตอบแทน
+                  </h2>
+                  <p className="text-xs text-[#7C2D12] mt-0.5 truncate">
+                    {showPhotosInReport
+                      ? `แสดงรูปถ่าย (${totalDisplayedPhotosCount} รูป)`
+                      : "ไม่แสดงรูปถ่าย"}{" "}
+                    • แตะเพื่อแก้ไขคำรับรอง/ผู้บังคับบัญชา
+                  </p>
+                </div>
+
+                {/* Right Action Pill + Circular Chevron */}
+                <div className="flex items-center gap-2 shrink-0">
+                  <label
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1.5 cursor-pointer font-bold text-[#0F172A] bg-white px-3 py-1.5 rounded-full border border-[#FDBA74] text-xs"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={showPhotosInReport}
+                      onChange={(e) => setShowPhotosInReport(e.target.checked)}
+                      className="rounded text-[#2563EB]"
+                    />
+                    แนบรูป ({totalDisplayedPhotosCount})
+                  </label>
+                  <div className="w-8 h-8 rounded-full bg-[#FED7AA] text-[#9A3412] flex items-center justify-center">
+                    {expandedSections[4] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </div>
                 </div>
               </div>
             </div>
 
             {expandedSections[4] && (
-              <div className="p-5 space-y-3.5 bg-gradient-to-b from-amber-100/50 via-amber-50/40 to-orange-50/30">
+              <div className="p-5 space-y-3.5 bg-[#FFF9F2] border-t border-[#FED7AA]">
                 <div>
-                  <label className="block font-extrabold text-amber-950 mb-1.5">
+                  <label className="block font-bold text-[#1E293B] mb-1">
                     ข้อความรับรองผลการปฏิบัติงาน / หมายเหตุเพิ่มเติม
                   </label>
                   <textarea
                     rows={2}
                     value={executiveNote}
                     onChange={(e) => setExecutiveNote(e.target.value)}
-                    className="w-full p-3 rounded-xl bg-white border border-amber-200 shadow-sm text-xs font-semibold text-slate-800 hover:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                    className="w-full p-3 rounded-xl bg-white border border-[#FDBA74] text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#EA580C]"
                   />
                 </div>
                 <div>
-                  <label className="block font-extrabold text-amber-950 mb-1.5">
+                  <label className="block font-bold text-[#1E293B] mb-1">
                     ตำแหน่งผู้บังคับบัญชา / ผู้รับรองผลการปฏิบัติงาน
                   </label>
                   <input
                     type="text"
                     value={approverName}
                     onChange={(e) => setApproverName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-amber-200 shadow-sm text-xs font-semibold text-slate-800 hover:border-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#FDBA74] text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#EA580C]"
                   />
                 </div>
               </div>
@@ -1550,15 +1597,16 @@ export default function WorkReportClaimPage() {
 
         {/* RIGHT COLUMN: Live Official Document Preview (7 cols on XL) */}
         <div className="xl:col-span-7">
-          <div className="bg-slate-200/70 rounded-3xl p-3 md:p-6 border border-slate-300/80 shadow-inner">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3 px-2">
+          <div className="bg-[#EEF2F6] rounded-3xl p-3 md:p-5 border border-slate-200/90">
+            {/* Top Preview Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-3.5 px-2">
               <div>
-                <span className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
-                  <Eye size={15} className="text-[#6B2169]" />
+                <span className="text-[13px] font-extrabold text-[#0F172A] flex items-center gap-2">
+                  <Eye size={16} className="text-[#7C3AED]" />
                   ตัวอย่างเอกสารรายงานผลการปฏิบัติงาน (A4 Preview - พร้อมพิมพ์แนบเบิกค่าตอบแทน)
                 </span>
-                <span className="text-[11px] font-bold text-slate-500">
-                  รวมงานในระบบ {selectedProjects.length} งาน + งานอื่นๆ {otherTasks.length} งาน
+                <span className="text-[11px] font-semibold text-slate-500 block mt-0.5 ml-6">
+                  รวมงานในระบบ {selectedProjects.length} งาน • งานอื่นๆ {otherTasks.length} งาน
                 </span>
               </div>
 
@@ -1566,109 +1614,124 @@ export default function WorkReportClaimPage() {
                 <button
                   type="button"
                   onClick={handlePrintPDF}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-[#6B2169] to-[#8A3B87] hover:from-[#581a56] hover:to-[#732f70] text-white shadow-md transition-all border-0 cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-extrabold bg-[#6D28D9] hover:bg-[#5B21B6] text-white transition-colors border-0 cursor-pointer"
                 >
-                  <Printer size={15} className="text-amber-300" /> พิมพ์ สำหรับแนบเบิกค่าตอบแทน
+                  <Printer size={15} /> พิมพ์ สำหรับแนบเบิกค่าตอบแทน
                 </button>
                 <button
                   type="button"
                   disabled={isExportingPng}
                   onClick={handleDownloadPNG}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all border-0 cursor-pointer disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold bg-[#16A34A] hover:bg-[#15803D] text-white transition-colors border-0 cursor-pointer disabled:opacity-60"
                 >
                   <Download size={14} /> บันทึกรูป (PNG)
                 </button>
               </div>
             </div>
 
-            {/* PRINTABLE SHEET - Compact layout engineered so 4 jobs + 12 photos (3 per job) fit on 1 A4 page */}
+            {/* PRINTABLE A4 SHEET - White base, 4-color category accents, print-friendly ink-saving design */}
             <div
               ref={reportRef}
-              className="bg-white rounded-2xl shadow-lg border border-slate-200 p-4 md:p-5 text-slate-900 space-y-3 max-w-[920px] mx-auto"
+              className="bg-white rounded-2xl border border-slate-200/90 p-5 md:p-6 text-[#0F172A] space-y-3.5 max-w-[920px] mx-auto"
             >
-              {/* Official Banner Header */}
-              <div className="border-b-2 border-[#6B2169] pb-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-[#6B2169] text-white flex flex-col items-center justify-center font-black shadow-sm shrink-0">
-                    <span className="text-sm leading-none">PEA</span>
-                    <span className="text-[8px] font-bold text-amber-300 mt-0.5">ผกร.(ก3)</span>
+              {/* 1. Official Document Header */}
+              <div className="pb-3.5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-14 h-14 rounded-2xl bg-[#7C3AED] text-white flex flex-col items-center justify-center font-black shrink-0">
+                    <span className="text-base leading-none tracking-tight">PEA</span>
+                    <span className="text-[9px] font-bold text-purple-100 mt-1">ผกร.(ก3)</span>
                   </div>
                   <div>
-                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-purple-100 text-[#6B2169] mb-0.5">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10.5px] font-extrabold bg-[#F3E8FF] text-[#6D28D9] border border-[#DDD6FE] mb-1">
                       การไฟฟ้าส่วนภูมิภาค เขต 3 (ภาคกลาง) จ.นครปฐม • PEA ผกร.กรย.(ก3)
                     </div>
-                    <h2 className="text-base md:text-lg font-black text-slate-900 leading-tight">
+                    <h2 className="text-base md:text-[19px] font-black text-[#0F172A] leading-snug">
                       แบบรายงานผลการปฏิบัติงานและอัปเดตสถานะงาน (ประกอบการเบิกค่าตอบแทน)
                     </h2>
-                    <p className="text-[11px] font-semibold text-slate-600">
-                      {claimType} • <span className="text-[#6B2169] font-extrabold">{claimPeriod}</span>
+                    <p className="text-xs font-semibold text-slate-600 mt-0.5">
+                      {claimType} • <span className="text-[#6D28D9] font-extrabold">{claimPeriod}</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-purple-50 border border-purple-200 rounded-xl px-3 py-1.5 text-right shrink-0">
-                  <p className="text-[9.5px] font-bold text-purple-700">สรุปภารกิจที่ขอเบิก</p>
-                  <p className="text-base font-black text-[#6B2169] leading-tight">
+                <div className="bg-[#FAF5FF] border border-[#E9D5FF] rounded-2xl px-4 py-2 text-center shrink-0 min-w-[135px]">
+                  <p className="text-[10px] font-bold text-[#6D28D9]">สรุปภารกิจที่ขอเบิก</p>
+                  <p className="text-xl font-black text-[#581C87] leading-tight my-0.5">
                     {selectedProjects.length + otherTasks.length} รายการ
                   </p>
-                  <p className="text-[9.5px] text-slate-500">
+                  <p className="text-[10px] font-medium text-slate-500">
                     งานในระบบ {selectedProjects.length} • งานอื่นๆ {otherTasks.length}
                   </p>
                 </div>
               </div>
 
-              {/* Claimant Info Box */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 text-[11px]">
-                <div>
-                  <span className="text-[9.5px] font-bold text-slate-400 block">ผู้ขอเบิก / ช่างผู้ควบคุมงาน</span>
-                  <span className="font-extrabold text-slate-900">{claimantName || "-"}</span>
+              {/* 2. Claimant Info Box - 4-column divided cells with icons */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 bg-[#F8FAFC] rounded-xl border border-slate-200/90 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/90 text-xs">
+                <div className="p-2.5 flex items-start gap-2">
+                  <User size={15} className="text-[#7C3AED] shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-500 block">ผู้ขอเบิก / ช่างผู้ควบคุมงาน</span>
+                    <span className="font-extrabold text-[#0F172A] block truncate">{claimantName || "-"}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[9.5px] font-bold text-slate-400 block">ตำแหน่ง / สังกัด</span>
-                  <span className="font-bold text-slate-800">{claimantPosition}</span>
+                <div className="p-2.5 flex items-start gap-2">
+                  <Calendar size={15} className="text-[#7C3AED] shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-500 block">ตำแหน่ง / สังกัด</span>
+                    <span className="font-bold text-[#0F172A] block truncate">{claimantPosition}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[9.5px] font-bold text-slate-400 block">เลขที่อนุมัติเดินทาง / คำสั่ง</span>
-                  <span className="font-bold text-slate-800">{travelOrderNo || "-"}</span>
+                <div className="p-2.5 flex items-start gap-2">
+                  <MapPin size={15} className="text-[#7C3AED] shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-500 block">เลขที่อนุมัติเดินทาง / คำสั่ง</span>
+                    <span className="font-bold text-[#0F172A] block truncate">{travelOrderNo || "-"}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[9.5px] font-bold text-slate-400 block">รถยนต์ที่ใช้ปฏิบัติงาน</span>
-                  <span className="font-bold text-slate-800">{vehiclePlate || "-"}</span>
+                <div className="p-2.5 flex items-start gap-2">
+                  <FileText size={15} className="text-[#7C3AED] shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-500 block">รถยนต์ที่ใช้ปฏิบัติงาน</span>
+                    <span className="font-bold text-[#0F172A] block truncate">{vehiclePlate || "-"}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* PART 1: งานจากการอัปเดตสถานะงานในระบบ */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-1">
-                  <h3 className="text-xs font-extrabold text-[#1E3A8A] flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded bg-blue-600 text-white inline-flex items-center justify-center text-[10px]">
+              {/* 3. PART 1: งานจากการอัปเดตสถานะงานในระบบ (Blue Category Header Bar) */}
+              <div className="space-y-2">
+                <div className="px-3 py-1.5 rounded-xl bg-[#EAF3FF] border border-[#BFDBFE] flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-xs font-extrabold text-[#0F172A] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#1D4ED8] text-white inline-flex items-center justify-center text-xs font-black shrink-0">
                       1
                     </span>
-                    ส่วนที่ 1: รายละเอียดงานก่อสร้างที่อัปเดตสถานะในระบบติดตาม ผกร.กรย.(ก3) ({selectedProjects.length}{" "}
-                    โครงการ)
+                    <span>
+                      ส่วนที่ 1: รายละเอียดงานก่อสร้างที่อัปเดตสถานะในระบบติดตาม ผกร.กรย.(ก3) ({selectedProjects.length}{" "}
+                      โครงการ)
+                    </span>
                   </h3>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    ✓ อัปเดตสถานะในระบบแล้ว
+                  <span className="inline-flex items-center gap-1 text-[10.5px] font-extrabold text-[#15803D] bg-white px-2.5 py-0.5 rounded-full border border-[#86EFAC]">
+                    <CheckCircle2 size={12} className="text-[#16A34A]" /> อัปเดตสถานะในระบบแล้ว
                   </span>
                 </div>
 
                 {selectedProjects.length === 0 ? (
-                  <div className="p-4 rounded-xl border border-dashed border-slate-300 text-center text-xs text-slate-400">
-                    ยังไม่ได้เลือกโครงการจากระบบอัปเดตสถานะงาน (กรุณาติ๊กเลือกโครงการจากแถบด้านซ้าย)
+                  <div className="py-3.5 px-4 rounded-xl border border-dashed border-[#93C5FD] bg-[#F8FAFC] text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+                    <Info size={15} className="text-[#3B82F6] shrink-0" />
+                    <span>ยังไม่ได้เลือกโครงการจากระบบอัปเดตสถานะงาน (กรุณาติ๊กเลือกโครงการจากแถบด้านซ้าย)</span>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                  <div className="overflow-x-auto border border-[#BFDBFE] rounded-xl">
                     <table className="w-full text-left text-[11px]">
                       <thead>
-                        <tr className="bg-slate-100 text-slate-700 border-b border-slate-200">
-                          <th className="py-1.5 px-2 font-bold w-8 text-center">ลำดับ</th>
-                          <th className="py-1.5 px-2 font-bold w-20">วันที่</th>
-                          <th className="py-1.5 px-2 font-bold">หมายเลข WBS / ชื่องานก่อสร้าง</th>
-                          <th className="py-1.5 px-2 font-bold text-center w-20">สถานะ / %</th>
-                          <th className="py-1.5 px-2 font-bold">ปริมาณงานและรายละเอียดที่อัปเดตในระบบ</th>
+                        <tr className="bg-[#F0F7FF] text-[#1E3A8A] border-b border-[#BFDBFE]">
+                          <th className="py-1.5 px-2.5 font-extrabold w-10 text-center">ลำดับ</th>
+                          <th className="py-1.5 px-2.5 font-extrabold w-20">วันที่</th>
+                          <th className="py-1.5 px-2.5 font-extrabold">หมายเลข WBS / ชื่องานก่อสร้าง</th>
+                          <th className="py-1.5 px-2.5 font-extrabold text-center w-20">สถานะ / %</th>
+                          <th className="py-1.5 px-2.5 font-extrabold">ปริมาณงานและรายละเอียดที่อัปเดตในระบบ</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-200">
+                      <tbody className="divide-y divide-slate-200 bg-white">
                         {selectedProjects.map((proj, idx) => {
                           const ov = projectOverrides[proj.wbs];
                           const pct = calculateProjectProgress(proj);
@@ -1698,27 +1761,27 @@ export default function WorkReportClaimPage() {
 
                           return (
                             <tr key={proj.wbs} className="align-top">
-                              <td className="py-1.5 px-2 text-center font-bold text-slate-500">{idx + 1}</td>
-                              <td className="py-1.5 px-2 font-bold text-slate-800 whitespace-nowrap">
+                              <td className="py-1.5 px-2.5 text-center font-bold text-slate-500">{idx + 1}</td>
+                              <td className="py-1.5 px-2.5 font-bold text-[#0F172A] whitespace-nowrap">
                                 {formatThaiDateShort(ov?.workDate)}
                               </td>
-                              <td className="py-1.5 px-2">
-                                <div className="font-mono font-extrabold text-indigo-900 text-[11px] leading-tight">
+                              <td className="py-1.5 px-2.5">
+                                <div className="font-mono font-extrabold text-[#1D4ED8] text-[11px] leading-tight">
                                   {proj.wbs}
                                 </div>
-                                <div className="font-bold text-slate-900 leading-snug">{proj.name}</div>
+                                <div className="font-bold text-[#0F172A] leading-snug">{proj.name}</div>
                                 <div className="text-[10px] text-slate-500">
                                   ผู้ควบคุมงาน: {proj.supervisor || claimantName}
                                 </div>
                               </td>
-                              <td className="py-1.5 px-2 text-center">
-                                <span className="inline-block px-1.5 py-0.5 rounded bg-purple-100 text-[#6B2169] font-extrabold text-[10px]">
+                              <td className="py-1.5 px-2.5 text-center">
+                                <span className="inline-block px-1.5 py-0.5 rounded bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] font-extrabold text-[10px]">
                                   {proj.status || "-"}
                                 </span>
-                                <div className="font-black text-emerald-700 text-xs mt-0.5">{pct}%</div>
+                                <div className="font-black text-[#15803D] text-xs mt-0.5">{pct}%</div>
                               </td>
-                              <td className="py-1.5 px-2 space-y-0.5">
-                                <p className="font-bold text-slate-800 leading-snug">
+                              <td className="py-1.5 px-2.5 space-y-0.5">
+                                <p className="font-bold text-[#0F172A] leading-snug">
                                   {ov?.customActivity || getLatestRemarkLines(proj.remarks)}
                                 </p>
                                 {activeMetrics.length > 0 && (
@@ -1738,7 +1801,7 @@ export default function WorkReportClaimPage() {
                                     {checkedItems.map((c) => (
                                       <span
                                         key={String(c.key)}
-                                        className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 text-[9.5px] font-bold border border-emerald-200"
+                                        className="px-1.5 py-0.2 rounded bg-[#F0FDF4] text-[#166534] text-[9.5px] font-bold border border-[#BBF7D0]"
                                       >
                                         ✓ {c.label}
                                       </span>
@@ -1755,54 +1818,56 @@ export default function WorkReportClaimPage() {
                 )}
               </div>
 
-              {/* PART 2: งานอื่นๆ ที่ไม่อยู่ในการอัปเดตสถานะงาน */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-1">
-                  <h3 className="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded bg-emerald-600 text-white inline-flex items-center justify-center text-[10px]">
+              {/* 4. PART 2: งานอื่นๆ ที่ไม่อยู่ในการอัปเดตสถานะงาน (Green Category Header Bar) */}
+              <div className="space-y-2">
+                <div className="px-3 py-1.5 rounded-xl bg-[#EAFBF0] border border-[#BBF7D0] flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-xs font-extrabold text-[#0F172A] flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-[#16A34A] text-white inline-flex items-center justify-center text-xs font-black shrink-0">
                       2
                     </span>
-                    ส่วนที่ 2: งานปฏิบัติการอื่นๆ นอกเหนือจากงานอัปเดตสถานะ ({otherTasks.length} รายการ)
+                    <span>
+                      ส่วนที่ 2: งานปฏิบัติการอื่นๆ นอกเหนือจากงานอัปเดตสถานะ ({otherTasks.length} รายการ)
+                    </span>
                   </h3>
-                  <span className="text-[10px] font-semibold text-slate-500">
+                  <span className="text-[10.5px] font-bold text-[#14532D]">
                     งานสำรวจ / ตรวจรับ / แก้ไฟขัดข้อง / งานมอบหมายพิเศษ
                   </span>
                 </div>
 
                 {otherTasks.length === 0 ? (
-                  <div className="py-1.5 px-3 rounded-lg bg-slate-50 border border-slate-200 text-center text-[10.5px] text-slate-400">
+                  <div className="py-2 px-3 rounded-xl bg-[#F4FDF7] border border-[#BBF7D0] text-center text-[11px] font-medium text-slate-500">
                     - ไม่มีรายการงานอื่นๆ เพิ่มเติม -
                   </div>
                 ) : (
-                  <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                  <div className="overflow-x-auto border border-[#BBF7D0] rounded-xl">
                     <table className="w-full text-left text-[11px]">
                       <thead>
-                        <tr className="bg-emerald-50/70 text-emerald-950 border-b border-slate-200">
-                          <th className="py-1.5 px-2 font-bold w-8 text-center">ลำดับ</th>
-                          <th className="py-1.5 px-2 font-bold w-20">วันที่</th>
-                          <th className="py-1.5 px-2 font-bold">ประเภทภารกิจ / ชื่องานอื่นๆ</th>
-                          <th className="py-1.5 px-2 font-bold">สถานที่ / พื้นที่ปฏิบัติงาน</th>
-                          <th className="py-1.5 px-2 font-bold">ผลการปฏิบัติงานเพื่อประกอบการเบิก</th>
+                        <tr className="bg-[#F0FDF4] text-[#14532D] border-b border-[#BBF7D0]">
+                          <th className="py-1.5 px-2.5 font-extrabold w-10 text-center">ลำดับ</th>
+                          <th className="py-1.5 px-2.5 font-extrabold w-20">วันที่</th>
+                          <th className="py-1.5 px-2.5 font-extrabold">ประเภทภารกิจ / ชื่องานอื่นๆ</th>
+                          <th className="py-1.5 px-2.5 font-extrabold">สถานที่ / พื้นที่ปฏิบัติงาน</th>
+                          <th className="py-1.5 px-2.5 font-extrabold">ผลการปฏิบัติงานเพื่อประกอบการเบิก</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-200">
+                      <tbody className="divide-y divide-slate-200 bg-white">
                         {otherTasks.map((task, idx) => (
                           <tr key={task.id} className="align-top">
-                            <td className="py-1.5 px-2 text-center font-bold text-slate-500">{idx + 1}</td>
-                            <td className="py-1.5 px-2 font-bold text-slate-800 whitespace-nowrap">
+                            <td className="py-1.5 px-2.5 text-center font-bold text-slate-500">{idx + 1}</td>
+                            <td className="py-1.5 px-2.5 font-bold text-[#0F172A] whitespace-nowrap">
                               {formatThaiDateShort(task.date)}
                             </td>
-                            <td className="py-1.5 px-2">
-                              <span className="inline-block px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 text-[9.5px] font-extrabold mr-1">
+                            <td className="py-1.5 px-2.5">
+                              <span className="inline-block px-1.5 py-0.2 rounded bg-[#DCFCE7] text-[#166534] text-[9.5px] font-extrabold mr-1">
                                 {task.category}
                               </span>
-                              <span className="font-bold text-slate-900">{task.title}</span>
+                              <span className="font-bold text-[#0F172A]">{task.title}</span>
                               {task.referenceNo && (
                                 <span className="text-[10px] text-slate-500 ml-1">(อ้างอิง: {task.referenceNo})</span>
                               )}
                             </td>
-                            <td className="py-1.5 px-2 font-medium text-slate-700">{task.location || "-"}</td>
-                            <td className="py-1.5 px-2 font-bold text-slate-800">{task.resultDetail}</td>
+                            <td className="py-1.5 px-2.5 font-medium text-slate-700">{task.location || "-"}</td>
+                            <td className="py-1.5 px-2.5 font-bold text-[#0F172A]">{task.resultDetail}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1811,18 +1876,17 @@ export default function WorkReportClaimPage() {
                 )}
               </div>
 
-              {/* PART 3: ประมวลภาพถ่ายการปฏิบัติงานหน้างาน (แยกแต่ละงาน งานละไม่เกิน 3 รูป ล่าสุด และจัดขนาดให้พอดี 12 รูปในหน้าแรก) */}
+              {/* 5. PART 3: ประมวลภาพถ่ายการปฏิบัติงานหน้างาน (แยกแต่ละงาน งานละไม่เกิน 3 รูป ล่าสุด และจัดขนาดให้พอดี 12 รูปในหน้าแรก) */}
               {showPhotosInReport && groupedReportPhotos.length > 0 && (
                 <div className="space-y-2 pt-0.5">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-1">
-                    <h3 className="text-xs font-extrabold text-purple-950 flex items-center gap-1.5">
-                      <ImageIcon size={15} className="text-[#6B2169]" />
+                  <div className="px-3 py-1.5 rounded-xl bg-[#F5F0FF] border border-[#DDD6FE] flex items-center justify-between">
+                    <h3 className="text-xs font-extrabold text-[#0F172A] flex items-center gap-2">
+                      <ImageIcon size={15} className="text-[#7C3AED]" />
                       ภาพถ่ายหลักฐานการออกไปปฏิบัติงานหน้างาน แยกตามรายโครงการ (แสดงภาพล่าสุดงานละไม่เกิน 3 รูป • รวม{" "}
                       {totalDisplayedPhotosCount} รูป)
                     </h3>
                   </div>
 
-                  {/* When there are multiple jobs (e.g. 3-4 jobs = 9-12 photos), arrange job cards in a 2-column grid so all 12 photos fit comfortably on Page 1 */}
                   <div
                     className={`grid gap-2.5 ${
                       groupedReportPhotos.length >= 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
@@ -1831,29 +1895,27 @@ export default function WorkReportClaimPage() {
                     {groupedReportPhotos.map((group) => (
                       <div
                         key={group.groupKey}
-                        className="rounded-xl border border-purple-200/90 bg-purple-50/30 p-2 space-y-1.5"
+                        className="rounded-xl border border-slate-200 bg-[#F8FAFC] p-2 space-y-1.5"
                       >
-                        {/* Job Header inside Photo Section */}
-                        <div className="flex items-center justify-between gap-1.5 border-b border-purple-100 pb-1">
+                        <div className="flex items-center justify-between gap-1.5 border-b border-slate-200 pb-1">
                           <div className="min-w-0 flex items-center gap-1.5">
-                            <span className="px-2 py-0.5 rounded-md bg-[#6B2169] text-white font-mono text-[9.5px] font-extrabold shrink-0">
+                            <span className="px-2 py-0.5 rounded-md bg-[#6D28D9] text-white font-mono text-[9.5px] font-extrabold shrink-0">
                               {group.badge}
                             </span>
-                            <span className="font-extrabold text-slate-900 text-[10.5px] truncate" title={group.title}>
+                            <span className="font-extrabold text-[#0F172A] text-[10.5px] truncate" title={group.title}>
                               {group.title}
                             </span>
                           </div>
-                          <span className="text-[9.5px] font-bold text-purple-800 bg-purple-100 px-1.5 py-0.5 rounded shrink-0">
+                          <span className="text-[9.5px] font-bold text-[#6D28D9] bg-[#F3E8FF] px-1.5 py-0.5 rounded shrink-0">
                             ล่าสุด {group.photos.length} รูป
                           </span>
                         </div>
 
-                        {/* 3 Photos Row for this specific Job */}
                         <div className="grid grid-cols-3 gap-1.5">
                           {group.photos.map((photo, pIdx) => (
                             <div
                               key={pIdx}
-                              className="rounded-lg border border-slate-200 overflow-hidden bg-white flex flex-col shadow-sm"
+                              className="rounded-lg border border-slate-200 overflow-hidden bg-white flex flex-col"
                             >
                               <div
                                 className={`${
@@ -1861,7 +1923,7 @@ export default function WorkReportClaimPage() {
                                 } w-full bg-slate-100 overflow-hidden relative`}
                               >
                                 <img src={photo.url} alt="" className="w-full h-full object-cover" />
-                                <span className="absolute top-1 left-1 bg-black/60 text-white text-[8.5px] font-bold px-1.5 py-0.2 rounded">
+                                <span className="absolute top-1 left-1 bg-black/65 text-white text-[8.5px] font-bold px-1.5 py-0.2 rounded">
                                   รูปที่ {pIdx + 1}
                                 </span>
                               </div>
@@ -1879,36 +1941,68 @@ export default function WorkReportClaimPage() {
                 </div>
               )}
 
-              {/* Clarification / Certification Box */}
+              {/* 6. Clarification / Certification Box (Soft Apricot Orange Style) */}
               {executiveNote && (
-                <div className="px-3 py-2 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] leading-snug">
-                  <span className="font-extrabold text-amber-900">คำรับรองและหมายเหตุประกอบการขอเบิกค่าตอบแทน: </span>
-                  <span className="text-slate-800 font-medium">{executiveNote}</span>
+                <div className="p-3 rounded-xl bg-[#FFF4E5] border border-[#FED7AA] flex items-start gap-3 text-[11px] leading-snug">
+                  <div className="w-8 h-8 rounded-full bg-[#FFEDD5] text-[#EA580C] flex items-center justify-center shrink-0">
+                    <Megaphone size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-extrabold text-[#9A3412]">คำรับรองและหมายเหตุประกอบการขอเบิกค่าตอบแทน</p>
+                    <p className="text-[#0F172A] font-medium mt-0.5">({executiveNote})</p>
+                  </div>
                 </div>
               )}
 
-              {/* Official Signature Blocks (Compact for single-page A4) */}
-              <div className="pt-3 border-t border-slate-200 grid grid-cols-2 gap-4 text-[11px] text-center">
-                <div className="space-y-1">
-                  <p className="font-bold text-slate-600">ขอรับรองว่าได้ออกไปปฏิบัติงานและอัปเดตสถานะงานจริง</p>
-                  <div className="pt-4 text-slate-400">ลงชื่อ ............................................................ ผู้ขอเบิก</div>
-                  <p className="font-extrabold text-slate-900">({claimantName || "................................................"})</p>
-                  <p className="text-slate-600 text-[10.5px]">{claimantPosition}</p>
-                  <p className="text-[10px] text-slate-400">วันที่ ......... / .................... / ............</p>
+              {/* 7. Official Signature Blocks - 2 Separate Framed Cards (Claimant vs Approver) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-[11px]">
+                {/* Left Box: Claimant (Purple Tint Header) */}
+                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                  <div className="px-3 py-1.5 bg-[#F5F0FF] border-b border-[#E9D5FF] flex items-center justify-center gap-1.5 font-extrabold text-[#4C1D95]">
+                    <PenTool size={13} className="text-[#7C3AED]" />
+                    <span>ขอรับรองว่าได้ออกไปปฏิบัติงานและอัปเดตสถานะงานจริง</span>
+                  </div>
+                  <div className="p-3.5 text-center space-y-1.5">
+                    <div className="pt-3 text-slate-500 font-medium">
+                      ลงชื่อ ............................................................ ผู้ขอเบิก
+                    </div>
+                    <p className="font-extrabold text-[#0F172A] text-xs">
+                      ( {claimantName || "................................................"} )
+                    </p>
+                    <p className="text-slate-600 font-medium">{claimantPosition}</p>
+                    <p className="text-[10.5px] text-slate-500">วันที่ ......... / ............... / ............</p>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <p className="font-bold text-slate-600">ได้ตรวจสอบผลการปฏิบัติงานในระบบแล้ว เห็นควรอนุมัติเบิกจ่าย</p>
-                  <div className="pt-4 text-slate-400">ลงชื่อ ............................................................ ผู้รับรอง/ผู้บังคับบัญชา</div>
-                  <p className="font-extrabold text-slate-900">(............................................................)</p>
-                  <p className="text-slate-600 text-[10.5px]">{approverName}</p>
-                  <p className="text-[10px] text-slate-400">วันที่ ......... / .................... / ............</p>
+                {/* Right Box: Approver (Blue Tint Header) */}
+                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                  <div className="px-3 py-1.5 bg-[#EAF3FF] border-b border-[#BFDBFE] flex items-center justify-center gap-1.5 font-extrabold text-[#1E3A8A]">
+                    <ClipboardCheck size={14} className="text-[#1D4ED8]" />
+                    <span>ได้ตรวจสอบผลการปฏิบัติงานในระบบแล้ว เห็นควรอนุมัติเบิกจ่าย</span>
+                  </div>
+                  <div className="p-3.5 text-center space-y-1.5">
+                    <div className="pt-3 text-slate-500 font-medium">
+                      ลงชื่อ ................................................... ผู้รับรอง/ผู้บังคับบัญชา
+                    </div>
+                    <p className="font-extrabold text-[#0F172A] text-xs">
+                      ( ............................................................ )
+                    </p>
+                    <p className="text-slate-600 font-medium">{approverName}</p>
+                    <p className="text-[10.5px] text-slate-500">วันที่ ......... / ............... / ............</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-1.5 border-t border-slate-100 flex justify-between items-center text-[9.5px] text-slate-400">
-                <span>เอกสารอ้างอิงจากระบบติดตามงานก่อสร้าง PEA ผกร.กรย.(ก3)</span>
-                <span>พิมพ์เมื่อ: {new Date().toLocaleDateString("th-TH")}</span>
+              {/* 8. Document Footer */}
+              <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-[10px] font-semibold text-slate-500">
+                <span className="inline-flex items-center gap-1.5">
+                  <FileText size={12} className="text-[#7C3AED]" />
+                  เอกสารอ้างอิงจากระบบติดตามงานก่อสร้าง PEA ผกร.กรย.(ก3)
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar size={12} className="text-slate-400" />
+                  พิมพ์เมื่อ : {new Date().toLocaleDateString("th-TH")}
+                </span>
               </div>
             </div>
           </div>
