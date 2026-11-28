@@ -807,29 +807,31 @@ export default function WorkReportClaimPage() {
             </div>
           )}
 
-          {/* Card 0: คลังบันทึกเก็บรายงานผลการปฏิบัติงาน (Microsoft 365 Clean Style) */}
-          <div className="rounded-2xl border border-[#CBD5E1] bg-white overflow-hidden transition-all">
+          {/* Card 0: คลังบันทึกเก็บรายงานผลการปฏิบัติงาน (Distinct Gray Background Style) */}
+          <div className="rounded-2xl border border-[#CBD5E1] bg-[#E2E8F0] overflow-hidden transition-all">
             <div
               onClick={() => setIsArchiveOpen((prev) => !prev)}
-              className="flex items-stretch cursor-pointer select-none hover:bg-slate-50 transition-colors"
+              className="flex items-stretch cursor-pointer select-none hover:bg-[#CBD5E1]/70 transition-colors min-h-[74px]"
             >
-              <div className="w-16 bg-[#475569] text-white flex items-center justify-center shrink-0">
-                <FolderOpen size={24} strokeWidth={2.2} />
+              <div className="w-16 bg-[#334155] text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full border-2 border-white/80 flex items-center justify-center">
+                  <FolderOpen size={21} strokeWidth={2.2} />
+                </div>
               </div>
               <div className="flex-1 px-4 py-3 flex items-center justify-between gap-2 min-w-0">
                 <div className="min-w-0">
                   <h2 className="font-extrabold text-[15px] text-[#0F172A] leading-snug truncate">
                     แฟ้มบันทึกรายงานผลที่กรอกไว้
                   </h2>
-                  <p className="text-xs text-slate-600 mt-0.5 truncate">
+                  <p className="text-xs text-[#334155] font-medium mt-0.5 truncate">
                     บันทึกเก็บไว้เรียกมาแก้ไข พิมพ์ซ้ำ หรือลบออกเมื่อไม่ใช้แล้ว
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#334155] text-white">
+                  <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#334155] text-white">
                     {savedReports.length} ฉบับ
                   </span>
-                  <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-[#CBD5E1] text-[#1E293B] flex items-center justify-center">
                     {isArchiveOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                   </div>
                 </div>
@@ -837,14 +839,14 @@ export default function WorkReportClaimPage() {
             </div>
 
             {isArchiveOpen && (
-              <div className="p-4 space-y-3 text-xs bg-[#F8FAFC] border-t border-slate-200">
+              <div className="p-4 space-y-3 text-xs bg-[#EEF2F6] border-t border-[#CBD5E1]">
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={customReportTitle}
                     onChange={(e) => setCustomReportTitle(e.target.value)}
                     placeholder={`ตั้งชื่อแฟ้มรายงาน เช่น ${claimantName} - ${claimPeriod}`}
-                    className="flex-1 px-3 py-2 rounded-xl bg-white border border-slate-300 font-semibold text-[#0F172A] focus:outline-none focus:border-[#4F46E5]"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-white border border-[#94A3B8] font-semibold text-[#0F172A] focus:outline-none focus:border-[#6B2169]"
                   />
                   <div className="flex items-center gap-1.5 shrink-0">
                     {activeSavedReportId ? (
@@ -852,7 +854,7 @@ export default function WorkReportClaimPage() {
                         <button
                           type="button"
                           onClick={() => handleSaveCurrentReport(false)}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold border-0 cursor-pointer transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#6B2169] hover:bg-[#581A56] text-white font-bold border-0 cursor-pointer transition-colors"
                           title="บันทึกทับฉบับที่กำลังเปิดแก้ไข"
                         >
                           <Save size={14} /> บันทึกแก้ไข
@@ -860,7 +862,7 @@ export default function WorkReportClaimPage() {
                         <button
                           type="button"
                           onClick={() => handleSaveCurrentReport(true)}
-                          className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white font-bold border-0 cursor-pointer transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-2.5 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white font-bold border-0 cursor-pointer transition-colors"
                           title="บันทึกแยกเป็นฉบับใหม่"
                         >
                           <FilePlus size={14} /> บันทึกฉบับใหม่
@@ -870,7 +872,7 @@ export default function WorkReportClaimPage() {
                       <button
                         type="button"
                         onClick={() => handleSaveCurrentReport(true)}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold border-0 cursor-pointer transition-colors"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#6B2169] hover:bg-[#581A56] text-white font-bold border-0 cursor-pointer transition-colors"
                       >
                         <Save size={14} /> บันทึกเก็บรายงานนี้
                       </button>
@@ -878,7 +880,7 @@ export default function WorkReportClaimPage() {
                     <button
                       type="button"
                       onClick={handleCreateBlankReport}
-                      className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-300 cursor-pointer transition-colors"
+                      className="inline-flex items-center gap-1 px-3 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-[#1E293B] font-bold border border-[#94A3B8] cursor-pointer transition-colors"
                       title="ล้างฟอร์มเพื่อสร้างรายงานฉบับใหม่"
                     >
                       <RefreshCw size={13} /> เริ่มใหม่
@@ -887,9 +889,9 @@ export default function WorkReportClaimPage() {
                 </div>
 
                 {savedReports.length === 0 ? (
-                  <div className="py-3.5 px-3 rounded-xl border border-dashed border-slate-300 bg-white text-center text-slate-500">
+                  <div className="py-3.5 px-3 rounded-xl border border-dashed border-[#94A3B8] bg-white/90 text-center text-[#334155]">
                     ยังไม่มีรายงานที่บันทึกเก็บไว้ • กดปุ่ม{" "}
-                    <span className="font-bold text-[#4F46E5]">บันทึกเก็บรายงานนี้</span> เพื่อเก็บไว้เรียกใช้ภายหลัง
+                    <span className="font-bold text-[#6B2169]">บันทึกเก็บรายงานนี้</span> เพื่อเก็บไว้เรียกใช้ภายหลัง
                   </div>
                 ) : (
                   <div className="space-y-1.5 max-h-[190px] overflow-y-auto pr-1">
@@ -907,8 +909,8 @@ export default function WorkReportClaimPage() {
                           key={rec.id}
                           className={`p-2.5 rounded-xl border transition-colors flex items-center justify-between gap-2 ${
                             isCurrent
-                              ? "bg-[#EEF2FF] border-[#818CF8]"
-                              : "bg-white border-slate-200 hover:border-slate-300"
+                              ? "bg-[#F8F1F8] border-[#C697C6]"
+                              : "bg-white border-slate-300 hover:border-slate-400"
                           }`}
                         >
                           <div
@@ -917,20 +919,20 @@ export default function WorkReportClaimPage() {
                           >
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {isCurrent && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#4F46E5] text-white">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#6B2169] text-white">
                                   กำลังเปิดแก้ไข
                                 </span>
                               )}
                               <span className="font-bold text-[#0F172A] truncate">{rec.reportTitle}</span>
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                            <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-600 mt-0.5">
                               <span>ผู้ขอเบิก: {rec.claimantName || "-"}</span>
                               <span>•</span>
                               <span>
                                 งานในระบบ {rec.selectedWbsList?.length || 0} + งานอื่นๆ {rec.otherTasks?.length || 0}
                               </span>
                               <span>•</span>
-                              <span className="inline-flex items-center gap-0.5 text-slate-400">
+                              <span className="inline-flex items-center gap-0.5 text-slate-500">
                                 <Clock size={11} /> {dateLabel}
                               </span>
                             </div>
@@ -940,7 +942,7 @@ export default function WorkReportClaimPage() {
                             <button
                               type="button"
                               onClick={() => handleLoadSavedReport(rec)}
-                              className="px-2.5 py-1.5 rounded-lg bg-[#EEF2FF] hover:bg-[#4F46E5] text-[#4338CA] hover:text-white font-bold border border-[#C7D2FE] transition-colors cursor-pointer text-[11px]"
+                              className="px-2.5 py-1.5 rounded-lg bg-[#F3E8F3] hover:bg-[#6B2169] text-[#6B2169] hover:text-white font-bold border border-[#D5B3D5] transition-colors cursor-pointer text-[11px]"
                             >
                               เรียกใช้/แก้ไข
                             </button>
