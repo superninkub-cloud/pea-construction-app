@@ -5,10 +5,12 @@ import {
   Search, Plus, X, HardHat, ChevronDown, 
   List, CheckCircle, AlertTriangle, Box, RefreshCw,
   Filter, ChevronLeft, ChevronRight, Wrench, Calendar, Trash2, Edit3, Users, ShieldCheck,
-  Download, Printer, FileText, Sparkles
+  Download, Printer, FileText, Sparkles, Camera, Upload, Eye, Image as ImageIcon
 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { safetyData } from './data';
+import { compressMultipleImages } from '../utils/imageCompressor';
+import { supabase } from '../../lib/supabaseClient';
 
 // --- Type Definitions ---
 type AggregatedEquipment = {
@@ -26,6 +28,7 @@ type AggregatedEquipment = {
   disposed: number; // ขาด / จำหน่าย / เบิกเพิ่ม
   lastInspected: string;
   remarks?: string;
+  images?: string[];
 };
 
 // Custom SVG Safety Helmet & Emoji mapping so icons render crisply on all OS versions
@@ -126,6 +129,20 @@ export default function SafetyPPEDashboard() {
   const [editDamaged, setEditDamaged] = useState<number>(0);
   const [editDisposed, setEditDisposed] = useState<number>(0);
   const [editRemarks, setEditRemarks] = useState<string>('');
+  const [editImages, setEditImages] = useState<string[]>([]);
+
+  // Photo Upload Modal & Lightbox state
+  const [photoModalItem, setPhotoModalItem] = useState<AggregatedEquipment | null>(null);
+  const [isCompressingPhotos, setIsCompressingPhotos] = useState<boolean>(false);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
+  const [toastNotification, setToastNotification] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastNotification(msg);
+    setTimeout(() => {
+      setToastNotification((prev) => (prev === msg ? null : prev));
+    }, 3500);
+  };
 
   // Create form state
   const [newUserName, setNewUserName] = useState('');
@@ -137,6 +154,7 @@ export default function SafetyPPEDashboard() {
   const [newPending, setNewPending] = useState(0);
   const [newDamaged, setNewDamaged] = useState(0);
   const [newDisposed, setNewDisposed] = useState(0);
+  const [newItemImages, setNewItemImages] = useState<string[]>([]);
 
   useEffect(() => {
     setUserRole(sessionStorage.getItem("pea_role"));
@@ -215,6 +233,131 @@ export default function SafetyPPEDashboard() {
     setEditDamaged(item.damaged);
     setEditDisposed(item.disposed);
     setEditRemarks(item.remarks || '');
+    setEditImages(item.images || []);
+  };
+
+  // Compress and upload photos (to Supabase Storage 'project_images' with fallback to compressed DataURL)
+  const processAndCompressFiles = async (files: File[], prefixKey: string): Promise<string[]> => {
+    const compressedList = await compressMultipleImages(files, undefined, {
+      maxWidth: 1100,
+      maxHeight: 1100,
+      quality: 0.75,
+    });
+
+    const urls: string[] = [];
+    for (let i = 0; i < compressedList.length; i++) {
+      const item = compressedList[i];
+      const fileName = `PPE_${prefixKey}_${Date.now()}_${i + 1}.jpg`;
+      let finalUrl = '';
+
+      try {
+        const { error: uploadErr } = await supabase.storage
+          .from('project_images')
+          .upload(fileName, item.file, { cacheControl: '3600', upsert: false });
+
+        if (!uploadErr) {
+          const { data: pubData } = supabase.storage.from('project_images').getPublicUrl(fileName);
+          if (pubData?.publicUrl) {
+            finalUrl = pubData.publicUrl;
+          }
+        }
+      } catch (storageErr) {
+        console.warn('Supabase storage fallback to base64:', storageErr);
+      }
+
+      if (!finalUrl) {
+        finalUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () =>
+            resolve(typeof reader.result === 'string' ? reader.result : item.previewUrl);
+          reader.readAsDataURL(item.file);
+        });
+      }
+
+      urls.push(finalUrl);
+    }
+    return urls;
+  };
+
+  // Upload photos directly for a specific equipment row
+  const handleUploadPhotosForRow = async (targetItem: AggregatedEquipment, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    e.target.value = '';
+
+    const currentImgs = targetItem.images || [];
+    const remaining = Math.max(0, 6 - currentImgs.length);
+    if (remaining <= 0) {
+      alert('สามารถแนบรูปถ่ายอุปกรณ์ได้สูงสุด 6 รูปต่อรายการครับ');
+      return;
+    }
+
+    setIsCompressingPhotos(true);
+    try {
+      const addedUrls = await processAndCompressFiles(files.slice(0, remaining), targetItem.rowKey);
+      const nextImages = [...currentImgs, ...addedUrls];
+      const today = new Date().toISOString().split('T')[0];
+
+      const newData = localData.map((row) =>
+        row.rowKey === targetItem.rowKey
+          ? { ...row, images: nextImages, lastInspected: today }
+          : row
+      );
+      saveLocalData(newData);
+
+      if (photoModalItem && photoModalItem.rowKey === targetItem.rowKey) {
+        setPhotoModalItem({ ...targetItem, images: nextImages, lastInspected: today });
+      }
+      if (updateItem && updateItem.rowKey === targetItem.rowKey) {
+        setEditImages(nextImages);
+      }
+
+      showToast(`บีบอัดและแนบรูปถ่าย "${targetItem.name}" สำเร็จ (${nextImages.length} รูป)`);
+    } catch (err) {
+      console.error('Failed to compress/upload PPE photo:', err);
+      alert('เกิดข้อผิดพลาดในการบีบอัดรูปภาพ กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setIsCompressingPhotos(false);
+    }
+  };
+
+  const handleRemovePhotoFromRow = (targetItem: AggregatedEquipment, indexToRemove: number) => {
+    const currentImgs = targetItem.images || [];
+    const nextImages = currentImgs.filter((_, idx) => idx !== indexToRemove);
+    const newData = localData.map((row) =>
+      row.rowKey === targetItem.rowKey ? { ...row, images: nextImages } : row
+    );
+    saveLocalData(newData);
+
+    if (photoModalItem && photoModalItem.rowKey === targetItem.rowKey) {
+      setPhotoModalItem({ ...targetItem, images: nextImages });
+    }
+    if (updateItem && updateItem.rowKey === targetItem.rowKey) {
+      setEditImages(nextImages);
+    }
+  };
+
+  // Upload photos inside "Add New Equipment" modal
+  const handleUploadNewEquipmentPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    e.target.value = '';
+
+    const remaining = Math.max(0, 6 - newItemImages.length);
+    if (remaining <= 0) {
+      alert('สามารถแนบรูปถ่ายอุปกรณ์ได้สูงสุด 6 รูปต่อรายการครับ');
+      return;
+    }
+
+    setIsCompressingPhotos(true);
+    try {
+      const addedUrls = await processAndCompressFiles(files.slice(0, remaining), 'new');
+      setNewItemImages((prev) => [...prev, ...addedUrls]);
+    } catch (err) {
+      console.error('Compress new item photo error:', err);
+    } finally {
+      setIsCompressingPhotos(false);
+    }
   };
 
   const handleUpdateQuantities = (e: React.FormEvent) => {
@@ -231,6 +374,7 @@ export default function SafetyPPEDashboard() {
           damaged: Math.max(0, Number(editDamaged) || 0),
           disposed: Math.max(0, Number(editDisposed) || 0),
           remarks: editRemarks.trim(),
+          images: editImages,
           lastInspected: new Date().toISOString().split('T')[0]
         };
       }
@@ -260,6 +404,7 @@ export default function SafetyPPEDashboard() {
         pending: target.pending + Math.max(0, Number(newPending) || 0),
         damaged: target.damaged + Math.max(0, Number(newDamaged) || 0),
         disposed: target.disposed + Math.max(0, Number(newDisposed) || 0),
+        images: [...(target.images || []), ...newItemImages].slice(0, 6),
         lastInspected: today,
       };
       saveLocalData(updated);
@@ -278,6 +423,7 @@ export default function SafetyPPEDashboard() {
         pending: Math.max(0, Number(newPending) || 0),
         damaged: Math.max(0, Number(newDamaged) || 0),
         disposed: Math.max(0, Number(newDisposed) || 0),
+        images: newItemImages,
         lastInspected: today,
       };
       saveLocalData([newRow, ...localData]);
@@ -289,6 +435,7 @@ export default function SafetyPPEDashboard() {
     setNewPending(0);
     setNewDamaged(0);
     setNewDisposed(0);
+    setNewItemImages([]);
     setShowCreateModal(false);
   };
 
@@ -843,95 +990,160 @@ export default function SafetyPPEDashboard() {
 
           {activeTab === 'equipment' ? (
             <>
-              {/* Aggregated Equipment Data Table (No PPE ID column) */}
-              <div className="overflow-x-auto min-h-[500px]">
-                <table className="w-full text-left text-[13px] whitespace-nowrap">
+              {toastNotification && (
+                <div className="mx-5 mt-3 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center justify-between shadow-sm">
+                  <span className="flex items-center gap-2">
+                    <CheckCircle size={15} /> {toastNotification}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setToastNotification(null)}
+                    className="text-white/80 hover:text-white bg-transparent border-0 cursor-pointer"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+
+              {/* Aggregated Equipment Data Table (Light Blue Item Backgrounds + Compressed Photo Upload) */}
+              <div className="overflow-x-auto min-h-[500px] p-3 bg-[#F4F9FF]">
+                <table className="w-full text-left text-[13px] whitespace-nowrap border-separate border-spacing-y-2">
                   <thead>
-                    <tr className="bg-[#F8FAFC] text-slate-600 border-b border-slate-200">
-                      <th className="px-4 py-3.5 font-bold">รูปภาพ</th>
-                      <th className="px-4 py-3.5 font-bold text-slate-800">ชื่ออุปกรณ์</th>
-                      <th className="px-4 py-3.5 font-bold">หมวดหมู่</th>
-                      <th className="px-4 py-3.5 font-bold">ผู้ใช้งาน / ช่าง</th>
-                      <th className="px-4 py-3.5 font-bold text-center">จำนวนขั้นต่ำต่อชุด</th>
-                      <th className="px-4 py-3.5 font-bold">ภาพรวมสถานะแต่ละอุปกรณ์</th>
-                      <th className="px-3 py-3.5 font-bold text-center">พร้อมใช้</th>
-                      <th className="px-3 py-3.5 font-bold text-center">ชำรุด</th>
-                      <th className="px-3 py-3.5 font-bold text-center">รอซ่อม</th>
-                      <th className="px-4 py-3.5 font-bold min-w-[200px]">หมายเหตุ / คำชี้แจง</th>
-                      <th className="px-3 py-3.5 font-bold">ตรวจล่าสุด</th>
-                      <th className="px-4 py-3.5 font-bold text-center">จัดการ</th>
+                    <tr className="bg-[#DCEBFE] text-[#1E3A8A] rounded-xl">
+                      <th className="px-4 py-3 font-extrabold rounded-l-xl">รูปภาพ / แนบรูป</th>
+                      <th className="px-4 py-3 font-extrabold text-[#0F172A]">ชื่ออุปกรณ์</th>
+                      <th className="px-4 py-3 font-extrabold">หมวดหมู่</th>
+                      <th className="px-4 py-3 font-extrabold">ผู้ใช้งาน / ช่าง</th>
+                      <th className="px-4 py-3 font-extrabold text-center">จำนวนขั้นต่ำต่อชุด</th>
+                      <th className="px-4 py-3 font-extrabold">ภาพรวมสถานะแต่ละอุปกรณ์</th>
+                      <th className="px-3 py-3 font-extrabold text-center">พร้อมใช้</th>
+                      <th className="px-3 py-3 font-extrabold text-center">ชำรุด</th>
+                      <th className="px-3 py-3 font-extrabold text-center">รอซ่อม</th>
+                      <th className="px-4 py-3 font-extrabold min-w-[200px]">หมายเหตุ / คำชี้แจง</th>
+                      <th className="px-3 py-3 font-extrabold">ตรวจล่าสุด</th>
+                      <th className="px-4 py-3 font-extrabold text-center rounded-r-xl">จัดการ</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody>
                     {currentData.length === 0 ? (
                       <tr>
-                        <td colSpan={12} className="px-6 py-12 text-center text-slate-500">
+                        <td colSpan={12} className="px-6 py-12 text-center text-slate-500 bg-white rounded-xl">
                           ไม่มีข้อมูลที่ตรงกับตัวกรอง
                         </td>
                       </tr>
                     ) : (
-                      currentData.map((item) => {
+                      currentData.map((item, idx) => {
+                        const itemPhotos = item.images || [];
+                        const hasPhoto = itemPhotos.length > 0;
                         return (
-                          <tr key={item.rowKey} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="px-4 py-3.5">
-                              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-2xl shadow-sm border border-slate-200">
-                                {getEmojiIcon(item.category, item.name)}
+                          <tr
+                            key={item.rowKey}
+                            className={`${
+                              idx % 2 === 0 ? 'bg-[#EAF3FF]' : 'bg-[#F0F7FF]'
+                            } hover:bg-[#DCEBFE] transition-colors shadow-xs`}
+                          >
+                            <td className="px-4 py-3 rounded-l-xl border-y border-l border-[#BFDBFE]">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setPhotoModalItem(item)}
+                                  title={
+                                    hasPhoto
+                                      ? `มีรูปถ่าย ${itemPhotos.length} รูป • คลิกเพื่อดูหรือเพิ่มรูปถ่าย`
+                                      : 'คลิกเพื่อแนบรูปถ่ายอุปกรณ์ (ระบบบีบอัดภาพอัตโนมัติ)'
+                                  }
+                                  className="group relative w-11 h-11 bg-white rounded-xl flex items-center justify-center text-2xl shadow-xs border border-[#93C5FD] hover:border-[#1D4ED8] cursor-pointer overflow-hidden shrink-0"
+                                >
+                                  {hasPhoto ? (
+                                    <>
+                                      <img
+                                        src={itemPhotos[itemPhotos.length - 1]}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                      <span className="absolute bottom-0 right-0 px-1 py-0.2 bg-[#1D4ED8] text-white text-[9px] font-extrabold rounded-tl-md">
+                                        +{itemPhotos.length}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      {getEmojiIcon(item.category, item.name)}
+                                      <span className="absolute bottom-0 right-0 w-4 h-4 bg-[#1E88E5] text-white rounded-tl-md flex items-center justify-center">
+                                        <Camera size={10} />
+                                      </span>
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setPhotoModalItem(item)}
+                                  className={`px-2 py-1 rounded-lg text-[11px] font-bold border cursor-pointer transition-colors inline-flex items-center gap-1 ${
+                                    hasPhoto
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                                      : 'bg-white text-[#1D4ED8] border-[#93C5FD] hover:bg-blue-50'
+                                  }`}
+                                >
+                                  <Camera size={12} />
+                                  {hasPhoto ? `${itemPhotos.length} รูป` : 'แนบรูป'}
+                                </button>
                               </div>
                             </td>
-                            <td className="px-4 py-3.5">
-                              <div className="font-bold text-slate-800">{item.name}</div>
+                            <td className="px-4 py-3 border-y border-[#BFDBFE]">
+                              <div className="font-extrabold text-[#0F172A]">{item.name}</div>
                             </td>
-                            <td className="px-4 py-3.5 text-slate-500">
+                            <td className="px-4 py-3 text-[#1E3A8A] font-medium border-y border-[#BFDBFE]">
                               {item.category.split(' ')[1] || item.category}
                             </td>
-                            <td className="px-4 py-3.5">
+                            <td className="px-4 py-3 border-y border-[#BFDBFE]">
                               <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+                                <div className="w-7 h-7 rounded-full bg-[#1D4ED8] text-white flex items-center justify-center font-bold text-xs shrink-0">
                                   {item.userName.replace('นาย', '').charAt(0)}
                                 </div>
-                                <span className="text-slate-800 font-semibold">{item.userName}</span>
+                                <span className="text-[#0F172A] font-bold">{item.userName}</span>
                               </div>
                             </td>
-                            <td className="px-4 py-3.5 text-center">
-                              <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-purple-50 text-purple-800 border border-purple-200">
+                            <td className="px-4 py-3 text-center border-y border-[#BFDBFE]">
+                              <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-extrabold bg-[#F8F1F8] text-[#6B2169] border border-[#E2CBE2]">
                                 {item.standard} {item.unit}
                               </span>
                             </td>
-                            <td className="px-4 py-3.5">
+                            <td className="px-4 py-3 border-y border-[#BFDBFE]">
                               {renderOverviewSummary(item)}
                             </td>
-                            <td className="px-3 py-3.5 text-center">
-                              <span className={`font-extrabold text-sm ${item.ready > 0 ? 'text-emerald-600' : 'text-slate-300'}`}>
+                            <td className="px-3 py-3 text-center border-y border-[#BFDBFE]">
+                              <span className={`font-extrabold text-sm ${item.ready > 0 ? 'text-emerald-700' : 'text-slate-400'}`}>
                                 {item.ready} {item.unit}
                               </span>
                             </td>
-                            <td className="px-3 py-3.5 text-center">
-                              <span className={`font-extrabold text-sm ${item.damaged > 0 ? 'text-rose-600' : 'text-slate-300'}`}>
+                            <td className="px-3 py-3 text-center border-y border-[#BFDBFE]">
+                              <span className={`font-extrabold text-sm ${item.damaged > 0 ? 'text-rose-600' : 'text-slate-400'}`}>
                                 {item.damaged} {item.unit}
                               </span>
                             </td>
-                            <td className="px-3 py-3.5 text-center">
-                              <span className={`font-extrabold text-sm ${item.pending > 0 ? 'text-amber-600' : 'text-slate-300'}`}>
+                            <td className="px-3 py-3 text-center border-y border-[#BFDBFE]">
+                              <span className={`font-extrabold text-sm ${item.pending > 0 ? 'text-amber-600' : 'text-slate-400'}`}>
                                 {item.pending} {item.unit}
                               </span>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 border-y border-[#BFDBFE]">
                               <input
                                 type="text"
                                 value={item.remarks || ''}
                                 onChange={(e) => updateRowRemarkInline(item.rowKey, e.target.value)}
                                 placeholder="ระบุหมายเหตุ/คำชี้แจง..."
-                                className="w-full min-w-[180px] px-3 py-1.5 rounded-lg text-xs text-slate-800 font-medium bg-slate-50 hover:bg-amber-50/50 focus:bg-white border border-slate-200 hover:border-amber-300 focus:border-[#1E88E5] focus:outline-none focus:ring-2 focus:ring-blue-500/20 placeholder:text-slate-400 transition-all"
+                                className="w-full min-w-[180px] px-3 py-1.5 rounded-lg text-xs text-slate-800 font-medium bg-white hover:bg-amber-50/50 focus:bg-white border border-[#93C5FD] hover:border-amber-400 focus:border-[#1D4ED8] focus:outline-none placeholder:text-slate-400 transition-all"
                               />
                             </td>
-                            <td className="px-3 py-3.5 text-slate-500 text-xs">{formatDate(item.lastInspected)}</td>
-                            <td className="px-4 py-3.5 text-center">
+                            <td className="px-3 py-3 text-[#1E3A8A] font-semibold text-xs border-y border-[#BFDBFE]">
+                              {formatDate(item.lastInspected)}
+                            </td>
+                            <td className="px-4 py-3 text-center rounded-r-xl border-y border-r border-[#BFDBFE]">
                               <button 
                                 type="button"
                                 onClick={() => openEditModal(item)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-[#1E88E5] bg-blue-50/60 hover:bg-blue-100/80 rounded-lg transition-colors border border-blue-200/60 cursor-pointer"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-[#1D4ED8] hover:bg-[#1E40AF] rounded-lg transition-colors border-0 cursor-pointer"
                               >
-                                <Edit3 size={14} /> ปรับจำนวน
+                                <Edit3 size={13} /> ปรับจำนวน
                               </button>
                             </td>
                           </tr>
@@ -1018,29 +1230,54 @@ export default function SafetyPPEDashboard() {
                       </div>
                     </div>
 
-                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 bg-[#F8FAFC]">
                       {group.items.map(item => {
                         const totalCount = item.ready + item.pending + item.damaged + item.disposed;
+                        const itemPhotos = item.images || [];
+                        const hasPhoto = itemPhotos.length > 0;
                         return (
                           <div
                             key={item.rowKey}
-                            className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 bg-white flex flex-col gap-2.5 transition-all shadow-sm"
+                            className="p-3.5 rounded-xl border border-[#BFDBFE] hover:border-[#3B82F6] bg-[#EAF3FF] flex flex-col gap-2.5 transition-all shadow-xs"
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex items-start gap-3 min-w-0">
-                                <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-2xl shrink-0">
-                                  {getEmojiIcon(item.category, item.name)}
-                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setPhotoModalItem(item)}
+                                  title="คลิกเพื่อดูหรือแนบรูปถ่ายอุปกรณ์"
+                                  className="relative w-11 h-11 rounded-xl bg-white border border-[#93C5FD] flex items-center justify-center text-2xl shrink-0 overflow-hidden cursor-pointer"
+                                >
+                                  {hasPhoto ? (
+                                    <>
+                                      <img
+                                        src={itemPhotos[itemPhotos.length - 1]}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                      <span className="absolute bottom-0 right-0 px-1 py-0.2 bg-[#1D4ED8] text-white text-[8.5px] font-extrabold rounded-tl">
+                                        +{itemPhotos.length}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      {getEmojiIcon(item.category, item.name)}
+                                      <span className="absolute bottom-0 right-0 w-4 h-4 bg-[#1E88E5] text-white rounded-tl flex items-center justify-center">
+                                        <Camera size={9} />
+                                      </span>
+                                    </>
+                                  )}
+                                </button>
                                 <div className="min-w-0">
-                                  <p className="font-bold text-slate-800 text-sm truncate" title={item.name}>
+                                  <p className="font-extrabold text-[#0F172A] text-sm truncate" title={item.name}>
                                     {item.name}
                                   </p>
-                                  <p className="text-xs text-slate-500 mt-0.5">
-                                    ขั้นต่ำ <span className="font-bold text-purple-700">{item.standard} {item.unit}</span>
+                                  <p className="text-xs text-[#1E3A8A] mt-0.5">
+                                    ขั้นต่ำ <span className="font-bold text-[#6B2169]">{item.standard} {item.unit}</span>
                                     {' • '}
-                                    รวม <span className="font-bold text-slate-800">{totalCount} {item.unit}</span>
+                                    รวม <span className="font-bold text-[#0F172A]">{totalCount} {item.unit}</span>
                                     {' • '}
-                                    <span className="text-emerald-600 font-bold">พร้อมใช้ {item.ready} {item.unit}</span>
+                                    <span className="text-emerald-700 font-bold">พร้อมใช้ {item.ready} {item.unit}</span>
                                     {item.damaged > 0 && (
                                       <> • <span className="text-rose-600 font-bold">ชำรุด {item.damaged} {item.unit}</span></>
                                     )}
@@ -1048,26 +1285,41 @@ export default function SafetyPPEDashboard() {
                                       <> • <span className="text-amber-600 font-bold">รอซ่อม {item.pending} {item.unit}</span></>
                                     )}
                                     {item.disposed > 0 && (
-                                      <> • <span className="text-slate-500 font-semibold">ขาด/จำหน่าย {item.disposed} {item.unit}</span></>
+                                      <> • <span className="text-slate-600 font-semibold">ขาด/จำหน่าย {item.disposed} {item.unit}</span></>
                                     )}
                                   </p>
                                 </div>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => openEditModal(item)}
-                                className="p-1.5 text-slate-400 hover:text-[#1E88E5] hover:bg-blue-50 rounded-lg transition-colors shrink-0 border-0 cursor-pointer"
-                                title="แก้ไขจำนวน"
-                              >
-                                <Edit3 size={15} />
-                              </button>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setPhotoModalItem(item)}
+                                  className={`px-2 py-1 rounded-lg text-[10.5px] font-bold border cursor-pointer transition-colors inline-flex items-center gap-1 ${
+                                    hasPhoto
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                                      : 'bg-white text-[#1D4ED8] border-[#93C5FD]'
+                                  }`}
+                                  title="แนบรูปถ่ายอุปกรณ์"
+                                >
+                                  <Camera size={12} />
+                                  {hasPhoto ? `${itemPhotos.length}` : 'แนบรูป'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => openEditModal(item)}
+                                  className="p-1.5 text-[#1D4ED8] bg-white hover:bg-blue-50 rounded-lg transition-colors shrink-0 border border-[#93C5FD] cursor-pointer"
+                                  title="แก้ไขจำนวน"
+                                >
+                                  <Edit3 size={14} />
+                                </button>
+                              </div>
                             </div>
                             <input
                               type="text"
                               value={item.remarks || ''}
                               onChange={(e) => updateRowRemarkInline(item.rowKey, e.target.value)}
                               placeholder="ระบุหมายเหตุ/คำชี้แจง..."
-                              className="w-full px-2.5 py-1.5 rounded-lg text-xs text-slate-700 bg-slate-50 hover:bg-amber-50/50 focus:bg-white border border-slate-200 focus:border-[#1E88E5] focus:outline-none placeholder:text-slate-400 transition-colors"
+                              className="w-full px-2.5 py-1.5 rounded-lg text-xs text-slate-800 bg-white hover:bg-amber-50/50 focus:bg-white border border-[#93C5FD] focus:border-[#1D4ED8] focus:outline-none placeholder:text-slate-400 transition-colors"
                             />
                           </div>
                         );
@@ -1186,6 +1438,54 @@ export default function SafetyPPEDashboard() {
                     onChange={(e) => setEditRemarks(e.target.value)}
                     className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1E88E5]"
                   />
+                </div>
+
+                {/* Photo Attachment inside Update Modal */}
+                <div className="p-3.5 rounded-xl bg-[#EAF3FF] border border-[#BFDBFE] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-extrabold text-[#1E3A8A] flex items-center gap-1.5">
+                      <Camera size={14} className="text-[#1D4ED8]" />
+                      รูปถ่ายอุปกรณ์ ({editImages.length}/6 รูป • บีบอัดภาพอัตโนมัติ)
+                    </span>
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold cursor-pointer transition-colors">
+                      <Upload size={12} />
+                      <span>{isCompressingPhotos ? 'กำลังบีบอัดรูป...' : '+ แนบรูปถ่าย'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={isCompressingPhotos}
+                        onChange={(e) => handleUploadPhotosForRow({ ...updateItem, images: editImages }, e)}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {editImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {editImages.map((imgUrl, idx) => (
+                        <div
+                          key={idx}
+                          className="relative w-16 h-16 rounded-lg overflow-hidden border border-[#93C5FD] bg-white"
+                        >
+                          <img
+                            src={imgUrl}
+                            alt=""
+                            onClick={() => setLightboxImageUrl(imgUrl)}
+                            className="w-full h-full object-cover cursor-zoom-in"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhotoFromRow({ ...updateItem, images: editImages }, idx)}
+                            className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-rose-600 text-white border-0 cursor-pointer"
+                            title="ลบรูปนี้"
+                          >
+                            <X size={11} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </form>
             </div>
@@ -1312,6 +1612,44 @@ export default function SafetyPPEDashboard() {
                     className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold"
                   />
                 </div>
+              </div>
+
+              {/* Photo Attachment inside Add Equipment Modal */}
+              <div className="p-3 rounded-xl bg-[#EAF3FF] border border-[#BFDBFE] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold text-[#1E3A8A] flex items-center gap-1.5">
+                    <Camera size={14} className="text-[#1D4ED8]" />
+                    แนบรูปถ่ายอุปกรณ์ ({newItemImages.length}/6 รูป)
+                  </span>
+                  <label className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold cursor-pointer">
+                    <Upload size={12} />
+                    <span>{isCompressingPhotos ? 'กำลังบีบอัด...' : '+ เลือกรูปถ่าย'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      disabled={isCompressingPhotos}
+                      onChange={handleUploadNewEquipmentPhotos}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {newItemImages.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {newItemImages.map((url, idx) => (
+                      <div key={idx} className="relative w-14 h-14 rounded-lg overflow-hidden border border-[#93C5FD] bg-white">
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setNewItemImages((prev) => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-rose-600 text-white border-0 cursor-pointer"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
@@ -1683,6 +2021,156 @@ export default function SafetyPPEDashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dedicated Photo Upload & Gallery Modal for Equipment Item */}
+      {photoModalItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+          onClick={() => setPhotoModalItem(null)}
+        >
+          <div
+            className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 bg-[#EAF3FF] border-b border-[#BFDBFE] flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white border border-[#93C5FD] flex items-center justify-center text-2xl shrink-0">
+                  {getEmojiIcon(photoModalItem.category, photoModalItem.name)}
+                </div>
+                <div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#1D4ED8] text-white">
+                    ผู้เบิก/ชุดงาน: {photoModalItem.userName}
+                  </span>
+                  <h3 className="text-base font-extrabold text-[#0F172A] mt-1">{photoModalItem.name}</h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPhotoModalItem(null)}
+                className="w-8 h-8 rounded-full bg-white hover:bg-slate-100 text-slate-600 flex items-center justify-center border border-slate-200 cursor-pointer"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-extrabold text-[#0F172A] flex items-center gap-1.5">
+                  <ImageIcon size={15} className="text-[#1D4ED8]" />
+                  รูปถ่ายอุปกรณ์ความปลอดภัย ({(photoModalItem.images || []).length}/6 รูป)
+                </span>
+                <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-extrabold cursor-pointer transition-colors">
+                  <Upload size={14} />
+                  <span>{isCompressingPhotos ? 'กำลังบีบอัดและอัปโหลด...' : '+ แนบรูปถ่ายเพิ่ม'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={isCompressingPhotos}
+                    onChange={(e) => handleUploadPhotosForRow(photoModalItem, e)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {(photoModalItem.images || []).length === 0 ? (
+                <label className="flex flex-col items-center justify-center py-9 px-4 rounded-2xl border-2 border-dashed border-[#93C5FD] bg-[#F4F9FF] hover:bg-[#EAF3FF] cursor-pointer transition-colors text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-white text-[#1D4ED8] border border-[#BFDBFE] flex items-center justify-center mb-2">
+                    <Camera size={24} />
+                  </div>
+                  <span className="font-extrabold text-sm text-[#1D4ED8]">
+                    {isCompressingPhotos ? 'กำลังบีบอัดรูปภาพอัตโนมัติ...' : 'คลิกที่นี่เพื่อเลือกรูปถ่ายอุปกรณ์'}
+                  </span>
+                  <span className="text-[11px] text-slate-500 mt-1">
+                    ระบบจะบีบอัดขนาดไฟล์ภาพให้อัตโนมัติเพื่อให้โหลดเร็วและประหยัดพื้นที่
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={isCompressingPhotos}
+                    onChange={(e) => handleUploadPhotosForRow(photoModalItem, e)}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {(photoModalItem.images || []).map((imgUrl, idx) => (
+                    <div
+                      key={idx}
+                      className="group relative rounded-xl border border-[#BFDBFE] overflow-hidden bg-slate-100 h-32"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={`${photoModalItem.name} รูปที่ ${idx + 1}`}
+                        onClick={() => setLightboxImageUrl(imgUrl)}
+                        className="w-full h-full object-cover cursor-zoom-in"
+                      />
+                      <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/65 text-white text-[10px] font-bold">
+                        รูปที่ {idx + 1}
+                      </span>
+                      <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setLightboxImageUrl(imgUrl)}
+                          className="p-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white border-0 cursor-pointer"
+                          title="ดูรูปขยาย"
+                        >
+                          <Eye size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhotoFromRow(photoModalItem, idx)}
+                          className="p-1.5 rounded-lg bg-rose-600/90 hover:bg-rose-700 text-white border-0 cursor-pointer"
+                          title="ลบรูปนี้"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-3.5 bg-[#F8FAFC] border-t border-slate-200 flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-slate-500">
+                ⚡ บีบอัดภาพอัตโนมัติ (Max 1100px • Quality 75%)
+              </span>
+              <button
+                type="button"
+                onClick={() => setPhotoModalItem(null)}
+                className="px-5 py-2 rounded-xl bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-extrabold border-0 cursor-pointer"
+              >
+                เสร็จสิ้น
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Lightbox Preview */}
+      {lightboxImageUrl && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/85 flex items-center justify-center p-4"
+          onClick={() => setLightboxImageUrl(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              type="button"
+              onClick={() => setLightboxImageUrl(null)}
+              className="absolute -top-10 right-0 px-3 py-1.5 rounded-full bg-white text-slate-900 text-xs font-extrabold border-0 cursor-pointer"
+            >
+              ✕ ปิดรูปขยาย
+            </button>
+            <img
+              src={lightboxImageUrl}
+              alt="รูปถ่ายอุปกรณ์ PPE"
+              className="max-w-full max-h-[85vh] rounded-2xl object-contain border-2 border-white/20"
+            />
           </div>
         </div>
       )}
